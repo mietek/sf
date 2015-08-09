@@ -65,7 +65,7 @@ COQCHK?=$(COQBIN)coqchk
 #                    #
 ######################
 
-VFILES:=Symbols.v\
+RVFILES:=\
   Preface.v\
   Basics.v\
   Induction.v\
@@ -104,6 +104,9 @@ VFILES:=Symbols.v\
   UseAuto.v\
   PE.v\
   Postscript.v
+
+reverse=$(if $1,$(call reverse,$(wordlist 2,$(words $1),$1))) $(firstword $1)
+VFILES:=$(call reverse,$(RVFILES))
 
 -include $(addsuffix .d,$(VFILES))
 .SECONDARY: $(addsuffix .d,$(VFILES))
