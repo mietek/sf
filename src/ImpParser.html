@@ -1,0 +1,581 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>ImpParser: Lexing and Parsing in Coq</title>
+<script type="text/javascript" src="jquery-1.8.3.js"></script>
+<script type="text/javascript" src="main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">ImpParser<span class="subtitle">Lexing and Parsing in Coq</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ The development of the <span class="inlinecode"><span class="id" type="var">Imp</span></span> language in Imp.v completely ignores
+    issues of concrete syntax &mdash; how an ascii string that a programmer
+    might write gets translated into the abstract syntax trees defined
+    by the datatypes <span class="inlinecode"><span class="id" type="var">aexp</span></span>, <span class="inlinecode"><span class="id" type="var">bexp</span></span>, and <span class="inlinecode"><span class="id" type="var">com</span></span>.  In this file we
+    illustrate how the rest of the story can be filled in by building
+    a simple lexical analyzer and parser using Coq's functional
+    programming facilities.
+
+<div class="paragraph"> </div>
+
+    This development is not intended to be understood in detail: the
+    explanations are fairly terse and there are no exercises.  The
+    main point is simply to demonstrate that it can be done.  You are
+    invited to look through the code &mdash; most of it is not very
+    complicated, though the parser relies on some "monadic"
+    programming idioms that may require a little work to make out &mdash;
+    but most readers will probably want to just skip down to the
+    Examples section at the very end to get the punchline. 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab439"></a><h1 class="section">Internals</h1>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">SfLib</span>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Imp</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">String</span>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Ascii</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Open</span> <span class="id" type="keyword">Scope</span> <span class="id" type="var">list_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab440"></a><h2 class="section">Lexical Analysis</h2>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">isWhite</span> (<span class="id" type="var">c</span> : <span class="id" type="var">ascii</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">n</span> := <span class="id" type="var">nat_of_ascii</span> <span class="id" type="var">c</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="var">orb</span> (<span class="id" type="var">orb</span> (<span class="id" type="var">beq_nat</span> <span class="id" type="var">n</span> 32)   <span class="comment">(*&nbsp;space&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">beq_nat</span> <span class="id" type="var">n</span> 9))   <span class="comment">(*&nbsp;tab&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">orb</span> (<span class="id" type="var">beq_nat</span> <span class="id" type="var">n</span> 10)   <span class="comment">(*&nbsp;linefeed&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">beq_nat</span> <span class="id" type="var">n</span> 13)). <span class="comment">(*&nbsp;Carriage&nbsp;return.&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" type="keyword">Notation</span> "x '&lt;=?' y" := (<span class="id" type="var">ble_nat</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 70, <span class="id" type="var">no</span> <span class="id" type="var">associativity</span>) : <span class="id" type="var">nat_scope</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">isLowerAlpha</span> (<span class="id" type="var">c</span> : <span class="id" type="var">ascii</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">n</span> := <span class="id" type="var">nat_of_ascii</span> <span class="id" type="var">c</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">andb</span> (97 &lt;=? <span class="id" type="var">n</span>) (<span class="id" type="var">n</span> &lt;=? 122).<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">isAlpha</span> (<span class="id" type="var">c</span> : <span class="id" type="var">ascii</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">n</span> := <span class="id" type="var">nat_of_ascii</span> <span class="id" type="var">c</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">orb</span> (<span class="id" type="var">andb</span> (65 &lt;=? <span class="id" type="var">n</span>) (<span class="id" type="var">n</span> &lt;=? 90))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">andb</span> (97 &lt;=? <span class="id" type="var">n</span>) (<span class="id" type="var">n</span> &lt;=? 122)).<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">isDigit</span> (<span class="id" type="var">c</span> : <span class="id" type="var">ascii</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">n</span> := <span class="id" type="var">nat_of_ascii</span> <span class="id" type="var">c</span> <span class="id" type="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">andb</span> (48 &lt;=? <span class="id" type="var">n</span>) (<span class="id" type="var">n</span> &lt;=? 57).<br/>
+
+<br/>
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">chartype</span> := <span class="id" type="var">white</span> | <span class="id" type="var">alpha</span> | <span class="id" type="var">digit</span> | <span class="id" type="var">other</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">classifyChar</span> (<span class="id" type="var">c</span> : <span class="id" type="var">ascii</span>) : <span class="id" type="var">chartype</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">if</span> <span class="id" type="var">isWhite</span> <span class="id" type="var">c</span> <span class="id" type="keyword">then</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">white</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">else</span> <span class="id" type="keyword">if</span> <span class="id" type="var">isAlpha</span> <span class="id" type="var">c</span> <span class="id" type="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">alpha</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">else</span> <span class="id" type="keyword">if</span> <span class="id" type="var">isDigit</span> <span class="id" type="var">c</span> <span class="id" type="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">digit</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">other</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">list_of_string</span> (<span class="id" type="var">s</span> : <span class="id" type="var">string</span>) : <span class="id" type="var">list</span> <span class="id" type="var">ascii</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">s</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">EmptyString</span> ⇒ []<br/>
+&nbsp;&nbsp;| <span class="id" type="var">String</span> <span class="id" type="var">c</span> <span class="id" type="var">s</span> ⇒ <span class="id" type="var">c</span> :: (<span class="id" type="var">list_of_string</span> <span class="id" type="var">s</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">string_of_list</span> (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">ascii</span>) : <span class="id" type="var">string</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">fold_right</span> <span class="id" type="var">String</span> <span class="id" type="var">EmptyString</span> <span class="id" type="var">xs</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">token</span> := <span class="id" type="var">string</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">tokenize_helper</span> (<span class="id" type="var">cls</span> : <span class="id" type="var">chartype</span>) (<span class="id" type="var">acc</span> <span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">ascii</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">list</span> (<span class="id" type="var">list</span> <span class="id" type="var">ascii</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">tk</span> := <span class="id" type="keyword">match</span> <span class="id" type="var">acc</span> <span class="id" type="keyword">with</span> [] ⇒ [] | <span class="id" type="var">_</span>::_ ⇒ [<span class="id" type="var">rev</span> <span class="id" type="var">acc</span>] <span class="id" type="keyword">end</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">xs</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| [] ⇒ <span class="id" type="var">tk</span><br/>
+&nbsp;&nbsp;| (<span class="id" type="var">x</span>::<span class="id" type="var">xs'</span>) ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">cls</span>, <span class="id" type="var">classifyChar</span> <span class="id" type="var">x</span>, <span class="id" type="var">x</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span>, <span class="id" type="var">_</span>, "("      ⇒ <span class="id" type="var">tk</span> ++ ["("]::(<span class="id" type="var">tokenize_helper</span> <span class="id" type="var">other</span> [] <span class="id" type="var">xs'</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span>, <span class="id" type="var">_</span>, ")"      ⇒ <span class="id" type="var">tk</span> ++ [")"]::(<span class="id" type="var">tokenize_helper</span> <span class="id" type="var">other</span> [] <span class="id" type="var">xs'</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span>, <span class="id" type="var">white</span>, <span class="id" type="var">_</span>    ⇒ <span class="id" type="var">tk</span> ++ (<span class="id" type="var">tokenize_helper</span> <span class="id" type="var">white</span> [] <span class="id" type="var">xs'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">alpha</span>,<span class="id" type="var">alpha</span>,<span class="id" type="var">x</span>  ⇒ <span class="id" type="var">tokenize_helper</span> <span class="id" type="var">alpha</span> (<span class="id" type="var">x</span>::<span class="id" type="var">acc</span>) <span class="id" type="var">xs'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">digit</span>,<span class="id" type="var">digit</span>,<span class="id" type="var">x</span>  ⇒ <span class="id" type="var">tokenize_helper</span> <span class="id" type="var">digit</span> (<span class="id" type="var">x</span>::<span class="id" type="var">acc</span>) <span class="id" type="var">xs'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">other</span>,<span class="id" type="var">other</span>,<span class="id" type="var">x</span>  ⇒ <span class="id" type="var">tokenize_helper</span> <span class="id" type="var">other</span> (<span class="id" type="var">x</span>::<span class="id" type="var">acc</span>) <span class="id" type="var">xs'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span>,<span class="id" type="var">tp</span>,<span class="id" type="var">x</span>         ⇒ <span class="id" type="var">tk</span> ++ (<span class="id" type="var">tokenize_helper</span> <span class="id" type="var">tp</span> [<span class="id" type="var">x</span>] <span class="id" type="var">xs'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span> %<span class="id" type="var">char</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">tokenize</span> (<span class="id" type="var">s</span> : <span class="id" type="var">string</span>) : <span class="id" type="var">list</span> <span class="id" type="var">string</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">map</span> <span class="id" type="var">string_of_list</span> (<span class="id" type="var">tokenize_helper</span> <span class="id" type="var">white</span> [] (<span class="id" type="var">list_of_string</span> <span class="id" type="var">s</span>)).<br/>
+
+<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">tokenize_ex1</span> : <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">tokenize</span> "abc12==3  223*(3+(a+c))" %<span class="id" type="var">string</span><br/>
+&nbsp;&nbsp;= ["abc"; "12"; "=="; "3"; "223";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"×"; "("; "3"; "+"; "(";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"a"; "+"; "c"; ")"; ")"]%<span class="id" type="var">string</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab441"></a><h2 class="section">Parsing</h2>
+
+</div>
+<div class="code code-space">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab442"></a><h3 class="section">Options with Errors</h3>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="comment">(*&nbsp;An&nbsp;option&nbsp;with&nbsp;error&nbsp;messages.&nbsp;*)</span><br/>
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">optionE</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">SomeE</span> : <span class="id" type="var">X</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">optionE</span> <span class="id" type="var">X</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">NoneE</span> : <span class="id" type="var">string</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">optionE</span> <span class="id" type="var">X</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Implicit Arguments</span> <span class="id" type="var">SomeE</span> [[<span class="id" type="var">X</span>]].<br/>
+<span class="id" type="keyword">Implicit Arguments</span> <span class="id" type="var">NoneE</span> [[<span class="id" type="var">X</span>]].<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Some&nbsp;syntactic&nbsp;sugar&nbsp;to&nbsp;make&nbsp;writing&nbsp;nested&nbsp;match-expressions&nbsp;on<br/>
+&nbsp;&nbsp;&nbsp;optionE&nbsp;more&nbsp;convenient.&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" type="keyword">Notation</span> "'DO' ( x , y ) &lt;== e1 ; e2" <br/>
+&nbsp;&nbsp;&nbsp;:= (<span class="id" type="keyword">match</span> <span class="id" type="var">e1</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">SomeE</span> (<span class="id" type="var">x</span>,<span class="id" type="var">y</span>) ⇒ <span class="id" type="var">e2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">NoneE</span> <span class="id" type="var">err</span> ⇒ <span class="id" type="var">NoneE</span> <span class="id" type="var">err</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" type="var">right</span> <span class="id" type="var">associativity</span>, <span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 60).<br/>
+
+<br/>
+<span class="id" type="keyword">Notation</span> "'DO' ( x , y ) &lt;-- e1 ; e2 'OR' e3" <br/>
+&nbsp;&nbsp;&nbsp;:= (<span class="id" type="keyword">match</span> <span class="id" type="var">e1</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">SomeE</span> (<span class="id" type="var">x</span>,<span class="id" type="var">y</span>) ⇒ <span class="id" type="var">e2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">NoneE</span> <span class="id" type="var">err</span> ⇒ <span class="id" type="var">e3</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" type="var">right</span> <span class="id" type="var">associativity</span>, <span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 60, <span class="id" type="var">e2</span> <span class="id" type="tactic">at</span> <span class="id" type="var">next</span> <span class="id" type="var">level</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab443"></a><h3 class="section">Symbol Table</h3>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="comment">(*&nbsp;Build&nbsp;a&nbsp;mapping&nbsp;from&nbsp;<span class="inlinecode"><span class="id" type="var">tokens</span></span>&nbsp;to&nbsp;<span class="inlinecode"><span class="id" type="var">nats</span></span>.&nbsp;&nbsp;A&nbsp;real&nbsp;parser&nbsp;would&nbsp;do<br/>
+&nbsp;&nbsp;&nbsp;this&nbsp;incrementally&nbsp;as&nbsp;it&nbsp;encountered&nbsp;new&nbsp;symbols,&nbsp;but&nbsp;passing<br/>
+&nbsp;&nbsp;&nbsp;around&nbsp;the&nbsp;symbol&nbsp;table&nbsp;inside&nbsp;the&nbsp;parsing&nbsp;functions&nbsp;is&nbsp;a&nbsp;bit<br/>
+&nbsp;&nbsp;&nbsp;inconvenient,&nbsp;so&nbsp;instead&nbsp;we&nbsp;do&nbsp;it&nbsp;as&nbsp;a&nbsp;first&nbsp;pass.&nbsp;*)</span><br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">build_symtable</span> (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>) (<span class="id" type="var">n</span> : <span class="id" type="var">nat</span>) : (<span class="id" type="var">token</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">nat</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">xs</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| [] ⇒ (<span class="id" type="keyword">fun</span> <span class="id" type="var">s</span> ⇒ <span class="id" type="var">n</span>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">x</span>::<span class="id" type="var">xs</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">if</span> (<span class="id" type="var">forallb</span> <span class="id" type="var">isLowerAlpha</span> (<span class="id" type="var">list_of_string</span> <span class="id" type="var">x</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">then</span> (<span class="id" type="keyword">fun</span> <span class="id" type="var">s</span> ⇒ <span class="id" type="keyword">if</span> <span class="id" type="var">string_dec</span> <span class="id" type="var">s</span> <span class="id" type="var">x</span> <span class="id" type="keyword">then</span> <span class="id" type="var">n</span> <span class="id" type="keyword">else</span> (<span class="id" type="var">build_symtable</span> <span class="id" type="var">xs</span> (<span class="id" type="var">S</span> <span class="id" type="var">n</span>) <span class="id" type="var">s</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">else</span> <span class="id" type="var">build_symtable</span> <span class="id" type="var">xs</span> <span class="id" type="var">n</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab444"></a><h3 class="section">Generic Combinators for Building Parsers</h3>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="id" type="keyword">Open</span> <span class="id" type="keyword">Scope</span> <span class="id" type="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">parser</span> (<span class="id" type="var">T</span> : <span class="id" type="keyword">Type</span>) := <br/>
+&nbsp;&nbsp;<span class="id" type="var">list</span> <span class="id" type="var">token</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">optionE</span> (<span class="id" type="var">T</span> × <span class="id" type="var">list</span> <span class="id" type="var">token</span>).<br/>
+
+<br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">many_helper</span> {<span class="id" type="var">T</span>} (<span class="id" type="var">p</span> : <span class="id" type="var">parser</span> <span class="id" type="var">T</span>) <span class="id" type="var">acc</span> <span class="id" type="var">steps</span> <span class="id" type="var">xs</span> :=<br/>
+<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span>, <span class="id" type="var">p</span> <span class="id" type="var">xs</span> <span class="id" type="keyword">with</span><br/>
+| 0, <span class="id" type="var">_</span> ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+| <span class="id" type="var">_</span>, <span class="id" type="var">NoneE</span> <span class="id" type="var">_</span> ⇒ <span class="id" type="var">SomeE</span> ((<span class="id" type="var">rev</span> <span class="id" type="var">acc</span>), <span class="id" type="var">xs</span>)<br/>
+| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span>, <span class="id" type="var">SomeE</span> (<span class="id" type="var">t</span>, <span class="id" type="var">xs'</span>) ⇒ <span class="id" type="var">many_helper</span> <span class="id" type="var">p</span> (<span class="id" type="var">t</span>::<span class="id" type="var">acc</span>) <span class="id" type="var">steps'</span> <span class="id" type="var">xs'</span><br/>
+<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;A&nbsp;(step-indexed)&nbsp;parser&nbsp;which&nbsp;expects&nbsp;zero&nbsp;or&nbsp;more&nbsp;<span class="inlinecode"><span class="id" type="var">p</span></span>s&nbsp;*)</span><br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">many</span> {<span class="id" type="var">T</span>} (<span class="id" type="var">p</span> : <span class="id" type="var">parser</span> <span class="id" type="var">T</span>) (<span class="id" type="var">steps</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">parser</span> (<span class="id" type="var">list</span> <span class="id" type="var">T</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">many_helper</span> <span class="id" type="var">p</span> [] <span class="id" type="var">steps</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;A&nbsp;parser&nbsp;which&nbsp;expects&nbsp;a&nbsp;given&nbsp;token,&nbsp;followed&nbsp;by&nbsp;p&nbsp;*)</span><br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">firstExpect</span> {<span class="id" type="var">T</span>} (<span class="id" type="var">t</span> : <span class="id" type="var">token</span>) (<span class="id" type="var">p</span> : <span class="id" type="var">parser</span> <span class="id" type="var">T</span>) : <span class="id" type="var">parser</span> <span class="id" type="var">T</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">fun</span> <span class="id" type="var">xs</span> ⇒ <span class="id" type="keyword">match</span> <span class="id" type="var">xs</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">x</span>::<span class="id" type="var">xs'</span> ⇒ <span class="id" type="keyword">if</span> <span class="id" type="var">string_dec</span> <span class="id" type="var">x</span> <span class="id" type="var">t</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">then</span> <span class="id" type="var">p</span> <span class="id" type="var">xs'</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">else</span> <span class="id" type="var">NoneE</span> ("expected '" ++ <span class="id" type="var">t</span> ++ "'.")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] ⇒  <span class="id" type="var">NoneE</span> ("expected '" ++ <span class="id" type="var">t</span> ++ "'.")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;A&nbsp;parser&nbsp;which&nbsp;expects&nbsp;a&nbsp;particular&nbsp;token&nbsp;*)</span><br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">expect</span> (<span class="id" type="var">t</span> : <span class="id" type="var">token</span>) : <span class="id" type="var">parser</span> <span class="id" type="var">unit</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> <span class="id" type="var">t</span> (<span class="id" type="keyword">fun</span> <span class="id" type="var">xs</span> ⇒ <span class="id" type="var">SomeE</span>(<span class="id" type="var">tt</span>, <span class="id" type="var">xs</span>)).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab445"></a><h3 class="section">A Recursive-Descent Parser for Imp</h3>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="comment">(*&nbsp;Identifiers&nbsp;*)</span><br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">parseIdentifier</span> (<span class="id" type="var">symtable</span> :<span class="id" type="var">string</span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">nat</span>) (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">optionE</span> (<span class="id" type="var">id</span> × <span class="id" type="var">list</span> <span class="id" type="var">token</span>) :=<br/>
+<span class="id" type="keyword">match</span> <span class="id" type="var">xs</span> <span class="id" type="keyword">with</span><br/>
+| [] ⇒ <span class="id" type="var">NoneE</span> "Expected identifier"<br/>
+| <span class="id" type="var">x</span>::<span class="id" type="var">xs'</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">if</span> <span class="id" type="var">forallb</span> <span class="id" type="var">isLowerAlpha</span> (<span class="id" type="var">list_of_string</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">Id</span> (<span class="id" type="var">symtable</span> <span class="id" type="var">x</span>), <span class="id" type="var">xs'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">NoneE</span> ("Illegal identifier:'" ++ <span class="id" type="var">x</span> ++ "'")<br/>
+<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Numbers&nbsp;*)</span><br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">parseNumber</span> (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>) : <span class="id" type="var">optionE</span> (<span class="id" type="var">nat</span> × <span class="id" type="var">list</span> <span class="id" type="var">token</span>) :=<br/>
+<span class="id" type="keyword">match</span> <span class="id" type="var">xs</span> <span class="id" type="keyword">with</span> <br/>
+| [] ⇒ <span class="id" type="var">NoneE</span> "Expected number"<br/>
+| <span class="id" type="var">x</span>::<span class="id" type="var">xs'</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">if</span> <span class="id" type="var">forallb</span> <span class="id" type="var">isDigit</span> (<span class="id" type="var">list_of_string</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">fold_left</span> (<span class="id" type="keyword">fun</span> <span class="id" type="var">n</span> <span class="id" type="var">d</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10 × <span class="id" type="var">n</span> + (<span class="id" type="var">nat_of_ascii</span> <span class="id" type="var">d</span> - <span class="id" type="var">nat_of_ascii</span> "0"%<span class="id" type="var">char</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">list_of_string</span> <span class="id" type="var">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">xs'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">NoneE</span> "Expected number"<br/>
+<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Parse&nbsp;arithmetic&nbsp;expressions&nbsp;*)</span><br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">parsePrimaryExp</span> (<span class="id" type="var">steps</span>:<span class="id" type="var">nat</span>) <span class="id" type="var">symtable</span> (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>) <br/>
+&nbsp;&nbsp;&nbsp;: <span class="id" type="var">optionE</span> (<span class="id" type="var">aexp</span> × <span class="id" type="var">list</span> <span class="id" type="var">token</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">i</span>, <span class="id" type="var">rest</span>) &lt;-- <span class="id" type="var">parseIdentifier</span> <span class="id" type="var">symtable</span> <span class="id" type="var">xs</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">AId</span> <span class="id" type="var">i</span>, <span class="id" type="var">rest</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">n</span>, <span class="id" type="var">rest</span>) &lt;-- <span class="id" type="var">parseNumber</span> <span class="id" type="var">xs</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">ANum</span> <span class="id" type="var">n</span>, <span class="id" type="var">rest</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> (<span class="id" type="var">DO</span> (<span class="id" type="var">e</span>, <span class="id" type="var">rest</span>)  &lt;== <span class="id" type="var">firstExpect</span> "(" (<span class="id" type="var">parseSumExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">u</span>, <span class="id" type="var">rest'</span>) &lt;== <span class="id" type="var">expect</span> ")" <span class="id" type="var">rest</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span>(<span class="id" type="var">e</span>,<span class="id" type="var">rest'</span>))<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+<span class="id" type="keyword">with</span> <span class="id" type="var">parseProductExp</span> (<span class="id" type="var">steps</span>:<span class="id" type="var">nat</span>) <span class="id" type="var">symtable</span> (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>)  :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">e</span>, <span class="id" type="var">rest</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">parsePrimaryExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span> <span class="id" type="var">xs</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">es</span>, <span class="id" type="var">rest'</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">many</span> (<span class="id" type="var">firstExpect</span> "×" (<span class="id" type="var">parsePrimaryExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>)) <span class="id" type="var">steps'</span> <span class="id" type="var">rest</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">fold_left</span> <span class="id" type="var">AMult</span> <span class="id" type="var">es</span> <span class="id" type="var">e</span>, <span class="id" type="var">rest'</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+<span class="id" type="keyword">with</span> <span class="id" type="var">parseSumExp</span> (<span class="id" type="var">steps</span>:<span class="id" type="var">nat</span>) <span class="id" type="var">symtable</span> (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>)  :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">e</span>, <span class="id" type="var">rest</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">parseProductExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span> <span class="id" type="var">xs</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">es</span>, <span class="id" type="var">rest'</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">many</span> (<span class="id" type="keyword">fun</span> <span class="id" type="var">xs</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">e</span>,<span class="id" type="var">rest'</span>) &lt;-- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "+" (<span class="id" type="var">parseProductExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> ( (<span class="id" type="var">true</span>, <span class="id" type="var">e</span>), <span class="id" type="var">rest'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">e</span>,<span class="id" type="var">rest'</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "-" (<span class="id" type="var">parseProductExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> ( (<span class="id" type="var">false</span>, <span class="id" type="var">e</span>), <span class="id" type="var">rest'</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">steps'</span> <span class="id" type="var">rest</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">fold_left</span> (<span class="id" type="keyword">fun</span> <span class="id" type="var">e0</span> <span class="id" type="var">term</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">term</span> <span class="id" type="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">true</span>,  <span class="id" type="var">e</span>) ⇒ <span class="id" type="var">APlus</span> <span class="id" type="var">e0</span> <span class="id" type="var">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id" type="var">false</span>, <span class="id" type="var">e</span>) ⇒ <span class="id" type="var">AMinus</span> <span class="id" type="var">e0</span> <span class="id" type="var">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">es</span> <span class="id" type="var">e</span>, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rest'</span>)         <br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">parseAExp</span> := <span class="id" type="var">parseSumExp</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Parsing&nbsp;boolean&nbsp;expressions.&nbsp;*)</span><br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">parseAtomicExp</span> (<span class="id" type="var">steps</span>:<span class="id" type="var">nat</span>) (<span class="id" type="var">symtable</span> : <span class="id" type="var">string</span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">nat</span>) (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>)  :=<br/>
+<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span>    (<span class="id" type="var">u</span>,<span class="id" type="var">rest</span>) &lt;-- <span class="id" type="var">expect</span> "true" <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">BTrue</span>,<span class="id" type="var">rest</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">u</span>,<span class="id" type="var">rest</span>) &lt;-- <span class="id" type="var">expect</span> "false" <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">BFalse</span>,<span class="id" type="var">rest</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">e</span>,<span class="id" type="var">rest</span>) &lt;-- <span class="id" type="var">firstExpect</span> "not" (<span class="id" type="var">parseAtomicExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">BNot</span> <span class="id" type="var">e</span>, <span class="id" type="var">rest</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">e</span>,<span class="id" type="var">rest</span>) &lt;-- <span class="id" type="var">firstExpect</span> "(" (<span class="id" type="var">parseConjunctionExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">DO</span> (<span class="id" type="var">u</span>,<span class="id" type="var">rest'</span>) &lt;== <span class="id" type="var">expect</span> ")" <span class="id" type="var">rest</span>; <span class="id" type="var">SomeE</span> (<span class="id" type="var">e</span>, <span class="id" type="var">rest'</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">e</span>, <span class="id" type="var">rest</span>) &lt;== <span class="id" type="var">parseProductExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span> <span class="id" type="var">xs</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">DO</span> (<span class="id" type="var">e'</span>, <span class="id" type="var">rest'</span>) &lt;-- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "==" (<span class="id" type="var">parseAExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">rest</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">BEq</span> <span class="id" type="var">e</span> <span class="id" type="var">e'</span>, <span class="id" type="var">rest'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">e'</span>, <span class="id" type="var">rest'</span>) &lt;-- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "≤" (<span class="id" type="var">parseAExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">rest</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">BLe</span> <span class="id" type="var">e</span> <span class="id" type="var">e'</span>, <span class="id" type="var">rest'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">NoneE</span> "Expected '==' or '≤' after arithmetic expression")<br/>
+<span class="id" type="keyword">end</span><br/>
+<span class="id" type="keyword">with</span> <span class="id" type="var">parseConjunctionExp</span> (<span class="id" type="var">steps</span>:<span class="id" type="var">nat</span>) (<span class="id" type="var">symtable</span> : <span class="id" type="var">string</span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">nat</span>) (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>)   :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">e</span>, <span class="id" type="var">rest</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">parseAtomicExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span> <span class="id" type="var">xs</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">es</span>, <span class="id" type="var">rest'</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">many</span> (<span class="id" type="var">firstExpect</span> "&amp;&amp;" (<span class="id" type="var">parseAtomicExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>)) <span class="id" type="var">steps'</span> <span class="id" type="var">rest</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">fold_left</span> <span class="id" type="var">BAnd</span> <span class="id" type="var">es</span> <span class="id" type="var">e</span>, <span class="id" type="var">rest'</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">parseBExp</span> := <span class="id" type="var">parseConjunctionExp</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;<br/>
+Eval&nbsp;compute&nbsp;in&nbsp;<br/>
+&nbsp;&nbsp;(parseProductExp&nbsp;100&nbsp;(tokenize&nbsp;"x*y*(x*x)*x")).<br/>
+<br/>
+Eval&nbsp;compute&nbsp;in&nbsp;<br/>
+&nbsp;&nbsp;(parseDisjunctionExp&nbsp;100&nbsp;(tokenize&nbsp;"not((x==x||x*x&lt;=(x*x)*x)&amp;&amp;x==x)")).&nbsp;<br/>
+*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;Parsing&nbsp;commands&nbsp;*)</span><br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">parseSimpleCommand</span> (<span class="id" type="var">steps</span>:<span class="id" type="var">nat</span>) (<span class="id" type="var">symtable</span>:<span class="id" type="var">string</span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">nat</span>) (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">u</span>, <span class="id" type="var">rest</span>) &lt;-- <span class="id" type="var">expect</span> "SKIP" <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span> (<span class="id" type="var">SKIP</span>, <span class="id" type="var">rest</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">e</span>,<span class="id" type="var">rest</span>) &lt;-- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "IF" (<span class="id" type="var">parseBExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">c</span>,<span class="id" type="var">rest'</span>)  &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "THEN" (<span class="id" type="var">parseSequencedCommand</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">rest</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">c'</span>,<span class="id" type="var">rest''</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "ELSE" (<span class="id" type="var">parseSequencedCommand</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">rest'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">u</span>,<span class="id" type="var">rest'''</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">expect</span> "END" <span class="id" type="var">rest''</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span>(<span class="id" type="var">IFB</span> <span class="id" type="var">e</span> <span class="id" type="var">THEN</span> <span class="id" type="var">c</span> <span class="id" type="var">ELSE</span> <span class="id" type="var">c'</span> <span class="id" type="var">FI</span>, <span class="id" type="var">rest'''</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">e</span>,<span class="id" type="var">rest</span>) &lt;-- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "WHILE" (<span class="id" type="var">parseBExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">c</span>,<span class="id" type="var">rest'</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> "DO" (<span class="id" type="var">parseSequencedCommand</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">rest</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">u</span>,<span class="id" type="var">rest''</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">expect</span> "END" <span class="id" type="var">rest'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span>(<span class="id" type="var">WHILE</span> <span class="id" type="var">e</span> <span class="id" type="var">DO</span> <span class="id" type="var">c</span> <span class="id" type="var">END</span>, <span class="id" type="var">rest''</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span> <span class="id" type="var">DO</span> (<span class="id" type="var">i</span>, <span class="id" type="var">rest</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">parseIdentifier</span> <span class="id" type="var">symtable</span> <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">e</span>, <span class="id" type="var">rest'</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> ":=" (<span class="id" type="var">parseAExp</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">rest</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span>(<span class="id" type="var">i</span> ::= <span class="id" type="var">e</span>, <span class="id" type="var">rest'</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+<br/>
+<span class="id" type="keyword">with</span> <span class="id" type="var">parseSequencedCommand</span> (<span class="id" type="var">steps</span>:<span class="id" type="var">nat</span>) (<span class="id" type="var">symtable</span>:<span class="id" type="var">string</span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">nat</span>) (<span class="id" type="var">xs</span> : <span class="id" type="var">list</span> <span class="id" type="var">token</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">steps</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 ⇒ <span class="id" type="var">NoneE</span> "Too many recursive calls"<br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">steps'</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">c</span>, <span class="id" type="var">rest</span>) &lt;== <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">parseSimpleCommand</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span> <span class="id" type="var">xs</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">DO</span> (<span class="id" type="var">c'</span>, <span class="id" type="var">rest'</span>) &lt;-- <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">firstExpect</span> ";;" (<span class="id" type="var">parseSequencedCommand</span> <span class="id" type="var">steps'</span> <span class="id" type="var">symtable</span>) <span class="id" type="var">rest</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span>(<span class="id" type="var">c</span> ;; <span class="id" type="var">c'</span>, <span class="id" type="var">rest'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SomeE</span>(<span class="id" type="var">c</span>, <span class="id" type="var">rest</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">bignumber</span> := 1000.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">parse</span> (<span class="id" type="var">str</span> : <span class="id" type="var">string</span>) : <span class="id" type="var">optionE</span> (<span class="id" type="var">com</span> × <span class="id" type="var">list</span> <span class="id" type="var">token</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">tokens</span> := <span class="id" type="var">tokenize</span> <span class="id" type="var">str</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="var">parseSequencedCommand</span> <span class="id" type="var">bignumber</span> (<span class="id" type="var">build_symtable</span> <span class="id" type="var">tokens</span> 0) <span class="id" type="var">tokens</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab446"></a><h1 class="section">Examples</h1>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="comment">(*<br/>
+Eval&nbsp;compute&nbsp;in&nbsp;parse&nbsp;"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;IF&nbsp;x&nbsp;==&nbsp;y&nbsp;+&nbsp;1&nbsp;+&nbsp;2&nbsp;-&nbsp;y&nbsp;*&nbsp;6&nbsp;+&nbsp;3&nbsp;THEN<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;:=&nbsp;x&nbsp;*&nbsp;1;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;:=&nbsp;0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ELSE<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SKIP<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;END&nbsp;&nbsp;".<br/>
+====&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;SomeE<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(IFB&nbsp;BEq&nbsp;(AId&nbsp;(Id&nbsp;0))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(APlus<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(AMinus&nbsp;(APlus&nbsp;(APlus&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(ANum&nbsp;1))&nbsp;(ANum&nbsp;2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(AMult&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(ANum&nbsp;6)))&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ANum&nbsp;3))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;THEN&nbsp;Id&nbsp;0&nbsp;::=&nbsp;AMult&nbsp;(AId&nbsp;(Id&nbsp;0))&nbsp;(ANum&nbsp;1);;&nbsp;Id&nbsp;1&nbsp;::=&nbsp;ANum&nbsp;0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELSE&nbsp;SKIP&nbsp;FI,&nbsp;<span class="inlinecode"></span>)<br/>
+*)</span><br/>
+
+<br/>
+<span class="comment">(*<br/>
+Eval&nbsp;compute&nbsp;in&nbsp;parse&nbsp;"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;SKIP;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;z:=x*y*(x*x);;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;WHILE&nbsp;x==x&nbsp;DO<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IF&nbsp;z&nbsp;&lt;=&nbsp;z*z&nbsp;&amp;&amp;&nbsp;not&nbsp;x&nbsp;==&nbsp;2&nbsp;THEN<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;:=&nbsp;z;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;:=&nbsp;z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELSE<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SKIP<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;END;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SKIP<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;END;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x:=z&nbsp;&nbsp;".<br/>
+====&gt;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SomeE<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(SKIP;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Id&nbsp;0&nbsp;::=&nbsp;AMult&nbsp;(AMult&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(AId&nbsp;(Id&nbsp;2)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(AMult&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(AId&nbsp;(Id&nbsp;1)));;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WHILE&nbsp;BEq&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;DO&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IFB&nbsp;BAnd&nbsp;(BLe&nbsp;(AId&nbsp;(Id&nbsp;0))&nbsp;(AMult&nbsp;(AId&nbsp;(Id&nbsp;0))&nbsp;(AId&nbsp;(Id&nbsp;0))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(BNot&nbsp;(BEq&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(ANum&nbsp;2)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;THEN&nbsp;Id&nbsp;1&nbsp;::=&nbsp;AId&nbsp;(Id&nbsp;0);;&nbsp;Id&nbsp;2&nbsp;::=&nbsp;AId&nbsp;(Id&nbsp;0)&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELSE&nbsp;SKIP&nbsp;FI;;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SKIP&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;END;;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Id&nbsp;1&nbsp;::=&nbsp;AId&nbsp;(Id&nbsp;0),&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode"></span>)&nbsp;<br/>
+*)</span><br/>
+
+<br/>
+<span class="comment">(*<br/>
+Eval&nbsp;compute&nbsp;in&nbsp;parse&nbsp;"<br/>
+&nbsp;&nbsp;&nbsp;SKIP;;<br/>
+&nbsp;&nbsp;&nbsp;z:=x*y*(x*x);;<br/>
+&nbsp;&nbsp;&nbsp;WHILE&nbsp;x==x&nbsp;DO<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IF&nbsp;z&nbsp;&lt;=&nbsp;z*z&nbsp;&amp;&amp;&nbsp;not&nbsp;x&nbsp;==&nbsp;2&nbsp;THEN<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;:=&nbsp;z;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;:=&nbsp;z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELSE<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SKIP<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;END;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SKIP<br/>
+&nbsp;&nbsp;&nbsp;END;;<br/>
+&nbsp;&nbsp;&nbsp;x:=z&nbsp;&nbsp;".<br/>
+=====&gt;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SomeE<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(SKIP;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Id&nbsp;0&nbsp;::=&nbsp;AMult&nbsp;(AMult&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(AId&nbsp;(Id&nbsp;2)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(AMult&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(AId&nbsp;(Id&nbsp;1)));;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WHILE&nbsp;BEq&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;DO&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IFB&nbsp;BAnd&nbsp;(BLe&nbsp;(AId&nbsp;(Id&nbsp;0))&nbsp;(AMult&nbsp;(AId&nbsp;(Id&nbsp;0))&nbsp;(AId&nbsp;(Id&nbsp;0))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(BNot&nbsp;(BEq&nbsp;(AId&nbsp;(Id&nbsp;1))&nbsp;(ANum&nbsp;2)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;THEN&nbsp;Id&nbsp;1&nbsp;::=&nbsp;AId&nbsp;(Id&nbsp;0);;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Id&nbsp;2&nbsp;::=&nbsp;AId&nbsp;(Id&nbsp;0)&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELSE&nbsp;SKIP&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FI;;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SKIP&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;END;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Id&nbsp;1&nbsp;::=&nbsp;AId&nbsp;(Id&nbsp;0),&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode"></span>).<br/>
+*)</span><br/>
+
+<br/>
+</div>
+
+<div class="doc">
+ 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a></div>
+
+</div>
+
+</body>
+</html>

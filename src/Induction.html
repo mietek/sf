@@ -1,0 +1,1030 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>Induction: Proof by Induction</title>
+<script type="text/javascript" src="jquery-1.8.3.js"></script>
+<script type="text/javascript" src="main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Induction<span class="subtitle">Proof by Induction</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ The next line imports all of our definitions from the
+    previous chapter. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Export</span> <span class="id" type="var">Basics</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+For it to work, you need to use <span class="inlinecode"><span class="id" type="var">coqc</span></span> to compile <span class="inlinecode"><span class="id" type="var">Basics.v</span></span>
+    into <span class="inlinecode"><span class="id" type="var">Basics.vo</span></span>.  (This is like making a .class file from a .java
+    file, or a .o file from a .c file.)
+
+<div class="paragraph"> </div>
+
+    Here are two ways to compile your code:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> CoqIDE:
+
+<div class="paragraph"> </div>
+
+         Open <span class="inlinecode"><span class="id" type="var">Basics.v</span></span>.
+         In the "Compile" menu, click on "Compile Buffer".
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Command line:
+
+<div class="paragraph"> </div>
+
+         Run <span class="inlinecode"><span class="id" type="var">coqc</span></span> <span class="inlinecode"><span class="id" type="var">Basics.v</span></span>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab38"></a><h1 class="section">Naming Cases</h1>
+
+<div class="paragraph"> </div>
+
+ The fact that there is no explicit command for moving from
+    one branch of a case analysis to the next can make proof scripts
+    rather hard to read.  In larger proofs, with nested case analyses,
+    it can even become hard to stay oriented when you're sitting with
+    Coq and stepping through the proof.  (Imagine trying to remember
+    that the first five subgoals belong to the inner case analysis and
+    the remaining seven cases are what remains of the outer one...)
+    Disciplined use of indentation and comments can help, but a better
+    way is to use the <span class="inlinecode"><span class="id" type="var">Case</span></span> tactic. 
+<div class="paragraph"> </div>
+
+ <span class="inlinecode"><span class="id" type="var">Case</span></span> is not built into Coq: we need to define it ourselves.
+    There is no need to understand how it works &mdash; you can just skip
+    over the definition to the example that follows.  It uses some
+    facilities of Coq that we have not discussed &mdash; the string
+    library (just for the concrete syntax of quoted strings) and the
+    <span class="inlinecode"><span class="id" type="keyword">Ltac</span></span> command, which allows us to declare custom tactics.  Kudos
+    to Aaron Bohannon for this nice hack! 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="var">String</span>. <span class="id" type="keyword">Open</span> <span class="id" type="keyword">Scope</span> <span class="id" type="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">move_to_top</span> <span class="id" type="var">x</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">reverse</span> <span class="id" type="var">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span> : <span class="id" type="var">_</span> <span style="font-family: arial;">&#8866;</span> <span class="id" type="var">_</span> ⇒ <span class="id" type="tactic">try</span> <span class="id" type="tactic">move</span> <span class="id" type="var">x</span> <span class="id" type="keyword">after</span> <span class="id" type="var">H</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Tactic Notation</span> "assert_eq" <span class="id" type="var">ident</span>(<span class="id" type="var">x</span>) <span class="id" type="var">constr</span>(<span class="id" type="var">v</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">H</span> := <span class="id" type="tactic">fresh</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">x</span> = <span class="id" type="var">v</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">H</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">reflexivity</span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">clear</span> <span class="id" type="var">H</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Tactic Notation</span> "Case_aux" <span class="id" type="var">ident</span>(<span class="id" type="var">x</span>) <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">first</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">set</span> (<span class="id" type="var">x</span> := <span class="id" type="var">name</span>); <span class="id" type="var">move_to_top</span> <span class="id" type="var">x</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">assert_eq</span> <span class="id" type="var">x</span> <span class="id" type="var">name</span>; <span class="id" type="var">move_to_top</span> <span class="id" type="var">x</span><br/>
+&nbsp;&nbsp;| <span class="id" type="tactic">fail</span> 1 "because we are working on a different case" ].<br/>
+
+<br/>
+<span class="id" type="keyword">Tactic Notation</span> "Case" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">Case</span> <span class="id" type="var">name</span>.<br/>
+<span class="id" type="keyword">Tactic Notation</span> "SCase" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">SCase</span> <span class="id" type="var">name</span>.<br/>
+<span class="id" type="keyword">Tactic Notation</span> "SSCase" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">SSCase</span> <span class="id" type="var">name</span>.<br/>
+<span class="id" type="keyword">Tactic Notation</span> "SSSCase" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">SSSCase</span> <span class="id" type="var">name</span>.<br/>
+<span class="id" type="keyword">Tactic Notation</span> "SSSSCase" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">SSSSCase</span> <span class="id" type="var">name</span>.<br/>
+<span class="id" type="keyword">Tactic Notation</span> "SSSSSCase" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">SSSSSCase</span> <span class="id" type="var">name</span>.<br/>
+<span class="id" type="keyword">Tactic Notation</span> "SSSSSSCase" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">SSSSSSCase</span> <span class="id" type="var">name</span>.<br/>
+<span class="id" type="keyword">Tactic Notation</span> "SSSSSSSCase" <span class="id" type="var">constr</span>(<span class="id" type="var">name</span>) := <span class="id" type="var">Case_aux</span> <span class="id" type="var">SSSSSSSCase</span> <span class="id" type="var">name</span>.<br/>
+</div>
+
+<div class="doc">
+Here's an example of how <span class="inlinecode"><span class="id" type="var">Case</span></span> is used.  Step through the
+   following proof and observe how the context changes. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_true_elim1</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span> : <span class="id" type="var">bool</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> = <span class="id" type="var">true</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">b</span> = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">b</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "b = true". <span class="comment">(*&nbsp;&lt;-----&nbsp;here&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "b = false". <span class="comment">(*&nbsp;&lt;----&nbsp;and&nbsp;here&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" type="var">Case</span></span> does something very straightforward: It simply adds a
+    string that we choose (tagged with the identifier "Case") to the
+    context for the current goal.  When subgoals are generated, this
+    string is carried over into their contexts.  When the last of
+    these subgoals is finally proved and the next top-level goal
+    becomes active, this string will no longer appear in the context
+    and we will be able to see that the case where we introduced it is
+    complete.  Also, as a sanity check, if we try to execute a new
+    <span class="inlinecode"><span class="id" type="var">Case</span></span> tactic while the string left by the previous one is still
+    in the context, we get a nice clear error message.
+
+<div class="paragraph"> </div>
+
+    For nested case analyses (e.g., when we want to use a <span class="inlinecode"><span class="id" type="tactic">destruct</span></span>
+    to solve a goal that has itself been generated by a <span class="inlinecode"><span class="id" type="tactic">destruct</span></span>),
+    there is an <span class="inlinecode"><span class="id" type="var">SCase</span></span> ("subcase") tactic. 
+<div class="paragraph"> </div>
+
+<a name="lab39"></a><h4 class="section">Exercise: 2 stars (andb_true_elim2)</h4>
+ Prove <span class="inlinecode"><span class="id" type="var">andb_true_elim2</span></span>, marking cases (and subcases) when
+    you use <span class="inlinecode"><span class="id" type="tactic">destruct</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_true_elim2</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span> : <span class="id" type="var">bool</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> = <span class="id" type="var">true</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">c</span> = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+ There are no hard and fast rules for how proofs should be
+    formatted in Coq &mdash; in particular, where lines should be broken
+    and how sections of the proof should be indented to indicate their
+    nested structure.  However, if the places where multiple subgoals
+    are generated are marked with explicit <span class="inlinecode"><span class="id" type="var">Case</span></span> tactics placed at
+    the beginning of lines, then the proof will be readable almost no
+    matter what choices are made about other aspects of layout.
+
+<div class="paragraph"> </div>
+
+    This is a good place to mention one other piece of (possibly
+    obvious) advice about line lengths.  Beginning Coq users sometimes
+    tend to the extremes, either writing each tactic on its own line
+    or entire proofs on one line.  Good style lies somewhere in the
+    middle.  In particular, one reasonable convention is to limit
+    yourself to 80-character lines.  Lines longer than this are hard
+    to read and can be inconvenient to display and print.  Many
+    editors have features that help enforce this. 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab40"></a><h1 class="section">Proof by Induction</h1>
+
+<div class="paragraph"> </div>
+
+ We proved in the last chapter that <span class="inlinecode">0</span> is a neutral element
+    for <span class="inlinecode">+</span> on the left using a simple argument.  The fact that it is
+    also a neutral element on the <i>right</i>... 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_0_r_firsttry</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + 0 = <span class="id" type="var">n</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+... cannot be proved in the same simple way.  Just applying
+  <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> doesn't work: the <span class="inlinecode"><span class="id" type="var">n</span></span> in <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode">0</span> is an arbitrary
+  unknown number, so the <span class="inlinecode"><span class="id" type="keyword">match</span></span> in the definition of <span class="inlinecode">+</span> can't be
+  simplified.  
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="comment">(*&nbsp;Does&nbsp;nothing!&nbsp;*)</span><br/>
+<span class="id" type="keyword">Abort</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab41"></a><h3 class="section"> </h3>
+
+<div class="paragraph"> </div>
+
+ And reasoning by cases using <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> doesn't get us much
+   further: the branch of the case analysis where we assume <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>
+   goes through, but in the branch where <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> for some <span class="inlinecode"><span class="id" type="var">n'</span></span> we
+   get stuck in exactly the same way.  We could use <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> to
+   get one step further, but since <span class="inlinecode"><span class="id" type="var">n</span></span> can be arbitrarily large, if we
+   try to keep on like this we'll never be done. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_0_r_secondtry</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + 0 = <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = 0".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="comment">(*&nbsp;so&nbsp;far&nbsp;so&nbsp;good...&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = S n'".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="comment">(*&nbsp;...but&nbsp;here&nbsp;we&nbsp;are&nbsp;stuck&nbsp;again&nbsp;*)</span><br/>
+<span class="id" type="keyword">Abort</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab42"></a><h3 class="section"> </h3>
+
+<div class="paragraph"> </div>
+
+ To prove such facts &mdash; indeed, to prove most interesting
+    facts about numbers, lists, and other inductively defined sets &mdash;
+    we need a more powerful reasoning principle: <i>induction</i>.
+
+<div class="paragraph"> </div>
+
+    Recall (from high school) the principle of induction over natural
+    numbers: If <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">n</span>)</span> is some proposition involving a natural number
+    <span class="inlinecode"><span class="id" type="var">n</span></span> and we want to show that P holds for <i>all</i> numbers <span class="inlinecode"><span class="id" type="var">n</span></span>, we can
+    reason like this:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> show that <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">O</span>)</span> holds;
+
+</li>
+<li> show that, for any <span class="inlinecode"><span class="id" type="var">n'</span></span>, if <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">n'</span>)</span> holds, then so does
+           <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span>)</span>;
+
+</li>
+<li> conclude that <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">n</span>)</span> holds for all <span class="inlinecode"><span class="id" type="var">n</span></span>.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    In Coq, the steps are the same but the order is backwards: we
+    begin with the goal of proving <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">n</span>)</span> for all <span class="inlinecode"><span class="id" type="var">n</span></span> and break it
+    down (by applying the <span class="inlinecode"><span class="id" type="tactic">induction</span></span> tactic) into two separate
+    subgoals: first showing <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">O</span>)</span> and then showing <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">n'</span>)</span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">P</span>(<span class="id" type="var">S</span></span>
+    <span class="inlinecode"><span class="id" type="var">n'</span>)</span>.  Here's how this works for the theorem we are trying to
+    prove at the moment: 
+<div class="paragraph"> </div>
+
+<a name="lab43"></a><h3 class="section"> </h3>
+
+</div>
+<div class="code code-space">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_0_r</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>, <span class="id" type="var">n</span> + 0 = <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = 0". <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = S n'". <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">IHn'</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Like <span class="inlinecode"><span class="id" type="tactic">destruct</span></span>, the <span class="inlinecode"><span class="id" type="tactic">induction</span></span> tactic takes an <span class="inlinecode"><span class="id" type="keyword">as</span>...</span>
+    clause that specifies the names of the variables to be introduced
+    in the subgoals.  In the first branch, <span class="inlinecode"><span class="id" type="var">n</span></span> is replaced by <span class="inlinecode">0</span> and
+    the goal becomes <span class="inlinecode">0</span> <span class="inlinecode">+</span> <span class="inlinecode">0</span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>, which follows by simplification.  In
+    the second, <span class="inlinecode"><span class="id" type="var">n</span></span> is replaced by <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> and the assumption <span class="inlinecode"><span class="id" type="var">n'</span></span> <span class="inlinecode">+</span> <span class="inlinecode">0</span> <span class="inlinecode">=</span>
+    <span class="inlinecode"><span class="id" type="var">n'</span></span> is added to the context (with the name <span class="inlinecode"><span class="id" type="var">IHn'</span></span>, i.e., the
+    Induction Hypothesis for <span class="inlinecode"><span class="id" type="var">n'</span></span>).  The goal in this case becomes <span class="inlinecode">(<span class="id" type="var">S</span></span>
+    <span class="inlinecode"><span class="id" type="var">n'</span>)</span> <span class="inlinecode">+</span> <span class="inlinecode">0</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span>, which simplifies to <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">n'</span></span> <span class="inlinecode">+</span> <span class="inlinecode">0)</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span>, which in
+    turn follows from the induction hypothesis. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">minus_diag</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">minus</span> <span class="id" type="var">n</span> <span class="id" type="var">n</span> = 0.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;WORKED&nbsp;IN&nbsp;CLASS&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = 0".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = S n'".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">IHn'</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab44"></a><h4 class="section">Exercise: 2 stars (basic_induction)</h4>
+
+<div class="paragraph"> </div>
+
+ Prove the following lemmas using induction. You might need
+    previously proven results. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_0_r</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> × 0 = 0.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_n_Sm</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>, <br/>
+&nbsp;&nbsp;<span class="id" type="var">S</span> (<span class="id" type="var">n</span> + <span class="id" type="var">m</span>) = <span class="id" type="var">n</span> + (<span class="id" type="var">S</span> <span class="id" type="var">m</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_comm</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + <span class="id" type="var">m</span> = <span class="id" type="var">m</span> + <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_assoc</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + (<span class="id" type="var">m</span> + <span class="id" type="var">p</span>) = (<span class="id" type="var">n</span> + <span class="id" type="var">m</span>) + <span class="id" type="var">p</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab45"></a><h4 class="section">Exercise: 2 stars (double_plus)</h4>
+
+<div class="paragraph"> </div>
+
+ Consider the following function, which doubles its argument: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">double</span> (<span class="id" type="var">n</span>:<span class="id" type="var">nat</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span> ⇒ <span class="id" type="var">S</span> (<span class="id" type="var">S</span> (<span class="id" type="var">double</span> <span class="id" type="var">n'</span>))<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Use induction to prove this simple fact about <span class="inlinecode"><span class="id" type="var">double</span></span>: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">double_plus</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>, <span class="id" type="var">double</span> <span class="id" type="var">n</span> = <span class="id" type="var">n</span> + <span class="id" type="var">n</span> .<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab46"></a><h4 class="section">Exercise: 1 star (destruct_induction)</h4>
+ Briefly explain the difference between the tactics
+    <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> and <span class="inlinecode"><span class="id" type="tactic">induction</span></span>.  
+
+<div class="paragraph"> </div>
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+
+<div class="paragraph"> </div>
+
+ <font size=-2>&#9744;</font> 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab47"></a><h1 class="section">Proofs Within Proofs</h1>
+
+<div class="paragraph"> </div>
+
+ In Coq, as in informal mathematics, large proofs are very
+    often broken into a sequence of theorems, with later proofs
+    referring to earlier theorems.  Occasionally, however, a proof
+    will need some miscellaneous fact that is too trivial (and of too
+    little general interest) to bother giving it its own top-level
+    name.  In such cases, it is convenient to be able to simply state
+    and prove the needed "sub-theorem" right at the point where it is
+    used.  The <span class="inlinecode"><span class="id" type="tactic">assert</span></span> tactic allows us to do this.  For example, our
+    earlier proof of the <span class="inlinecode"><span class="id" type="var">mult_0_plus</span></span> theorem referred to a previous
+    theorem named <span class="inlinecode"><span class="id" type="var">plus_O_n</span></span>.  We can also use <span class="inlinecode"><span class="id" type="tactic">assert</span></span> to state and
+    prove <span class="inlinecode"><span class="id" type="var">plus_O_n</span></span> in-line: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_0_plus'</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(0 + <span class="id" type="var">n</span>) × <span class="id" type="var">m</span> = <span class="id" type="var">n</span> × <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">H</span>: 0 + <span class="id" type="var">n</span> = <span class="id" type="var">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Case</span> "Proof of assertion". <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">assert</span></span> tactic introduces two sub-goals.  The first is
+    the assertion itself; by prefixing it with <span class="inlinecode"><span class="id" type="var">H</span>:</span> we name the
+    assertion <span class="inlinecode"><span class="id" type="var">H</span></span>.  (Note that we could also name the assertion with
+    <span class="inlinecode"><span class="id" type="keyword">as</span></span> just as we did above with <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> and <span class="inlinecode"><span class="id" type="tactic">induction</span></span>, i.e.,
+    <span class="inlinecode"><span class="id" type="tactic">assert</span></span> <span class="inlinecode">(0</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span>.  Also note that we mark the proof of
+    this assertion with a <span class="inlinecode"><span class="id" type="var">Case</span></span>, both for readability and so that,
+    when using Coq interactively, we can see when we're finished
+    proving the assertion by observing when the <span class="inlinecode">"<span class="id" type="keyword">Proof</span></span> <span class="inlinecode"><span class="id" type="var">of</span></span> <span class="inlinecode"><span class="id" type="var">assertion</span>"</span>
+    string disappears from the context.)  The second goal is the same
+    as the one at the point where we invoke <span class="inlinecode"><span class="id" type="tactic">assert</span></span>, except that, in
+    the context, we have the assumption <span class="inlinecode"><span class="id" type="var">H</span></span> that <span class="inlinecode">0</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span>.  That
+    is, <span class="inlinecode"><span class="id" type="tactic">assert</span></span> generates one subgoal where we must prove the
+    asserted fact and a second subgoal where we can use the asserted
+    fact to make progress on whatever we were trying to prove in the
+    first place. 
+<div class="paragraph"> </div>
+
+ Actually, <span class="inlinecode"><span class="id" type="tactic">assert</span></span> will turn out to be handy in many sorts of
+    situations.  For example, suppose we want to prove that <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">m</span>)</span>
+    <span class="inlinecode">+</span> <span class="inlinecode">(<span class="id" type="var">p</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">q</span>)</span> <span class="inlinecode">=</span> <span class="inlinecode">(<span class="id" type="var">m</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> <span class="inlinecode">+</span> <span class="inlinecode">(<span class="id" type="var">p</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">q</span>)</span>. The only difference between the
+    two sides of the <span class="inlinecode">=</span> is that the arguments <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">n</span></span> to the
+    first inner <span class="inlinecode">+</span> are swapped, so it seems we should be able to
+    use the commutativity of addition (<span class="inlinecode"><span class="id" type="var">plus_comm</span></span>) to rewrite one
+    into the other.  However, the <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> tactic is a little stupid
+    about <i>where</i> it applies the rewrite.  There are three uses of
+    <span class="inlinecode">+</span> here, and it turns out that doing <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">plus_comm</span></span>
+    will affect only the <i>outer</i> one. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_rearrange_firsttry</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> <span class="id" type="var">q</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> + <span class="id" type="var">m</span>) + (<span class="id" type="var">p</span> + <span class="id" type="var">q</span>) = (<span class="id" type="var">m</span> + <span class="id" type="var">n</span>) + (<span class="id" type="var">p</span> + <span class="id" type="var">q</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> <span class="id" type="var">q</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;just&nbsp;need&nbsp;to&nbsp;swap&nbsp;(n&nbsp;+&nbsp;m)&nbsp;for&nbsp;(m&nbsp;+&nbsp;n)...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;seems&nbsp;like&nbsp;plus_comm&nbsp;should&nbsp;do&nbsp;the&nbsp;trick!&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">plus_comm</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Doesn't&nbsp;work...Coq&nbsp;rewrote&nbsp;the&nbsp;wrong&nbsp;plus!&nbsp;*)</span><br/>
+<span class="id" type="keyword">Abort</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+To get <span class="inlinecode"><span class="id" type="var">plus_comm</span></span> to apply at the point where we want it, we can
+    introduce a local lemma stating that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n</span></span> (for
+    the particular <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">n</span></span> that we are talking about here), prove
+    this lemma using <span class="inlinecode"><span class="id" type="var">plus_comm</span></span>, and then use this lemma to do the
+    desired rewrite. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_rearrange</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> <span class="id" type="var">q</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> + <span class="id" type="var">m</span>) + (<span class="id" type="var">p</span> + <span class="id" type="var">q</span>) = (<span class="id" type="var">m</span> + <span class="id" type="var">n</span>) + (<span class="id" type="var">p</span> + <span class="id" type="var">q</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> <span class="id" type="var">q</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">H</span>: <span class="id" type="var">n</span> + <span class="id" type="var">m</span> = <span class="id" type="var">m</span> + <span class="id" type="var">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Case</span> "Proof of assertion".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">plus_comm</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab48"></a><h4 class="section">Exercise: 4 stars (mult_comm)</h4>
+ Use <span class="inlinecode"><span class="id" type="tactic">assert</span></span> to help prove this theorem.  You shouldn't need to
+    use induction. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_swap</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>, <br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + (<span class="id" type="var">m</span> + <span class="id" type="var">p</span>) = <span class="id" type="var">m</span> + (<span class="id" type="var">n</span> + <span class="id" type="var">p</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Now prove commutativity of multiplication.  (You will probably
+    need to define and prove a separate subsidiary theorem to be used
+    in the proof of this one.)  You may find that <span class="inlinecode"><span class="id" type="var">plus_swap</span></span> comes in
+    handy. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_comm</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">m</span> <span class="id" type="var">n</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;<span class="id" type="var">m</span> × <span class="id" type="var">n</span> = <span class="id" type="var">n</span> × <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab49"></a><h4 class="section">Exercise: 2 stars, optional (evenb_n__oddb_Sn)</h4>
+
+<div class="paragraph"> </div>
+
+ Prove the following simple fact: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">evenb_n__oddb_Sn</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">evenb</span> <span class="id" type="var">n</span> = <span class="id" type="var">negb</span> (<span class="id" type="var">evenb</span> (<span class="id" type="var">S</span> <span class="id" type="var">n</span>)).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab50"></a><h1 class="section">More Exercises</h1>
+
+<div class="paragraph"> </div>
+
+<a name="lab51"></a><h4 class="section">Exercise: 3 stars, optional (more_exercises)</h4>
+ Take a piece of paper.  For each of the following theorems, first
+    <i>think</i> about whether (a) it can be proved using only
+    simplification and rewriting, (b) it also requires case
+    analysis (<span class="inlinecode"><span class="id" type="tactic">destruct</span></span>), or (c) it also requires induction.  Write
+    down your prediction.  Then fill in the proof.  (There is no need
+    to turn in your piece of paper; this is just to encourage you to
+    reflect before hacking!) 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ble_nat_refl</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">true</span> = <span class="id" type="var">ble_nat</span> <span class="id" type="var">n</span> <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">zero_nbeq_S</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">beq_nat</span> 0 (<span class="id" type="var">S</span> <span class="id" type="var">n</span>) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_false_r</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">b</span> : <span class="id" type="var">bool</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">false</span> = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_ble_compat_l</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>, <br/>
+&nbsp;&nbsp;<span class="id" type="var">ble_nat</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> = <span class="id" type="var">true</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">ble_nat</span> (<span class="id" type="var">p</span> + <span class="id" type="var">n</span>) (<span class="id" type="var">p</span> + <span class="id" type="var">m</span>) = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">S_nbeq_0</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">beq_nat</span> (<span class="id" type="var">S</span> <span class="id" type="var">n</span>) 0 = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_1_l</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>, 1 × <span class="id" type="var">n</span> = <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">all3_spec</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span> : <span class="id" type="var">bool</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">orb</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">orb</span> (<span class="id" type="var">negb</span> <span class="id" type="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">negb</span> <span class="id" type="var">c</span>))<br/>
+&nbsp;&nbsp;= <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_plus_distr_r</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> + <span class="id" type="var">m</span>) × <span class="id" type="var">p</span> = (<span class="id" type="var">n</span> × <span class="id" type="var">p</span>) + (<span class="id" type="var">m</span> × <span class="id" type="var">p</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_assoc</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> × (<span class="id" type="var">m</span> × <span class="id" type="var">p</span>) = (<span class="id" type="var">n</span> × <span class="id" type="var">m</span>) × <span class="id" type="var">p</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab52"></a><h4 class="section">Exercise: 2 stars, optional (beq_nat_refl)</h4>
+ Prove the following theorem.  Putting <span class="inlinecode"><span class="id" type="var">true</span></span> on the left-hand side
+of the equality may seem odd, but this is how the theorem is stated in
+the standard library, so we follow suit.  Since rewriting 
+works equally well in either direction, we will have no 
+problem using the theorem no matter which way we state it. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">beq_nat_refl</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>, <br/>
+&nbsp;&nbsp;<span class="id" type="var">true</span> = <span class="id" type="var">beq_nat</span> <span class="id" type="var">n</span> <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab53"></a><h4 class="section">Exercise: 2 stars, optional (plus_swap')</h4>
+ The <span class="inlinecode"><span class="id" type="tactic">replace</span></span> tactic allows you to specify a particular subterm to
+   rewrite and what you want it rewritten to.  More precisely,
+   <span class="inlinecode"><span class="id" type="tactic">replace</span></span> <span class="inlinecode">(<span class="id" type="var">t</span>)</span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">(<span class="id" type="var">u</span>)</span> replaces (all copies of) expression <span class="inlinecode"><span class="id" type="var">t</span></span> in
+   the goal by expression <span class="inlinecode"><span class="id" type="var">u</span></span>, and generates <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">u</span></span> as an additional
+   subgoal. This is often useful when a plain <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> acts on the wrong
+   part of the goal.  
+
+<div class="paragraph"> </div>
+
+   Use the <span class="inlinecode"><span class="id" type="tactic">replace</span></span> tactic to do a proof of <span class="inlinecode"><span class="id" type="var">plus_swap'</span></span>, just like
+   <span class="inlinecode"><span class="id" type="var">plus_swap</span></span> but without needing <span class="inlinecode"><span class="id" type="tactic">assert</span></span> <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n</span>)</span>. 
+
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_swap'</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>, <br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + (<span class="id" type="var">m</span> + <span class="id" type="var">p</span>) = <span class="id" type="var">m</span> + (<span class="id" type="var">n</span> + <span class="id" type="var">p</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab54"></a><h4 class="section">Exercise: 3 stars (binary_commute)</h4>
+ Recall the <span class="inlinecode"><span class="id" type="var">increment</span></span> and <span class="inlinecode"><span class="id" type="var">binary</span>-<span class="id" type="var">to</span>-<span class="id" type="var">unary</span></span> functions that you
+    wrote for the <span class="inlinecode"><span class="id" type="var">binary</span></span> exercise in the <span class="inlinecode"><span class="id" type="var">Basics</span></span> chapter.  Prove
+    that these functions commute &mdash; that is, incrementing a binary
+    number and then converting it to unary yields the same result as
+    first converting it to unary and then incrementing.
+    Name your theorem <span class="inlinecode"><span class="id" type="var">bin_to_nat_pres_incr</span></span>.
+
+<div class="paragraph"> </div>
+
+    (Before you start working on this exercise, please copy the
+    definitions from your solution to the <span class="inlinecode"><span class="id" type="var">binary</span></span> exercise here so
+    that this file can be graded on its own.  If you find yourself
+    wanting to change your original definitions to make the property
+    easier to prove, feel free to do so.) 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab55"></a><h4 class="section">Exercise: 5 stars, advanced (binary_inverse)</h4>
+ This exercise is a continuation of the previous exercise about
+    binary numbers.  You will need your definitions and theorems from
+    the previous exercise to complete this one.
+
+<div class="paragraph"> </div>
+
+    (a) First, write a function to convert natural numbers to binary
+        numbers.  Then prove that starting with any natural number,
+        converting to binary, then converting back yields the same
+        natural number you started with.
+
+<div class="paragraph"> </div>
+
+    (b) You might naturally think that we should also prove the
+        opposite direction: that starting with a binary number,
+        converting to a natural, and then back to binary yields the
+        same number we started with.  However, it is not true!
+        Explain what the problem is.
+
+<div class="paragraph"> </div>
+
+    (c) Define a "direct" normalization function &mdash; i.e., a function
+        <span class="inlinecode"><span class="id" type="var">normalize</span></span> from binary numbers to binary numbers such that,
+        for any binary number b, converting to a natural and then back
+        to binary yields <span class="inlinecode">(<span class="id" type="var">normalize</span></span> <span class="inlinecode"><span class="id" type="var">b</span>)</span>.  Prove it.  (Warning: This
+        part is tricky!)
+
+<div class="paragraph"> </div>
+
+    Again, feel free to change your earlier definitions if this helps
+    here. 
+
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<font size=-2>&#9744;</font> 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab56"></a><h1 class="section">Formal vs. Informal Proof (Advanced)</h1>
+
+<div class="paragraph"> </div>
+
+ "Informal proofs are algorithms; formal proofs are code." 
+<div class="paragraph"> </div>
+
+ The question of what, exactly, constitutes a "proof" of a
+    mathematical claim has challenged philosophers for millennia.  A
+    rough and ready definition, though, could be this: a proof of a
+    mathematical proposition <span class="inlinecode"><span class="id" type="var">P</span></span> is a written (or spoken) text that
+    instills in the reader or hearer the certainty that <span class="inlinecode"><span class="id" type="var">P</span></span> is true.
+    That is, a proof is an act of communication.
+
+<div class="paragraph"> </div>
+
+    Now, acts of communication may involve different sorts of readers.
+    On one hand, the "reader" can be a program like Coq, in which case
+    the "belief" that is instilled is a simple mechanical check that
+    <span class="inlinecode"><span class="id" type="var">P</span></span> can be derived from a certain set of formal logical rules, and
+    the proof is a recipe that guides the program in performing this
+    check.  Such recipes are <i>formal</i> proofs.
+
+<div class="paragraph"> </div>
+
+    Alternatively, the reader can be a human being, in which case the
+    proof will be written in English or some other natural language,
+    thus necessarily <i>informal</i>.  Here, the criteria for success are
+    less clearly specified.  A "good" proof is one that makes the
+    reader believe <span class="inlinecode"><span class="id" type="var">P</span></span>.  But the same proof may be read by many
+    different readers, some of whom may be convinced by a particular
+    way of phrasing the argument, while others may not be.  One reader
+    may be particularly pedantic, inexperienced, or just plain
+    thick-headed; the only way to convince them will be to make the
+    argument in painstaking detail.  But another reader, more familiar
+    in the area, may find all this detail so overwhelming that they
+    lose the overall thread.  All they want is to be told the main
+    ideas, because it is easier to fill in the details for themselves.
+    Ultimately, there is no universal standard, because there is no
+    single way of writing an informal proof that is guaranteed to
+    convince every conceivable reader.  In practice, however,
+    mathematicians have developed a rich set of conventions and idioms
+    for writing about complex mathematical objects that, within a
+    certain community, make communication fairly reliable.  The
+    conventions of this stylized form of communication give a fairly
+    clear standard for judging proofs good or bad.
+
+<div class="paragraph"> </div>
+
+    Because we are using Coq in this course, we will be working
+    heavily with formal proofs.  But this doesn't mean we can ignore
+    the informal ones!  Formal proofs are useful in many ways, but
+    they are <i>not</i> very efficient ways of communicating ideas between
+    human beings. 
+<div class="paragraph"> </div>
+
+ For example, here is a proof that addition is associative: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_assoc'</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + (<span class="id" type="var">m</span> + <span class="id" type="var">p</span>) = (<span class="id" type="var">n</span> + <span class="id" type="var">m</span>) + <span class="id" type="var">p</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>]. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">IHn'</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Coq is perfectly happy with this as a proof.  For a human,
+    however, it is difficult to make much sense of it.  If you're used
+    to Coq you can probably step through the tactics one after the
+    other in your mind and imagine the state of the context and goal
+    stack at each point, but if the proof were even a little bit more
+    complicated this would be next to impossible.  Instead, a
+    mathematician might write it something like this: 
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <i>Theorem</i>: For any <span class="inlinecode"><span class="id" type="var">n</span></span>, <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">p</span></span>,
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;<span class="id" type="var">n</span>&nbsp;+&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">p</span>)&nbsp;=&nbsp;(<span class="id" type="var">n</span>&nbsp;+&nbsp;<span class="id" type="var">m</span>)&nbsp;+&nbsp;<span class="id" type="var">p</span>.
+<div class="paragraph"> </div>
+
+</div>
+    <i>Proof</i>: By induction on <span class="inlinecode"><span class="id" type="var">n</span></span>.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> First, suppose <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>.  We must show 
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;0&nbsp;+&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">p</span>)&nbsp;=&nbsp;(0&nbsp;+&nbsp;<span class="id" type="var">m</span>)&nbsp;+&nbsp;<span class="id" type="var">p</span>.
+<div class="paragraph"> </div>
+
+</div>
+      This follows directly from the definition of <span class="inlinecode">+</span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Next, suppose <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span>, where
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="var">n'</span>&nbsp;+&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">p</span>)&nbsp;=&nbsp;(<span class="id" type="var">n'</span>&nbsp;+&nbsp;<span class="id" type="var">m</span>)&nbsp;+&nbsp;<span class="id" type="var">p</span>.
+<div class="paragraph"> </div>
+
+</div>
+      We must show
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">n'</span>)&nbsp;+&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">p</span>)&nbsp;=&nbsp;((<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">n'</span>)&nbsp;+&nbsp;<span class="id" type="var">m</span>)&nbsp;+&nbsp;<span class="id" type="var">p</span>.
+<div class="paragraph"> </div>
+
+</div>
+      By the definition of <span class="inlinecode">+</span>, this follows from
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">n'</span>&nbsp;+&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">p</span>))&nbsp;=&nbsp;<span class="id" type="var">S</span>&nbsp;((<span class="id" type="var">n'</span>&nbsp;+&nbsp;<span class="id" type="var">m</span>)&nbsp;+&nbsp;<span class="id" type="var">p</span>),
+<div class="paragraph"> </div>
+
+</div>
+      which is immediate from the induction hypothesis. 
+</li>
+</ul>
+
+</li>
+</ul>
+ <i>Qed</i> 
+<div class="paragraph"> </div>
+
+ The overall form of the proof is basically similar.  This is
+    no accident: Coq has been designed so that its <span class="inlinecode"><span class="id" type="tactic">induction</span></span> tactic
+    generates the same sub-goals, in the same order, as the bullet
+    points that a mathematician would write.  But there are
+    significant differences of detail: the formal proof is much more
+    explicit in some ways (e.g., the use of <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span>) but much
+    less explicit in others (in particular, the "proof state" at any
+    given point in the Coq proof is completely implicit, whereas the
+    informal proof reminds the reader several times where things
+    stand). 
+<div class="paragraph"> </div>
+
+ Here is a formal proof that shows the structure more
+    clearly: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_assoc''</span> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + (<span class="id" type="var">m</span> + <span class="id" type="var">p</span>) = (<span class="id" type="var">n</span> + <span class="id" type="var">m</span>) + <span class="id" type="var">p</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = 0".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "n = S n'".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&rarr;</span> <span class="id" type="var">IHn'</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab57"></a><h4 class="section">Exercise: 2 stars, advanced (plus_comm_informal)</h4>
+ Translate your solution for <span class="inlinecode"><span class="id" type="var">plus_comm</span></span> into an informal proof. 
+<div class="paragraph"> </div>
+
+ Theorem: Addition is commutative.
+
+<div class="paragraph"> </div>
+
+    Proof: <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+ <font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab58"></a><h4 class="section">Exercise: 2 stars, optional (beq_nat_refl_informal)</h4>
+ Write an informal proof of the following theorem, using the
+    informal proof of <span class="inlinecode"><span class="id" type="var">plus_assoc</span></span> as a model.  Don't just
+    paraphrase the Coq tactics into English!
+
+<div class="paragraph"> </div>
+
+    Theorem: <span class="inlinecode"><span class="id" type="var">true</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">beq_nat</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> for any <span class="inlinecode"><span class="id" type="var">n</span></span>.
+
+<div class="paragraph"> </div>
+
+    Proof: <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+<font size=-2>&#9744;</font> 
+<div class="paragraph"> </div>
+
+  
+</div>
+<div class="code code-tight">
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a></div>
+
+</div>
+
+</body>
+</html>

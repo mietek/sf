@@ -1,0 +1,8 @@
+*.d
+*.glob
+*.ml
+*.mli
+*.toc
+*.vo
+src/all.pdf
+src/html
