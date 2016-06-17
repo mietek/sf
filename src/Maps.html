@@ -1,0 +1,568 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>Maps: Total and Partial Maps</title>
+<script type="text/javascript" src="jquery-1.8.3.js"></script>
+<script type="text/javascript" src="main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Maps<span class="subtitle">Total and Partial Maps</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ Maps (or dictionaries) are ubiquitous data structures, both in
+    software construction generally and in the theory of programming
+    languages in particular; we're going to need them in many places
+    in the coming chapters.  They also make a nice case study using
+    ideas we've seen in previous chapters, including building data
+    structures out of higher-order functions (from <span class="inlinecode"><span class="id" type="var">Basics</span></span> and
+    <span class="inlinecode"><span class="id" type="var">Poly</span></span>) and the use of reflection to streamline proofs (from
+    <span class="inlinecode"><span class="id" type="var">IndProp</span></span>).
+
+<div class="paragraph"> </div>
+
+    We'll define two flavors of maps: <i>total</i> maps, which include a
+    "default" element to be returned when a key being looked up
+    doesn't exist, and <i>partial</i> maps, which return an <span class="inlinecode"><span class="id" type="var">option</span></span> to
+    indicate success or failure.  The latter is defined in terms of
+    the former, using <span class="inlinecode"><span class="id" type="var">None</span></span> as the default element. 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab233"></a><h1 class="section">The Coq Standard Library</h1>
+
+<div class="paragraph"> </div>
+
+ One small digression before we start.
+
+<div class="paragraph"> </div>
+
+    Unlike the chapters we have seen so far, this one does not
+    <span class="inlinecode"><span class="id" type="keyword">Require</span></span> <span class="inlinecode"><span class="id" type="keyword">Import</span></span> the chapter before it (and, transitively, all the
+    earlier chapters).  Instead, in this chapter and from now, on
+    we're going to import the definitions and theorems we need
+    directly from Coq's standard library stuff.  You should not notice
+    much difference, though, because we've been careful to name our
+    own definitions and theorems the same as their counterparts in the
+    standard library, wherever they overlap. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Arith.html#"><span class="id" type="library">Coq.Arith.Arith</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Bool.Bool.html#"><span class="id" type="library">Coq.Bool.Bool</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Logic.FunctionalExtensionality.html#"><span class="id" type="library">Coq.Logic.FunctionalExtensionality</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Documentation for the standard library can be found at
+    <a href="http://coq.inria.fr/library/">http://coq.inria.fr/library/</a>.  
+
+<div class="paragraph"> </div>
+
+    The <span class="inlinecode"><span class="id" type="var">SearchAbout</span></span> command is a good way to look for theorems 
+    involving objects of specific types. 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab234"></a><h1 class="section">Identifiers</h1>
+
+<div class="paragraph"> </div>
+
+ First, we need a type for the keys that we use to index into our
+    maps.  For this purpose, we again use the type <span class="inlinecode"><span class="id" type="var">id</span></span> from the
+    <a href="Lists.html"><font color="gray">Lists</font></a> chapter.  To make this chapter self contained, we repeat
+    its definition here, together with the equality comparison
+    function for <span class="inlinecode"><span class="id" type="var">id</span></span>s and its fundamental property. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Inductive</span> <a name="id"><span class="id" type="inductive">id</span></a> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <a name="Id"><span class="id" type="constructor">Id</span></a> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="beq_id"><span class="id" type="definition">beq_id</span></a> <span class="id" type="var">id<sub>1</sub></span> <span class="id" type="var">id<sub>2</sub></span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="Maps.html#id<sub>1</sub>"><span class="id" type="variable">id<sub>1</sub></span></a>,<a class="idref" href="Maps.html#id<sub>2</sub>"><span class="id" type="variable">id<sub>2</sub></span></a> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> <span class="id" type="var">n<sub>1</sub></span>, <a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> <span class="id" type="var">n<sub>2</sub></span> ⇒ <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="beq_id_refl"><span class="id" type="lemma">beq_id_refl</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">id</span>, <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a> = <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#id"><span class="id" type="variable">id</span></a> <a class="idref" href="Maps.html#id"><span class="id" type="variable">id</span></a>.<br/>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> [<span class="id" type="var">n</span>]. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat_refl"><span class="id" type="lemma">beq_nat_refl</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+</div>
+
+<div class="doc">
+The following useful property of <span class="inlinecode"><span class="id" type="var">beq_id</span></span> follows from an
+    analogous lemma about numbers: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="beq_id_true_iff"><span class="id" type="lemma">beq_id_true_iff</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">id<sub>1</sub></span> <span class="id" type="var">id<sub>2</sub></span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#id<sub>1</sub>"><span class="id" type="variable">id<sub>1</sub></span></a> <a class="idref" href="Maps.html#id<sub>2</sub>"><span class="id" type="variable">id<sub>2</sub></span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">&harr;</span> <a class="idref" href="Maps.html#id<sub>1</sub>"><span class="id" type="variable">id<sub>1</sub></span></a> = <a class="idref" href="Maps.html#id<sub>2</sub>"><span class="id" type="variable">id<sub>2</sub></span></a>.<br/>
+<div class="togglescript" id="proofcontrol2" onclick="toggleDisplay('proof2');toggleDisplay('proofcontrol2')"><span class="show"></span></div>
+<div class="proofscript" id="proof2" onclick="toggleDisplay('proof2');toggleDisplay('proofcontrol2')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> [<span class="id" type="var">n<sub>1</sub></span>] [<span class="id" type="var">n<sub>2</sub></span>].<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat_true_iff"><span class="id" type="lemma">beq_nat_true_iff</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;-&gt;&nbsp;*)</span> <span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;&lt;-&nbsp;*)</span> <span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+</div>
+
+<div class="doc">
+Similarly: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="beq_id_false_iff"><span class="id" type="lemma">beq_id_false_iff</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a><br/>
+&nbsp;&nbsp;<span style="font-family: arial;">&harr;</span> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> ≠ <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a>.<br/>
+<div class="togglescript" id="proofcontrol3" onclick="toggleDisplay('proof3');toggleDisplay('proofcontrol3')"><span class="show"></span></div>
+<div class="proofscript" id="proof3" onclick="toggleDisplay('proof3');toggleDisplay('proofcontrol3')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <a class="idref" href="Maps.html#beq_id_true_iff"><span class="id" type="lemma">beq_id_true_iff</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Bool.Bool.html#not_true_iff_false"><span class="id" type="lemma">not_true_iff_false</span></a>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+</div>
+
+<div class="doc">
+This useful variant follows just by rewriting: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="false_beq_id"><span class="id" type="lemma">false_beq_id</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> ≠ <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&rarr;</span> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
+<div class="togglescript" id="proofcontrol4" onclick="toggleDisplay('proof4');toggleDisplay('proofcontrol4')"><span class="show"></span></div>
+<div class="proofscript" id="proof4" onclick="toggleDisplay('proof4');toggleDisplay('proofcontrol4')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#beq_id_false_iff"><span class="id" type="lemma">beq_id_false_iff</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab235"></a><h1 class="section">Total Maps</h1>
+
+<div class="paragraph"> </div>
+
+ Our main job in this chapter will be to build a definition of
+    partial maps that is similar in behavior to the one we saw in the
+    <a href="Lists.html"><font color="gray">Lists</font></a> chapter, plus accompanying lemmas about their behavior.
+
+<div class="paragraph"> </div>
+
+    This time around, though, we're going to use <i>functions</i>, rather
+    than lists of key-value pairs, to build maps.  The advantage of
+    this representation is that it offers a more <i>extensional</i> view of
+    maps, where two maps that respond to queries in the same way will
+    be represented as literally the same thing (the same function),
+    rather than just "equivalent" data structures.  This, in turn,
+    simplifies proofs that use maps.
+
+<div class="paragraph"> </div>
+
+    We build partial maps in two steps.  First, we define a type of
+    <i>total maps</i> that return a default value when we look up a key
+    that is not present in the map. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="total_map"><span class="id" type="definition">total_map</span></a> (<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>) := <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Intuitively, a total map over an element type <span class="inlinecode"><span class="id" type="var">A</span></span> <i>is</i> just a
+    function that can be used to look up <span class="inlinecode"><span class="id" type="var">id</span></span>s, yielding <span class="inlinecode"><span class="id" type="var">A</span></span>s.
+
+<div class="paragraph"> </div>
+
+    The function <span class="inlinecode"><span class="id" type="var">t_empty</span></span> yields an empty total map, given a default
+    element; this map always returns the default element when applied
+    to any id. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="t_empty"><span class="id" type="definition">t_empty</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">v</span> : <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;(<span class="id" type="keyword">fun</span> <span class="id" type="var">_</span> ⇒ <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+More interesting is the <span class="inlinecode"><span class="id" type="var">update</span></span> function, which (as before) takes
+    a map <span class="inlinecode"><span class="id" type="var">m</span></span>, a key <span class="inlinecode"><span class="id" type="var">x</span></span>, and a value <span class="inlinecode"><span class="id" type="var">v</span></span> and returns a new map that
+    takes <span class="inlinecode"><span class="id" type="var">x</span></span> to <span class="inlinecode"><span class="id" type="var">v</span></span> and takes every other key to whatever <span class="inlinecode"><span class="id" type="var">m</span></span> does. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="t_update"><span class="id" type="definition">t_update</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>) (<span class="id" type="var">v</span> : <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">fun</span> <span class="id" type="var">x'</span> ⇒ <span class="id" type="keyword">if</span> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#x'"><span class="id" type="variable">x'</span></a> <span class="id" type="keyword">then</span> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x'"><span class="id" type="variable">x'</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This definition is a nice example of higher-order programming.
+    The <span class="inlinecode"><span class="id" type="var">t_update</span></span> function takes a <i>function</i> <span class="inlinecode"><span class="id" type="var">m</span></span> and yields a new
+    function <span class="inlinecode"><span class="id" type="keyword">fun</span></span> <span class="inlinecode"><span class="id" type="var">x'</span></span> <span class="inlinecode">⇒</span> <span class="inlinecode">...</span> that behaves like the desired map.
+
+<div class="paragraph"> </div>
+
+    For example, we can build a map taking <span class="inlinecode"><span class="id" type="var">id</span></span>s to <span class="inlinecode"><span class="id" type="var">bool</span></span>s, where <span class="inlinecode"><span class="id" type="var">Id</span></span>
+    <span class="inlinecode">3</span> is mapped to <span class="inlinecode"><span class="id" type="var">true</span></span> and every other key is mapped to <span class="inlinecode"><span class="id" type="var">false</span></span>,
+    like this: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="examplemap"><span class="id" type="definition">examplemap</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_empty"><span class="id" type="definition">t_empty</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>) (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 1) <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 3) <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This completes the definition of total maps.  Note that we don't
+    need to define a <span class="inlinecode"><span class="id" type="var">find</span></span> operation because it is just function
+    application! 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example1"><span class="id" type="definition">update_example1</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 0) = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
+<div class="togglescript" id="proofcontrol5" onclick="toggleDisplay('proof5');toggleDisplay('proofcontrol5')"><span class="show"></span></div>
+<div class="proofscript" id="proof5" onclick="toggleDisplay('proof5');toggleDisplay('proofcontrol5')">
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example2"><span class="id" type="definition">update_example2</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 1) = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
+<div class="togglescript" id="proofcontrol6" onclick="toggleDisplay('proof6');toggleDisplay('proofcontrol6')"><span class="show"></span></div>
+<div class="proofscript" id="proof6" onclick="toggleDisplay('proof6');toggleDisplay('proofcontrol6')">
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example3"><span class="id" type="definition">update_example3</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 2) = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
+<div class="togglescript" id="proofcontrol7" onclick="toggleDisplay('proof7');toggleDisplay('proofcontrol7')"><span class="show"></span></div>
+<div class="proofscript" id="proof7" onclick="toggleDisplay('proof7');toggleDisplay('proofcontrol7')">
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example4"><span class="id" type="definition">update_example4</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 3) = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a>.<br/>
+<div class="togglescript" id="proofcontrol8" onclick="toggleDisplay('proof8');toggleDisplay('proofcontrol8')"><span class="show"></span></div>
+<div class="proofscript" id="proof8" onclick="toggleDisplay('proof8');toggleDisplay('proofcontrol8')">
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+</div>
+
+<div class="doc">
+To use maps in later chapters, we'll need several fundamental
+    facts about how they behave.  Even if you don't work the following
+    exercises, make sure you thoroughly understand the statements of
+    the lemmas!  (Some of the proofs require the functional
+    extensionality axiom discussed in the <a href="Logic.html"><font color="gray">Logic</font></a> chapter, which is
+    also included in the standard library.) 
+<div class="paragraph"> </div>
+
+<a name="lab236"></a><h4 class="section">Exercise: 2 stars, optional (t_update_eq)</h4>
+ First, if we update a map <span class="inlinecode"><span class="id" type="var">m</span></span> at a key <span class="inlinecode"><span class="id" type="var">x</span></span> with a new value <span class="inlinecode"><span class="id" type="var">v</span></span>
+    and then look up <span class="inlinecode"><span class="id" type="var">x</span></span> in the map resulting from the <span class="inlinecode"><span class="id" type="var">update</span></span>, we
+    get back <span class="inlinecode"><span class="id" type="var">v</span></span>: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="t_update_eq"><span class="id" type="lemma">t_update_eq</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">x</span> <span class="id" type="var">v</span>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab237"></a><h4 class="section">Exercise: 2 stars, optional (t_update_neq)</h4>
+ On the other hand, if we update a map <span class="inlinecode"><span class="id" type="var">m</span></span> at a key <span class="inlinecode"><span class="id" type="var">x<sub>1</sub></span></span> and then
+    look up a <i>different</i> key <span class="inlinecode"><span class="id" type="var">x<sub>2</sub></span></span> in the resulting map, we get the
+    same result that <span class="inlinecode"><span class="id" type="var">m</span></span> would have given: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="t_update_neq"><span class="id" type="lemma">t_update_neq</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v</span> <span class="id" type="var">x<sub>1</sub></span> <span class="id" type="var">x<sub>2</sub></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> ≠ <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> = <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab238"></a><h4 class="section">Exercise: 2 stars, optional (t_update_shadow)</h4>
+ If we update a map <span class="inlinecode"><span class="id" type="var">m</span></span> at a key <span class="inlinecode"><span class="id" type="var">x</span></span> with a value <span class="inlinecode"><span class="id" type="var">v<sub>1</sub></span></span> and then
+    update again with the same key <span class="inlinecode"><span class="id" type="var">x</span></span> and another value <span class="inlinecode"><span class="id" type="var">v<sub>2</sub></span></span>, the
+    resulting map behaves the same (gives the same result when applied
+    to any key) as the simpler map obtained by performing just
+    the second <span class="inlinecode"><span class="id" type="var">update</span></span> on <span class="inlinecode"><span class="id" type="var">m</span></span>: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="t_update_shadow"><span class="id" type="lemma">t_update_shadow</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">v<sub>2</sub></span> <span class="id" type="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a><br/>
+&nbsp;&nbsp;= <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+<div class="paragraph"> </div>
+
+ For the final two lemmas about total maps, it's convenient to use
+    the reflection idioms introduced in chapter <a href="IndProp.html"><font color="gray">IndProp</font></a>.  We begin
+    by proving a fundamental <i>reflection lemma</i> relating the equality
+    proposition on <span class="inlinecode"><span class="id" type="var">id</span></span>s with the boolean function <span class="inlinecode"><span class="id" type="var">beq_id</span></span>. 
+<div class="paragraph"> </div>
+
+<a name="lab239"></a><h4 class="section">Exercise: 2 stars (beq_idP)</h4>
+ Use the proof of <span class="inlinecode"><span class="id" type="var">beq_natP</span></span> in chapter <a href="IndProp.html"><font color="gray">IndProp</font></a> as a template to
+    prove the following: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="beq_idP"><span class="id" type="lemma">beq_idP</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">x</span> <span class="id" type="var">y</span>, <a class="idref" href="http://coq.inria.fr/library/Coq.Bool.Bool.html#reflect"><span class="id" type="inductive">reflect</span></a> (<a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a>) (<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+<div class="paragraph"> </div>
+
+ Now, given <span class="inlinecode"><span class="id" type="var">id</span></span>s <span class="inlinecode"><span class="id" type="var">x<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">x<sub>2</sub></span></span>, we can use the <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> <span class="inlinecode">(<span class="id" type="var">beq_idP</span></span>
+    <span class="inlinecode"><span class="id" type="var">x<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">x<sub>2</sub></span>)</span> to simultaneously perform case analysis on the result of
+    <span class="inlinecode"><span class="id" type="var">beq_id</span></span> <span class="inlinecode"><span class="id" type="var">x<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">x<sub>2</sub></span></span> and generate hypotheses about the equality (in the
+    sense of <span class="inlinecode">=</span>) of <span class="inlinecode"><span class="id" type="var">x<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">x<sub>2</sub></span></span>. 
+<div class="paragraph"> </div>
+
+<a name="lab240"></a><h4 class="section">Exercise: 2 stars (t_update_same)</h4>
+ Using the example in chapter <a href="IndProp.html"><font color="gray">IndProp</font></a> as a template, use
+    <span class="inlinecode"><span class="id" type="var">beq_idP</span></span> to prove the following theorem, which states that if we
+    update a map to assign key <span class="inlinecode"><span class="id" type="var">x</span></span> the same value as it already has in
+    <span class="inlinecode"><span class="id" type="var">m</span></span>, then the result is equal to <span class="inlinecode"><span class="id" type="var">m</span></span>: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="t_update_same"><span class="id" type="lemma">t_update_same</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">X</span> <span class="id" type="var">x</span> (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a>) = <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab241"></a><h4 class="section">Exercise: 3 stars, recommended (t_update_permute)</h4>
+ Use <span class="inlinecode"><span class="id" type="var">beq_idP</span></span> to prove one final property of the <span class="inlinecode"><span class="id" type="var">update</span></span>
+    function: If we update a map <span class="inlinecode"><span class="id" type="var">m</span></span> at two distinct keys, it doesn't
+    matter in which order we do the updates. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="t_update_permute"><span class="id" type="lemma">t_update_permute</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">v<sub>2</sub></span> <span class="id" type="var">x<sub>1</sub></span> <span class="id" type="var">x<sub>2</sub></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> ≠ <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a>) <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <a class="idref" href="Maps.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a>)<br/>
+&nbsp;&nbsp;= (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <a class="idref" href="Maps.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a>) <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab242"></a><h1 class="section">Partial maps</h1>
+
+<div class="paragraph"> </div>
+
+ Finally, we define <i>partial maps</i> on top of total maps.  A partial
+    map with elements of type <span class="inlinecode"><span class="id" type="var">A</span></span> is simply a total map with elements
+    of type <span class="inlinecode"><span class="id" type="var">option</span></span> <span class="inlinecode"><span class="id" type="var">A</span></span> and default element <span class="inlinecode"><span class="id" type="var">None</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="partial_map"><span class="id" type="definition">partial_map</span></a> (<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>) := <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#option"><span class="id" type="inductive">option</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>).<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="empty"><span class="id" type="definition">empty</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_empty"><span class="id" type="definition">t_empty</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#None"><span class="id" type="constructor">None</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="update"><span class="id" type="definition">update</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>) (<span class="id" type="var">v</span> : <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#Some"><span class="id" type="constructor">Some</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can now lift all of the basic lemmas about total maps to
+    partial maps.  
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="update_eq"><span class="id" type="lemma">update_eq</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">x</span> <span class="id" type="var">v</span>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#Some"><span class="id" type="constructor">Some</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>.<br/>
+<div class="togglescript" id="proofcontrol9" onclick="toggleDisplay('proof9');toggleDisplay('proofcontrol9')"><span class="show"></span></div>
+<div class="proofscript" id="proof9" onclick="toggleDisplay('proof9');toggleDisplay('proofcontrol9')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#t_update_eq"><span class="id" type="axiom">t_update_eq</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="update_neq"><span class="id" type="lemma">update_neq</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v</span> <span class="id" type="var">x<sub>1</sub></span> <span class="id" type="var">x<sub>2</sub></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> ≠ <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> = <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a>.<br/>
+<div class="togglescript" id="proofcontrol10" onclick="toggleDisplay('proof10');toggleDisplay('proofcontrol10')"><span class="show"></span></div>
+<div class="proofscript" id="proof10" onclick="toggleDisplay('proof10');toggleDisplay('proofcontrol10')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x<sub>1</sub></span> <span class="id" type="var">x<sub>2</sub></span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#t_update_neq"><span class="id" type="axiom">t_update_neq</span></a>. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="update_shadow"><span class="id" type="lemma">update_shadow</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">v<sub>2</sub></span> <span class="id" type="var">x</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a> = <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a>.<br/>
+<div class="togglescript" id="proofcontrol11" onclick="toggleDisplay('proof11');toggleDisplay('proofcontrol11')"><span class="show"></span></div>
+<div class="proofscript" id="proof11" onclick="toggleDisplay('proof11');toggleDisplay('proofcontrol11')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">A</span> <span class="id" type="var">m</span> <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">v<sub>2</sub></span> <span class="id" type="var">x<sub>1</sub></span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#t_update_shadow"><span class="id" type="axiom">t_update_shadow</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="update_same"><span class="id" type="lemma">update_same</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x</span> (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#Some"><span class="id" type="constructor">Some</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a> = <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a>.<br/>
+<div class="togglescript" id="proofcontrol12" onclick="toggleDisplay('proof12');toggleDisplay('proofcontrol12')"><span class="show"></span></div>
+<div class="proofscript" id="proof12" onclick="toggleDisplay('proof12');toggleDisplay('proofcontrol12')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x</span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Maps.html#t_update_same"><span class="id" type="axiom">t_update_same</span></a>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="update_permute"><span class="id" type="lemma">update_permute</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">v<sub>2</sub></span> <span class="id" type="var">x<sub>1</sub></span> <span class="id" type="var">x<sub>2</sub></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> ≠ <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a>) <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <a class="idref" href="Maps.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a>)<br/>
+&nbsp;&nbsp;= (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x<sub>1</sub>"><span class="id" type="variable">x<sub>1</sub></span></a> <a class="idref" href="Maps.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a>) <a class="idref" href="Maps.html#x<sub>2</sub>"><span class="id" type="variable">x<sub>2</sub></span></a> <a class="idref" href="Maps.html#v<sub>2</sub>"><span class="id" type="variable">v<sub>2</sub></span></a>).<br/>
+<div class="togglescript" id="proofcontrol13" onclick="toggleDisplay('proof13');toggleDisplay('proofcontrol13')"><span class="show"></span></div>
+<div class="proofscript" id="proof13" onclick="toggleDisplay('proof13');toggleDisplay('proofcontrol13')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">v<sub>2</sub></span> <span class="id" type="var">x<sub>1</sub></span> <span class="id" type="var">x<sub>2</sub></span> <span class="id" type="var">m</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Maps.html#t_update_permute"><span class="id" type="axiom">t_update_permute</span></a>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+</div>
+
+<div class="doc">
+ 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a></div>
+
+</div>
+
+</body>
+</html>

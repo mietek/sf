@@ -1,0 +1,828 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>Auto: More Automation</title>
+<script type="text/javascript" src="jquery-1.8.3.js"></script>
+<script type="text/javascript" src="main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Auto<span class="subtitle">More Automation</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.omega.Omega.html#"><span class="id" type="library">Coq.omega.Omega</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Imp.html#"><span class="id" type="library">Imp</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Up to now, we've used a quite restricted set of Coq's tactic
+    facilities.  In this chapter, we'll learn more about two very
+    powerful features of Coq's tactic language: proof search via the
+    <span class="inlinecode"><span class="id" type="tactic">auto</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> tactics, and automated forward reasoning via
+    the <span class="inlinecode"><span class="id" type="keyword">Ltac</span></span> hypothesis matching machinery.  Using these features
+    together with Ltac's scripting facilities will enable us to make
+    our proofs startlingly short!  Used properly, they can also make
+    proofs more maintainable and robust in the face of incremental
+    changes to underlying definitions.  This chapter introduces <span class="inlinecode"><span class="id" type="tactic">auto</span></span>
+    and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span>.  A deeper treatment can be found in the <span class="inlinecode"><span class="id" type="var">UseAuto</span></span>
+    chapter.
+
+<div class="paragraph"> </div>
+
+    There's a third major category of automation we haven't fully
+    studied yet, namely built-in decision procedures for specific
+    kinds of problems: <span class="inlinecode"><span class="id" type="tactic">omega</span></span> is one example, but there are others.
+    This topic will be deferred for a while longer. 
+
+<div class="paragraph"> </div>
+
+    Our motivating example will be this proof, repeated with just a
+    few small changes from <span class="inlinecode"><span class="id" type="var">Imp</span></span>.  We will try to simplify this proof
+    in several stages. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">inv</span> <span class="id" type="var">H</span> := <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">clear</span> <span class="id" type="var">H</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="ceval_deterministic"><span class="id" type="lemma">ceval_deterministic</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Skip&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Ass&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="comment">(*&nbsp;Proof&nbsp;of&nbsp;assertion&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_1</span>; <span class="id" type="tactic">assumption</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_2</span>. <span class="id" type="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1</span>. <span class="id" type="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1</span>. <span class="id" type="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileEnd&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>4</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="comment">(*&nbsp;Proof&nbsp;of&nbsp;assertion&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_1</span>; <span class="id" type="tactic">assumption</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_2</span>. <span class="id" type="tactic">assumption</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab521"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">auto</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> Tactics</h1>
+
+<div class="paragraph"> </div>
+
+ Thus far, we have generally written proof scripts that apply
+    relevant hypotheses or lemmas by name.  In particular, when a
+    chain of hypothesis applications is needed, we have specified them
+    explicitly.  (The only exceptions we've seen to this are using
+    <span class="inlinecode"><span class="id" type="tactic">assumption</span></span> to find a matching unqualified hypothesis or
+    <span class="inlinecode">(<span class="id" type="var">e</span>)<span class="id" type="var">constructor</span></span> to find a matching constructor.) 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_1"><span class="id" type="definition">auto_example_1</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span>: <span class="id" type="keyword">Prop</span>), (<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a>) <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>) <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span> <span class="id" type="var">H<sub>3</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>1</sub></span>. <span class="id" type="tactic">assumption</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">auto</span></span> tactic frees us from this drudgery by <i>searching</i>
+   for a sequence of applications that will prove the goal 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_1'"><span class="id" type="definition">auto_example_1'</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span>: <span class="id" type="keyword">Prop</span>), (<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a>) <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>) <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span> <span class="id" type="var">H<sub>3</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">auto</span></span> tactic solves goals that are solvable by any combination of
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="tactic">intros</span></span>,
+
+</li>
+<li> <span class="inlinecode"><span class="id" type="tactic">apply</span></span> (with a local hypothesis, by default).
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    The <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> tactic works just like <span class="inlinecode"><span class="id" type="tactic">auto</span></span>, except that it uses
+    <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> instead of <span class="inlinecode"><span class="id" type="tactic">apply</span></span>. 
+<div class="paragraph"> </div>
+
+ Using <span class="inlinecode"><span class="id" type="tactic">auto</span></span> is always "safe" in the sense that it will never fail
+    and will never change the proof state: either it completely solves
+    the current goal, or it does nothing. 
+<div class="paragraph"> </div>
+
+ A more complicated example: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_2"><span class="id" type="definition">auto_example_2</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span> <span class="id" type="var">U</span> : <span class="id" type="keyword">Prop</span>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a>) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#S"><span class="id" type="variable">S</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#U"><span class="id" type="variable">U</span></a>) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;((<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a><span style="font-family: arial;">&rarr;</span><a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a>) <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a><span style="font-family: arial;">&rarr;</span><a class="idref" href="Auto.html#S"><span class="id" type="variable">S</span></a>)) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#U"><span class="id" type="variable">U</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Search can take an arbitrarily long time, so there are limits to
+    how far <span class="inlinecode"><span class="id" type="tactic">auto</span></span> will search by default. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_3"><span class="id" type="definition">auto_example_3</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span> <span class="id" type="var">U</span>: <span class="id" type="keyword">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a>) <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>) <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#S"><span class="id" type="variable">S</span></a>) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Auto.html#S"><span class="id" type="variable">S</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#T"><span class="id" type="variable">T</span></a>) <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#U"><span class="id" type="variable">U</span></a>) <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#U"><span class="id" type="variable">U</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;When&nbsp;it&nbsp;cannot&nbsp;solve&nbsp;the&nbsp;goal,&nbsp;<span class="inlinecode"><span class="id" type="tactic">auto</span></span>&nbsp;does&nbsp;nothing&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Optional&nbsp;argument&nbsp;says&nbsp;how&nbsp;deep&nbsp;to&nbsp;search&nbsp;(default&nbsp;depth&nbsp;is&nbsp;5)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span> 6.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+When searching for potential proofs of the current goal,
+    <span class="inlinecode"><span class="id" type="tactic">auto</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> consider the hypotheses in the current context
+    together with a <i>hint database</i> of other lemmas and constructors.
+    Some of the lemmas and constructors we've already seen &mdash; e.g.,
+    <span class="inlinecode"><span class="id" type="var">eq_refl</span></span>, <span class="inlinecode"><span class="id" type="var">conj</span></span>, <span class="inlinecode"><span class="id" type="var">or_introl</span></span>, and <span class="inlinecode"><span class="id" type="var">or_intror</span></span> &mdash; are installed
+    in this hint database by default. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_4"><span class="id" type="definition">auto_example_4</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> : <span class="id" type="keyword">Prop</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&or;</span> (<a class="idref" href="Auto.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="Auto.html#R"><span class="id" type="variable">R</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+If we want to see which facts <span class="inlinecode"><span class="id" type="tactic">auto</span></span> is using, we can use
+    <span class="inlinecode"><span class="id" type="var">info_auto</span></span> instead. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_5"><span class="id" type="definition">auto_example_5</span></a>: 2 = 2.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;auto&nbsp;subsumes&nbsp;reflexivity&nbsp;because&nbsp;eq_refl&nbsp;is&nbsp;in&nbsp;hint&nbsp;database&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="var">info_auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can extend the hint database just for the purposes of one
+    application of <span class="inlinecode"><span class="id" type="tactic">auto</span></span> or <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> by writing <span class="inlinecode"><span class="id" type="tactic">auto</span></span> <span class="inlinecode"><span class="id" type="keyword">using</span></span> <span class="inlinecode">...</span>. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="le_antisym"><span class="id" type="lemma">le_antisym</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>: <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>, (<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> ≤ <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a> ≤ <a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a>) <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span>. <span class="id" type="tactic">omega</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_6"><span class="id" type="definition">auto_example_6</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a>≤ <a class="idref" href="Auto.html#p"><span class="id" type="variable">p</span></a> <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> ≤ <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a> ≤ <a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a>)) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> ≤ <a class="idref" href="Auto.html#p"><span class="id" type="variable">p</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="comment">(*&nbsp;does&nbsp;nothing:&nbsp;auto&nbsp;doesn't&nbsp;destruct&nbsp;hypotheses!&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span> <span class="id" type="keyword">using</span> <a class="idref" href="Auto.html#le_antisym"><span class="id" type="lemma">le_antisym</span></a>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Of course, in any given development there will probably be
+    some specific constructors and lemmas that are used very often in
+    proofs.  We can add these to the global hint database by writing
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Hint</span>&nbsp;<span class="id" type="keyword">Resolve</span>&nbsp;<span class="id" type="var">T</span>.
+<div class="paragraph"> </div>
+
+</div>
+    at the top level, where <span class="inlinecode"><span class="id" type="var">T</span></span> is a top-level theorem or a
+    constructor of an inductively defined proposition (i.e., anything
+    whose type is an implication).  As a shorthand, we can write
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Hint</span>&nbsp;<span class="id" type="var">Constructors</span>&nbsp;<span class="id" type="var">c</span>.
+<div class="paragraph"> </div>
+
+</div>
+    to tell Coq to do a <span class="inlinecode"><span class="id" type="keyword">Hint</span></span> <span class="inlinecode"><span class="id" type="keyword">Resolve</span></span> for <i>all</i> of the constructors
+    from the inductive definition of <span class="inlinecode"><span class="id" type="var">c</span></span>.
+
+<div class="paragraph"> </div>
+
+    It is also sometimes necessary to add
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Hint</span>&nbsp;<span class="id" type="keyword">Unfold</span>&nbsp;<span class="id" type="var">d</span>.
+<div class="paragraph"> </div>
+
+</div>
+    where <span class="inlinecode"><span class="id" type="var">d</span></span> is a defined symbol, so that <span class="inlinecode"><span class="id" type="tactic">auto</span></span> knows to expand uses
+    of <span class="inlinecode"><span class="id" type="var">d</span></span> and enable further possibilities for applying lemmas that
+    it knows about. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <a class="idref" href="Auto.html#le_antisym"><span class="id" type="lemma">le_antisym</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_6'"><span class="id" type="definition">auto_example_6'</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a>≤ <a class="idref" href="Auto.html#p"><span class="id" type="variable">p</span></a> <span style="font-family: arial;">&rarr;</span> (<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> ≤ <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a> ≤ <a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a>)) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> ≤ <a class="idref" href="Auto.html#p"><span class="id" type="variable">p</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="Auto.html#m"><span class="id" type="variable">m</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="comment">(*&nbsp;picks&nbsp;up&nbsp;hint&nbsp;from&nbsp;database&nbsp;*)</span><br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="is_fortytwo"><span class="id" type="definition">is_fortytwo</span></a> <span class="id" type="var">x</span> := <a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a> = 42.<br/>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_7"><span class="id" type="definition">auto_example_7</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">x</span>, (<a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a> ≤ 42 <span style="font-family: arial;">&and;</span> 42 ≤ <a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a>) <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#is_fortytwo"><span class="id" type="definition">is_fortytwo</span></a> <a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="comment">(*&nbsp;does&nbsp;nothing&nbsp;*)</span><br/>
+<span class="id" type="keyword">Abort</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Unfold</span> <a class="idref" href="Auto.html#is_fortytwo"><span class="id" type="definition">is_fortytwo</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_7'"><span class="id" type="definition">auto_example_7'</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">x</span>, (<a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a> ≤ 42 <span style="font-family: arial;">&and;</span> 42 ≤ <a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a>) <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#is_fortytwo"><span class="id" type="definition">is_fortytwo</span></a> <a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">info_auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Transparent</span> <a class="idref" href="Imp.html#state"><span class="id" type="definition">state</span></a>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Transparent</span> <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="st<sub>12</sub>"><span class="id" type="definition">st<sub>12</sub></span></a> := <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Imp.html#empty_state"><span class="id" type="definition">empty_state</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a> 1) <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a> 2.<br/>
+<span class="id" type="keyword">Definition</span> <a name="st<sub>21</sub>"><span class="id" type="definition">st<sub>21</sub></span></a> := <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Imp.html#empty_state"><span class="id" type="definition">empty_state</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a> 2) <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a> 1.<br/>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_8"><span class="id" type="definition">auto_example_8</span></a> : <span style="font-family: arial;">&exist;</span><span class="id" type="var">s'</span>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Imp.html#::'IFB'_x_'THEN'_x_'ELSE'_x_'FI'"><span class="id" type="notation">IFB</span></a> (<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>) (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">THEN</span> (<a class="idref" href="Imp.html#Z"><span class="id" type="definition">Z</span></a> ::= <a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a>) (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ELSE</span> (<a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a> ::= <a class="idref" href="Imp.html#APlus"><span class="id" type="constructor">APlus</span></a> (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>) (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#Z"><span class="id" type="definition">Z</span></a>))<br/>
+&nbsp;&nbsp;<span class="id" type="var">FI</span>) / <a class="idref" href="Auto.html#st<sub>21</sub>"><span class="id" type="definition">st<sub>21</sub></span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#s'"><span class="id" type="variable">s'</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">eauto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Example</span> <a name="auto_example_8'"><span class="id" type="definition">auto_example_8'</span></a> : <span style="font-family: arial;">&exist;</span><span class="id" type="var">s'</span>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Imp.html#::'IFB'_x_'THEN'_x_'ELSE'_x_'FI'"><span class="id" type="notation">IFB</span></a> (<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>) (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">THEN</span> (<a class="idref" href="Imp.html#Z"><span class="id" type="definition">Z</span></a> ::= <a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a>) (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ELSE</span> (<a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a> ::= <a class="idref" href="Imp.html#APlus"><span class="id" type="constructor">APlus</span></a> (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>) (<a class="idref" href="Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="Imp.html#Z"><span class="id" type="definition">Z</span></a>))<br/>
+&nbsp;&nbsp;<span class="id" type="var">FI</span>) / <a class="idref" href="Auto.html#st<sub>12</sub>"><span class="id" type="definition">st<sub>12</sub></span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#s'"><span class="id" type="variable">s'</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">info_eauto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Now let's take a pass over <span class="inlinecode"><span class="id" type="var">ceval_deterministic</span></span> using <span class="inlinecode"><span class="id" type="tactic">auto</span></span> to
+    simplify the proof script. We see that all simple sequences of
+    hypothesis applications and all uses of <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> can be
+    replaced by <span class="inlinecode"><span class="id" type="tactic">auto</span></span>, which we add to the default tactic to be
+    applied to each case. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="ceval_deterministic'"><span class="id" type="lemma">ceval_deterministic'</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileEnd&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>4</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+When we are using a particular tactic many times in a proof, we
+    can use a variant of the <span class="inlinecode"><span class="id" type="keyword">Proof</span></span> command to make that tactic into
+    a default within the proof.  Saying <span class="inlinecode"><span class="id" type="keyword">Proof</span></span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode"><span class="id" type="var">t</span></span> (where <span class="inlinecode"><span class="id" type="var">t</span></span> is
+    an arbitrary tactic) allows us to use <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span>...</span> as a shorthand for
+    <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span>;<span class="id" type="var">t</span></span> within the proof.  As an illustration, here is an alternate
+    version of the previous proof, using <span class="inlinecode"><span class="id" type="keyword">Proof</span></span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode"><span class="id" type="tactic">auto</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="ceval_deterministic'_alt"><span class="id" type="lemma">ceval_deterministic'_alt</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')">
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>...<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>...<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileEnd&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>4</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab522"></a><h1 class="section">Searching Hypotheses</h1>
+
+<div class="paragraph"> </div>
+
+ The proof has become simpler, but there is still an annoying
+    amount of repetition. Let's start by tackling the contradiction
+    cases. Each of them occurs in a situation where we have both
+
+<div class="paragraph"> </div>
+
+      <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span>:</span> <span class="inlinecode"><span class="id" type="var">beval</span></span> <span class="inlinecode"><span class="id" type="var">st</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">false</span></span>
+
+<div class="paragraph"> </div>
+
+    and
+
+<div class="paragraph"> </div>
+
+      <span class="inlinecode"><span class="id" type="var">H<sub>2</sub></span>:</span> <span class="inlinecode"><span class="id" type="var">beval</span></span> <span class="inlinecode"><span class="id" type="var">st</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">true</span></span>
+
+<div class="paragraph"> </div>
+
+    as hypotheses.  The contradiction is evident, but demonstrating it
+    is a little complicated: we have to locate the two hypotheses <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span>
+    and <span class="inlinecode"><span class="id" type="var">H<sub>2</sub></span></span> and do a <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> following by an <span class="inlinecode"><span class="id" type="tactic">inversion</span></span>.  We'd
+    like to automate this process.
+
+<div class="paragraph"> </div>
+
+    (Note: In fact, Coq has a built-in tactic <span class="inlinecode"><span class="id" type="tactic">congruence</span></span> that will do
+    the job.  But we'll ignore the existence of this tactic for now,
+    in order to demonstrate how to build forward search tactics by
+    hand.) 
+
+<div class="paragraph"> </div>
+
+    As a first step, we can abstract out the piece of script in question by
+    writing a small amount of paramerized Ltac. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">rwinv</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span> := <span class="id" type="tactic">rewrite</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="ceval_deterministic''"><span class="id" type="lemma">ceval_deterministic''</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileEnd&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+But this is not much better.  We really want Coq to discover the
+    relevant hypotheses for us.  We can do this by using the <span class="inlinecode"><span class="id" type="keyword">match</span></span>
+    <span class="inlinecode"><span class="id" type="var">goal</span></span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">...</span> <span class="inlinecode"><span class="id" type="keyword">end</span></span> facility of Ltac. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">find_rwinv</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>1</sub></span>: ?<span class="id" type="var">E</span> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a>, <span class="id" type="var">H<sub>2</sub></span>: ?<span class="id" type="var">E</span> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a> <span style="font-family: arial;">&#8866;</span> <span class="id" type="var">_</span> ⇒ <span class="id" type="var">rwinv</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+In words, this <span class="inlinecode"><span class="id" type="keyword">match</span></span> <span class="inlinecode"><span class="id" type="var">goal</span></span> looks for two distinct hypotheses that
+    have the form of equalities with the same arbitrary expression <span class="inlinecode"><span class="id" type="var">E</span></span>
+    on the left and conflicting boolean values on the right; if such
+    hypotheses are found, it binds <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">H<sub>2</sub></span></span> to their names, and
+    applies the <span class="inlinecode"><span class="id" type="var">rwinv</span></span> tactic.
+
+<div class="paragraph"> </div>
+
+    Adding this tactic to our default string handles all the
+    contradiction cases. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="ceval_deterministic'''"><span class="id" type="lemma">ceval_deterministic'''</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Let's see about the remaining cases. Each of them involves
+    applying a conditional hypothesis to extract an equality.
+    Currently we have phrased these as assertions, so that we have to
+    predict what the resulting equality will be (although we can then
+    use <span class="inlinecode"><span class="id" type="tactic">auto</span></span> to prove it.)  An alternative is to pick the relevant
+    hypotheses to use, and then rewrite with them, as follows: 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="ceval_deterministic''''"><span class="id" type="lemma">ceval_deterministic''''</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> (<span class="id" type="var">IHE1_1</span> <span class="id" type="var">st'0</span> <span class="id" type="var">H<sub>1</sub></span>) <span class="id" type="keyword">in</span> *. <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> (<span class="id" type="var">IHE1_1</span> <span class="id" type="var">st'0</span> <span class="id" type="var">H<sub>3</sub></span>) <span class="id" type="keyword">in</span> *. <span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Now we can automate the task of finding the relevant hypotheses to
+    rewrite with. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">find_eqn</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>1</sub></span>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">x</span>, ?<span class="id" type="var">P</span> <a class="idref" href="Auto.html#x"><span class="id" type="variable">x</span></a> <span style="font-family: arial;">&rarr;</span> ?<span class="id" type="var">L</span> = ?<span class="id" type="var">R</span>, <span class="id" type="var">H<sub>2</sub></span>: ?<span class="id" type="var">P</span> ?<span class="id" type="var">X</span> <span style="font-family: arial;">&#8866;</span> <span class="id" type="var">_</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> (<span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">X</span> <span class="id" type="var">H<sub>2</sub></span>) <span class="id" type="keyword">in</span> *<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+But there are several pairs of hypotheses that have the right
+    general form, and it seems tricky to pick out the ones we actually
+    need.  A key trick is to realize that we can <i>try them all</i>!
+    Here's how this works:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> will fail given a trivial equation of the form <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">X</span></span>;
+
+</li>
+<li> each execution of <span class="inlinecode"><span class="id" type="keyword">match</span></span> <span class="inlinecode"><span class="id" type="var">goal</span></span> will keep trying to find a valid
+      pair of hypotheses until the tactic on the RHS of the match
+      succeeds; if there are no such pairs, it fails;
+
+</li>
+<li> we can wrap the whole thing in a <span class="inlinecode"><span class="id" type="tactic">repeat</span></span>, which will keep doing
+      useful rewrites until only trivial ones are left. 
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="ceval_deterministic'''''"><span class="id" type="lemma">ceval_deterministic'''''</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="var">find_eqn</span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The big payoff in this approach is that our proof script
+    should be robust in the face of modest changes to our language.
+    For example, we can add a <span class="inlinecode"><span class="id" type="var">REPEAT</span></span> command to the language.
+    (This was an exercise in <span class="inlinecode"><span class="id" type="var">Hoare.v</span></span>.) 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Module</span> <a name="Repeat"><span class="id" type="module">Repeat</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Inductive</span> <a name="Repeat.com"><span class="id" type="inductive">com</span></a> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <a name="Repeat.CSkip"><span class="id" type="constructor">CSkip</span></a> : <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.CAsgn"><span class="id" type="constructor">CAsgn</span></a> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#aexp"><span class="id" type="inductive">aexp</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.CSeq"><span class="id" type="constructor">CSeq</span></a> : <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.CIf"><span class="id" type="constructor">CIf</span></a> : <a class="idref" href="Imp.html#bexp"><span class="id" type="inductive">bexp</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.CWhile"><span class="id" type="constructor">CWhile</span></a> : <a class="idref" href="Imp.html#bexp"><span class="id" type="inductive">bexp</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.CRepeat"><span class="id" type="constructor">CRepeat</span></a> : <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#bexp"><span class="id" type="inductive">bexp</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#com"><span class="id" type="inductive">com</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" type="var">REPEAT</span></span> behaves like <span class="inlinecode"><span class="id" type="var">WHILE</span></span>, except that the loop guard is
+    checked <i>after</i> each execution of the body, with the loop
+    repeating as long as the guard stays <i>false</i>.  Because of this,
+    the body will always execute at least once. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Notation</span> "'SKIP'" :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Auto.html#Repeat.CSkip"><span class="id" type="constructor">CSkip</span></a>.<br/>
+<span class="id" type="keyword">Notation</span> "c<sub>1</sub> ; c<sub>2</sub>" :=<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#Repeat.CSeq"><span class="id" type="constructor">CSeq</span></a> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/>
+<span class="id" type="keyword">Notation</span> "X '::=' a" :=<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#Repeat.CAsgn"><span class="id" type="constructor">CAsgn</span></a> <span class="id" type="var">X</span> <span class="id" type="var">a</span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 60).<br/>
+<span class="id" type="keyword">Notation</span> "'WHILE' b 'DO' c 'END'" :=<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#Repeat.CWhile"><span class="id" type="constructor">CWhile</span></a> <span class="id" type="var">b</span> <span class="id" type="var">c</span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/>
+<span class="id" type="keyword">Notation</span> "'IFB' e<sub>1</sub> 'THEN' e<sub>2</sub> 'ELSE' e<sub>3</sub> 'FI'" :=<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#Repeat.CIf"><span class="id" type="constructor">CIf</span></a> <span class="id" type="var">e<sub>1</sub></span> <span class="id" type="var">e<sub>2</sub></span> <span class="id" type="var">e<sub>3</sub></span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/>
+<span class="id" type="keyword">Notation</span> "'REPEAT' e<sub>1</sub> 'UNTIL' b<sub>2</sub> 'END'" :=<br/>
+&nbsp;&nbsp;(<a class="idref" href="Auto.html#Repeat.CRepeat"><span class="id" type="constructor">CRepeat</span></a> <span class="id" type="var">e<sub>1</sub></span> <span class="id" type="var">b<sub>2</sub></span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/>
+
+<br/>
+<span class="id" type="keyword">Inductive</span> <a name="Repeat.ceval"><span class="id" type="inductive">ceval</span></a> : <a class="idref" href="Imp.html#state"><span class="id" type="definition">state</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Auto.html#Repeat.com"><span class="id" type="inductive">com</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#state"><span class="id" type="definition">state</span></a> <span style="font-family: arial;">&rarr;</span> <span class="id" type="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;| <a name="Repeat.E_Skip"><span class="id" type="constructor">E_Skip</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#Repeat.::'SKIP'"><span class="id" type="notation">SKIP</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.E_Ass"><span class="id" type="constructor">E_Ass</span></a>  : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">n</span> <span class="id" type="var">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#aeval"><span class="id" type="definition">aeval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> = <a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#X"><span class="id" type="variable">X</span></a> ::= <a class="idref" href="Auto.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a>) (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#X"><span class="id" type="variable">X</span></a> <a class="idref" href="Auto.html#n"><span class="id" type="variable">n</span></a>)<br/>
+&nbsp;&nbsp;| <a name="Repeat.E_Seq"><span class="id" type="constructor">E_Seq</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span> <span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">st''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <a class="idref" href="Auto.html#c<sub>2</sub>"><span class="id" type="variable">c<sub>2</sub></span></a> <a class="idref" href="Auto.html#st''"><span class="id" type="variable">st''</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> ; <a class="idref" href="Auto.html#c<sub>2</sub>"><span class="id" type="variable">c<sub>2</sub></span></a>) <a class="idref" href="Auto.html#st''"><span class="id" type="variable">st''</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.E_IfTrue"><span class="id" type="constructor">E_IfTrue</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#beval"><span class="id" type="definition">beval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#Repeat.::'IFB'_x_'THEN'_x_'ELSE'_x_'FI'"><span class="id" type="notation">IFB</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <span class="id" type="var">THEN</span> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <span class="id" type="var">ELSE</span> <a class="idref" href="Auto.html#c<sub>2</sub>"><span class="id" type="variable">c<sub>2</sub></span></a> <span class="id" type="var">FI</span>) <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.E_IfFalse"><span class="id" type="constructor">E_IfFalse</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#beval"><span class="id" type="definition">beval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#c<sub>2</sub>"><span class="id" type="variable">c<sub>2</sub></span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#Repeat.::'IFB'_x_'THEN'_x_'ELSE'_x_'FI'"><span class="id" type="notation">IFB</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <span class="id" type="var">THEN</span> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <span class="id" type="var">ELSE</span> <a class="idref" href="Auto.html#c<sub>2</sub>"><span class="id" type="variable">c<sub>2</sub></span></a> <span class="id" type="var">FI</span>) <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.E_WhileEnd"><span class="id" type="constructor">E_WhileEnd</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#beval"><span class="id" type="definition">beval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#Repeat.::'WHILE'_x_'DO'_x_'END'"><span class="id" type="notation">WHILE</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <span class="id" type="var">DO</span> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <span class="id" type="var">END</span>) <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.E_WhileLoop"><span class="id" type="constructor">E_WhileLoop</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">st''</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#beval"><span class="id" type="definition">beval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> (<a class="idref" href="Auto.html#Repeat.::'WHILE'_x_'DO'_x_'END'"><span class="id" type="notation">WHILE</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <span class="id" type="var">DO</span> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <span class="id" type="var">END</span>) <a class="idref" href="Auto.html#st''"><span class="id" type="variable">st''</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#Repeat.::'WHILE'_x_'DO'_x_'END'"><span class="id" type="notation">WHILE</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <span class="id" type="var">DO</span> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <span class="id" type="var">END</span>) <a class="idref" href="Auto.html#st''"><span class="id" type="variable">st''</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.E_RepeatEnd"><span class="id" type="constructor">E_RepeatEnd</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#beval"><span class="id" type="definition">beval</span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#Repeat.CRepeat"><span class="id" type="constructor">CRepeat</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a>) <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a><br/>
+&nbsp;&nbsp;| <a name="Repeat.E_RepeatLoop"><span class="id" type="constructor">E_RepeatLoop</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">st''</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#beval"><span class="id" type="definition">beval</span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st'"><span class="id" type="variable">st'</span></a> (<a class="idref" href="Auto.html#Repeat.CRepeat"><span class="id" type="constructor">CRepeat</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a>) <a class="idref" href="Auto.html#st''"><span class="id" type="variable">st''</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#ceval"><span class="id" type="inductive">ceval</span></a> <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> (<a class="idref" href="Auto.html#Repeat.CRepeat"><span class="id" type="constructor">CRepeat</span></a> <a class="idref" href="Auto.html#c<sub>1</sub>"><span class="id" type="variable">c<sub>1</sub></span></a> <a class="idref" href="Auto.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a>) <a class="idref" href="Auto.html#st''"><span class="id" type="variable">st''</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Notation</span> "c<sub>1</sub> '/' st '<span style="font-family: arial;">&dArr;</span>' st'" := (<a class="idref" href="Auto.html#Repeat.ceval"><span class="id" type="inductive">ceval</span></a> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">st'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40, <span class="id" type="var">st</span> <span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 39).<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="Repeat.ceval_deterministic"><span class="id" type="lemma">ceval_deterministic</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">repeat</span> <span class="id" type="var">find_eqn</span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_RepeatEnd&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">find_rwinv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;oops:&nbsp;why&nbsp;didn't&nbsp;<span class="inlinecode"><span class="id" type="var">find_rwinv</span></span>&nbsp;solve&nbsp;this&nbsp;for&nbsp;us&nbsp;already?<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;answer:&nbsp;we&nbsp;did&nbsp;things&nbsp;in&nbsp;the&nbsp;wrong&nbsp;order.&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_RepeatLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">find_rwinv</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="Repeat.ceval_deterministic'"><span class="id" type="lemma">ceval_deterministic'</span></a>: <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a>  <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#c"><span class="id" type="variable">c</span></a> / <a class="idref" href="Auto.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&dArr;</span> <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Auto.html#st<sub>1</sub>"><span class="id" type="variable">st<sub>1</sub></span></a> = <a class="idref" href="Auto.html#st<sub>2</sub>"><span class="id" type="variable">st<sub>2</sub></span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">repeat</span> <span class="id" type="var">find_eqn</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="Auto.html#Repeat"><span class="id" type="module">Repeat</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+These examples just give a flavor of what "hyper-automation" can
+    do.  The details of using <span class="inlinecode"><span class="id" type="keyword">match</span></span> <span class="inlinecode"><span class="id" type="var">goal</span></span> are a bit tricky, and
+    debugging scripts using it is not very pleasant.  But it is well
+    worth adding at least simple uses to your proofs to avoid tedium
+    and to "future proof" your scripts. 
+<div class="paragraph"> </div>
+
+  
+</div>
+<div class="code code-tight">
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a></div>
+
+</div>
+
+</body>
+</html>
