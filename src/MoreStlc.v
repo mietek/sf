@@ -281,7 +281,8 @@ Require Import Stlc.
     construct (a very simplified form of Coq's [match]) to destruct
     them. For example, the following procedure converts a [Nat+Bool]
     into a [Nat]: *)
-(** <<
+(**
+
     getNat =
       \x:Nat+Bool.
         case x of
