@@ -1,11 +1,11 @@
 (** * Poly: Polymorphism and Higher-Order Functions *)
 
-(* REMINDER: Please do not put solutions to the exercises in
+(* Final reminder: Please do not put solutions to the exercises in
    publicly accessible places.  Thank you!! *)
 
 Require Export Lists.
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Polymorphism *)
 
 (** In this chapter we continue our development of basic
@@ -14,7 +14,7 @@ Require Export Lists.
     they manipulate) and _higher-order functions_ (treating functions
     as data).  We begin with polymorphism. *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Polymorphic Lists *)
 
 (** For the last couple of chapters, we've been working just
@@ -31,7 +31,7 @@ Inductive boollist : Type :=
 (** ... but this would quickly become tedious, partly because we
     have to make up different constructor names for each datatype, but
     mostly because we would also need to define new versions of all
-    our list manipulating functions ([length], [rev], etc.)  for each
+    our list manipulating functions ([length], [rev], etc.) for each
     new datatype definition. *)
 
 (** To avoid all this repetition, Coq supports _polymorphic_
@@ -56,7 +56,7 @@ Inductive list (X:Type) : Type :=
     [Inductive] definitions; or, to put it another way, [list] is a
     function from [Type]s to [Type]s.  For any particular type [X],
     the type [list X] is an [Inductive]ly defined set of lists whose
-    elements are things of type [X]. *)
+    elements are of type [X]. *)
 
 (** With this definition, when we use the constructors [nil] and
     [cons] to build lists, we need to tell Coq the type of the
@@ -69,12 +69,13 @@ Check nil.
 Check cons.
 (* ===> cons : forall X : Type, X -> list X -> list X *)
 
-(** (Side note on notation: In .v files, the "forall" quantifier is
-    spelled out in letters.  In the generated HTML files, [forall] is
-    usually typeset as the usual mathematical "upside down A," but
-    you'll see the spelled-out "forall" in a few places, as in the
-    above comments.  This is just a quirk of typesetting: there is no
-    difference in meaning.) *)
+(** (Side note on notation: In .v files, the "forall" quantifier
+    is spelled out in letters.  In the generated HTML files and in the
+    way various IDEs show .v files (with certain settings of their
+    display controls), [forall] is usually typeset as the usual
+    mathematical "upside down A," but you'll still see the spelled-out
+    "forall" in a few places.  This is just a quirk of typesetting:
+    there is no difference in meaning.) *)
 
 (** The "[forall X]" in these types can be read as an additional
     argument to the constructors that determines the expected types of
@@ -112,6 +113,7 @@ Example test_repeat2 :
   repeat bool false 1 = cons bool false (nil bool).
 Proof. reflexivity.  Qed.
 
+
 Module MumbleGrumble.
 
 (** **** Exercise: 2 stars (mumble_grumble)  *)
@@ -141,11 +143,11 @@ Inductive grumble (X:Type) : Type :=
 
 End MumbleGrumble.
 
-(* ###################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Type Annotation Inference *)
 
 (** Let's write the definition of [repeat] again, but this time we
-    won't specify the types of any of the arguments. Will Coq still
+    won't specify the types of any of the arguments.  Will Coq still
     accept it? *)
 
 Fixpoint repeat' X x count : list X :=
@@ -177,10 +179,10 @@ Check repeat.
     few (which forces readers to perform type inference in their heads
     in order to understand your code). *)
 
-(* ###################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Type Argument Synthesis *)
 
-(** To we use a polymorphic function, we need to pass it one or
+(** To use a polymorphic function, we need to pass it one or
     more types in addition to its other arguments.  For example, the
     recursive call in the body of the [repeat] function above must
     pass along the type [X].  But since the second argument to
@@ -210,8 +212,8 @@ Check repeat.
 
     to tell Coq to attempt to infer the missing information.
 
-    Using implicit arguments, the [count] function can be written
-    like this: *)
+    Using implicit arguments, the [count] function can be written like
+    this: *)
 
 Fixpoint repeat'' X x count : list X :=
   match count with
@@ -233,7 +235,7 @@ Definition list123 :=
 Definition list123' :=
   cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
 
-(* ###################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Implicit Arguments *)
 
 (** We can go further and even avoid writing [_]'s in most cases by
@@ -255,7 +257,7 @@ Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
 
 (** Alternatively, we can declare an argument to be implicit
     when defining the function itself, by surrounding it in curly
-    braces.  For example: *)
+    braces instead of parens.  For example: *)
 
 Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
   match count with
@@ -318,6 +320,9 @@ Proof. reflexivity.  Qed.
 Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
 Proof. reflexivity.  Qed.
 
+(* ----------------------------------------------------------------- *)
+(** *** Supplying Type Arguments Explicitly *)
+
 (** One small problem with declaring arguments [Implicit] is
     that, occasionally, Coq does not have enough local information to
     determine a type argument; in such cases, we need to tell Coq that
@@ -362,7 +367,7 @@ Notation "x ++ y" := (app x y)
 
 Definition list123''' := [1; 2; 3].
 
-(* ###################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Exercises *)
 
 (** **** Exercise: 2 stars, optional (poly_exercises)  *)
@@ -399,7 +404,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Polymorphic Pairs *)
 
 (** Following the same pattern, the type definition we gave in
@@ -465,19 +470,20 @@ Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
 
         Compute (combine [1;2] [false;false;true;true]).
 
-      print?   [] *)
+      print? *)
+(** [] *)
 
 (** **** Exercise: 2 stars, recommended (split)  *)
 (** The function [split] is the right inverse of [combine]: it takes a
     list of pairs and returns a pair of lists.  In many functional
     languages, it is called [unzip].
 
-    Uncomment the material below and fill in the definition of
-    [split].  Make sure it passes the given unit test. *)
+    Fill in the definition of [split] below.  Make sure it passes the
+    given unit test. *)
 
 Fixpoint split {X Y : Type} (l : list (X*Y))
-               : (list X) * (list Y) :=
-(* FILL IN HERE *) admit.
+               : (list X) * (list Y) 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example test_split:
   split [(1,false);(2,false)] = ([1;2],[false;false]).
@@ -485,7 +491,7 @@ Proof.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Polymorphic Options *)
 
 (** One last polymorphic type for now: _polymorphic options_,
@@ -520,8 +526,8 @@ Proof. reflexivity. Qed.
     [hd_error] function from the last chapter. Be sure that it
     passes the unit tests below. *)
 
-Definition hd_error {X : Type} (l : list X) : option X :=
-  (* FILL IN HERE *) admit.
+Definition hd_error {X : Type} (l : list X) : option X 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 (** Once again, to force the implicit arguments to be explicit,
     we can use [@] before the name of the function. *)
@@ -534,7 +540,7 @@ Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Functions as Data *)
 
 (** Like many other modern programming languages -- including
@@ -543,7 +549,7 @@ Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
     them to be passed as arguments to other functions, returned as
     results, stored in data structures, etc.*)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Higher-Order Functions *)
 
 (** Functions that manipulate other functions are often called
@@ -565,7 +571,7 @@ Proof. reflexivity.  Qed.
 Example test_doit3times': doit3times negb true = false.
 Proof. reflexivity.  Qed.
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Filter *)
 
 (** Here is a more useful higher-order function, taking a list
@@ -610,7 +616,7 @@ Proof. reflexivity.  Qed.
 Example test_countoddmembers'3:   countoddmembers' nil = 0.
 Proof. reflexivity.  Qed.
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Anonymous Functions *)
 
 (** It is arguably a little sad, in the example just above, to
@@ -648,8 +654,8 @@ Proof. reflexivity.  Qed.
     and returns a list of just those that are even and greater than
     7. *)
 
-Definition filter_even_gt7 (l : list nat) : list nat :=
-  (* FILL IN HERE *) admit.
+Definition filter_even_gt7 (l : list nat) : list nat 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example test_filter_even_gt7_1 :
   filter_even_gt7 [1;2;6;9;10;3;12;8] = [10;12;8].
@@ -677,8 +683,8 @@ Example test_filter_even_gt7_2 :
 Definition partition {X : Type}
                      (test : X -> bool)
                      (l : list X)
-                   : list X * list X :=
-(* FILL IN HERE *) admit.
+                   : list X * list X 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example test_partition1: partition oddb [1;2;3;4;5] = ([1;3;5], [2;4]).
 (* FILL IN HERE *) Admitted.
@@ -686,7 +692,7 @@ Example test_partition2: partition (fun x => false) [5;9;0] = ([], [5;9;0]).
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Map *)
 
 (** Another handy higher-order function is called [map]. *)
@@ -722,12 +728,12 @@ Example test_map3:
   = [[true;false];[false;true];[true;false];[false;true]].
 Proof. reflexivity.  Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Exercises *)
 
 (** **** Exercise: 3 stars (map_rev)  *)
 (** Show that [map] and [rev] commute.  You may need to define an
     auxiliary lemma. *)
-
 
 Theorem map_rev : forall (X Y : Type) (f : X -> Y) (l : list X),
   map f (rev l) = rev (map f l).
@@ -744,12 +750,11 @@ Proof.
 
         flat_map (fun n => [n;n+1;n+2]) [1;5;10]
       = [1; 2; 3; 5; 6; 7; 10; 11; 12].
-
 *)
 
 Fixpoint flat_map {X Y:Type} (f:X -> list Y) (l:list X)
-                   : (list Y) :=
-  (* FILL IN HERE *) admit.
+                   : (list Y) 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example test_flat_map1:
   flat_map (fun n => [n;n;n]) [1;5;4]
@@ -777,7 +782,7 @@ Definition option_map {X Y : Type} (f : X -> Y) (xo : option X)
     probably easiest to do it on a _copy_ of this file that you can
     throw away afterwards.)  [] *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Fold *)
 
 (** An even more powerful higher-order function is called
@@ -829,7 +834,10 @@ Proof. reflexivity. Qed.
     situation where it would be useful for [X] and [Y] to be
     different? *)
 
-(* ###################################################### *)
+(* FILL IN HERE *)
+(** [] *)
+
+(* ================================================================= *)
 (** ** Functions That Construct Functions *)
 
 (** Most of the higher-order functions we have talked about so
@@ -877,7 +885,7 @@ Proof. reflexivity.  Qed.
 Example test_plus3'' :  doit3times (plus 3) 0 = 9.
 Proof. reflexivity.  Qed.
 
-(* ##################################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
 
 Module Exercises.
@@ -903,8 +911,8 @@ Theorem fold_length_correct : forall X (l : list X),
 (** We can also define [map] in terms of [fold].  Finish [fold_map]
     below. *)
 
-Definition fold_map {X Y:Type} (f : X -> Y) (l : list X) : list Y :=
-(* FILL IN HERE *) admit.
+Definition fold_map {X Y:Type} (f : X -> Y) (l : list X) : list Y 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 (** Write down a theorem [fold_map_correct] in Coq stating that
    [fold_map] is correct, and prove it. *)
@@ -935,10 +943,10 @@ Definition prod_curry {X Y Z : Type}
     the theorems below to show that the two are inverses. *)
 
 Definition prod_uncurry {X Y Z : Type}
-  (f : X -> Y -> Z) (p : X * Y) : Z :=
-  (* FILL IN HERE *) admit.
+  (f : X -> Y -> Z) (p : X * Y) : Z 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
-(** As a trivial example of the usefulness of currying, we can use it
+(** As a (trivial) example of the usefulness of currying, we can use it
     to shorten one of the examples that we saw above: *)
 
 Example test_map2: map (fun x => plus 3 x) [2;0;2] = [5;3;5].
@@ -1022,8 +1030,8 @@ Definition three : nat := @doit3times.
 
 (** Successor of a natural number: *)
 
-Definition succ (n : nat) : nat :=
-  (* FILL IN HERE *) admit.
+Definition succ (n : nat) : nat 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example succ_1 : succ zero = one.
 Proof. (* FILL IN HERE *) Admitted.
@@ -1036,8 +1044,8 @@ Proof. (* FILL IN HERE *) Admitted.
 
 (** Addition of two natural numbers: *)
 
-Definition plus (n m : nat) : nat :=
-  (* FILL IN HERE *) admit.
+Definition plus (n m : nat) : nat 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example plus_1 : plus zero one = one.
 Proof. (* FILL IN HERE *) Admitted.
@@ -1051,8 +1059,8 @@ Proof. (* FILL IN HERE *) Admitted.
 
 (** Multiplication: *)
 
-Definition mult (n m : nat) : nat :=
-  (* FILL IN HERE *) admit.
+Definition mult (n m : nat) : nat 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example mult_1 : mult one one = one.
 Proof. (* FILL IN HERE *) Admitted.
@@ -1070,8 +1078,8 @@ Proof. (* FILL IN HERE *) Admitted.
     a "Universe inconsistency" error, try iterating over a different
     type: [nat] itself is usually problematic.) *)
 
-Definition exp (n m : nat) : nat :=
-  (* FILL IN HERE *) admit.
+Definition exp (n m : nat) : nat 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example exp_1 : exp two two = plus two two.
 Proof. (* FILL IN HERE *) Admitted.
@@ -1087,5 +1095,5 @@ End Church.
 
 End Exercises.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-09-20 10:50:11 -0400 (Tue, 20 Sep 2016) $ *)
 

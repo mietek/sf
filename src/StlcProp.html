@@ -29,7 +29,6 @@
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="keyword">Types</span>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Stlc.html#"><span class="id" type="library">Stlc</span></a>.<br/>
@@ -51,11 +50,11 @@ In this chapter, we develop the fundamental theory of the Simply
 </div>
 
 <div class="doc">
-<a name="lab575"></a><h1 class="section">Canonical Forms</h1>
+<a name="lab574"></a><h1 class="section">Canonical Forms</h1>
 
 <div class="paragraph"> </div>
 
- As we saw for the simple calculus in the <a href="Types.html"><font color="gray">Types</font></a> chapter, the
+ As we saw for the simple calculus in the <a href="Types.html"><span class="inlineref">Types</span></a> chapter, the
     first step in establishing basic properties of reduction and types
     is to identify the possible <i>canonical forms</i> (i.e., well-typed
     closed values) belonging to each type.  For <span class="inlinecode"><span class="id" type="var">Bool</span></span>, these are the boolean
@@ -95,7 +94,7 @@ In this chapter, we develop the fundamental theory of the Simply
 </div>
 
 <div class="doc">
-<a name="lab576"></a><h1 class="section">Progress</h1>
+<a name="lab575"></a><h1 class="section">Progress</h1>
 
 <div class="paragraph"> </div>
 
@@ -103,7 +102,7 @@ In this chapter, we develop the fundamental theory of the Simply
     terms are not stuck: either a well-typed term is a value, or it
     can take a reduction step.  The proof is a relatively
     straightforward extension of the progress proof we saw in the
-    <a href="Types.html"><font color="gray">Types</font></a> chapter.  We'll give the proof in English first, then the
+    <a href="Types.html"><span class="inlineref">Types</span></a> chapter.  We'll give the proof in English first, then the
     formal version. 
 </div>
 <div class="code code-tight">
@@ -257,7 +256,7 @@ In this chapter, we develop the fundamental theory of the Simply
 </div>
 
 <div class="doc">
-<a name="lab577"></a><h4 class="section">Exercise: 3 stars, optional (progress_from_term_ind)</h4>
+<a name="lab576"></a><h4 class="section">Exercise: 3 stars, optional (progress_from_term_ind)</h4>
  Show that progress can also be proved by induction on terms
     instead of induction on typing derivations. 
 </div>
@@ -282,7 +281,7 @@ In this chapter, we develop the fundamental theory of the Simply
 </div>
 
 <div class="doc">
-<a name="lab578"></a><h1 class="section">Preservation</h1>
+<a name="lab577"></a><h1 class="section">Preservation</h1>
 
 <div class="paragraph"> </div>
 
@@ -298,7 +297,7 @@ In this chapter, we develop the fundamental theory of the Simply
 
 <ul class="doclist">
 <li> The <i>preservation theorem</i> is proved by induction on a typing
-        derivation, pretty much as we did in the <a href="Types.html"><font color="gray">Types</font></a> chapter.  The
+        derivation, pretty much as we did in the <a href="Types.html"><span class="inlineref">Types</span></a> chapter.  The
         one case that is significantly different is the one for the
         <span class="inlinecode"><span class="id" type="var">ST_AppAbs</span></span> rule, whose definition uses the substitution
         operation.  To see that this step preserves typing, we need to
@@ -351,7 +350,7 @@ In this chapter, we develop the fundamental theory of the Simply
 </div>
 
 <div class="doc">
-<a name="lab579"></a><h2 class="section">Free Occurrences</h2>
+<a name="lab578"></a><h2 class="section">Free Occurrences</h2>
 
 <div class="paragraph"> </div>
 
@@ -420,7 +419,7 @@ A term in which no variables appear free is said to be <i>closed</i>.
 </div>
 
 <div class="doc">
-<a name="lab580"></a><h4 class="section">Exercise: 1 star (afi)</h4>
+<a name="lab579"></a><h4 class="section">Exercise: 1 star (afi)</h4>
  If the definition of <span class="inlinecode"><span class="id" type="var">appears_free_in</span></span> is not crystal clear to
     you, it is a good idea to take a piece of paper and write out the
     rules in informal inference-rule notation.  (Although it is a
@@ -434,7 +433,7 @@ A term in which no variables appear free is said to be <i>closed</i>.
 </div>
 
 <div class="doc">
-<a name="lab581"></a><h2 class="section">Substitution</h2>
+<a name="lab580"></a><h2 class="section">Substitution</h2>
 
 <div class="paragraph"> </div>
 
@@ -528,7 +527,7 @@ Next, we'll need the fact that any term <span class="inlinecode"><span class="id
     the empty context is closed (it has no free variables). 
 <div class="paragraph"> </div>
 
-<a name="lab582"></a><h4 class="section">Exercise: 2 stars, optional (typable_empty__closed)</h4>
+<a name="lab581"></a><h4 class="section">Exercise: 2 stars, optional (typable_empty__closed)</h4>
 
 </div>
 <div class="code code-space">
@@ -838,7 +837,7 @@ One technical subtlety in the statement of the lemma is that
 </div>
 
 <div class="doc">
-<a name="lab583"></a><h2 class="section">Main Theorem</h2>
+<a name="lab582"></a><h2 class="section">Main Theorem</h2>
 
 <div class="paragraph"> </div>
 
@@ -953,8 +952,8 @@ One technical subtlety in the statement of the lemma is that
 </div>
 
 <div class="doc">
-<a name="lab584"></a><h4 class="section">Exercise: 2 stars, recommended (subject_expansion_stlc)</h4>
- An exercise in the <a href="Types.html"><font color="gray">Types</font></a> chapter asked about the subject
+<a name="lab583"></a><h4 class="section">Exercise: 2 stars, recommended (subject_expansion_stlc)</h4>
+ An exercise in the <a href="Types.html"><span class="inlineref">Types</span></a> chapter asked about the subject
     expansion property for the simple language of arithmetic and
     boolean expressions.  Does this property hold for STLC?  That is,
     is it always the case that, if <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode"><span style="font-family: arial;">&rArr;</span></span> <span class="inlinecode"><span class="id" type="var">t'</span></span> and <span class="inlinecode"><span class="id" type="var">has_type</span></span> <span class="inlinecode"><span class="id" type="var">t'</span></span> <span class="inlinecode"><span class="id" type="var">T</span></span>,
@@ -973,11 +972,11 @@ One technical subtlety in the statement of the lemma is that
 </div>
 
 <div class="doc">
-<a name="lab585"></a><h1 class="section">Type Soundness</h1>
+<a name="lab584"></a><h1 class="section">Type Soundness</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab586"></a><h4 class="section">Exercise: 2 stars, optional (type_soundness)</h4>
+<a name="lab585"></a><h4 class="section">Exercise: 2 stars, optional (type_soundness)</h4>
  Put progress and preservation together and show that a well-typed
     term can <i>never</i> reach a stuck state.  
 </div>
@@ -1011,11 +1010,11 @@ One technical subtlety in the statement of the lemma is that
 </div>
 
 <div class="doc">
-<a name="lab587"></a><h1 class="section">Uniqueness of Types</h1>
+<a name="lab586"></a><h1 class="section">Uniqueness of Types</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab588"></a><h4 class="section">Exercise: 3 stars (types_unique)</h4>
+<a name="lab587"></a><h4 class="section">Exercise: 3 stars (types_unique)</h4>
  Another nice property of the STLC is that types are unique: a
     given term (in a given context) has at most one type.  Formalize this statement and prove it. 
 </div>
@@ -1034,16 +1033,16 @@ One technical subtlety in the statement of the lemma is that
 </div>
 
 <div class="doc">
-<a name="lab589"></a><h1 class="section">Additional Exercises</h1>
+<a name="lab588"></a><h1 class="section">Additional Exercises</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab590"></a><h4 class="section">Exercise: 1 star (progress_preservation_statement)</h4>
+<a name="lab589"></a><h4 class="section">Exercise: 1 star (progress_preservation_statement)</h4>
  Without peeking at their statements above, write down the progress
     and preservation theorems for the simply typed lambda-calculus.  <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab591"></a><h4 class="section">Exercise: 2 stars (stlc_variation1)</h4>
+<a name="lab590"></a><h4 class="section">Exercise: 2 stars (stlc_variation1)</h4>
  Suppose we add a new term <span class="inlinecode"><span class="id" type="var">zap</span></span> with the following reduction rule
 <center><table class="infrule">
 <tr class="infruleassumption">
@@ -1103,7 +1102,7 @@ One technical subtlety in the statement of the lemma is that
 
 <div class="paragraph"> </div>
 
-<a name="lab592"></a><h4 class="section">Exercise: 2 stars (stlc_variation2)</h4>
+<a name="lab591"></a><h4 class="section">Exercise: 2 stars (stlc_variation2)</h4>
  Suppose instead that we add a new term <span class="inlinecode"><span class="id" type="var">foo</span></span> with the following 
     reduction rules:
 <center><table class="infrule">
@@ -1163,7 +1162,7 @@ One technical subtlety in the statement of the lemma is that
 
 <div class="paragraph"> </div>
 
-<a name="lab593"></a><h4 class="section">Exercise: 2 stars (stlc_variation3)</h4>
+<a name="lab592"></a><h4 class="section">Exercise: 2 stars (stlc_variation3)</h4>
  Suppose instead that we remove the rule <span class="inlinecode"><span class="id" type="var">ST_App1</span></span> from the <span class="inlinecode"><span class="id" type="var">step</span></span>
     relation. Which of the following properties of the STLC remain
     true in the presence of this rule?  For each one, write either
@@ -1196,7 +1195,7 @@ One technical subtlety in the statement of the lemma is that
 
 <div class="paragraph"> </div>
 
-<a name="lab594"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation4)</h4>
+<a name="lab593"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation4)</h4>
  Suppose instead that we add the following new rule to the 
     reduction relation:
 <center><table class="infrule">
@@ -1242,7 +1241,7 @@ One technical subtlety in the statement of the lemma is that
 
 <div class="paragraph"> </div>
 
-<a name="lab595"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation5)</h4>
+<a name="lab594"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation5)</h4>
  Suppose instead that we add the following new rule to the typing 
     relation:
 <center><table class="infrule">
@@ -1292,7 +1291,7 @@ One technical subtlety in the statement of the lemma is that
 
 <div class="paragraph"> </div>
 
-<a name="lab596"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation6)</h4>
+<a name="lab595"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation6)</h4>
  Suppose instead that we add the following new rule to the typing 
     relation:
 <center><table class="infrule">
@@ -1342,7 +1341,7 @@ One technical subtlety in the statement of the lemma is that
 
 <div class="paragraph"> </div>
 
-<a name="lab597"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation7)</h4>
+<a name="lab596"></a><h4 class="section">Exercise: 2 stars, optional (stlc_variation7)</h4>
  Suppose we add the following new rule to the typing relation 
     of the STLC:
 <center><table class="infrule">
@@ -1397,7 +1396,7 @@ One technical subtlety in the statement of the lemma is that
 </div>
 
 <div class="doc">
-<a name="lab598"></a><h2 class="section">Exercise: STLC with Arithmetic</h2>
+<a name="lab597"></a><h2 class="section">Exercise: STLC with Arithmetic</h2>
 
 <div class="paragraph"> </div>
 
@@ -1449,7 +1448,7 @@ To terms, we add natural number constants, along with
 </div>
 
 <div class="doc">
-<a name="lab599"></a><h4 class="section">Exercise: 4 stars (stlc_arith)</h4>
+<a name="lab598"></a><h4 class="section">Exercise: 4 stars (stlc_arith)</h4>
  Finish formalizing the definition and properties of the STLC extended
     with arithmetic.  Specifically:
 

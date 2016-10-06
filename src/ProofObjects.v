@@ -122,7 +122,7 @@ Qed.
     according to the same basic rules used for programs in the
     language. *)
 
-(* ##################################################### *)
+(* ################################################################# *)
 (** * Proof Scripts *)
 
 (** The _proof objects_ we've been discussing lie at the core of how
@@ -182,11 +182,11 @@ Theorem ev_8 : ev 8.
 Proof.
   (* FILL IN HERE *) Admitted.
 
-Definition ev_8' : ev 8 :=
-  (* FILL IN HERE *) admit.
+Definition ev_8' : ev 8 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 (** [] *)
 
-(* ##################################################### *)
+(* ################################################################# *)
 (** * Quantifiers, Implications, Functions *)
 
 (** In Coq's computational universe (where data structures and
@@ -270,7 +270,7 @@ Definition ev_plus2'' : Prop :=
 (** In general, "[P -> Q]" is just syntactic sugar for
     "[forall (_:P), Q]". *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Connectives as Inductive Types *)
 
 (** Inductive definitions are powerful enough to express most of the
@@ -337,8 +337,8 @@ Definition and_comm' P Q : P /\ Q <-> Q /\ P :=
 (** **** Exercise: 2 stars, optional (conj_fact)  *)
 (** Construct a proof object demonstrating the following proposition. *)
 
-Definition conj_fact : forall P Q R, P /\ Q -> Q /\ R -> P /\ R :=
-  (* FILL IN HERE *) admit.
+Definition conj_fact : forall P Q R, P /\ Q -> Q /\ R -> P /\ R 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 (** [] *)
 
 (** ** Disjunction
@@ -365,8 +365,8 @@ End Or.
 (** Try to write down an explicit proof object for [or_commut] (without
     using [Print] to peek at the ones we already defined!). *)
 
-Definition or_comm : forall P Q, P \/ Q -> Q \/ P :=
-  (* FILL IN HERE *) admit.
+Definition or_comm : forall P Q, P \/ Q -> Q \/ P 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 (** [] *)
 
 (** ** Existential Quantification
@@ -404,10 +404,11 @@ Definition some_nat_is_even : exists n, ev n :=
 (** **** Exercise: 2 stars, optional (ex_ev_Sn)  *)
 (** Complete the definition of the following proof object: *)
 
-Definition ex_ev_Sn : ex (fun n => ev (S n)) :=
-(* FILL IN HERE *) admit.
+Definition ex_ev_Sn : ex (fun n => ev (S n)) 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 (** [] *)
 
+(* ================================================================= *)
 (** ** [True] and [False] *)
 
 (** The inductive definition of the [True] proposition is simple: *)
@@ -428,7 +429,7 @@ Inductive False : Prop :=.
 
 End Props.
 
-(* ##################################################### *)
+(* ################################################################# *)
 (** * Programming with Tactics *)
 
 (** If we can build proofs by giving explicit terms rather than
@@ -465,7 +466,7 @@ Compute add1 2.
     does illustrate the uniformity and orthogonality of the basic
     ideas in Coq. *)
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Equality *)
 
 (** Even Coq's equality relation is not built in.  It has the
@@ -535,7 +536,7 @@ End MyEquality.
 Definition quiz6 : exists x,  x + 3 = 4
   := ex_intro (fun z => (z + 3 = 4)) 1 (refl_equal 4).
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Inversion, Again *)
 
 (** We've seen [inversion] used with both equality hypotheses and
@@ -587,5 +588,5 @@ Definition quiz6 : exists x,  x + 3 = 4
    must be the same!  The [inversion] tactic adds this fact to the
    context. *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-08-30 14:08:53 -0400 (Tue, 30 Aug 2016) $ *)
 

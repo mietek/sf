@@ -44,7 +44,7 @@ Require Import LibTactics.
     two copies of the current goal, and [dup n] produces [n] copies of it. *)
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Tactics for Introduction and Case Analysis *)
 
 (** This section presents the following tactics:
@@ -54,7 +54,7 @@ Require Import LibTactics.
     - [cases_if], for automating case analysis on the argument of [if]. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [introv] *)
 
 Module IntrovExamples.
@@ -114,7 +114,7 @@ Qed.
 End IntrovExamples.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [inverts] *)
 
 Module InvertsExamples.
@@ -270,7 +270,7 @@ End InvertsExamples.
 
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Tactics for N-ary Connectives *)
 
 (** Because Coq encodes conjunctions and disjunctions using binary
@@ -286,11 +286,11 @@ End InvertsExamples.
     - [exists] for proving n-ary existentials. *)
 
 Module NaryExamples.
-  Require Import References SfLib.
+  Require Import References Smallstep.
   Import STLCRef.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [splits] *)
 
 (** The tactic [splits] applies to a goal made of a conjunction
@@ -305,7 +305,7 @@ Proof.
 Abort.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [branch] *)
 
 (** The tactic [branch k] can be used to prove a n-ary disjunction.
@@ -324,7 +324,7 @@ Proof.
 Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [exists] *)
 
 (** The library "LibTactics" introduces a notation for n-ary
@@ -342,11 +342,11 @@ Theorem progress : forall ST t T st,
   (* was: [value t \/ exists t', exists st', t / st ==> t' / st'] *)
 Proof with eauto.
   intros ST t T st Ht HST. remember (@empty ty) as Gamma.
-  (induction Ht); subst; try solve by inversion...
+  (induction Ht); subst; try solve_by_invert...
   - (* T_App *)
     right. destruct IHHt1 as [Ht1p | Ht1p]...
     + (* t1 is a value *)
-      inversion Ht1p; subst; try solve by inversion.
+      inversion Ht1p; subst; try solve_by_invert.
       destruct IHHt2 as [Ht2p | Ht2p]...
       (* t2 steps *)
       inversion Ht2p as [t2' [st' Hstep]].
@@ -362,7 +362,7 @@ Abort.
 End NaryExamples.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Tactics for Working with Equality *)
 
 (** One of the major weakness of Coq compared with other interactive
@@ -381,7 +381,7 @@ End NaryExamples.
 Module EqualityExamples.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactics [asserts_rewrite] and [cuts_rewrite] *)
 
 (** The tactic [asserts_rewrite (E1 = E2)] replaces [E1] with [E2] in
@@ -434,7 +434,7 @@ Proof.
 Abort.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [substs] *)
 
 (** The tactic [substs] is similar to [subst] except that it
@@ -449,7 +449,7 @@ Proof.
 Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [fequals] *)
 
 (** The tactic [fequals] is similar to [f_equal] except that it
@@ -466,7 +466,7 @@ Proof.
 Abort.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [applys_eq] *)
 
 (** The tactic [applys_eq] is a variant of [eapply] that introduces
@@ -531,7 +531,7 @@ Abort.
 End EqualityExamples.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Some Convenient Shorthands *)
 
 (** This section of the tutorial introduces a few tactics
@@ -544,7 +544,7 @@ End EqualityExamples.
       propositions at the bottom. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [unfolds] *)
 
 Module UnfoldsExample.
@@ -575,7 +575,7 @@ Qed.
 End UnfoldsExample.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactics [false] and [tryfalse] *)
 
 (** The tactic [false] can be used to replace any goal with [False].
@@ -610,7 +610,7 @@ Proof.
 Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [gen] *)
 
 (** The tactic [gen] is a shortand for [generalize dependent]
@@ -643,7 +643,7 @@ Abort.
 End GenExample.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactics [skip], [skip_rewrite] and [skip_goal] *)
 
 (** Temporarily admitting a given subgoal is very useful when
@@ -741,7 +741,7 @@ Abort.
 End SkipExample.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The Tactic [sort] *)
 
 Module SortExamples.
@@ -766,7 +766,7 @@ Abort.
 End SortExamples.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Tactics for Advanced Lemma Instantiation *)
 
 (** This last section describes a mechanism for instantiating a lemma
@@ -789,7 +789,7 @@ End SortExamples.
     the form [destruct (H _ _ _ Htypt) as (T & Hctx & Hsub).] *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Working of [lets] *)
 
 (** When we have a lemma (or an assumption) that we want to exploit,
@@ -921,7 +921,7 @@ Abort.
 End ExamplesLets.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Working of [applys], [forwards] and [specializes] *)
 
 (** The tactics [applys], [forwards] and [specializes] are
@@ -947,7 +947,7 @@ End ExamplesLets.
     use of [forwards] can be found in the tutorial chapter [UseAuto]. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example of Instantiations *)
 
 Module ExamplesInstantiations.
@@ -1032,7 +1032,7 @@ Admitted.
 End ExamplesInstantiations.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Summary *)
 
 (** In this chapter we have presented a number of tactics that help make
@@ -1070,4 +1070,4 @@ End ExamplesInstantiations.
 
 *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)

@@ -1,5 +1,6 @@
 (** * Extraction: Extracting ML from Coq *)
 
+(* ################################################################# *)
 (** * Basic Extraction *)
 
 (** In its simplest form, extracting an efficient program from one
@@ -16,7 +17,6 @@ Extraction Language Ocaml.
 
 Require Import Coq.Arith.Arith.
 Require Import Coq.Arith.EqNat.
-Require Import SfLib.
 Require Import ImpCEvalFun.
 
 (** Finally, we tell Coq the name of a definition to extract and the
@@ -29,7 +29,7 @@ Extraction "imp1.ml" ceval_step.
     everything that it recursively depends on.  Compile the present
     [.v] file and have a look at [imp1.ml] now. *)
 
-(* ############################################################## *)
+(* ################################################################# *)
 (** * Controlling Extraction of Specific Types *)
 
 (** We can tell Coq to extract certain [Inductive] definitions to
@@ -69,7 +69,7 @@ Extraction "imp2.ml" ceval_step.
 (** Have a look at the file [imp2.ml].  Notice how the fundamental
     definitions have changed from [imp1.ml]. *)
 
-(* ############################################################## *)
+(* ################################################################# *)
 (** * A Complete Example *)
 
 (** To use our extracted evaluator to run Imp programs, all we need to
@@ -118,7 +118,7 @@ Extraction "imp.ml" empty_state ceval_step parse.
     (The [-w] flags to [ocamlc] are just there to suppress a few
     spurious warnings.) *)
 
-(* ############################################################## *)
+(* ################################################################# *)
 (** * Discussion *)
 
 (** Since we've proved that the [ceval_step] function behaves the same
@@ -127,4 +127,4 @@ Extraction "imp.ml" empty_state ceval_step parse.
     course, the parser we're using is not certified, since we didn't
     prove anything about it! *)
 
-(** $Date: 2016-05-26 12:03:56 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)

@@ -11,14 +11,13 @@
     Coq!). *)
 
 Require Import Coq.Arith.Arith.
-Require Import SfLib.
 Require Import Maps.
 Require Import Imp.
 Require Import Smallstep.
 
 Hint Constructors multi.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Typed Arithmetic Expressions *)
 
 (** To motivate the discussion of type systems, let's begin as
@@ -32,7 +31,7 @@ Hint Constructors multi.
 
     The language definition is completely routine. *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Syntax *)
 
 (** Here is the syntax, informally:
@@ -72,7 +71,7 @@ Hint Constructors bvalue nvalue.
 Hint Unfold value.
 Hint Unfold update.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Operational Semantics *)
 
 (** And here is the single-step relation, first informally... *)
@@ -113,7 +112,6 @@ Hint Unfold update.
                               t1 ==> t1'
                        ------------------------                     (ST_Iszero)
                        iszero t1 ==> iszero t1'
-
 *)
 
 (** ... and then formally: *)
@@ -163,7 +161,7 @@ Hint Constructors step.
 
     can take a step (once, before becoming stuck). *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Normal Forms and Values *)
 
 (** The first interesting thing to notice about this [step] relation
@@ -217,7 +215,7 @@ Proof with eauto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Typing *)
 
 (** The next critical observation is that, although this
@@ -262,7 +260,6 @@ Inductive ty : Type :=
                             |- t1 \in Nat
                         ---------------------                        (T_IsZero)
                         |- iszero t1 \in Bool
-
 *)
 
 Reserved Notation "'|-' t '\in' T" (at level 40).
@@ -315,7 +312,7 @@ Qed.
 Example has_type_not :
   ~ (|- tif tfalse tzero ttrue \in TBool).
 Proof.
-  intros Contra. solve by inversion 2.  Qed.
+  intros Contra. solve_by_inverts 2.  Qed.
 
 (** **** Exercise: 1 star, optional (succ_hastype_nat__hastype_nat)  *)
 Example succ_hastype_nat__hastype_nat : forall t,
@@ -325,7 +322,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Canonical forms *)
 
 (** The following two lemmas capture the fundamental property that the
@@ -349,7 +346,7 @@ Proof.
   auto.
 Qed.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Progress *)
 
 (** The typing relation enjoys two critical properties.  The first is
@@ -430,7 +427,7 @@ Proof with auto.
 *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Type Preservation *)
 
 (** The second critical property of typing is that, when a well-typed
@@ -454,7 +451,7 @@ Proof with auto.
          intros t' HE;
          (* and we can deal with several impossible
             cases all at once *)
-         try (solve by inversion).
+         try solve_by_invert.
     - (* T_If *) inversion HE; subst; clear HE.
       + (* ST_IFTrue *) assumption.
       + (* ST_IfFalse *) assumption.
@@ -515,7 +512,7 @@ Proof with eauto.
     typing statements as sentences, where the term is the subject and
     the type is the predicate. *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Type Soundness *)
 
 (** Putting progress and preservation together, it follows that a
@@ -534,7 +531,7 @@ Proof.
   apply IHP.  apply (preservation x y T HT H).
   unfold stuck. split; auto.   Qed.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Aside: the [normalize] Tactic *)
 
 (** When experimenting with definitions of programming languages
@@ -636,7 +633,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Additional Exercises *)
 
 (** **** Exercise: 2 stars, recommended (subject_expansion)  *)
@@ -750,4 +747,4 @@ Proof.
 (* FILL IN HERE *)
 [] *)
 
-(** $Date: 2016-05-26 17:51:14 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)

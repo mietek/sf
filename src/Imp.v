@@ -18,7 +18,6 @@
        Y ::= Y * Z;;
        Z ::= Z - 1
      END
-
 *)
 
 (** This chapter looks at how to define the _syntax_ and _semantics_
@@ -33,9 +32,8 @@ Require Import Coq.omega.Omega.
 Require Import Coq.Lists.List.
 Import ListNotations.
 Require Import Maps.
-Require Import SfLib. (* for [admit] *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Arithmetic and Boolean Expressions *)
 
 (** We'll present Imp in three parts: first a core language of
@@ -43,7 +41,7 @@ Require Import SfLib. (* for [admit] *)
     expressions with _variables_, and finally a language of _commands_
     including assignment, conditions, sequencing, and loops. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Syntax *)
 
 Module AExp.
@@ -90,7 +88,6 @@ Inductive bexp : Type :=
         | a <= a
         | not b
         | b and b
-
 *)
 
 (** Compared to the Coq version above...
@@ -125,7 +122,7 @@ Inductive bexp : Type :=
     informal ones for communicating between humans and formal ones for
     carrying out implementations and proofs. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Evaluation *)
 
 (** _Evaluating_ an arithmetic expression produces a number. *)
@@ -154,7 +151,7 @@ Fixpoint beval (b : bexp) : bool :=
   | BAnd b1 b2  => andb (beval b1) (beval b2)
   end.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Optimization *)
 
 (** We haven't defined very much yet, but we can already get
@@ -214,7 +211,7 @@ Proof.
   - (* AMult *)
     simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Coq Automation *)
 
 (** The repetition in this last proof is starting to be a little
@@ -232,13 +229,13 @@ Proof.
     interesting properties without becoming overwhelmed by boring,
     repetitive, low-level details. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Tacticals *)
 
 (** _Tacticals_ is Coq's term for tactics that take other tactics as
     arguments -- "higher-order tactics," if you will.  *)
 
-(* ####################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** The [try] Tactical *)
 
 (** If [T] is a tactic, then [try T] is a tactic that is just like [T]
@@ -259,7 +256,7 @@ Qed.
     proofs like these, but we'll see below that it is very useful for
     doing automated proofs in conjunction with the [;] tactical. *)
 
-(* ####################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** The [;] Tactical (Simple Form) *)
 
 (** In its most common form, the [;] tactical takes two tactics as
@@ -384,7 +381,7 @@ Proof.
     + (* a1 = ANum n *) destruct n;
       simpl; rewrite IHa2; reflexivity. Qed.
 
-(* ####################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** The [;] Tactical (General Form) *)
 
 (** The [;] tactical also has a more general form than the simple
@@ -401,10 +398,9 @@ Proof.
    [Ti]'s are the same tactic -- i.e., [T;T'] is shorthand for:
 
       T; [T' | T' | ... | T']
-
 *)
 
-(* ####################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** The [repeat] Tactical *)
 
 (** The [repeat] tactical takes another tactic and keeps applying this
@@ -435,15 +431,15 @@ Qed.
     not! *)
 
 (** **** Exercise: 3 stars (optimize_0plus_b)  *)
-(** Since the [optimize_0plus] tranformation doesn't change the value
+(** Since the [optimize_0plus] transformation doesn't change the value
     of [aexp]s, we should be able to apply it to all the [aexp]s that
     appear in a [bexp] without changing the [bexp]'s value.  Write a
     function which performs that transformation on [bexp]s, and prove
     it is sound.  Use the tacticals we've just seen to make the proof
     as elegant as possible. *)
 
-Fixpoint optimize_0plus_b (b : bexp) : bexp :=
-  (* FILL IN HERE *) admit.
+Fixpoint optimize_0plus_b (b : bexp) : bexp 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Theorem optimize_0plus_b_sound : forall b,
   beval (optimize_0plus_b b) = beval b.
@@ -461,7 +457,7 @@ Proof.
 *)
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Defining New Tactic Notations *)
 
 (** Coq also provides several ways of "programming" tactic scripts.
@@ -496,7 +492,7 @@ Tactic Notation "simpl_and_try" tactic(c) :=
     reflexivity.]" in a proof would be the same as writing "[simpl;
     try reflexivity.]" *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** The [omega] Tactic *)
 
 (** The [omega] tactic implements a decision procedure for a subset of
@@ -525,13 +521,7 @@ Proof.
   intros. omega.
 Qed.
 
-(** Leibniz wrote, "It is unworthy of excellent men to lose
-    hours like slaves in the labor of calculation which could be
-    relegated to anyone else if machines were used."  We recommend
-    that excellent people of all genders use the omega tactic whenever
-    possible. *)
-
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** A Few More Handy Tactics *)
 
 (** Finally, here are some miscellaneous tactics that you may find
@@ -566,7 +556,7 @@ Qed.
 
     We'll see many examples of these in the proofs below. *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Evaluation as a Relation *)
 
 (** We have presented [aeval] and [beval] as functions defined by
@@ -632,7 +622,7 @@ Inductive aevalR : aexp -> nat -> Prop :=
 
   where "e '\\' n" := (aevalR e n) : type_scope.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Inference Rule Notation *)
 
 (** In informal discussions, it is convenient to write the rules for
@@ -654,7 +644,6 @@ Inductive aevalR : aexp -> nat -> Prop :=
                                e2 \\ n2
                          --------------------                         (E_APlus)
                          APlus e1 e2 \\ n1+n2
-
 *)
 
 (** Formally, there is nothing deep about inference rules: they
@@ -692,10 +681,9 @@ Inductive aevalR : aexp -> nat -> Prop :=
                                e2 \\ n2
                          --------------------                         (E_AMult)
                          AMult e1 e2 \\ n1*n2
-
 *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Equivalence of the Definitions *)
 
 (** It is straightforward to prove that the relational and functional
@@ -764,7 +752,7 @@ Inductive bevalR:
 
 End AExp.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Computational vs. Relational Definitions *)
 
 (** For the definitions of evaluation for arithmetic and boolean
@@ -819,6 +807,7 @@ End aevalR_division.
 
 Module aevalR_extended.
 
+(* ----------------------------------------------------------------- *)
 (** *** Adding Nondeterminism *)
 
 (** Suppose, instead, that we want to extend the arithmetic operations
@@ -857,7 +846,7 @@ where "a '\\' n" := (aevalR a n) : type_scope.
 
 End aevalR_extended.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Expressions With Variables *)
 
 (** Let's turn our attention back to defining Imp.  The next thing we
@@ -865,7 +854,7 @@ End aevalR_extended.
     with variables.  To keep things simple, we'll assume that all
     variables are global and that they only hold numbers. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** States *)
 
 (** Since we'll want to look variables up to find out their current
@@ -888,7 +877,7 @@ Definition state := total_map nat.
 Definition empty_state : state :=
   t_empty 0.
 
-(* ################################################### *)
+(* ================================================================= *)
 (** ** Syntax  *)
 
 (** We can add variables to the arithmetic expressions we had before by
@@ -924,7 +913,7 @@ Inductive bexp : Type :=
   | BNot : bexp -> bexp
   | BAnd : bexp -> bexp -> bexp.
 
-(* ################################################### *)
+(* ================================================================= *)
 (** ** Evaluation  *)
 
 (** The arith and boolean evaluators are extended to handle
@@ -962,13 +951,13 @@ Example bexp1 :
   = true.
 Proof. reflexivity. Qed.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Commands *)
 
 (** Now we are ready define the syntax and behavior of Imp
     _commands_ (sometimes called _statements_). *)
 
-(* ################################################### *)
+(* ================================================================= *)
 (** ** Syntax *)
 
 (** Informally, commands [c] are described by the following BNF
@@ -979,7 +968,6 @@ Proof. reflexivity. Qed.
 
      c ::= SKIP | x ::= a | c ;; c | IFB b THEN c ELSE c FI 
          | WHILE b DO c END
-
 *)
 (**
     For example, here's factorial in Imp:
@@ -1032,7 +1020,7 @@ Definition fact_in_coq : com :=
     Z ::= AMinus (AId Z) (ANum 1)
   END.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Examples *)
 
 (** Assignment: *)
@@ -1047,6 +1035,7 @@ Definition subtract_slowly_body : com :=
   Z ::= AMinus (AId Z) (ANum 1) ;;
   X ::= AMinus (AId X) (ANum 1).
 
+(* ----------------------------------------------------------------- *)
 (** *** Loops *)
 
 Definition subtract_slowly : com :=
@@ -1059,6 +1048,7 @@ Definition subtract_3_from_5_slowly : com :=
   Z ::= ANum 5 ;;
   subtract_slowly.
 
+(* ----------------------------------------------------------------- *)
 (** *** An infinite loop: *)
 
 Definition loop : com :=
@@ -1066,14 +1056,14 @@ Definition loop : com :=
     SKIP
   END.
 
-(* ################################################################ *)
+(* ################################################################# *)
 (** * Evaluation *)
 
 (** Next we need to define what it means to evaluate an Imp command.
     The fact that [WHILE] loops don't necessarily terminate makes defining
     an evaluation function tricky... *)
 
-(* #################################### *)
+(* ================================================================= *)
 (** ** Evaluation as a Function (Failed Attempt) *)
 
 (** Here's an attempt at defining an evaluation function for commands,
@@ -1131,7 +1121,7 @@ Fixpoint ceval_fun_no_while (st : state) (c : com)
     additional tricks (see chapter [ImpCEvalFun] if you're curious 
     about what those might be). *)
 
-(* #################################### *)
+(* ================================================================= *)
 (** ** Evaluation as a Relation *)
 
 (** Here's a better way: define [ceval] as a _relation_ rather than a
@@ -1150,6 +1140,7 @@ Fixpoint ceval_fun_no_while (st : state) (c : com)
     state [st] results in an ending state [st'].  This can be
     pronounced "[c] takes state [st] to [st']". *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Operational Semantics *)
 (** Here is an informal definition of evaluation, presented as inference 
     rules for the sake of readability:
@@ -1185,7 +1176,6 @@ Fixpoint ceval_fun_no_while (st : state) (c : com)
                   WHILE b DO c END / st' \\ st''
                   ---------------------------------               (E_WhileLoop)
                     WHILE b DO c END / st \\ st''
-
 *)
 
 (** Here is the formal definition.  Make sure you understand
@@ -1260,8 +1250,8 @@ Proof.
    Prove that this program executes as intended for [X] = [2]
    (the latter is trickier than you might expect). *)
 
-Definition pup_to_n : com :=
-  (* FILL IN HERE *) admit.
+Definition pup_to_n : com 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Theorem pup_to_2_ceval :
   pup_to_n / (t_update empty_state X 2) \\
@@ -1272,7 +1262,7 @@ Proof.
 (** [] *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Determinism of Evaluation *)
 
 (** Changing from a computational to a relational definition of
@@ -1323,7 +1313,7 @@ Proof.
       apply IHE1_2. assumption.  Qed.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Reasoning About Imp Programs *)
 
 (** We'll get much deeper into systematic techniques for reasoning
@@ -1409,7 +1399,7 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
 
 (** **** Exercise: 3 stars (stack_compiler)  *)
@@ -1472,8 +1462,8 @@ Inductive sinstr : Type :=
 
 Fixpoint s_execute (st : state) (stack : list nat)
                    (prog : list sinstr)
-                 : list nat :=
-(* FILL IN HERE *) admit.
+                 : list nat 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Example s_execute1 :
      s_execute empty_state []
@@ -1491,8 +1481,8 @@ Example s_execute2 :
     machine program. The effect of running the program should be the
     same as pushing the value of the expression on the stack. *)
 
-Fixpoint s_compile (e : aexp) : list sinstr :=
-(* FILL IN HERE *) admit.
+Fixpoint s_compile (e : aexp) : list sinstr 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 (** After you've defined [s_compile], prove the following to test
     that it works. *)
@@ -1713,5 +1703,5 @@ End BreakImp.
 (* FILL IN HERE *)
 (** [] *)
 
-(* $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(* $Date: 2016-09-08 11:49:29 -0400 (Thu, 08 Sep 2016) $ *)
 

@@ -33,7 +33,6 @@
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Arith.html#"><span class="id" type="library">Coq.Arith.Arith</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#"><span class="id" type="library">Coq.Arith.EqNat</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.omega.Omega.html#"><span class="id" type="library">Coq.omega.Omega</span></a>.<br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Imp.html#"><span class="id" type="library">Imp</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
 <span class="comment">(*&nbsp;/TERSE:&nbsp;HIDEFROMHTML&nbsp;*)</span><br/>
@@ -99,7 +98,7 @@ In the past couple of chapters, we've begun applying the
 
 
 </li>
-<li> behavioral equivalence of programs (in the <a href="Equiv.html"><font color="gray">Equiv</font></a> chapter). 
+<li> behavioral equivalence of programs (in the <a href="Equiv.html"><span class="inlineref">Equiv</span></a> chapter). 
 
 </li>
 </ul>
@@ -159,7 +158,7 @@ In the past couple of chapters, we've begun applying the
 </div>
 
 <div class="doc">
-<a name="lab405"></a><h1 class="section">Assertions</h1>
+<a name="lab404"></a><h1 class="section">Assertions</h1>
 
 <div class="paragraph"> </div>
 
@@ -179,7 +178,7 @@ In the past couple of chapters, we've begun applying the
 </div>
 
 <div class="doc">
-<a name="lab406"></a><h4 class="section">Exercise: 1 star, optional (assertions)</h4>
+<a name="lab405"></a><h4 class="section">Exercise: 1 star, optional (assertions)</h4>
  Paraphrase the following assertions in English (or your favorite
     natural language). 
 </div>
@@ -273,7 +272,7 @@ In the past couple of chapters, we've begun applying the
 </div>
 
 <div class="doc">
-<a name="lab407"></a><h1 class="section">Hoare Triples</h1>
+<a name="lab406"></a><h1 class="section">Hoare Triples</h1>
 
 <div class="paragraph"> </div>
 
@@ -340,7 +339,7 @@ Since we'll be working a lot with Hoare triples, it's useful to
 </div>
 
 <div class="doc">
-<a name="lab408"></a><h4 class="section">Exercise: 1 star, optional (triples)</h4>
+<a name="lab407"></a><h4 class="section">Exercise: 1 star, optional (triples)</h4>
  Paraphrase the following Hoare triples in English.
 
 <div class="paragraph"> </div>
@@ -370,7 +369,7 @@ Since we'll be working a lot with Hoare triples, it's useful to
  <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab409"></a><h4 class="section">Exercise: 1 star, optional (valid_triples)</h4>
+<a name="lab408"></a><h4 class="section">Exercise: 1 star, optional (valid_triples)</h4>
  Which of the following Hoare triples are <i>valid</i> &mdash; i.e., the
     claimed relation between <span class="inlinecode"><span class="id" type="var">P</span></span>, <span class="inlinecode"><span class="id" type="var">c</span></span>, and <span class="inlinecode"><span class="id" type="var">Q</span></span> is true?
 
@@ -445,7 +444,7 @@ Since we'll be working a lot with Hoare triples, it's useful to
 </div>
 
 <div class="doc">
-<a name="lab410"></a><h1 class="section">Proof Rules</h1>
+<a name="lab409"></a><h1 class="section">Proof Rules</h1>
 
 <div class="paragraph"> </div>
 
@@ -466,7 +465,7 @@ Since we'll be working a lot with Hoare triples, it's useful to
 </div>
 
 <div class="doc">
-<a name="lab411"></a><h2 class="section">Assignment</h2>
+<a name="lab410"></a><h2 class="section">Assignment</h2>
 
 <div class="paragraph"> </div>
 
@@ -735,7 +734,7 @@ Here's a first formal proof using this rule.
 </div>
 
 <div class="doc">
-<a name="lab412"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_examples)</h4>
+<a name="lab411"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_examples)</h4>
  Translate these informal Hoare triples...
 
 <div class="paragraph"> </div>
@@ -764,7 +763,7 @@ Here's a first formal proof using this rule.
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab413"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_wrong)</h4>
+<a name="lab412"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_wrong)</h4>
  The assignment rule looks backward to almost everyone the first
     time they see it.  If it still seems puzzling, it may help
     to think a little about alternative "forward" rules.  Here is a
@@ -798,7 +797,7 @@ Here's a first formal proof using this rule.
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab414"></a><h4 class="section">Exercise: 3 stars, advanced (hoare_asgn_fwd)</h4>
+<a name="lab413"></a><h4 class="section">Exercise: 3 stars, advanced (hoare_asgn_fwd)</h4>
  However, by using an auxiliary variable <span class="inlinecode"><span class="id" type="var">m</span></span> to remember the 
     original value of <span class="inlinecode"><span class="id" type="var">X</span></span> we can define a Hoare rule for assignment 
     that does, intuitively, "work forwards" rather than backwards.
@@ -854,7 +853,7 @@ Here's a first formal proof using this rule.
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab415"></a><h4 class="section">Exercise: 2 stars, advanced (hoare_asgn_fwd_exists)</h4>
+<a name="lab414"></a><h4 class="section">Exercise: 2 stars, advanced (hoare_asgn_fwd_exists)</h4>
  Another way to define a forward rule for assignment is to
     existentially quantify over the previous value of the assigned
     variable.
@@ -910,7 +909,7 @@ Here's a first formal proof using this rule.
 </div>
 
 <div class="doc">
-<a name="lab416"></a><h2 class="section">Consequence</h2>
+<a name="lab415"></a><h2 class="section">Consequence</h2>
 
 <div class="paragraph"> </div>
 
@@ -1115,7 +1114,7 @@ Finally, for convenience in some proofs, we can state a combined
 </div>
 
 <div class="doc">
-<a name="lab417"></a><h2 class="section">Digression: The <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> Tactic</h2>
+<a name="lab416"></a><h2 class="section">Digression: The <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> Tactic</h2>
 
 <div class="paragraph"> </div>
 
@@ -1280,7 +1279,7 @@ The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> 
 </div>
 
 <div class="doc">
-<a name="lab418"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_examples_2)</h4>
+<a name="lab417"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_examples_2)</h4>
  Translate these informal Hoare triples...
 
 <div class="paragraph"> </div>
@@ -1310,7 +1309,7 @@ The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> 
 </div>
 
 <div class="doc">
-<a name="lab419"></a><h2 class="section">Skip</h2>
+<a name="lab418"></a><h2 class="section">Skip</h2>
 
 <div class="paragraph"> </div>
 
@@ -1347,7 +1346,7 @@ The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> 
 </div>
 
 <div class="doc">
-<a name="lab420"></a><h2 class="section">Sequencing</h2>
+<a name="lab419"></a><h2 class="section">Sequencing</h2>
 
 <div class="paragraph"> </div>
 
@@ -1450,7 +1449,7 @@ We typically use <span class="inlinecode"><span class="id" type="var">hoare_seq<
     example. 
 <div class="paragraph"> </div>
 
-<a name="lab421"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_example4)</h4>
+<a name="lab420"></a><h4 class="section">Exercise: 2 stars (hoare_asgn_example4)</h4>
  Translate this "decorated program" into a formal proof:
 
 <div class="paragraph"> </div>
@@ -1482,7 +1481,7 @@ We typically use <span class="inlinecode"><span class="id" type="var">hoare_seq<
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab422"></a><h4 class="section">Exercise: 3 stars (swap_exercise)</h4>
+<a name="lab421"></a><h4 class="section">Exercise: 3 stars (swap_exercise)</h4>
  Write an Imp program <span class="inlinecode"><span class="id" type="var">c</span></span> that swaps the values of <span class="inlinecode"><span class="id" type="var">X</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span> and
     show that it satisfies the following specification:
 
@@ -1498,13 +1497,13 @@ We typically use <span class="inlinecode"><span class="id" type="var">hoare_seq<
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="swap_program"><span class="id" type="definition">swap_program</span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="swap_program"><span class="id" type="definition">swap_program</span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Theorem</span> <a name="swap_exercise"><span class="id" type="lemma">swap_exercise</span></a> :<br/>
 &nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="keyword">fun</span> <span class="id" type="var">st</span> ⇒ <a class="idref" href="Hoare.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a> ≤ <a class="idref" href="Hoare.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a><span style="letter-spacing:-.4em;">}</span>}<br/>
-&nbsp;&nbsp;<a class="idref" href="Hoare.html#swap_program"><span class="id" type="definition">swap_program</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="Hoare.html#swap_program"><span class="id" type="axiom">swap_program</span></a><br/>
 &nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="keyword">fun</span> <span class="id" type="var">st</span> ⇒ <a class="idref" href="Hoare.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Imp.html#Y"><span class="id" type="definition">Y</span></a> ≤ <a class="idref" href="Hoare.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a><span style="letter-spacing:-.4em;">}</span>}.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
@@ -1514,7 +1513,7 @@ We typically use <span class="inlinecode"><span class="id" type="var">hoare_seq<
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab423"></a><h4 class="section">Exercise: 3 stars (hoarestate1)</h4>
+<a name="lab422"></a><h4 class="section">Exercise: 3 stars (hoarestate1)</h4>
  Explain why the following proposition can't be proven:
 
 <div class="paragraph"> </div>
@@ -1544,7 +1543,7 @@ We typically use <span class="inlinecode"><span class="id" type="var">hoare_seq<
 </div>
 
 <div class="doc">
-<a name="lab424"></a><h2 class="section">Conditionals</h2>
+<a name="lab423"></a><h2 class="section">Conditionals</h2>
 
 <div class="paragraph"> </div>
 
@@ -1699,7 +1698,7 @@ Now we can formalize the Hoare proof rule for conditionals
 </div>
 
 <div class="doc">
-<a name="lab425"></a><h3 class="section">Example</h3>
+<a name="lab424"></a><h3 class="section">Example</h3>
 
 <div class="paragraph"> </div>
 
@@ -1738,7 +1737,7 @@ Now we can formalize the Hoare proof rule for conditionals
 </div>
 
 <div class="doc">
-<a name="lab426"></a><h4 class="section">Exercise: 2 stars (if_minus_plus)</h4>
+<a name="lab425"></a><h4 class="section">Exercise: 2 stars (if_minus_plus)</h4>
  Prove the following hoare triple using <span class="inlinecode"><span class="id" type="var">hoare_if</span></span>: 
 </div>
 <div class="code code-tight">
@@ -1758,11 +1757,11 @@ Now we can formalize the Hoare proof rule for conditionals
 </div>
 
 <div class="doc">
-<a name="lab427"></a><h3 class="section">Exercise: One-sided conditionals</h3>
+<a name="lab426"></a><h3 class="section">Exercise: One-sided conditionals</h3>
 
 <div class="paragraph"> </div>
 
-<a name="lab428"></a><h4 class="section">Exercise: 4 stars (if1_hoare)</h4>
+<a name="lab427"></a><h4 class="section">Exercise: 4 stars (if1_hoare)</h4>
 
 <div class="paragraph"> </div>
 
@@ -1931,7 +1930,7 @@ For full credit, prove formally <span class="inlinecode"><span class="id" type="
 </div>
 
 <div class="doc">
-<a name="lab429"></a><h2 class="section">Loops</h2>
+<a name="lab428"></a><h2 class="section">Loops</h2>
 
 <div class="paragraph"> </div>
 
@@ -2117,7 +2116,7 @@ One subtlety in the terminology is that calling some assertion <span class="inli
 &nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Hoare.html#bassn"><span class="id" type="definition">bassn</span></a>, <a class="idref" href="Hoare.html#assn_sub"><span class="id" type="definition">assn_sub</span></a>, <a class="idref" href="Hoare.html#assert_implies"><span class="id" type="definition">assert_implies</span></a>, <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a>. <span class="id" type="tactic">simpl</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st</span> [<span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span>]. <span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb_complete"><span class="id" type="lemma">leb_complete</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">omega</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Hoare.html#bassn"><span class="id" type="definition">bassn</span></a>, <a class="idref" href="Hoare.html#assert_implies"><span class="id" type="definition">assert_implies</span></a>. <span class="id" type="tactic">intros</span> <span class="id" type="var">st</span> [<span class="id" type="var">Hle</span> <span class="id" type="var">Hb</span>].<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hb</span>. <span class="id" type="tactic">destruct</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="definition">leb</span></a> (<span class="id" type="var">st</span> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>) 2) <span class="id" type="var">eqn</span> : <span class="id" type="var">Heqle</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hb</span>. <span class="id" type="tactic">destruct</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="abbreviation">leb</span></a> (<span class="id" type="var">st</span> <a class="idref" href="Imp.html#X"><span class="id" type="definition">X</span></a>) 2) <span class="id" type="var">eqn</span> : <span class="id" type="var">Heqle</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">exfalso</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">Hb</span>; <span class="id" type="tactic">reflexivity</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb_iff_conv"><span class="id" type="lemma">leb_iff_conv</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">Heqle</span>. <span class="id" type="tactic">omega</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
@@ -2175,11 +2174,11 @@ Of course, this result is not surprising if we remember that
 </div>
 
 <div class="doc">
-<a name="lab430"></a><h3 class="section">Exercise: <span class="inlinecode"><span class="id" type="var">REPEAT</span></span></h3>
+<a name="lab429"></a><h3 class="section">Exercise: <span class="inlinecode"><span class="id" type="var">REPEAT</span></span></h3>
 
 <div class="paragraph"> </div>
 
-<a name="lab431"></a><h4 class="section">Exercise: 4 stars, advanced (hoare_repeat)</h4>
+<a name="lab430"></a><h4 class="section">Exercise: 4 stars, advanced (hoare_repeat)</h4>
  In this exercise, we'll add a new command to our language of
     commands: <span class="inlinecode"><span class="id" type="var">REPEAT</span></span> c <span class="inlinecode"><span class="id" type="var">UNTIL</span></span> a <span class="inlinecode"><span class="id" type="var">END</span></span>. You will write the
     evaluation rule for <span class="inlinecode"><span class="id" type="tactic">repeat</span></span> and add a new Hoare rule to
@@ -2360,7 +2359,7 @@ For full credit, make sure (informally) that your rule can be used
 </div>
 
 <div class="doc">
-<a name="lab432"></a><h1 class="section">Summary</h1>
+<a name="lab431"></a><h1 class="section">Summary</h1>
 
 <div class="paragraph"> </div>
 
@@ -2471,11 +2470,11 @@ For full credit, make sure (informally) that your rule can be used
 </div>
 
 <div class="doc">
-<a name="lab433"></a><h1 class="section">Additional Exercises</h1>
+<a name="lab432"></a><h1 class="section">Additional Exercises</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab434"></a><h4 class="section">Exercise: 3 stars (himp_hoare)</h4>
+<a name="lab433"></a><h4 class="section">Exercise: 3 stars (himp_hoare)</h4>
  In this exercise, we will derive proof rules for the <span class="inlinecode"><span class="id" type="var">HAVOC</span></span>
     command, which we studied in the last chapter.
 
@@ -2570,12 +2569,12 @@ Complete the Hoare rule for <span class="inlinecode"><span class="id" type="var"
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Himp.havoc_pre"><span class="id" type="definition">havoc_pre</span></a> (<span class="id" type="var">X</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>) (<span class="id" type="var">Q</span> : <a class="idref" href="Hoare.html#Himp.Assertion"><span class="id" type="definition">Assertion</span></a>) : <a class="idref" href="Hoare.html#Himp.Assertion"><span class="id" type="definition">Assertion</span></a> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Himp.havoc_pre"><span class="id" type="definition">havoc_pre</span></a> (<span class="id" type="var">X</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>) (<span class="id" type="var">Q</span> : <a class="idref" href="Hoare.html#Himp.Assertion"><span class="id" type="definition">Assertion</span></a>) : <a class="idref" href="Hoare.html#Himp.Assertion"><span class="id" type="definition">Assertion</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Theorem</span> <a name="Himp.hoare_havoc"><span class="id" type="lemma">hoare_havoc</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">Q</span> : <a class="idref" href="Hoare.html#Himp.Assertion"><span class="id" type="definition">Assertion</span></a>) (<span class="id" type="var">X</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>),<br/>
-&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{ <a class="idref" href="Hoare.html#Himp.havoc_pre"><span class="id" type="definition">havoc_pre</span></a> <a class="idref" href="Hoare.html#X"><span class="id" type="variable">X</span></a> <a class="idref" href="Hoare.html#Q"><span class="id" type="variable">Q</span></a> <span style="letter-spacing:-.4em;">}</span>} <a class="idref" href="Hoare.html#Himp.::'HAVOC'_x"><span class="id" type="notation">HAVOC</span></a> <a class="idref" href="Hoare.html#X"><span class="id" type="variable">X</span></a> <span style="letter-spacing:-.4em;">{</span>{ <a class="idref" href="Hoare.html#Q"><span class="id" type="variable">Q</span></a> <span style="letter-spacing:-.4em;">}</span>}.<br/>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{ <a class="idref" href="Hoare.html#Himp.havoc_pre"><span class="id" type="axiom">havoc_pre</span></a> <a class="idref" href="Hoare.html#X"><span class="id" type="variable">X</span></a> <a class="idref" href="Hoare.html#Q"><span class="id" type="variable">Q</span></a> <span style="letter-spacing:-.4em;">}</span>} <a class="idref" href="Hoare.html#Himp.::'HAVOC'_x"><span class="id" type="notation">HAVOC</span></a> <a class="idref" href="Hoare.html#X"><span class="id" type="variable">X</span></a> <span style="letter-spacing:-.4em;">{</span>{ <a class="idref" href="Hoare.html#Q"><span class="id" type="variable">Q</span></a> <span style="letter-spacing:-.4em;">}</span>}.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 

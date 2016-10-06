@@ -36,7 +36,6 @@
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Lists.List.html#"><span class="id" type="library">Coq.Lists.List</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Logic.FunctionalExtensionality.html#"><span class="id" type="library">Coq.Logic.FunctionalExtensionality</span></a>.<br/>
 <span class="id" type="keyword">Import</span> <span class="id" type="var">ListNotations</span>.<br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Imp.html#"><span class="id" type="library">Imp</span></a>.<br/>
 
@@ -44,7 +43,7 @@
 </div>
 
 <div class="doc">
-<a name="lab366"></a><h3 class="section">Some general advice for working on exercises:</h3>
+<a name="lab365"></a><h3 class="section">Some general advice for working on exercises:</h3>
 
 
 <div class="paragraph"> </div>
@@ -88,7 +87,7 @@
 </div>
 
 <div class="doc">
-<a name="lab367"></a><h1 class="section">Behavioral Equivalence</h1>
+<a name="lab366"></a><h1 class="section">Behavioral Equivalence</h1>
 
 <div class="paragraph"> </div>
 
@@ -112,7 +111,7 @@
 </div>
 
 <div class="doc">
-<a name="lab368"></a><h2 class="section">Definitions</h2>
+<a name="lab367"></a><h2 class="section">Definitions</h2>
 
 <div class="paragraph"> </div>
 
@@ -159,7 +158,7 @@ For commands, the situation is a little more subtle.  We can't
 </div>
 
 <div class="doc">
-<a name="lab369"></a><h4 class="section">Exercise: 2 stars (equiv_classes)</h4>
+<a name="lab368"></a><h4 class="section">Exercise: 2 stars (equiv_classes)</h4>
 
 <div class="paragraph"> </div>
 
@@ -239,8 +238,8 @@ For commands, the situation is a little more subtle.  We can't
 &nbsp;&nbsp;<span class="id" type="var">END</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="equiv_classes"><span class="id" type="definition">equiv_classes</span></a> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#list"><span class="id" type="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a>) :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="equiv_classes"><span class="id" type="definition">equiv_classes</span></a> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#list"><span class="id" type="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a>) <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
 <div class="doc">
@@ -252,7 +251,7 @@ For commands, the situation is a little more subtle.  We can't
 </div>
 
 <div class="doc">
-<a name="lab370"></a><h2 class="section">Examples</h2>
+<a name="lab369"></a><h2 class="section">Examples</h2>
 
 <div class="paragraph"> </div>
 
@@ -314,7 +313,7 @@ For examples of command equivalence, let's start by looking at
 </div>
 
 <div class="doc">
-<a name="lab371"></a><h4 class="section">Exercise: 2 stars (skip_right)</h4>
+<a name="lab370"></a><h4 class="section">Exercise: 2 stars (skip_right)</h4>
  Prove that adding a <span class="inlinecode"><span class="id" type="var">SKIP</span></span> after a command results in an
     equivalent program 
 </div>
@@ -460,7 +459,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab372"></a><h4 class="section">Exercise: 2 stars, recommended (IFB_false)</h4>
+<a name="lab371"></a><h4 class="section">Exercise: 2 stars, recommended (IFB_false)</h4>
 
 </div>
 <div class="code code-space">
@@ -477,7 +476,7 @@ Of course, few programmers would be tempted to write a conditional
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab373"></a><h4 class="section">Exercise: 3 stars (swap_if_branches)</h4>
+<a name="lab372"></a><h4 class="section">Exercise: 3 stars (swap_if_branches)</h4>
  Show that we can swap the branches of an IF by negating its
     condition 
 </div>
@@ -531,7 +530,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab374"></a><h4 class="section">Exercise: 2 stars, advanced, optional (WHILE_false_informal)</h4>
+<a name="lab373"></a><h4 class="section">Exercise: 2 stars, advanced, optional (WHILE_false_informal)</h4>
  Write an informal proof of <span class="inlinecode"><span class="id" type="var">WHILE_false</span></span>.
 
 <div class="paragraph"> </div>
@@ -611,7 +610,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab375"></a><h4 class="section">Exercise: 2 stars, optional (WHILE_true_nonterm_informal)</h4>
+<a name="lab374"></a><h4 class="section">Exercise: 2 stars, optional (WHILE_true_nonterm_informal)</h4>
  Explain what the lemma <span class="inlinecode"><span class="id" type="var">WHILE_true_nonterm</span></span> means in English.
 
 <div class="paragraph"> </div>
@@ -620,7 +619,7 @@ Of course, few programmers would be tempted to write a conditional
  <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab376"></a><h4 class="section">Exercise: 2 stars, recommended (WHILE_true)</h4>
+<a name="lab375"></a><h4 class="section">Exercise: 2 stars, recommended (WHILE_true)</h4>
  Prove the following theorem. <i>Hint</i>: You'll want to use
     <span class="inlinecode"><span class="id" type="var">WHILE_true_nonterm</span></span> here. 
 </div>
@@ -673,7 +672,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab377"></a><h4 class="section">Exercise: 2 stars, optional (seq_assoc)</h4>
+<a name="lab376"></a><h4 class="section">Exercise: 2 stars, optional (seq_assoc)</h4>
 
 </div>
 <div class="code code-space">
@@ -689,7 +688,7 @@ Of course, few programmers would be tempted to write a conditional
 
  Proving program properties involving assignments is one place
     where the functional-extensionality axiom introduced in the
-    <a href="Logic.html"><font color="gray">Logic</font></a> chapter often comes in handy.  Here are an example and an
+    <a href="Logic.html"><span class="inlineref">Logic</span></a> chapter often comes in handy.  Here are an example and an
     exercise. 
 </div>
 <div class="code code-tight">
@@ -718,7 +717,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab378"></a><h4 class="section">Exercise: 2 stars, recommended (assign_aequiv)</h4>
+<a name="lab377"></a><h4 class="section">Exercise: 2 stars, recommended (assign_aequiv)</h4>
 
 </div>
 <div class="code code-space">
@@ -738,7 +737,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab379"></a><h1 class="section">Properties of Behavioral Equivalence</h1>
+<a name="lab378"></a><h1 class="section">Properties of Behavioral Equivalence</h1>
 
 <div class="paragraph"> </div>
 
@@ -751,7 +750,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab380"></a><h2 class="section">Behavioral Equivalence Is an Equivalence</h2>
+<a name="lab379"></a><h2 class="section">Behavioral Equivalence Is an Equivalence</h2>
 
 <div class="paragraph"> </div>
 
@@ -863,7 +862,7 @@ Of course, few programmers would be tempted to write a conditional
 </div>
 
 <div class="doc">
-<a name="lab381"></a><h2 class="section">Behavioral Equivalence Is a Congruence</h2>
+<a name="lab380"></a><h2 class="section">Behavioral Equivalence Is a Congruence</h2>
 
 <div class="paragraph"> </div>
 
@@ -1048,7 +1047,7 @@ The congruence property for loops is a little more interesting,
 </div>
 
 <div class="doc">
-<a name="lab382"></a><h4 class="section">Exercise: 3 stars, optional (CSeq_congruence)</h4>
+<a name="lab381"></a><h4 class="section">Exercise: 3 stars, optional (CSeq_congruence)</h4>
 
 </div>
 <div class="code code-space">
@@ -1063,7 +1062,7 @@ The congruence property for loops is a little more interesting,
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab383"></a><h4 class="section">Exercise: 3 stars (CIf_congruence)</h4>
+<a name="lab382"></a><h4 class="section">Exercise: 3 stars (CIf_congruence)</h4>
 
 </div>
 <div class="code code-space">
@@ -1109,7 +1108,7 @@ The congruence property for loops is a little more interesting,
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Equiv.html#CIf_congruence"><span class="id" type="axiom">CIf_congruence</span></a>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Equiv.html#refl_bequiv"><span class="id" type="lemma">refl_bequiv</span></a>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Equiv.html#CAss_congruence"><span class="id" type="lemma">CAss_congruence</span></a>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Equiv.html#aequiv"><span class="id" type="definition">aequiv</span></a>. <span class="id" type="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">symmetry</span>. <span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Minus.html#minus_diag"><span class="id" type="lemma">minus_diag</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">symmetry</span>. <span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Minus.html#minus_diag"><span class="id" type="abbreviation">minus_diag</span></a>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Equiv.html#refl_cequiv"><span class="id" type="lemma">refl_cequiv</span></a>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 
@@ -1117,7 +1116,7 @@ The congruence property for loops is a little more interesting,
 </div>
 
 <div class="doc">
-<a name="lab384"></a><h1 class="section">Program Transformations</h1>
+<a name="lab383"></a><h1 class="section">Program Transformations</h1>
 
 <div class="paragraph"> </div>
 
@@ -1151,7 +1150,7 @@ The congruence property for loops is a little more interesting,
 </div>
 
 <div class="doc">
-<a name="lab385"></a><h2 class="section">The Constant-Folding Transformation</h2>
+<a name="lab384"></a><h2 class="section">The Constant-Folding Transformation</h2>
 
 <div class="paragraph"> </div>
 
@@ -1242,7 +1241,7 @@ Not only can we lift <span class="inlinecode"><span class="id" type="var">fold_c
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> (<a class="idref" href="Equiv.html#fold_constants_aexp"><span class="id" type="definition">fold_constants_aexp</span></a> <span class="id" type="var">a<sub>1</sub></span>, <a class="idref" href="Equiv.html#fold_constants_aexp"><span class="id" type="definition">fold_constants_aexp</span></a> <span class="id" type="var">a<sub>2</sub></span>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">with</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <span class="id" type="var">n<sub>1</sub></span>, <a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <span class="id" type="var">n<sub>2</sub></span>) ⇒<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">if</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span> <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">if</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="abbreviation">beq_nat</span></a> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span> <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id" type="var">a<sub>1</sub>'</span>, <span class="id" type="var">a<sub>2</sub>'</span>) ⇒<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub>'</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
@@ -1250,7 +1249,7 @@ Not only can we lift <span class="inlinecode"><span class="id" type="var">fold_c
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> (<a class="idref" href="Equiv.html#fold_constants_aexp"><span class="id" type="definition">fold_constants_aexp</span></a> <span class="id" type="var">a<sub>1</sub></span>, <a class="idref" href="Equiv.html#fold_constants_aexp"><span class="id" type="definition">fold_constants_aexp</span></a> <span class="id" type="var">a<sub>2</sub></span>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">with</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <span class="id" type="var">n<sub>1</sub></span>, <a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <span class="id" type="var">n<sub>2</sub></span>) ⇒<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">if</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="definition">leb</span></a> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span> <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">if</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="abbreviation">leb</span></a> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span> <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id" type="var">a<sub>1</sub>'</span>, <span class="id" type="var">a<sub>2</sub>'</span>) ⇒<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub>'</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
@@ -1369,7 +1368,7 @@ To fold constants in a command, we apply the appropriate folding
 </div>
 
 <div class="doc">
-<a name="lab386"></a><h2 class="section">Soundness of Constant Folding</h2>
+<a name="lab385"></a><h2 class="section">Soundness of Constant Folding</h2>
 
 <div class="paragraph"> </div>
 
@@ -1405,7 +1404,7 @@ To fold constants in a command, we apply the appropriate folding
 </div>
 
 <div class="doc">
-<a name="lab387"></a><h4 class="section">Exercise: 3 stars, optional (fold_bexp_Eq_informal)</h4>
+<a name="lab386"></a><h4 class="section">Exercise: 3 stars, optional (fold_bexp_Eq_informal)</h4>
  Here is an informal proof of the <span class="inlinecode"><span class="id" type="var">BEq</span></span> case of the soundness
     argument for boolean expression constant folding.  Read it
     carefully and compare it to the formal proof that follows.  Then
@@ -1616,7 +1615,7 @@ The only interesting case is when both a<sub>1</sub> and a<sub>2</sub>
 <div class="code code-tight">
 
 <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">destruct</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <span class="id" type="var">n</span> <span class="id" type="var">n<sub>0</sub></span>); <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">destruct</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="abbreviation">beq_nat</span></a> <span class="id" type="var">n</span> <span class="id" type="var">n<sub>0</sub></span>); <span class="id" type="tactic">reflexivity</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;BLe&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">admit</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;BNot&nbsp;*)</span><br/>
@@ -1636,7 +1635,7 @@ The only interesting case is when both a<sub>1</sub> and a<sub>2</sub>
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab388"></a><h4 class="section">Exercise: 3 stars (fold_constants_com_sound)</h4>
+<a name="lab387"></a><h4 class="section">Exercise: 3 stars (fold_constants_com_sound)</h4>
  Complete the <span class="inlinecode"><span class="id" type="var">WHILE</span></span> case of the following proof. 
 </div>
 <div class="code code-tight">
@@ -1687,12 +1686,12 @@ The only interesting case is when both a<sub>1</sub> and a<sub>2</sub>
 </div>
 
 <div class="doc">
-<a name="lab389"></a><h3 class="section">Soundness of (0 + n) Elimination, Redux</h3>
+<a name="lab388"></a><h3 class="section">Soundness of (0 + n) Elimination, Redux</h3>
 
 <div class="paragraph"> </div>
 
-<a name="lab390"></a><h4 class="section">Exercise: 4 stars, advanced, optional (optimize_0plus)</h4>
- Recall the definition <span class="inlinecode"><span class="id" type="var">optimize_0plus</span></span> from the <a href="Imp.html"><font color="gray">Imp</font></a> chapter:
+<a name="lab389"></a><h4 class="section">Exercise: 4 stars, advanced, optional (optimize_0plus)</h4>
+ Recall the definition <span class="inlinecode"><span class="id" type="var">optimize_0plus</span></span> from the <a href="Imp.html"><span class="inlineref">Imp</span></a> chapter:
 
 <div class="paragraph"> </div>
 
@@ -1770,7 +1769,7 @@ The only interesting case is when both a<sub>1</sub> and a<sub>2</sub>
 </div>
 
 <div class="doc">
-<a name="lab391"></a><h1 class="section">Proving That Programs Are <i>Not</i> Equivalent</h1>
+<a name="lab390"></a><h1 class="section">Proving That Programs Are <i>Not</i> Equivalent</h1>
 
 <div class="paragraph"> </div>
 
@@ -1981,7 +1980,7 @@ Sadly, the property does <i>not</i> always hold.
 </div>
 
 <div class="doc">
-<a name="lab392"></a><h4 class="section">Exercise: 4 stars, optional (better_subst_equiv)</h4>
+<a name="lab391"></a><h4 class="section">Exercise: 4 stars, optional (better_subst_equiv)</h4>
  The equivalence we had in mind above was not complete nonsense &mdash;
     it was actually almost right.  To make it correct, we just need to
     exclude the case where the variable <span class="inlinecode"><span class="id" type="var">X</span></span> occurs in the
@@ -2030,7 +2029,7 @@ Using <span class="inlinecode"><span class="id" type="var">var_not_used_in_aexp<
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab393"></a><h4 class="section">Exercise: 3 stars, optional (inequiv_exercise)</h4>
+<a name="lab392"></a><h4 class="section">Exercise: 3 stars, optional (inequiv_exercise)</h4>
  Prove that an infinite loop is not equivalent to <span class="inlinecode"><span class="id" type="var">SKIP</span></span> 
 </div>
 <div class="code code-tight">
@@ -2051,7 +2050,7 @@ Using <span class="inlinecode"><span class="id" type="var">var_not_used_in_aexp<
 </div>
 
 <div class="doc">
-<a name="lab394"></a><h1 class="section">Extended Exercise: Nondeterministic Imp</h1>
+<a name="lab393"></a><h1 class="section">Extended Exercise: Nondeterministic Imp</h1>
 
 <div class="paragraph"> </div>
 
@@ -2153,7 +2152,7 @@ To formalize Himp, we first add a clause to the definition of
 </div>
 
 <div class="doc">
-<a name="lab395"></a><h4 class="section">Exercise: 2 stars (himp_ceval)</h4>
+<a name="lab394"></a><h4 class="section">Exercise: 2 stars (himp_ceval)</h4>
  Now, we must extend the operational semantics. We have provided
    a template for the <span class="inlinecode"><span class="id" type="var">ceval</span></span> relation below, specifying the big-step
    semantics. What rule(s) must be added to the definition of <span class="inlinecode"><span class="id" type="var">ceval</span></span>
@@ -2236,7 +2235,7 @@ Let's apply this definition to prove some nondeterministic
     programs equivalent / inequivalent. 
 <div class="paragraph"> </div>
 
-<a name="lab396"></a><h4 class="section">Exercise: 3 stars (havoc_swap)</h4>
+<a name="lab395"></a><h4 class="section">Exercise: 3 stars (havoc_swap)</h4>
  Are the following two programs equivalent? 
 </div>
 <div class="code code-tight">
@@ -2268,7 +2267,7 @@ If you think they are equivalent, prove it. If you think they are
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab397"></a><h4 class="section">Exercise: 4 stars, optional (havoc_copy)</h4>
+<a name="lab396"></a><h4 class="section">Exercise: 4 stars, optional (havoc_copy)</h4>
  Are the following two programs equivalent? 
 </div>
 <div class="code code-tight">
@@ -2313,7 +2312,7 @@ If you think they are equivalent, then prove it. If you think they
 
 <div class="paragraph"> </div>
 
-<a name="lab398"></a><h4 class="section">Exercise: 5 stars, advanced (p1_p2_equiv)</h4>
+<a name="lab397"></a><h4 class="section">Exercise: 5 stars, advanced (p1_p2_equiv)</h4>
  Prove that <span class="inlinecode"><span class="id" type="var">p<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">p<sub>2</sub></span></span> are equivalent. In this and the following
     exercises, try to understand why the <span class="inlinecode"><span class="id" type="var">cequiv</span></span> definition has the
     behavior it has on these examples. 
@@ -2373,7 +2372,7 @@ You should use these lemmas to prove that <span class="inlinecode"><span class="
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab399"></a><h4 class="section">Exercise: 4 stars, advanced (p3_p4_inquiv)</h4>
+<a name="lab398"></a><h4 class="section">Exercise: 4 stars, advanced (p3_p4_inquiv)</h4>
  Prove that the following programs are <i>not</i> equivalent. 
 </div>
 <div class="code code-tight">
@@ -2400,7 +2399,7 @@ You should use these lemmas to prove that <span class="inlinecode"><span class="
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab400"></a><h4 class="section">Exercise: 5 stars, advanced, optional (p5_p6_equiv)</h4>
+<a name="lab399"></a><h4 class="section">Exercise: 5 stars, advanced, optional (p5_p6_equiv)</h4>
 
 </div>
 <div class="code code-space">
@@ -2432,13 +2431,13 @@ You should use these lemmas to prove that <span class="inlinecode"><span class="
 </div>
 
 <div class="doc">
-<a name="lab401"></a><h1 class="section">Additional Exercises</h1>
+<a name="lab400"></a><h1 class="section">Additional Exercises</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab402"></a><h4 class="section">Exercise: 4 stars, optional (for_while_equiv)</h4>
+<a name="lab401"></a><h4 class="section">Exercise: 4 stars, optional (for_while_equiv)</h4>
  This exercise extends the optional <span class="inlinecode"><span class="id" type="var">add_for_loop</span></span> exercise from
-    the <a href="Imp.html"><font color="gray">Imp</font></a> chapter, where you were asked to extend the language 
+    the <a href="Imp.html"><span class="inlineref">Imp</span></a> chapter, where you were asked to extend the language 
     of commands with C-style <span class="inlinecode"><span class="id" type="keyword">for</span></span> loops.  Prove that the command:
 
 <div class="paragraph"> </div>
@@ -2473,7 +2472,7 @@ You should use these lemmas to prove that <span class="inlinecode"><span class="
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab403"></a><h4 class="section">Exercise: 3 stars, optional (swap_noninterfering_assignments)</h4>
+<a name="lab402"></a><h4 class="section">Exercise: 3 stars, optional (swap_noninterfering_assignments)</h4>
  (Hint: You'll need <span class="inlinecode"><span class="id" type="var">functional_extensionality</span></span> for this one.) 
 </div>
 <div class="code code-tight">
@@ -2494,7 +2493,7 @@ You should use these lemmas to prove that <span class="inlinecode"><span class="
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab404"></a><h4 class="section">Exercise: 4 stars, advanced, optional (capprox)</h4>
+<a name="lab403"></a><h4 class="section">Exercise: 4 stars, advanced, optional (capprox)</h4>
 
 <div class="paragraph"> </div>
 
@@ -2528,11 +2527,11 @@ For example, the program <span class="inlinecode"><span class="id" type="var">c<
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="c<sub>3</sub>"><span class="id" type="definition">c<sub>3</sub></span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> := <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
-<span class="id" type="keyword">Definition</span> <a name="c<sub>4</sub>"><span class="id" type="definition">c<sub>4</sub></span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> := <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="c<sub>3</sub>"><span class="id" type="definition">c<sub>3</sub></span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> <span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="c<sub>4</sub>"><span class="id" type="definition">c<sub>4</sub></span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> <span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <a name="c3_c4_different"><span class="id" type="lemma">c3_c4_different</span></a> : ¬ <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#c<sub>3</sub>"><span class="id" type="definition">c<sub>3</sub></span></a> <a class="idref" href="Equiv.html#c<sub>4</sub>"><span class="id" type="definition">c<sub>4</sub></span></a> <span style="font-family: arial;">&and;</span> ¬ <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#c<sub>4</sub>"><span class="id" type="definition">c<sub>4</sub></span></a> <a class="idref" href="Equiv.html#c<sub>3</sub>"><span class="id" type="definition">c<sub>3</sub></span></a>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="c3_c4_different"><span class="id" type="lemma">c3_c4_different</span></a> : ¬ <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#c<sub>3</sub>"><span class="id" type="axiom">c<sub>3</sub></span></a> <a class="idref" href="Equiv.html#c<sub>4</sub>"><span class="id" type="axiom">c<sub>4</sub></span></a> <span style="font-family: arial;">&and;</span> ¬ <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#c<sub>4</sub>"><span class="id" type="axiom">c<sub>4</sub></span></a> <a class="idref" href="Equiv.html#c<sub>3</sub>"><span class="id" type="axiom">c<sub>3</sub></span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
@@ -2544,11 +2543,11 @@ Find a program <span class="inlinecode"><span class="id" type="var">cmin</span><
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="cmin"><span class="id" type="definition">cmin</span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="cmin"><span class="id" type="definition">cmin</span></a> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <a name="cmin_minimal"><span class="id" type="lemma">cmin_minimal</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span>, <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#cmin"><span class="id" type="definition">cmin</span></a> <a class="idref" href="Equiv.html#c"><span class="id" type="variable">c</span></a>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="cmin_minimal"><span class="id" type="lemma">cmin_minimal</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span>, <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#cmin"><span class="id" type="axiom">cmin</span></a> <a class="idref" href="Equiv.html#c"><span class="id" type="variable">c</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
@@ -2561,12 +2560,12 @@ Finally, find a non-trivial property which is preserved by
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="zprop"><span class="id" type="definition">zprop</span></a> (<span class="id" type="var">c</span> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a>) : <span class="id" type="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="zprop"><span class="id" type="definition">zprop</span></a> (<span class="id" type="var">c</span> : <a class="idref" href="Imp.html#com"><span class="id" type="inductive">com</span></a>) : <span class="id" type="keyword">Prop</span> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Theorem</span> <a name="zprop_preserving"><span class="id" type="lemma">zprop_preserving</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">c'</span>,<br/>
-&nbsp;&nbsp;<a class="idref" href="Equiv.html#zprop"><span class="id" type="definition">zprop</span></a> <a class="idref" href="Equiv.html#c"><span class="id" type="variable">c</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#c"><span class="id" type="variable">c</span></a> <a class="idref" href="Equiv.html#c'"><span class="id" type="variable">c'</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Equiv.html#zprop"><span class="id" type="definition">zprop</span></a> <a class="idref" href="Equiv.html#c'"><span class="id" type="variable">c'</span></a>.<br/>
+&nbsp;&nbsp;<a class="idref" href="Equiv.html#zprop"><span class="id" type="axiom">zprop</span></a> <a class="idref" href="Equiv.html#c"><span class="id" type="variable">c</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Equiv.html#capprox"><span class="id" type="definition">capprox</span></a> <a class="idref" href="Equiv.html#c"><span class="id" type="variable">c</span></a> <a class="idref" href="Equiv.html#c'"><span class="id" type="variable">c'</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Equiv.html#zprop"><span class="id" type="axiom">zprop</span></a> <a class="idref" href="Equiv.html#c'"><span class="id" type="variable">c'</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
 

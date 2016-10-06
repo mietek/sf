@@ -15,7 +15,7 @@
     indicate success or failure.  The latter is defined in terms of
     the former, using [None] as the default element. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * The Coq Standard Library *)
 
 (** One small digression before we start.
@@ -39,7 +39,7 @@ Require Import Coq.Logic.FunctionalExtensionality.
     The [SearchAbout] command is a good way to look for theorems 
     involving objects of specific types. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Identifiers *)
 
 (** First, we need a type for the keys that we use to index into our
@@ -51,8 +51,8 @@ Require Import Coq.Logic.FunctionalExtensionality.
 Inductive id : Type :=
   | Id : nat -> id.
 
-Definition beq_id id1 id2 :=
-  match id1,id2 with
+Definition beq_id x y :=
+  match x,y with
     | Id n1, Id n2 => beq_nat n1 n2
   end.
 
@@ -64,8 +64,8 @@ Proof.
 (** The following useful property of [beq_id] follows from an
     analogous lemma about numbers: *)
 
-Theorem beq_id_true_iff : forall id1 id2 : id,
-  beq_id id1 id2 = true <-> id1 = id2.
+Theorem beq_id_true_iff : forall x y : id,
+  beq_id x y = true <-> x = y.
 Proof.
    intros [n1] [n2].
    unfold beq_id.
@@ -93,7 +93,7 @@ Proof.
   intros x y. rewrite beq_id_false_iff.
   intros H. apply H. Qed.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Total Maps *)
 
 (** Our main job in this chapter will be to build a definition of
@@ -164,11 +164,18 @@ Proof. reflexivity. Qed.
     facts about how they behave.  Even if you don't work the following
     exercises, make sure you thoroughly understand the statements of
     the lemmas!  (Some of the proofs require the functional
-    extensionality axiom discussed in the [Logic] chapter, which is
-    also included in the standard library.) *)
+    extensionality axiom, which is discussed in the [Logic]
+    chapter and included in the Coq standard library.) *)
+
+(** **** Exercise: 1 star, optional (t_apply_empty)  *)
+(** First, the empty map returns its default element for all keys: *)
+Lemma t_apply_empty:  forall A x v, @t_empty A v x = v.
+Proof.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 2 stars, optional (t_update_eq)  *)
-(** First, if we update a map [m] at a key [x] with a new value [v]
+(** Next, if we update a map [m] at a key [x] with a new value [v]
     and then look up [x] in the map resulting from the [update], we
     get back [v]: *)
 
@@ -250,7 +257,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Partial maps *)
 
 (** Finally, we define _partial maps_ on top of total maps.  A partial
@@ -268,6 +275,12 @@ Definition update {A:Type} (m : partial_map A)
 
 (** We can now lift all of the basic lemmas about total maps to
     partial maps.  *)
+
+Lemma apply_empty : forall A x, @empty A x = None.
+Proof.
+  intros. unfold empty. rewrite t_apply_empty.
+  reflexivity.
+Qed.
 
 Lemma update_eq : forall A (m: partial_map A) x v,
   (update m x v) x = Some v.

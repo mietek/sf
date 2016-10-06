@@ -42,11 +42,11 @@ Require Import Coq.Logic.FunctionalExtensionality.
 Require Import Coq.Lists.List.
 Import ListNotations.
 
-Require Import SfLib.
 Require Import Maps.
 Require Import Imp.
+Require Import Smallstep.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Generalizing Constant Folding *)
 
 (** The starting point of partial evaluation is to represent our
@@ -54,6 +54,7 @@ Require Import Imp.
     assignments above, the partial evaluator may know only that [X] is
     [3] and nothing about any other variable. *)
 
+(* ================================================================= *)
 (** ** Partial States *)
 
 (** Conceptually speaking, we can think of such partial states as the
@@ -155,6 +156,7 @@ Proof.
       * intros [H1 | H2]; congruence.
 Qed.
 
+(* ================================================================= *)
 (** ** Arithmetic Expressions *)
 
 (** Partial evaluation of [aexp] is straightforward -- it is basically
@@ -334,6 +336,7 @@ Proof.
   rewrite pe_update_correct. destruct (pe_lookup pe_st i); reflexivity.
 Qed.
 
+(* ================================================================= *)
 (** ** Boolean Expressions *)
 
 (** The partial evaluation of boolean expressions is similar.  In
@@ -403,7 +406,7 @@ Proof.
          rewrite IHb1; rewrite IHb2; reflexivity).
 Qed.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Partial Evaluation of Commands, Without Loops *)
 
 (** What about the partial evaluation of commands?  The analogy
@@ -448,6 +451,7 @@ Qed.
     to hold.  The assignment to [X] appears in the final partial state,
     not the residual command. *)
 
+(* ================================================================= *)
 (** ** Assignment *)
 
 (** Let's start by considering how to partially evaluate an
@@ -519,6 +523,7 @@ Proof. intros st pe_st V n. apply functional_extensionality. intros V0.
   unfold t_update. rewrite !pe_update_correct. rewrite pe_add_correct.
   destruct (beq_id V V0); reflexivity. Qed.
 
+(* ================================================================= *)
 (** ** Conditional *)
 
 (** Trickier than assignments to partially evaluate is the
@@ -643,7 +648,7 @@ Proof. intros pe_st1 pe_st2 V.
     unfold pe_disagree_at in Hagree.
     destruct (pe_lookup pe_st1 V) as [n1|];
     destruct (pe_lookup pe_st2 V) as [n2|];
-      try reflexivity; try solve by inversion.
+      try reflexivity; try solve_by_invert.
     rewrite negb_false_iff in Hagree.
     apply beq_nat_true in Hagree. subst. reflexivity. Qed.
 
@@ -754,6 +759,7 @@ Proof. intros pe_st ids st. induction ids as [| V ids]; simpl.
       * (* not equal *) rewrite false_beq_id; simpl; congruence.
 Qed.
 
+(* ================================================================= *)
 (** ** The Partial Evaluation Relation *)
 
 (** At long last, we can define a partial evaluator for commands
@@ -803,6 +809,7 @@ Inductive pe_com : com -> pe_state -> com -> pe_state -> Prop :=
 Hint Constructors pe_com.
 Hint Constructors ceval.
 
+(* ================================================================= *)
 (** ** Examples *)
 
 (** Below are some examples of using the partial evaluator.  To make
@@ -836,11 +843,12 @@ Example pe_example3:
       / [(X,3)].
 Proof. erewrite f_equal2 with (f := fun c st => _ / _ \\ c / st).
   eapply PE_Seq. eapply PE_AssStatic. reflexivity.
-  eapply PE_If; intuition eauto; try solve by inversion.
+  eapply PE_If; intuition eauto; try solve_by_invert.
   econstructor. eapply PE_AssStatic. reflexivity.
   eapply PE_IfFalse. reflexivity. econstructor.
   reflexivity. reflexivity. Qed.
 
+(* ================================================================= *)
 (** ** Correctness of Partial Evaluation *)
 
 (** Finally let's prove that this partial evaluator is correct! *)
@@ -866,7 +874,7 @@ Theorem pe_com_complete:
 Proof. intros c pe_st pe_st' c' Hpe.
   induction Hpe; intros st st'' Heval;
   try (inversion Heval; subst;
-       try (rewrite -> pe_bexp_correct, -> H in *; solve by inversion);
+       try (rewrite -> pe_bexp_correct, -> H in *; solve_by_invert);
        []);
   eauto.
   - (* PE_AssStatic *) econstructor. econstructor.
@@ -933,7 +941,7 @@ Proof. intros c pe_st pe_st' c' H st st''. split.
   - (* <- *) apply pe_com_sound. apply H.
 Qed.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Partial Evaluation of Loops *)
 
 (** It may seem straightforward at first glance to extend the partial
@@ -1083,15 +1091,16 @@ Inductive pe_com : com -> pe_state -> com -> pe_state -> com -> Prop :=
 
 Hint Constructors pe_com.
 
+(* ================================================================= *)
 (** ** Examples *)
 
 Ltac step i :=
-  (eapply i; intuition eauto; try solve by inversion);
+  (eapply i; intuition eauto; try solve_by_invert);
   repeat (try eapply PE_Seq;
           try (eapply PE_AssStatic; simpl; reflexivity);
           try (eapply PE_AssDynamic;
                [ simpl; reflexivity
-               | intuition eauto; solve by inversion ])).
+               | intuition eauto; solve_by_invert])).
 
 Definition square_loop: com :=
   WHILE BLe (ANum 1) (AId X) DO
@@ -1163,6 +1172,7 @@ Proof. erewrite f_equal2 with (f := fun c st => _ / _ \\ c / st / SKIP).
   step PE_WhileFixedEnd.
   inversion H. reflexivity. reflexivity. reflexivity. Qed.
 
+(* ================================================================= *)
 (** ** Correctness *)
 
 (** Because this partial evaluator can unroll a loop n-fold where n is
@@ -1265,7 +1275,7 @@ Theorem pe_com_complete:
 Proof. intros c pe_st pe_st' c' c'' Hpe.
   induction Hpe; intros st st'' n Heval;
   try (inversion Heval; subst;
-       try (rewrite -> pe_bexp_correct, -> H in *; solve by inversion);
+       try (rewrite -> pe_bexp_correct, -> H in *; solve_by_invert);
        []);
   eauto.
   - (* PE_AssStatic *) econstructor. econstructor.
@@ -1425,7 +1435,7 @@ Qed.
 
 End Loop.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Partial Evaluation of Flowchart Programs *)
 
 (** Instead of partially evaluating [WHILE] loops directly, the
@@ -1437,6 +1447,7 @@ End Loop.
     the residual flowchart can be converted back to [WHILE] loops, but
     that is not possible in general; we do not pursue it here. *)
 
+(* ================================================================= *)
 (** ** Basic blocks *)
 
 (** A flowchart is made of _basic blocks_, which we represent with the
@@ -1492,6 +1503,7 @@ Example keval_example:
   = (t_update (t_update empty_state Y 0) X 1, loop).
 Proof. reflexivity. Qed.
 
+(* ================================================================= *)
 (** ** Flowchart programs *)
 
 (** A flowchart program is simply a lookup function that maps labels
@@ -1533,6 +1545,7 @@ Proof. erewrite f_equal with (f := fun st => peval _ _ _ st _).
   apply functional_extensionality. intros i. rewrite t_update_same; auto.
 Qed.
 
+(* ================================================================= *)
 (** ** Partial Evaluation of Basic Blocks and Flowchart Programs *)
 
 (** Partial evaluation changes the label type in a systematic way: if
@@ -1639,4 +1652,4 @@ Proof. intros.
       eapply E_Some; eauto. apply pe_block_correct. apply Hkeval.
 Qed.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)

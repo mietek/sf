@@ -4,12 +4,11 @@ Require Import Coq.Bool.Bool.
 Require Import Coq.Arith.Arith.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.omega.Omega.
-Require Import SfLib.
 Require Import Maps.
 Require Import Imp.
 Require Import Hoare.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Decorated Programs *)
 
 (** The beauty of Hoare Logic is that it is _compositional_: the
@@ -41,7 +40,6 @@ Require Import Hoare.
     END;
       {{ Z - X = p - m /\ ~ (X <> 0) }} ->>
       {{ Z = p - m }}
-
 *)
 
 (** Concretely, a decorated program consists of the program text
@@ -57,7 +55,6 @@ Require Import Hoare.
           {{ P }}
           SKIP
           {{ P }}
-
 *)
 
 (** - The sequential composition of [c1] and [c2] is locally
@@ -70,7 +67,6 @@ Require Import Hoare.
           {{ Q }}
           c2
           {{ R }}
-
 *)
 
 (** - An assignment is locally consistent if its precondition is
@@ -79,7 +75,6 @@ Require Import Hoare.
           {{ P [X |-> a] }}
           X ::= a
           {{ P }}
-
 *)
 
 (** - A conditional is locally consistent (with respect to assertions
@@ -100,7 +95,6 @@ Require Import Hoare.
             {{ Q }}
           FI
           {{ Q }}
-
 *)
 
 (** - A while loop with precondition [P] is locally consistent if its
@@ -115,7 +109,6 @@ Require Import Hoare.
             {{ P }}
           END
           {{ P /\ ~b }}
-
 *)
 
 (** - A pair of assertions separated by [->>] is locally consistent if
@@ -140,7 +133,7 @@ Require Import Hoare.
     to construct decorations for several simple programs that don't
     involve non-trivial loop invariants. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example: Swapping Using Addition and Subtraction *)
 
 (** Here is a program that swaps the values of two variables using
@@ -163,7 +156,6 @@ Require Import Hoare.
     (4)     {{ X - Y = n /\ Y = m }}
            X ::= X - Y
     (5)     {{ X = n /\ Y = m }}
-
 *)
 (** These decorations can be constructed as follows:
       - We begin with the undecorated program (the unnumbered lines).
@@ -193,7 +185,7 @@ Require Import Hoare.
     possibility of arithmetic overflow anywhere in this argument.  
     This makes life quite a bit simpler! *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example: Simple Conditionals *)
 
 (** Here is a simple decorated program using conditionals:
@@ -248,11 +240,10 @@ These decorations were constructed as follows:
       {{                         }}
   FI
     {{ Y = X + Z }}
-
 *)
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example: Reduce to Zero *)
 
 (** Here is a [WHILE] loop that is so simple it needs no
@@ -317,7 +308,7 @@ Proof.
     apply beq_nat_true in GuardFalse.
     apply GuardFalse. Qed.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example: Division *)
 
 (** The following Imp program calculates the integer quotient and
@@ -371,7 +362,7 @@ Proof.
     implies (2) and that (5) implies (6).  This is indeed the case, so
     we have a valid decorated program. *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Finding Loop Invariants *)
 
 (** Once the outermost precondition and postcondition are
@@ -388,6 +379,7 @@ Proof.
     This section shows how to approach the challenge of finding loop
     invariants through a series of examples and exercises. *)
 
+(* ================================================================= *)
 (** ** Example: Slow Subtraction *)
 
 (** The following program subtracts the value of [X] from the value of
@@ -526,7 +518,7 @@ Proof.
     0], we have [Y - X = (Y - 1) - (X - 1)]; this holds for all
     natural numbers [X] and [Y].) *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Exercise: Slow Assignment *)
 
 (** **** Exercise: 2 stars (slow_assignment)  *)
@@ -549,7 +541,7 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Exercise: Slow Addition *)
 
 (** **** Exercise: 3 stars, optional (add_slowly_decoration)  *)
@@ -569,7 +561,7 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example: Parity *)
 
 (** Here is a cute little program for computing the parity of the
@@ -651,7 +643,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example: Finding Square Roots *)
 
 
@@ -664,7 +656,6 @@ Proof.
       Z ::= Z+1
     END
       {{ Z*Z<=m /\ m<(Z+1)*(Z+1) }}
-
 *)
 
 (** As above, we can try to use the postcondition as a candidate
@@ -720,7 +711,7 @@ Proof.
     specification and it is not changed by the loop), it is necessary
     to add the fact that it doesn't change to the loop invariant. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Example: Squaring *)
 
 
@@ -735,7 +726,6 @@ Proof.
     Y ::= Y + 1
   END
     {{ Z = m*m }}
-
 *)
 
 (** The first thing to note is that the loop reads [X] but doesn't
@@ -798,7 +788,7 @@ Proof.
     with expressions involving both variables and parameters, like
     [m - Y] -- when going from postconditions to invariants. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Exercise: Factorial *)
 
 (** **** Exercise: 3 stars (factorial)  *)
@@ -833,14 +823,13 @@ Proof.
   END
     {{                                      }} ->>
     {{ Y = m! }}
-
 *)
 
 
 (** [] *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Exercise: Min *)
 
 (** **** Exercise: 3 stars (Min_Hoare)  *)
@@ -876,7 +865,6 @@ Proof.
   END
   {{                            }} ->>
   {{ Z = min a b }}
-
 *)
 
 
@@ -930,12 +918,11 @@ Proof.
   END
     {{                                        }} ->>
     {{ Z = a + b + c }}
-
 *)
 
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Exercise: Power Series *)
 
 (** **** Exercise: 4 stars, optional (dpow2_down)  *)
@@ -955,7 +942,7 @@ Proof.
 
 (* FILL IN HERE *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Weakest Preconditions (Optional) *)
 
 (** Some Hoare triples are more interesting than others.
@@ -1020,7 +1007,6 @@ Definition is_wp P c Q :=
   6) {{ ? }}
      WHILE True DO X ::= 0 END
      {{ X = 0 }}
-
 *)
 (* FILL IN HERE *)
 (** [] *)
@@ -1061,7 +1047,7 @@ Proof.
 End Himp2.
 (** [] *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Formal Decorated Programs (Optional) *)
 
 (** Our informal conventions for decorated programs amount to a
@@ -1073,6 +1059,7 @@ End Himp2.
     completely formal and indeed that checking the validity of
     decorated programs can mostly be automated.  *)
 
+(* ================================================================= *)
 (** ** Syntax *)
 
 (** The first thing we need to do is to formalize a variant of the
@@ -1223,6 +1210,7 @@ Definition dec_correct (d:dcom) :=
     decorations are logically consistent and thus add up to a complete
     proof of correctness. *)
 
+(* ================================================================= *)
 (** ** Extracting Verification Conditions *)
 
 (** The function [verification_conditions] takes a [dcom] [d] together
@@ -1319,6 +1307,7 @@ Qed.
     applying [tactic] in the goal and every hypothesis in the
     context.) *)
 
+(* ================================================================= *)
 (** ** Automation *)
 
 (** The propositions generated by [verification_conditions] are fairly
@@ -1338,7 +1327,6 @@ Eval simpl in (verification_conditions (fun st => True) dec_while).
  (fun _ : state => True) [X |-> AMinus (AId X) (ANum 1)]) /\
 (fun st : state => True /\ ~ bassn (BNot (BEq (AId X) (ANum 0))) st) ->>
 (fun st : state => st X = 0)
-
 *)
 
 (** In principle, we could work with such propositions using just the
@@ -1416,8 +1404,8 @@ Proof. intros m p. verify. (* this grinds for a bit! *) Qed.
     incrementing [Y] at each step.  Write a formal version of this
     decorated program and prove it correct. *)
 
-Example slow_assignment_dec (m:nat) : dcom :=
-(* FILL IN HERE *) admit.
+Example slow_assignment_dec (m:nat) : dcom 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Theorem slow_assignment_dec_correct : forall m,
   dec_correct (slow_assignment_dec m).
@@ -1441,12 +1429,14 @@ Fixpoint real_fact (n:nat) : nat :=
 (** [] *)
 
 
+(* ================================================================= *)
 (** ** Examples *)
 
 (** In this section, we use the automation developed above to verify
     formal decorated programs corresponding to most of the informal
     ones we have seen. *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Swapping Using Addition and Subtraction *)
 
 Definition swap : com :=
@@ -1469,6 +1459,7 @@ Theorem swap_correct : forall m n,
   dec_correct (swap_dec m n).
 Proof. intros; verify. Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Simple Conditionals *)
 
 Definition if_minus_plus_com :=
@@ -1517,6 +1508,7 @@ Theorem if_minus_correct :
   dec_correct if_minus_dec.
 Proof. verify. Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Division *)
 
 Definition div_mod_dec (a b : nat) : dcom := (
@@ -1544,6 +1536,7 @@ Proof. intros a b. verify.
   rewrite mult_plus_distr_l. omega.
 Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Parity *)
 
 Definition find_parity : com :=
@@ -1705,6 +1698,7 @@ Proof.
     rewrite <- H. symmetry. apply parity_lt_2. assumption.
 Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Square Roots *)
 
 Definition sqrt_dec m : dcom := (
@@ -1729,6 +1723,7 @@ Theorem sqrt_correct : forall m,
   dec_correct (sqrt_dec m).
 Proof. intro m. verify. Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Squaring *)
 
 (** Again, there are several ways of annotating the squaring program.
@@ -1843,6 +1838,7 @@ Proof.
   reflexivity.
 Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Two loops *)
 
 Definition two_loops_dec (a b c : nat) :=
@@ -1880,6 +1876,7 @@ Theorem two_loops_correct : forall a b c,
   dec_correct (two_loops_dec a b c).
 Proof. intros a b c. verify. Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Power series *)
 
 Fixpoint pow2 n :=
@@ -1946,5 +1943,5 @@ Proof.
     reflexivity.
 Qed.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)
 

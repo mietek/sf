@@ -5,7 +5,6 @@ Require Import Coq.Arith.EqNat.
 Require Import Coq.omega.Omega.
 Require Import Coq.Lists.List.
 Import ListNotations.
-Require Import SfLib.
 Require Import Maps.
 Require Import Imp.
 
@@ -70,7 +69,7 @@ Require Import Imp.
     with a "small-step" relation that specifies, for a given program,
     how the "atomic steps" of computation are performed. *)
 
-(* ########################################################### *)
+(* ################################################################# *)
 (** * A Toy Language *)
 
 (** To save space in the discussion, let's go back to an
@@ -105,7 +104,6 @@ Fixpoint evalF (t : tm) : nat :=
                                t2 \\ n2
                            ------------------                          (E_Plus)
                            P t1 t2 \\ n1 + n2
-
 *)
 
 Reserved Notation " t '\\' n " (at level 50, left associativity).
@@ -134,7 +132,6 @@ Module SimpleArith1.
                               t2 ==> t2'
                       ---------------------------                    (ST_Plus2)
                       P (C n1) t2 ==> P (C n1) t2'
-
 *)
 
 Reserved Notation " t '==>' t' " (at level 40).
@@ -204,7 +201,7 @@ Proof.
 
 End SimpleArith1.
 
-(* ########################################################### *)
+(* ################################################################# *)
 (** * Relations *)
 
 (** We will be working with several different single-step relations,
@@ -287,28 +284,55 @@ Proof.
         reflexivity. assumption.
 Qed.
 
+End SimpleArith2.
+
 (** There is some annoying repetition in this proof.  Each use of
     [inversion Hy2] results in three subcases, only one of which is
     relevant (the one that matches the current case in the induction
     on [Hy1]).  The other two subcases need to be dismissed by finding
     the contradiction among the hypotheses and doing inversion on it.
 
-    The tactic [solve by inversion], which is defined in the small
-    accompanying file [SfLib.v], can be helpful in such cases.  It
-    will solve the goal if it can be solved by inverting some
-    hypothesis; otherwise, it fails.  (The variants [solve by
-    inversion 2] and [solve by inversion 3] that work if two or three
-    consecutive inversions will solve the goal.)
+    The following custom tactic, called [solve_by_inverts], can be
+    helpful in such cases.  It will solve the goal if it can be solved
+    by inverting some hypothesis; otherwise, it fails. *)
 
-    Let's see how a proof of the previous theorem can be simplified
+Ltac solve_by_inverts n :=
+  match goal with | H : ?T |- _ => 
+  match type of T with Prop =>
+    solve [ 
+      inversion H; 
+      match n with S (S (?n')) => subst; solve_by_inverts (S n') end ]
+  end end.
+
+(** The details of how this works are not important for now, but it
+    illustrates the power of Coq's [Ltac] language for
+    programmatically defining special-purpose tactics.  It looks
+    through the current proof state for a hypothesis [H] (the first
+    [match]) of type [Prop] (the second [match]) such that performing
+    inversion on [H] (followed by a recursive invocation of the same
+    tactic, if its argument [n] is greater than one) completely solves
+    the current goal.  If no such hypothesis exists, it fails.
+
+    We will usually want to call [solve_by_inverts] with argument
+    [1] (especially as larger arguments can lead to very slow proof
+    checking), so we define [solve_by_invert] as a shorthand for this
+    case. *)
+
+Ltac solve_by_invert :=
+  solve_by_inverts 1.
+
+(** Let's see how a proof of the previous theorem can be simplified
     using this tactic... *)
+
+Module SimpleArith3.
+Import SimpleArith1.
 
 Theorem step_deterministic_alt: deterministic step.
 Proof.
   intros x y1 y2 Hy1 Hy2.
   generalize dependent y2.
   induction Hy1; intros y2 Hy2;
-    inversion Hy2; subst; try (solve by inversion).
+    inversion Hy2; subst; try solve_by_invert.
   - (* ST_PlusConstConst *) reflexivity.
   - (* ST_Plus1 *)
     apply IHHy1 in H2. rewrite H2. reflexivity.
@@ -316,9 +340,9 @@ Proof.
     apply IHHy1 in H2. rewrite H2. reflexivity.
 Qed.
 
-End SimpleArith2.
+End SimpleArith3.
 
-(* ########################################################### *)
+(* ================================================================= *)
 (** ** Values *)
 
 (** Next, it will be useful to slightly reformulate the
@@ -370,7 +394,6 @@ Inductive value : tm -> Prop :=
                               t2 ==> t2'
                          --------------------                        (ST_Plus2)
                          P v1 t2 ==> P v1 t2'
-
 *)
 (** Again, the variable names here carry important information:
     by convention, [v1] ranges only over values, while [t1] and [t2]
@@ -431,7 +454,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ########################################################### *)
+(* ================================================================= *)
 (** ** Strong Progress and Normal Forms *)
 
 (** The definition of single-step reduction for our toy language
@@ -573,7 +596,6 @@ Proof.
 (** [] *)
 End Temp1.
 
-(* ##################################################### *)
 (** **** Exercise: 2 stars, optional (value_not_same_as_normal_form)  *)
 (** Alternatively, we might mistakenly define [step] so that it
     permits something designated as a value to reduce further. *)
@@ -642,7 +664,7 @@ Proof.
 
 End Temp3.
 
-(* ########################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Additional Exercises *)
 
 Module Temp4.
@@ -741,7 +763,6 @@ Module Temp5.
             tfalse
      ==>
          tfalse.
-
 *)
 
 (** Write an extra clause for the step relation that achieves this
@@ -809,7 +830,7 @@ Proof.
 End Temp5.
 End Temp4.
 
-(* ########################################################### *)
+(* ################################################################# *)
 (** * Multi-Step Reduction *)
 
 (** We've been working so far with the _single-step reduction_
@@ -827,7 +848,6 @@ End Temp4.
     - Then we define a "result" of a term [t] as a normal form that
       [t] can reach by multi-step reduction. *)
 
-(* ########################################################### *)
 
 (** Since we'll want to reuse the idea of multi-step reduction many
     times, let's take a little extra trouble and define it
@@ -903,7 +923,7 @@ Proof.
 (** In particular, for the [multi step] relation on terms, if
     [t1==>*t2] and [t2==>*t3], then [t1==>*t3]. *)
 
-(* ########################################################### *)
+(* ================================================================= *)
 (** ** Examples *)
 
 (** Here's a specific instance of the [multi step] relation: *)
@@ -976,7 +996,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ########################################################### *)
+(* ================================================================= *)
 (** ** Normal Forms Again *)
 
 (** If [t] reduces to [t'] in zero or more steps and [t'] is a
@@ -1104,7 +1124,7 @@ Proof.
         + (* r *)
           rewrite nf_same_as_value. apply v_const.  Qed.
 
-(* ########################################################### *)
+(* ================================================================= *)
 (** ** Equivalence of Big-Step Evaluation and Small-Step Reduction *)
 
 (** Having defined the operational semantics of our tiny programming
@@ -1187,7 +1207,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ########################################################### *)
+(* ================================================================= *)
 (** ** Additional Exercises *)
 
 (** **** Exercise: 3 stars, optional (interp_tm)  *)
@@ -1258,7 +1278,7 @@ Inductive step : tm -> tm -> Prop :=
 End Combined.
 
 
-(* ########################################################### *)
+(* ################################################################# *)
 (** * Small-Step Imp *)
 
 (** Now for a more serious example: a small-step version of the Imp
@@ -1409,7 +1429,7 @@ Inductive cstep : (com * state) -> (com * state) -> Prop :=
   where " t '/' st '==>' t' '/' st' " := (cstep (t,st) (t',st')).
 
 
-(* ########################################################### *)
+(* ################################################################# *)
 (** * Concurrent Imp *)
 
 (** Finally, to show the power of this definitional style, let's
@@ -1614,7 +1634,7 @@ Qed.
 
 End CImp.
 
-(* ########################################################### *)
+(* ################################################################# *)
 (** * A Small-Step Stack Machine *)
 
 (** Our last example is a small-step semantics for the stack machine
@@ -1652,8 +1672,8 @@ Definition stack_multistep st := multi (stack_step st).
     State what it means for the compiler to be correct according to
     the stack machine small step semantics and then prove it. *)
 
-Definition compiler_is_correct_statement : Prop :=
-(* FILL IN HERE *) admit.
+Definition compiler_is_correct_statement : Prop 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 
 Theorem compiler_is_correct : compiler_is_correct_statement.
@@ -1661,5 +1681,5 @@ Proof.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)
 

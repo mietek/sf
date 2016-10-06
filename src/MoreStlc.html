@@ -29,7 +29,6 @@
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="keyword">Types</span>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br/>
@@ -39,7 +38,7 @@
 </div>
 
 <div class="doc">
-<a name="lab600"></a><h1 class="section">Simple Extensions to STLC</h1>
+<a name="lab599"></a><h1 class="section">Simple Extensions to STLC</h1>
 
 <div class="paragraph"> </div>
 
@@ -51,17 +50,17 @@
     typing. 
 <div class="paragraph"> </div>
 
-<a name="lab601"></a><h2 class="section">Numbers</h2>
+<a name="lab600"></a><h2 class="section">Numbers</h2>
 
 <div class="paragraph"> </div>
 
  As we saw in exercise <span class="inlinecode"><span class="id" type="var">stlc_arith</span></span> at the end of the <span class="inlinecode"><span class="id" type="var">StlcProp</span></span>
     chapter, adding types, constants, and primitive operations for
     numbers is easy &mdash; basically just a matter of combining the
-    <a href="Types} and &lambda;CHAP{Stlc.html"><font color="gray">Types} and &lambda;CHAP{Stlc</font></a> chapters. 
+    <a href="Types.html"><span class="inlineref">Types</span></a> and <a href="Stlc.html"><span class="inlineref">Stlc</span></a> chapters. 
 <div class="paragraph"> </div>
 
-<a name="lab602"></a><h2 class="section">Let Bindings</h2>
+<a name="lab601"></a><h2 class="section">Let Bindings</h2>
 
 <div class="paragraph"> </div>
 
@@ -146,7 +145,7 @@
 </table></center>
 <div class="paragraph"> </div>
 
-<a name="lab603"></a><h2 class="section">Pairs</h2>
+<a name="lab602"></a><h2 class="section">Pairs</h2>
 
 <div class="paragraph"> </div>
 
@@ -353,7 +352,7 @@
    this pair are <span class="inlinecode"><span class="id" type="var">T<sub>11</sub></span></span> and <span class="inlinecode"><span class="id" type="var">T<sub>12</sub></span></span>. 
 <div class="paragraph"> </div>
 
-<a name="lab604"></a><h2 class="section">Unit</h2>
+<a name="lab603"></a><h2 class="section">Unit</h2>
 
 <div class="paragraph"> </div>
 
@@ -412,7 +411,7 @@
     evaluated only for its effect. 
 <div class="paragraph"> </div>
 
-<a name="lab605"></a><h2 class="section">Sums</h2>
+<a name="lab604"></a><h2 class="section">Sums</h2>
 
 <div class="paragraph"> </div>
 
@@ -665,7 +664,7 @@
     formalize. 
 <div class="paragraph"> </div>
 
-<a name="lab606"></a><h2 class="section">Lists</h2>
+<a name="lab605"></a><h2 class="section">Lists</h2>
 
 <div class="paragraph"> </div>
 
@@ -856,7 +855,7 @@
 </table></center>
 <div class="paragraph"> </div>
 
-<a name="lab607"></a><h2 class="section">General Recursion</h2>
+<a name="lab606"></a><h2 class="section">General Recursion</h2>
 
 <div class="paragraph"> </div>
 
@@ -1039,7 +1038,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 
 <div class="paragraph"> </div>
 
-<a name="lab608"></a><h4 class="section">Exercise: 1 star, optional (halve_fix)</h4>
+<a name="lab607"></a><h4 class="section">Exercise: 1 star, optional (halve_fix)</h4>
  Translate this informal recursive definition into one using <span class="inlinecode"><span class="id" type="var">fix</span></span>:
 <pre>
       halve =
@@ -1053,7 +1052,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 
 <div class="paragraph"> </div>
 
-<a name="lab609"></a><h4 class="section">Exercise: 1 star, optional (fact_steps)</h4>
+<a name="lab608"></a><h4 class="section">Exercise: 1 star, optional (fact_steps)</h4>
  Write down the sequence of steps that the term <span class="inlinecode"><span class="id" type="var">fact</span></span> <span class="inlinecode">1</span> goes
     through to reduce to a normal form (assuming the usual reduction
     rules for arithmetic operations).
@@ -1119,7 +1118,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 </div>
 
 <div class="doc">
-<a name="lab610"></a><h2 class="section">Records</h2>
+<a name="lab609"></a><h2 class="section">Records</h2>
 
 <div class="paragraph"> </div>
 
@@ -1261,7 +1260,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
         the extended exercise at the end of this chapter.  (It is
         still useful to discuss them informally here because they will
         help motivate the addition of subtyping to the type system
-        when we get to the <a href="Sub.html"><font color="gray">Sub</font></a> chapter.)
+        when we get to the <a href="Sub.html"><span class="inlineref">Sub</span></a> chapter.)
 
 <div class="paragraph"> </div>
 
@@ -1275,7 +1274,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
         once.  This is the right way to go if we are primarily
         interested in studying the metatheory of the calculi with
         records, since it leads to clean and elegant definitions and
-        proofs.  Chapter <a href="Records.html"><font color="gray">Records</font></a> shows how this can be done.
+        proofs.  Chapter <a href="Records.html"><span class="inlineref">Records</span></a> shows how this can be done.
 
 <div class="paragraph"> </div>
 
@@ -1296,7 +1295,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 </div>
 
 <div class="doc">
-<a name="lab611"></a><h3 class="section">Encoding Records (Optional)</h3>
+<a name="lab610"></a><h3 class="section">Encoding Records (Optional)</h3>
 
 <div class="paragraph"> </div>
 
@@ -1382,7 +1381,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
     compilers that essentially do this! 
 <div class="paragraph"> </div>
 
-<a name="lab612"></a><h3 class="section">Variants (Optional)</h3>
+<a name="lab611"></a><h3 class="section">Variants (Optional)</h3>
 
 <div class="paragraph"> </div>
 
@@ -1407,11 +1406,11 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 </div>
 
 <div class="doc">
-<a name="lab613"></a><h1 class="section">Exercise: Formalizing the Extensions</h1>
+<a name="lab612"></a><h1 class="section">Exercise: Formalizing the Extensions</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab614"></a><h4 class="section">Exercise: 4 stars, optional (STLC_extensions)</h4>
+<a name="lab613"></a><h4 class="section">Exercise: 4 stars (STLC_extensions)</h4>
  In this exercise, you will formalize some of the extensions
     described in this chapter.  We've provided the necessary additions
     to the syntax of terms and types, and we've included a few
@@ -1461,7 +1460,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
     passes, rather than trying to work through the file from start to
     finish in a single pass.  For each definition or proof, begin by
     reading carefully through the parts that are provided for you,
-    referring to the text in the <a href="Stlc.html"><font color="gray">Stlc</font></a> chapter for high-level
+    referring to the text in the <a href="Stlc.html"><span class="inlineref">Stlc</span></a> chapter for high-level
     intuitions and the embedded comments for detailed mechanics. 
 </div>
 <div class="code code-tight">
@@ -1473,7 +1472,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 </div>
 
 <div class="doc">
-<a name="lab615"></a><h3 class="section">Syntax and Operational Semantics</h3>
+<a name="lab614"></a><h3 class="section">Syntax and Operational Semantics</h3>
 
 </div>
 <div class="code code-space">
@@ -1543,7 +1542,7 @@ Note that, for brevity, we've omitted booleans and instead
 </div>
 
 <div class="doc">
-<a name="lab616"></a><h3 class="section">Substitution</h3>
+<a name="lab615"></a><h3 class="section">Substitution</h3>
 
 </div>
 <div class="code code-space">
@@ -1604,7 +1603,7 @@ Note that, for brevity, we've omitted booleans and instead
 </div>
 
 <div class="doc">
-<a name="lab617"></a><h3 class="section">Reduction</h3>
+<a name="lab616"></a><h3 class="section">Reduction</h3>
 
 <div class="paragraph"> </div>
 
@@ -1669,7 +1668,7 @@ Note that, for brevity, we've omitted booleans and instead
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="MoreStlc.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">&rArr;</span> <a class="idref" href="MoreStlc.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tpred"><span class="id" type="constructor">tpred</span></a> <a class="idref" href="MoreStlc.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a>) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tpred"><span class="id" type="constructor">tpred</span></a> <a class="idref" href="MoreStlc.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a>)<br/>
 &nbsp;&nbsp;| <a name="STLCExtended.ST_PredNat"><span class="id" type="constructor">ST_PredNat</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n<sub>1</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tpred"><span class="id" type="constructor">tpred</span></a> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>)) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#pred"><span class="id" type="definition">pred</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tpred"><span class="id" type="constructor">tpred</span></a> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>)) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#pred"><span class="id" type="abbreviation">pred</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>))<br/>
 &nbsp;&nbsp;| <a name="STLCExtended.ST_Mult1"><span class="id" type="constructor">ST_Mult1</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">t<sub>2</sub></span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="MoreStlc.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">&rArr;</span> <a class="idref" href="MoreStlc.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tmult"><span class="id" type="constructor">tmult</span></a> <a class="idref" href="MoreStlc.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="MoreStlc.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a>) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tmult"><span class="id" type="constructor">tmult</span></a> <a class="idref" href="MoreStlc.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <a class="idref" href="MoreStlc.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a>)<br/>
@@ -1678,7 +1677,7 @@ Note that, for brevity, we've omitted booleans and instead
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="MoreStlc.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <span style="font-family: arial;">&rArr;</span> <a class="idref" href="MoreStlc.html#t<sub>2</sub>'"><span class="id" type="variable">t<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tmult"><span class="id" type="constructor">tmult</span></a> <a class="idref" href="MoreStlc.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="MoreStlc.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a>) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tmult"><span class="id" type="constructor">tmult</span></a> <a class="idref" href="MoreStlc.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="MoreStlc.html#t<sub>2</sub>'"><span class="id" type="variable">t<sub>2</sub>'</span></a>)<br/>
 &nbsp;&nbsp;| <a name="STLCExtended.ST_MultNats"><span class="id" type="constructor">ST_MultNats</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tmult"><span class="id" type="constructor">tmult</span></a> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> <a class="idref" href="MoreStlc.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="definition">mult</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="MoreStlc.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tmult"><span class="id" type="constructor">tmult</span></a> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> <a class="idref" href="MoreStlc.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="abbreviation">mult</span></a> <a class="idref" href="MoreStlc.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="MoreStlc.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>))<br/>
 &nbsp;&nbsp;| <a name="STLCExtended.ST_If<sub>01</sub>"><span class="id" type="constructor">ST_If<sub>01</sub></span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="MoreStlc.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">&rArr;</span> <a class="idref" href="MoreStlc.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="MoreStlc.html#STLCExtended.tif0"><span class="id" type="constructor">tif0</span></a> <a class="idref" href="MoreStlc.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="MoreStlc.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="MoreStlc.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a>) <span style="font-family: arial;">&rArr;</span> (<a class="idref" href="MoreStlc.html#STLCExtended.tif0"><span class="id" type="constructor">tif0</span></a> <a class="idref" href="MoreStlc.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <a class="idref" href="MoreStlc.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="MoreStlc.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a>)<br/>
@@ -1759,7 +1758,7 @@ Note that, for brevity, we've omitted booleans and instead
 </div>
 
 <div class="doc">
-<a name="lab618"></a><h3 class="section">Typing</h3>
+<a name="lab617"></a><h3 class="section">Typing</h3>
 
 </div>
 <div class="code code-space">
@@ -1862,7 +1861,7 @@ Next we define the typing rules.  These are nearly direct
 </div>
 
 <div class="doc">
-<a name="lab619"></a><h2 class="section">Examples</h2>
+<a name="lab618"></a><h2 class="section">Examples</h2>
 
 <div class="paragraph"> </div>
 
@@ -1884,7 +1883,7 @@ Next we define the typing rules.  These are nearly direct
 </div>
 
 <div class="doc">
-<a name="lab620"></a><h3 class="section">Preliminaries</h3>
+<a name="lab619"></a><h3 class="section">Preliminaries</h3>
 
 <div class="paragraph"> </div>
 
@@ -1950,7 +1949,7 @@ Hint&nbsp;Extern&nbsp;2&nbsp;(has_type&nbsp;_&nbsp;(tlcase&nbsp;_&nbsp;_&nbsp;_&
 </div>
 
 <div class="doc">
-<a name="lab621"></a><h3 class="section">Numbers</h3>
+<a name="lab620"></a><h3 class="section">Numbers</h3>
 
 </div>
 <div class="code code-space">
@@ -2005,7 +2004,7 @@ Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab622"></a><h3 class="section">Products</h3>
+<a name="lab621"></a><h3 class="section">Products</h3>
 
 </div>
 <div class="code code-space">
@@ -2042,7 +2041,7 @@ Proof.&nbsp;unfold&nbsp;test.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab623"></a><h3 class="section"><span class="inlinecode"><span class="id" type="keyword">let</span></span></h3>
+<a name="lab622"></a><h3 class="section"><span class="inlinecode"><span class="id" type="keyword">let</span></span></h3>
 
 </div>
 <div class="code code-space">
@@ -2076,7 +2075,7 @@ Proof.&nbsp;unfold&nbsp;test.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab624"></a><h3 class="section">Sums</h3>
+<a name="lab623"></a><h3 class="section">Sums</h3>
 
 </div>
 <div class="code code-space">
@@ -2150,7 +2149,7 @@ Proof.&nbsp;unfold&nbsp;test.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab625"></a><h3 class="section">Lists</h3>
+<a name="lab624"></a><h3 class="section">Lists</h3>
 
 </div>
 <div class="code code-space">
@@ -2190,7 +2189,7 @@ Proof.&nbsp;unfold&nbsp;test.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab626"></a><h3 class="section"><span class="inlinecode"><span class="id" type="var">fix</span></span></h3>
+<a name="lab625"></a><h3 class="section"><span class="inlinecode"><span class="id" type="var">fix</span></span></h3>
 
 </div>
 <div class="code code-space">
@@ -2394,7 +2393,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab627"></a><h2 class="section">Properties of Typing</h2>
+<a name="lab626"></a><h2 class="section">Properties of Typing</h2>
 
 <div class="paragraph"> </div>
 
@@ -2408,7 +2407,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab628"></a><h3 class="section">Progress</h3>
+<a name="lab627"></a><h3 class="section">Progress</h3>
 
 </div>
 <div class="code code-space">
@@ -2453,7 +2452,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">tabs</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">T<sub>11</sub></span></span> <span class="inlinecode"><span class="id" type="var">t<sub>12</sub></span></span>,&nbsp;since&nbsp;abstractions&nbsp;are&nbsp;the&nbsp;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;only&nbsp;values&nbsp;that&nbsp;can&nbsp;have&nbsp;an&nbsp;arrow&nbsp;type.&nbsp;&nbsp;But<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode">(<span class="id" type="var">tabs</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">T<sub>11</sub></span></span> <span class="inlinecode"><span class="id" type="var">t<sub>12</sub></span>)</span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> <span class="inlinecode"><span style="font-family: arial;">&rArr;</span></span> <span class="inlinecode">[<span class="id" type="var">x</span>:=<span class="id" type="var">t<sub>2</sub></span>]<span class="id" type="var">t<sub>12</sub></span></span>&nbsp;by&nbsp;<span class="inlinecode"><span class="id" type="var">ST_AppAbs</span></span>.&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> (<span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.subst"><span class="id" type="definition">subst</span></a> <span class="id" type="var">x</span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>12</sub></span>)...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;If&nbsp;<span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>&nbsp;is&nbsp;a&nbsp;value&nbsp;and&nbsp;<span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> <span class="inlinecode"><span style="font-family: arial;">&rArr;</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub>'</span></span>,&nbsp;<br/>
@@ -2469,7 +2468,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <span class="id" type="var">n<sub>1</sub></span>))...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">Hstp</span>].<br/>
@@ -2478,8 +2477,8 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#pred"><span class="id" type="definition">pred</span></a> <span class="id" type="var">n<sub>1</sub></span>))...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#pred"><span class="id" type="abbreviation">pred</span></a> <span class="id" type="var">n<sub>1</sub></span>))...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">Hstp</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.tpred"><span class="id" type="constructor">tpred</span></a> <span class="id" type="var">t<sub>1</sub>'</span>)...<br/>
@@ -2489,9 +2488,9 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt2</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="definition">mult</span></a> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>0</sub></span>))...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.tnat"><span class="id" type="constructor">tnat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="abbreviation">mult</span></a> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>0</sub></span>))...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>2</sub>'</span> <span class="id" type="var">Hstp</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="MoreStlc.html#STLCExtended.tmult"><span class="id" type="constructor">tmult</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub>'</span>)...<br/>
@@ -2502,7 +2501,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt1</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="keyword">as</span> [|<span class="id" type="var">n<sub>1</sub>'</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;n<sub>1</sub>=0&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">t<sub>2</sub></span>...<br/>
@@ -2525,7 +2524,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">v<sub>1</sub></span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">Hstp</span>].<br/>
@@ -2534,7 +2533,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">v<sub>2</sub></span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">Hstp</span>].<br/>
@@ -2557,7 +2556,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt1</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>0</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>0</sub>&nbsp;is&nbsp;inl&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>([<span class="id" type="var">x<sub>1</sub></span>:=<span class="id" type="var">v</span>]<span class="id" type="var">t<sub>1</sub></span>)...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>0</sub>&nbsp;is&nbsp;inr&nbsp;*)</span><br/>
@@ -2581,7 +2580,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt1</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>1</sub>=tnil&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">t<sub>2</sub></span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>1</sub>=tcons&nbsp;v<sub>1</sub>&nbsp;vl&nbsp;*)</span><br/>
@@ -2598,7 +2597,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab629"></a><h3 class="section">Context Invariance</h3>
+<a name="lab628"></a><h3 class="section">Context Invariance</h3>
 
 </div>
 <div class="code code-space">
@@ -2776,7 +2775,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab630"></a><h3 class="section">Substitution</h3>
+<a name="lab629"></a><h3 class="section">Substitution</h3>
 
 </div>
 <div class="code code-space">
@@ -2925,7 +2924,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 </div>
 
 <div class="doc">
-<a name="lab631"></a><h3 class="section">Preservation</h3>
+<a name="lab630"></a><h3 class="section">Preservation</h3>
 
 </div>
 <div class="code code-space">
@@ -3003,7 +3002,7 @@ Proof.&nbsp;unfold&nbsp;eotest.&nbsp;normalize.&nbsp;Qed.<br/>
 <span class="id" type="keyword">End</span> <a class="idref" href="MoreStlc.html#STLCExtended"><span class="id" type="module">STLCExtended</span></a>.<br/>
 
 <br/>
-<span class="comment">(*&nbsp;$Date:&nbsp;2016-05-26&nbsp;16:17:19&nbsp;-0400&nbsp;(Thu,&nbsp;26&nbsp;May&nbsp;2016)&nbsp;$&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;$Date:&nbsp;2016-09-14&nbsp;17:48:09&nbsp;-0400&nbsp;(Wed,&nbsp;14&nbsp;Sep&nbsp;2016)&nbsp;$&nbsp;*)</span><br/>
 </div>
 </div>
 

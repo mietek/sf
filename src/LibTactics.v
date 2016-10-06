@@ -59,15 +59,18 @@ Remove Hints Bool.trans_eq_bool.
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Tools for Programming with Ltac *)
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Identity Continuation *)
 
 Ltac idcont tt :=
   idtac.
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Untyped Arguments for Tactics *)
 
 (** Any Coq value can be boxed into the type [Boxer]. This is
@@ -78,6 +81,7 @@ Inductive Boxer : Type :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Optional Arguments for Tactics  *)
 
 (** [ltac_no_arg] is a constant that can be used to simulate
@@ -92,6 +96,7 @@ Inductive ltac_No_arg : Set :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Wildcard Arguments for Tactics  *)
 
 (** [ltac_wild] is a constant that can be used to simulate
@@ -115,6 +120,7 @@ Open Scope ltac_scope.
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Position Markers *)
 
 (** [ltac_Mark] and [ltac_mark] are dummy definitions used as sentinel
@@ -148,6 +154,7 @@ Ltac intro_until_mark :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** List of Arguments for Tactics  *)
 
 (** A datatype of type [list Boxer] is used to manipulate list of
@@ -254,6 +261,7 @@ Ltac list_boxer_of E :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Databases of Lemmas  *)
 
 (** Use the hint facility to implement a database mapping
@@ -296,6 +304,7 @@ Ltac ltac_database_get D T :=
 *)
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** On-the-Fly Removal of Hypotheses *)
 
 (** In a list of arguments [>> H1 H2 .. HN] passed to a tactic
@@ -348,6 +357,7 @@ Ltac fast_rm_inside E :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Numbers as Arguments *)
 
 (** When tactic takes a natural number as argument, it may be
@@ -402,6 +412,7 @@ Tactic Notation "ltac_pattern" constr(E) "at" constr(K) "in" hyp(H) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Testing Tactics *)
 
 (** [show tac] executes a tactic [tac] that produces a result,
@@ -431,6 +442,7 @@ Tactic Notation "dup" :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Check No Evar in Goal *)
 
 (* COQ8.4:
@@ -453,6 +465,7 @@ Ltac check_noevar_goal := (* todo: imlement using check_noevar *)
   match goal with |- ?G => check_noevar G end.
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Helper Function for Introducing Evars *)
 
 (** [with_evar T (fun M => tac)] creates a new evar that can
@@ -466,6 +479,7 @@ Tactic Notation "with_evar" constr(T) tactic(cont) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Tagging of Hypotheses *)
 
 (** [get_last_hyp tt] is a function that returns the last hypothesis
@@ -478,6 +492,7 @@ Ltac get_last_hyp tt :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** More Tagging of Hypotheses *)
 
 (** [ltac_tag_subst] is a specific marker for hypotheses
@@ -501,6 +516,7 @@ Ltac mark_to_generalize H :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Deconstructing Terms *)
 
 (** [get_head E] is a tactic that returns the head constant of the
@@ -543,6 +559,7 @@ Ltac get_fun_arg E :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Action at Occurence and Action Not at Occurence *)
 
 (** [ltac_action_at K of E do Tac] isolates the [K]-th occurence of [E] in the
@@ -574,6 +591,7 @@ Tactic Notation "protects" constr(E) "do" tactic(Tac) "/" :=
   protects E do Tac.
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** An Alias for [eq] *)
 
 (** [eq'] is an alias for [eq] to be used for equalities in
@@ -589,6 +607,7 @@ Notation "x '='' y" := (@eq' _ x y)
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Common Tactics for Simplifying Goals Like [intuition] *)
 
 Ltac jauto_set_hyps :=
@@ -614,9 +633,11 @@ Ltac jauto_set :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Backward and Forward Chaining *)
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Application *)
 
 Ltac old_refine f := 
@@ -716,6 +737,7 @@ Tactic Notation "constructors" :=
   first [ constructor | econstructor ]; unfold eq'.
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Assertions *)
 
 (** [asserts H: T] is another syntax for [assert (H : T)], which
@@ -792,6 +814,7 @@ Tactic Notation "cuts" simple_intropattern(I1)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Instantiation and Forward-Chaining *)
 
 (** The instantiation tactics are used to instantiate a lemma [E]
@@ -1350,6 +1373,7 @@ Tactic Notation "specializes_vars" hyp(H) :=
   specializes_vars_base H.
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Experimental Tactics for Application *)
 
 (** [fapply] is a version of [apply] based on [forwards]. *)
@@ -1370,6 +1394,7 @@ Tactic Notation "sapply" constr(H) :=
         | fapply H ].
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Adding Assumptions *)
 
 (** [lets_simpl H: E] is the same as [lets H: E] excepts that it
@@ -1402,6 +1427,7 @@ Tactic Notation "puts" ":" constr(E) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Application of Tautologies *)
 
 (** [logic E], where [E] is a fact, is equivalent to
@@ -1417,6 +1443,7 @@ Tactic Notation "logic" constr(E) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Application Modulo Equalities *)
 
 (** The tactic [equates] replaces a goal of the form
@@ -1528,6 +1555,7 @@ Tactic Notation "applys_eq" constr(H) constr(n1) constr(n2) constr(n3) constr(n4
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Absurd Goals *)
 
 (** [false_goal] replaces any goal by the goal [False]. 
@@ -1627,9 +1655,11 @@ Ltac false_neq_self_hyp :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Introduction and Generalization *)
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Introduction *)
 
 (** [introv] is used to name only non-dependent hypothesis.
@@ -1744,6 +1774,7 @@ Tactic Notation "intro_hnf" :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Generalization *)
 
 (** [gen X1 .. XN] is a shorthand for calling [generalize dependent]
@@ -1793,6 +1824,7 @@ Tactic Notation "generalizes" hyp(X1) hyp(X2) hyp(X3) hyp(X4) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Naming *)
 
 (** [sets X: E] is the same as [set (X := E) in *], that is,
@@ -1931,6 +1963,7 @@ Tactic Notation "sets_eq_let" ident(X) "in" hyp(H) :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Rewriting *)
 
 (** [rewrites E] is similar to [rewrite] except that
@@ -2095,6 +2128,7 @@ Tactic Notation "changes" constr(E1) "with" constr(E2) "in" "*" :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Renaming *)
 
 (** [renames X1 to Y1, ..., XN to YN] is a shorthand for a sequence of
@@ -2124,6 +2158,7 @@ Tactic Notation "renames" ident(X1) "to" ident(Y1) ","
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Unfolding *)
 
 (** [unfolds] unfolds the head definition in the goal, i.e., if the
@@ -2213,6 +2248,7 @@ Tactic Notation "folds" constr(H1) "," constr(H2) "," constr(H3)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Simplification *)
 
 (** [simpls] is a shortcut for [simpl in *]. *)
@@ -2263,11 +2299,13 @@ Notation "'nosimpl' t" := (match tt with tt => t end)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Reduction *)
 
 Tactic Notation "hnfs" := hnf in *.
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Substitution *)
 
 (** [substs] does the same as [subst], except that it does not fail
@@ -2353,6 +2391,7 @@ Tactic Notation "subst_eq" constr(E) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Tactics to Work with Proof Irrelevance *)
 
 Require Import ProofIrrelevance.
@@ -2374,6 +2413,7 @@ Tactic Notation "pi_rewrite" constr(E) "in" hyp(H) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Proving Equalities *)
 
 (** Note: current implementation only supports up to arity 5 *)
@@ -2415,9 +2455,11 @@ Tactic Notation "fequals_rec" :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Inversion *)
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Basic Inversion *)
 
 (** [invert keep H] is same to [inversion H] except that it puts all the
@@ -2464,6 +2506,7 @@ Tactic Notation "invert" hyp(H) "as" simple_intropattern(I1)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Inversion with Substitution *)
 
 (** Our inversion tactics is able to get rid of dependent equalities
@@ -2628,6 +2671,7 @@ Tactic Notation "lets_inverts" constr(E) "as" simple_intropattern(I1)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Injection with Substitution *)
 
 (** Underlying implementation of [injects] *)
@@ -2675,6 +2719,7 @@ Tactic Notation "inject" hyp(H) "as" ident(X1) ident(X2) ident(X3)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Inversion and Injection with Substitution --rough implementation *)
 
 (** The tactics [inversions] and [injections] provided in this section
@@ -2719,6 +2764,7 @@ Tactic Notation "injections" "keep" hyp(H) :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Case Analysis *)
 
 (** [cases] is similar to [case_eq E] except that it generates the
@@ -2924,6 +2970,7 @@ Tactic Notation "cases_if'" :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Induction *)
 
 (** [inductions E] is a shorthand for [dependent induction E].
@@ -3005,6 +3052,7 @@ Ltac induct_height := induct_height_step O.
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Coinduction *)
 
 (** Tactic [cofixs IH] is like [cofix IH] except that the
@@ -3036,6 +3084,7 @@ Tactic Notation "abstracts" tactic(tac) :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Decidable Equality *)
 
 (** [decides_equality] is the same as [decide equality] excepts that it
@@ -3049,6 +3098,7 @@ Tactic Notation "decides_equality" :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Equivalence *)
 
 (** [iff H] can be used to prove an equivalence [P <-> Q] and name [H]
@@ -3076,6 +3126,7 @@ Tactic Notation "iff" "<-" :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * N-ary Conjunctions and Disjunctions *)
 
 (* ---------------------------------------------------------------------- *)
@@ -3184,7 +3235,7 @@ Tactic Notation "destructs" constr(N) constr(T) :=
 (** Underlying implementation of [branch]. *)
 
 Ltac branch_tactic K N :=
-  match constr:(K,N) with
+  match constr:((K,N)) with
   | (_,0) => fail 1
   | (0,_) => fail 1
   | (1,1) => idtac
@@ -3379,6 +3430,7 @@ Tactic Notation "unpack" constr(H) :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Tactics to Prove Typeclass Instances *)
 
 (** [typeclass] is an automation tactic specialized for finding
@@ -3396,10 +3448,12 @@ Tactic Notation "solve_typeclass" :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Tactics to Invoke Automation *)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Definitions for Parsing Compatibility *)
 
 Tactic Notation "f_equal" :=
@@ -3419,6 +3473,7 @@ Tactic Notation "left" :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** [hint] to Add Hints Local to a Lemma *)
 
 (** [hint E] adds [E] as an hypothesis so that automation can use it.
@@ -3435,6 +3490,7 @@ Tactic Notation "hint" constr(E1) "," constr(E2) "," constr(E3) "," constr(E4) :
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** [jauto], a New Automation Tactic *)
 
 (** [jauto] is better at [intuition eauto] because it can open existentials
@@ -3457,6 +3513,7 @@ Tactic Notation "iauto" := try solve [intuition eauto].
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Definitions of Automation Tactics *)
 
 (** The two following tactics defined the default behaviour of
@@ -3530,6 +3587,7 @@ Tactic Notation "dauto" :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Parsing for Light Automation *)
 
 (** Any tactic followed by the symbol [~] will have [auto_tilde] called
@@ -3910,6 +3968,7 @@ Tactic Notation "exists" "~" constr(T1) constr(T2) constr(T3) constr(T4)
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Parsing for Strong Automation *)
 
 (** Any tactic followed by the symbol [*] will have [auto*] called
@@ -4294,9 +4353,11 @@ Tactic Notation "exists" "*" constr(T1) constr(T2) constr(T3) constr(T4)
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Tactics to Sort Out the Proof Context *)
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Hiding Hypotheses *)
 
 (* Implementation *)
@@ -4430,6 +4491,7 @@ Tactic Notation "show_unfold" constr(R1) "," constr(R2) :=
   unfold R1, R2; show_def.
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Sorting Hypotheses *)
 
 (** [sort] sorts out hypotheses from the context by moving all the
@@ -4446,6 +4508,7 @@ Tactic Notation "sort" :=
 
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Clearing Hypotheses *)
 
 (** [clears X1 ... XN] is a variation on [clear] which clears
@@ -4554,9 +4617,11 @@ Tactic Notation "clears_last" constr(N) :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Tactics for Development Purposes *)
 
 (* ---------------------------------------------------------------------- *)
+(* ================================================================= *)
 (** ** Skipping Subgoals *)
 
 (** DEPRECATED: the new "admit" tactics now works fine.
@@ -4592,7 +4657,7 @@ Ltac skip_with_existential :=
     let H := fresh in evar(H:G); eexact H end.
 
 (* TO BE DEPRECATED: *)
-Variable skip_axiom : False.
+Parameter skip_axiom : False.
   (* To obtain a safe development, change to [skip_axiom : True] *)
 Ltac skip_with_axiom :=
   elimtype False; apply skip_axiom.
@@ -4705,6 +4770,7 @@ Tactic Notation "skip_induction" constr(E) "as" simple_intropattern(I) :=
 
 
 (* ********************************************************************** *)
+(* ################################################################# *)
 (** * Compatibility with Standard Library *)
 
 (** The module [Program] contains definitions that conflict with the
@@ -4722,4 +4788,4 @@ End LibTacticsCompatibility.
 
 Open Scope nat_scope.
 
-(** $Date: 2016-05-24 14:00:08 -0400 (Tue, 24 May 2016) $ *)
+(** $Date: 2016-07-16 03:12:58 -0400 (Sat, 16 Jul 2016) $ *)

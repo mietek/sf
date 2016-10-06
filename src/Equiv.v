@@ -8,7 +8,6 @@ Require Import Coq.omega.Omega.
 Require Import Coq.Lists.List.
 Require Import Coq.Logic.FunctionalExtensionality.
 Import ListNotations.
-Require Import SfLib.
 Require Import Maps.
 Require Import Imp.
 
@@ -35,7 +34,7 @@ Require Import Imp.
       chapter's exercises are pretty long if you try to write out all
       the cases explicitly. *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Behavioral Equivalence *)
 
 (** In an earlier chapter, we investigated the correctness of a very
@@ -50,7 +49,7 @@ Require Import Imp.
     transformations in the full Imp language, we need to consider the
     role of variables and state. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Definitions *)
 
 (** For [aexp]s and [bexp]s with variables, the definition we want is
@@ -142,11 +141,11 @@ Definition prog_i : com :=
     X ::= APlus (AId Y) (ANum 1)
   END.
 
-Definition equiv_classes : list (list com) :=
-(* FILL IN HERE *) admit.
+Definition equiv_classes : list (list com) 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Examples *)
 
 (** Here are some simple examples of equivalences of arithmetic
@@ -459,13 +458,13 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Properties of Behavioral Equivalence *)
 
 (** We now turn to developing some of the properties of the program
     equivalences we have defined. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Behavioral Equivalence Is an Equivalence *)
 
 (** First, we verify that the equivalences on [aexps], [bexps], and
@@ -530,7 +529,7 @@ Proof.
   unfold cequiv. intros c1 c2 c3 H12 H23 st st'.
   apply iff_trans with (c2 / st \\ st'). apply H12. apply H23.  Qed.
 
-(* ######################################################## *)
+(* ================================================================= *)
 (** ** Behavioral Equivalence Is a Congruence *)
 
 (** Less obviously, behavioral equivalence is also a _congruence_.
@@ -696,7 +695,7 @@ Proof.
       apply refl_cequiv.
 Qed.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Program Transformations *)
 
 (** A _program transformation_ is a function that takes a program as
@@ -719,7 +718,7 @@ Definition ctrans_sound (ctrans : com -> com) : Prop :=
   forall (c : com),
     cequiv c (ctrans c).
 
-(* ######################################################## *)
+(* ================================================================= *)
 (** ** The Constant-Folding Transformation *)
 
 (** An expression is _constant_ when it contains no variable
@@ -887,7 +886,7 @@ Example fold_com_ex1 :
      END).
 Proof. reflexivity. Qed.
 
-(* ################################################### *)
+(* ================================================================= *)
 (** ** Soundness of Constant Folding *)
 
 (** Now we need to show that what we've done is correct. *)
@@ -1080,7 +1079,7 @@ Proof.
     (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ########################################################## *)
+(* ----------------------------------------------------------------- *)
 (** *** Soundness of (0 + n) Elimination, Redux *)
 
 (** **** Exercise: 4 stars, advanced, optional (optimize_0plus)  *)
@@ -1126,7 +1125,7 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Proving That Programs Are _Not_ Equivalent *)
 
 (** Suppose that [c1] is a command of the form [X ::= a1;; Y ::= a2]
@@ -1302,7 +1301,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ################################################################## *)
+(* ################################################################# *)
 (** * Extended Exercise: Nondeterministic Imp *)
 
 (** As we have seen (in theorem [ceval_deterministic] in the [Imp]
@@ -1551,7 +1550,7 @@ Proof. (* FILL IN HERE *) Admitted.
 
 End Himp.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
 
 (** **** Exercise: 4 stars, optional (for_while_equiv)  *)
@@ -1570,7 +1569,6 @@ End Himp.
          c3 ;
          c2
        END
-
 *)
 (* FILL IN HERE *)
 (** [] *)
@@ -1610,16 +1608,16 @@ Definition capprox (c1 c2 : com) : Prop := forall (st st' : state),
 (** Find two programs [c3] and [c4] such that neither approximates
     the other. *)
 
-Definition c3 : com := (* FILL IN HERE *) admit.
-Definition c4 : com := (* FILL IN HERE *) admit.
+Definition c3 : com (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
+Definition c4 : com (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Theorem c3_c4_different : ~ capprox c3 c4 /\ ~ capprox c4 c3.
 Proof. (* FILL IN HERE *) Admitted.
 
 (** Find a program [cmin] that approximates every other program. *)
 
-Definition cmin : com :=
-  (* FILL IN HERE *) admit.
+Definition cmin : com 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Theorem cmin_minimal : forall c, capprox cmin c.
 Proof. (* FILL IN HERE *) Admitted.
@@ -1627,8 +1625,8 @@ Proof. (* FILL IN HERE *) Admitted.
 (** Finally, find a non-trivial property which is preserved by
     program approximation (when going from left to right). *)
 
-Definition zprop (c : com) : Prop :=
-  (* FILL IN HERE *) admit.
+Definition zprop (c : com) : Prop 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 
 Theorem zprop_preserving : forall c c',
@@ -1636,5 +1634,5 @@ Theorem zprop_preserving : forall c c',
 Proof. (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)
 

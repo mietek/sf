@@ -1,6 +1,5 @@
 (** * StlcProp: Properties of STLC *)
 
-Require Import SfLib.
 Require Import Maps.
 Require Import Types.
 Require Import Stlc.
@@ -12,7 +11,7 @@ Import STLC.
     Typed Lambda Calculus -- in particular, the type safety
     theorem. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Canonical Forms *)
 
 (** As we saw for the simple calculus in the [Types] chapter, the
@@ -41,7 +40,7 @@ Proof.
   exists x0. exists t0.  auto.
 Qed.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Progress *)
 
 (** As before, the _progress_ theorem tells us that closed, well-typed
@@ -144,7 +143,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Preservation *)
 
 (** The other half of the type soundness property is the preservation
@@ -186,7 +185,7 @@ Proof.
    To make Coq happy, we need to formalize the story in the opposite
    order... *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Free Occurrences *)
 
 (** A variable [x] _appears free in_ a term _t_ if [t] contains some
@@ -235,7 +234,7 @@ Definition closed (t:tm) :=
     are really the crux of the lambda-calculus.) *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Substitution *)
 
 (** To prove that substitution preserves typing, we first need a
@@ -500,7 +499,7 @@ Proof with eauto.
       rewrite Hxy...
 Qed.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Main Theorem *)
 
 (** We now have the tools we need to prove preservation: if a closed
@@ -571,7 +570,7 @@ Qed.
 []
 *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Type Soundness *)
 
 (** **** Exercise: 2 stars, optional (type_soundness)  *)
@@ -592,7 +591,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Uniqueness of Types *)
 
 (** **** Exercise: 3 stars (types_unique)  *)
@@ -603,7 +602,7 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
 
 (** **** Exercise: 1 star (progress_preservation_statement)  *)
@@ -763,8 +762,7 @@ and the following typing rule:
 
 End STLCProp.
 
-(* ###################################################################### *)
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Exercise: STLC with Arithmetic *)
 
 (** To see how the STLC might function as the core of a real
@@ -814,5 +812,5 @@ Inductive tm : Type :=
 
 End STLCArith.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)
 

@@ -29,15 +29,15 @@
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="keyword">Types</span>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab632"></a><h1 class="section">Concepts</h1>
+<a name="lab631"></a><h1 class="section">Concepts</h1>
 
 <div class="paragraph"> </div>
 
@@ -50,7 +50,7 @@
 </div>
 
 <div class="doc">
-<a name="lab633"></a><h2 class="section">A Motivating Example</h2>
+<a name="lab632"></a><h2 class="section">A Motivating Example</h2>
 
 <div class="paragraph"> </div>
 
@@ -102,7 +102,7 @@
    pairs, etc. 
 <div class="paragraph"> </div>
 
-<a name="lab634"></a><h2 class="section">Subtyping and Object-Oriented Languages</h2>
+<a name="lab633"></a><h2 class="section">Subtyping and Object-Oriented Languages</h2>
 
 <div class="paragraph"> </div>
 
@@ -156,13 +156,13 @@
 
     To keep things simple here, we won't deal with any of these
     issues &mdash; in fact, we won't even talk any more about objects or
-    classes.  (There is a lot of discussion in <a href="Bib.html#Pierce 2002"><font color="gray">[Pierce 2002]</font></a>, if
+    classes.  (There is a lot of discussion in <a href="Bib.html#Pierce 2002"><span class="inlineref">[Pierce 2002]</span></a>, if
     you are interested.)  Instead, we'll study the core concepts
     behind the subclass / subinterface relation in the simplified
     setting of the STLC. 
 <div class="paragraph"> </div>
 
-<a name="lab635"></a><h2 class="section">The Subsumption Rule</h2>
+<a name="lab634"></a><h2 class="section">The Subsumption Rule</h2>
 
 <div class="paragraph"> </div>
 
@@ -211,7 +211,7 @@
     function that requires just a single-field record. 
 <div class="paragraph"> </div>
 
-<a name="lab636"></a><h2 class="section">The Subtype Relation</h2>
+<a name="lab635"></a><h2 class="section">The Subtype Relation</h2>
 
 <div class="paragraph"> </div>
 
@@ -220,7 +220,7 @@
     definition.  
 <div class="paragraph"> </div>
 
-<a name="lab637"></a><h3 class="section">Structural Rules</h3>
+<a name="lab636"></a><h3 class="section">Structural Rules</h3>
 
 <div class="paragraph"> </div>
 
@@ -260,7 +260,7 @@
 </table></center>
 <div class="paragraph"> </div>
 
-<a name="lab638"></a><h3 class="section">Products</h3>
+<a name="lab637"></a><h3 class="section">Products</h3>
 
 <div class="paragraph"> </div>
 
@@ -283,7 +283,7 @@
 </table></center>
 <div class="paragraph"> </div>
 
-<a name="lab639"></a><h3 class="section">Arrows</h3>
+<a name="lab638"></a><h3 class="section">Arrows</h3>
 
 <div class="paragraph"> </div>
 
@@ -382,7 +382,7 @@
     viewed as having type <span class="inlinecode"><span class="id" type="var">T<sub>1</sub></span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">T<sub>2</sub></span></span>. 
 <div class="paragraph"> </div>
 
-<a name="lab640"></a><h3 class="section">Records</h3>
+<a name="lab639"></a><h3 class="section">Records</h3>
 
 <div class="paragraph"> </div>
 
@@ -559,7 +559,7 @@
 
 <div class="paragraph"> </div>
 
-<a name="lab641"></a><h4 class="section">Exercise: 2 stars, recommended (arrow_sub_wrong)</h4>
+<a name="lab640"></a><h4 class="section">Exercise: 2 stars, recommended (arrow_sub_wrong)</h4>
  Suppose we had incorrectly defined subtyping as covariant on both
     the right and the left of arrow types:
 <center><table class="infrule">
@@ -593,7 +593,7 @@
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab642"></a><h3 class="section">Top</h3>
+<a name="lab641"></a><h3 class="section">Top</h3>
 
 <div class="paragraph"> </div>
 
@@ -624,7 +624,7 @@
 </div>
 
 <div class="doc">
-<a name="lab643"></a><h3 class="section">Summary</h3>
+<a name="lab642"></a><h3 class="section">Summary</h3>
 
 <div class="paragraph"> </div>
 
@@ -776,11 +776,11 @@
 </div>
 
 <div class="doc">
-<a name="lab644"></a><h2 class="section">Exercises</h2>
+<a name="lab643"></a><h2 class="section">Exercises</h2>
 
 <div class="paragraph"> </div>
 
-<a name="lab645"></a><h4 class="section">Exercise: 1 star, optional (subtype_instances_tf_1)</h4>
+<a name="lab644"></a><h4 class="section">Exercise: 1 star, optional (subtype_instances_tf_1)</h4>
  Suppose we have types <span class="inlinecode"><span class="id" type="var">S</span></span>, <span class="inlinecode"><span class="id" type="var">T</span></span>, <span class="inlinecode"><span class="id" type="var">U</span></span>, and <span class="inlinecode"><span class="id" type="var">V</span></span> with <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">&lt;:</span> <span class="inlinecode"><span class="id" type="var">T</span></span>
     and <span class="inlinecode"><span class="id" type="var">U</span></span> <span class="inlinecode">&lt;:</span> <span class="inlinecode"><span class="id" type="var">V</span></span>.  Which of the following subtyping assertions
     are then true?  Write <i>true</i> or <i>false</i> after each one.
@@ -835,7 +835,7 @@
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab646"></a><h4 class="section">Exercise: 2 stars (subtype_order)</h4>
+<a name="lab645"></a><h4 class="section">Exercise: 2 stars (subtype_order)</h4>
  The following types happen to form a linear order with respect to subtyping:
 
 <div class="paragraph"> </div>
@@ -871,7 +871,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab647"></a><h4 class="section">Exercise: 1 star (subtype_instances_tf_2)</h4>
+<a name="lab646"></a><h4 class="section">Exercise: 1 star (subtype_instances_tf_2)</h4>
  Which of the following statements are true?  Write <i>true</i> or
     <i>false</i> after each one.
 
@@ -908,7 +908,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab648"></a><h4 class="section">Exercise: 1 star (subtype_concepts_tf)</h4>
+<a name="lab647"></a><h4 class="section">Exercise: 1 star (subtype_concepts_tf)</h4>
  Which of the following statements are true, and which are false?
 
 <div class="paragraph"> </div>
@@ -976,7 +976,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab649"></a><h4 class="section">Exercise: 2 stars (proper_subtypes)</h4>
+<a name="lab648"></a><h4 class="section">Exercise: 2 stars (proper_subtypes)</h4>
  Is the following statement true or false?  Briefly explain your
     answer.
 
@@ -993,7 +993,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab650"></a><h4 class="section">Exercise: 2 stars (small_large_1)</h4>
+<a name="lab649"></a><h4 class="section">Exercise: 2 stars (small_large_1)</h4>
 
 <div class="paragraph"> </div>
 
@@ -1025,7 +1025,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab651"></a><h4 class="section">Exercise: 2 stars (small_large_2)</h4>
+<a name="lab650"></a><h4 class="section">Exercise: 2 stars (small_large_2)</h4>
 
 <div class="paragraph"> </div>
 
@@ -1055,7 +1055,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab652"></a><h4 class="section">Exercise: 2 stars, optional (small_large_3)</h4>
+<a name="lab651"></a><h4 class="section">Exercise: 2 stars, optional (small_large_3)</h4>
 
 <div class="paragraph"> </div>
 
@@ -1085,7 +1085,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab653"></a><h4 class="section">Exercise: 2 stars (small_large_4)</h4>
+<a name="lab652"></a><h4 class="section">Exercise: 2 stars (small_large_4)</h4>
 
 <div class="paragraph"> </div>
 
@@ -1117,7 +1117,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab654"></a><h4 class="section">Exercise: 2 stars (smallest_1)</h4>
+<a name="lab653"></a><h4 class="section">Exercise: 2 stars (smallest_1)</h4>
  What is the <i>smallest</i> type <span class="inlinecode"><span class="id" type="var">T</span></span> that makes the following
     assertion true?
 
@@ -1132,7 +1132,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab655"></a><h4 class="section">Exercise: 2 stars (smallest_2)</h4>
+<a name="lab654"></a><h4 class="section">Exercise: 2 stars (smallest_2)</h4>
  What is the <i>smallest</i> type <span class="inlinecode"><span class="id" type="var">T</span></span> that makes the following
     assertion true?
 
@@ -1146,7 +1146,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab656"></a><h4 class="section">Exercise: 3 stars, optional (count_supertypes)</h4>
+<a name="lab655"></a><h4 class="section">Exercise: 3 stars, optional (count_supertypes)</h4>
  How many supertypes does the record type <span class="inlinecode">{<span class="id" type="var">x</span>:<span class="id" type="var">A</span>,</span> <span class="inlinecode"><span class="id" type="var">y</span>:<span class="id" type="var">C</span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">C</span>}</span> have?  That is,
     how many different types <span class="inlinecode"><span class="id" type="var">T</span></span> are there such that <span class="inlinecode">{<span class="id" type="var">x</span>:<span class="id" type="var">A</span>,</span> <span class="inlinecode"><span class="id" type="var">y</span>:<span class="id" type="var">C</span><span style="font-family: arial;">&rarr;</span><span class="id" type="var">C</span>}</span> <span class="inlinecode">&lt;:</span>
     <span class="inlinecode"><span class="id" type="var">T</span></span>?  (We consider two types to be different if they are written
@@ -1158,7 +1158,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab657"></a><h4 class="section">Exercise: 2 stars (pair_permutation)</h4>
+<a name="lab656"></a><h4 class="section">Exercise: 2 stars (pair_permutation)</h4>
  The subtyping rule for product types
 <center><table class="infrule">
 <tr class="infruleassumption">
@@ -1200,7 +1200,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 </div>
 
 <div class="doc">
-<a name="lab658"></a><h1 class="section">Formal Definitions</h1>
+<a name="lab657"></a><h1 class="section">Formal Definitions</h1>
 
 <div class="paragraph"> </div>
 
@@ -1217,7 +1217,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 </div>
 
 <div class="doc">
-<a name="lab659"></a><h2 class="section">Core Definitions</h2>
+<a name="lab658"></a><h2 class="section">Core Definitions</h2>
 
 </div>
 <div class="code code-space">
@@ -1226,7 +1226,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 </div>
 
 <div class="doc">
-<a name="lab660"></a><h3 class="section">Syntax</h3>
+<a name="lab659"></a><h3 class="section">Syntax</h3>
 
 <div class="paragraph"> </div>
 
@@ -1264,7 +1264,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 </div>
 
 <div class="doc">
-<a name="lab661"></a><h3 class="section">Substitution</h3>
+<a name="lab660"></a><h3 class="section">Substitution</h3>
 
 <div class="paragraph"> </div>
 
@@ -1299,7 +1299,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 </div>
 
 <div class="doc">
-<a name="lab662"></a><h3 class="section">Reduction</h3>
+<a name="lab661"></a><h3 class="section">Reduction</h3>
 
 <div class="paragraph"> </div>
 
@@ -1354,7 +1354,7 @@ Where does the type <span class="inlinecode"><span class="id" type="var">Top</sp
 </div>
 
 <div class="doc">
-<a name="lab663"></a><h2 class="section">Subtyping</h2>
+<a name="lab662"></a><h2 class="section">Subtyping</h2>
 
 <div class="paragraph"> </div>
 
@@ -1428,14 +1428,14 @@ Note that we don't need any special rules for base types: they are
 </div>
 
 <div class="doc">
-<a name="lab664"></a><h4 class="section">Exercise: 2 stars, optional (subtyping_judgements)</h4>
+<a name="lab663"></a><h4 class="section">Exercise: 2 stars, optional (subtyping_judgements)</h4>
  (Wait to do this exercise after you have added product types to the
     language &mdash; see exercise <span class="inlinecode"><span class="id" type="var">products</span></span> &mdash; at least up to this point 
     in the file).
 
 <div class="paragraph"> </div>
 
-    Recall that, in chapter <a href="MoreStlc.html"><font color="gray">MoreStlc</font></a>, the optional section "Encoding
+    Recall that, in chapter <a href="MoreStlc.html"><span class="inlineref">MoreStlc</span></a>, the optional section "Encoding
     Records" describes how records can be encoded as pairs.
     Using this encoding, define pair types representing the following 
     record types:
@@ -1454,12 +1454,12 @@ Note that we don't need any special rules for base types: they are
 
 </div>
 <div class="code code-tight">
-<span class="id" type="keyword">Definition</span> <a name="Examples.Person"><span class="id" type="definition">Person</span></a> : <a class="idref" href="Sub.html#Examples.ty"><span class="id" type="inductive">ty</span></a> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
-<span class="id" type="keyword">Definition</span> <a name="Examples.Student"><span class="id" type="definition">Student</span></a> : <a class="idref" href="Sub.html#Examples.ty"><span class="id" type="inductive">ty</span></a> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
-<span class="id" type="keyword">Definition</span> <a name="Examples.Employee"><span class="id" type="definition">Employee</span></a> : <a class="idref" href="Sub.html#Examples.ty"><span class="id" type="inductive">ty</span></a> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Examples.Person"><span class="id" type="definition">Person</span></a> : <a class="idref" href="Sub.html#Examples.ty"><span class="id" type="inductive">ty</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Examples.Student"><span class="id" type="definition">Student</span></a> : <a class="idref" href="Sub.html#Examples.ty"><span class="id" type="inductive">ty</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Examples.Employee"><span class="id" type="definition">Employee</span></a> : <a class="idref" href="Sub.html#Examples.ty"><span class="id" type="inductive">ty</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 </div>
@@ -1471,13 +1471,13 @@ Now use the definition of the subtype relation to prove the following:
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="Examples.sub_student_person"><span class="id" type="definition">sub_student_person</span></a> :<br/>
-&nbsp;&nbsp;<a class="idref" href="Sub.html#Examples.Student"><span class="id" type="definition">Student</span></a> &lt;: <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="definition">Person</span></a>.<br/>
+&nbsp;&nbsp;<a class="idref" href="Sub.html#Examples.Student"><span class="id" type="axiom">Student</span></a> &lt;: <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="axiom">Person</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="Examples.sub_employee_person"><span class="id" type="definition">sub_employee_person</span></a> :<br/>
-&nbsp;&nbsp;<a class="idref" href="Sub.html#Examples.Employee"><span class="id" type="definition">Employee</span></a> &lt;: <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="definition">Person</span></a>.<br/>
+&nbsp;&nbsp;<a class="idref" href="Sub.html#Examples.Employee"><span class="id" type="axiom">Employee</span></a> &lt;: <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="axiom">Person</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
@@ -1491,12 +1491,12 @@ Now use the definition of the subtype relation to prove the following:
     understand how to prove them on paper! 
 <div class="paragraph"> </div>
 
-<a name="lab665"></a><h4 class="section">Exercise: 1 star, optional (subtyping_example_1)</h4>
+<a name="lab664"></a><h4 class="section">Exercise: 1 star, optional (subtyping_example_1)</h4>
 
 </div>
 <div class="code code-space">
 <span class="id" type="keyword">Example</span> <a name="Examples.subtyping_example_1"><span class="id" type="definition">subtyping_example_1</span></a> :<br/>
-&nbsp;&nbsp;(<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.TTop"><span class="id" type="constructor">TTop</span></a> <a class="idref" href="Sub.html#Examples.Student"><span class="id" type="definition">Student</span></a>) &lt;: (<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> (<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.C"><span class="id" type="abbreviation">C</span></a> <a class="idref" href="Sub.html#Examples.C"><span class="id" type="abbreviation">C</span></a>) <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="definition">Person</span></a>).<br/>
+&nbsp;&nbsp;(<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.TTop"><span class="id" type="constructor">TTop</span></a> <a class="idref" href="Sub.html#Examples.Student"><span class="id" type="axiom">Student</span></a>) &lt;: (<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> (<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.C"><span class="id" type="abbreviation">C</span></a> <a class="idref" href="Sub.html#Examples.C"><span class="id" type="abbreviation">C</span></a>) <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="axiom">Person</span></a>).<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;Top-&gt;Student&nbsp;&lt;:&nbsp;(C-&gt;C)-&gt;Person&nbsp;*)</span><br/>
 <span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
@@ -1506,12 +1506,12 @@ Now use the definition of the subtype relation to prove the following:
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab666"></a><h4 class="section">Exercise: 1 star, optional (subtyping_example_2)</h4>
+<a name="lab665"></a><h4 class="section">Exercise: 1 star, optional (subtyping_example_2)</h4>
 
 </div>
 <div class="code code-space">
 <span class="id" type="keyword">Example</span> <a name="Examples.subtyping_example_2"><span class="id" type="definition">subtyping_example_2</span></a> :<br/>
-&nbsp;&nbsp;(<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.TTop"><span class="id" type="constructor">TTop</span></a> <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="definition">Person</span></a>) &lt;: (<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="definition">Person</span></a> <a class="idref" href="Sub.html#Examples.TTop"><span class="id" type="constructor">TTop</span></a>).<br/>
+&nbsp;&nbsp;(<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.TTop"><span class="id" type="constructor">TTop</span></a> <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="axiom">Person</span></a>) &lt;: (<a class="idref" href="Sub.html#Examples.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="Sub.html#Examples.Person"><span class="id" type="axiom">Person</span></a> <a class="idref" href="Sub.html#Examples.TTop"><span class="id" type="constructor">TTop</span></a>).<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;Top-&gt;Person&nbsp;&lt;:&nbsp;Person-&gt;Top&nbsp;*)</span><br/>
 <span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
@@ -1529,7 +1529,7 @@ Now use the definition of the subtype relation to prove the following:
 </div>
 
 <div class="doc">
-<a name="lab667"></a><h2 class="section">Typing</h2>
+<a name="lab666"></a><h2 class="section">Typing</h2>
 
 <div class="paragraph"> </div>
 
@@ -1584,7 +1584,7 @@ Now use the definition of the subtype relation to prove the following:
 
 <div class="doc">
 The following hints help <span class="inlinecode"><span class="id" type="tactic">auto</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> construct typing
-    derivations.  (See chapter <a href="UseAuto.html"><font color="gray">UseAuto</font></a> for more on hints.) 
+    derivations.  (See chapter <a href="UseAuto.html"><span class="inlineref">UseAuto</span></a> for more on hints.) 
 </div>
 <div class="code code-tight">
 
@@ -1606,7 +1606,7 @@ Do the following exercises after you have added product types to
     formal statement in Coq and prove it. 
 <div class="paragraph"> </div>
 
-<a name="lab668"></a><h4 class="section">Exercise: 1 star, optional (typing_example_0)</h4>
+<a name="lab667"></a><h4 class="section">Exercise: 1 star, optional (typing_example_0)</h4>
 
 </div>
 <div class="code code-space">
@@ -1619,7 +1619,7 @@ Do the following exercises after you have added product types to
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab669"></a><h4 class="section">Exercise: 2 stars, optional (typing_example_1)</h4>
+<a name="lab668"></a><h4 class="section">Exercise: 2 stars, optional (typing_example_1)</h4>
 
 </div>
 <div class="code code-space">
@@ -1632,7 +1632,7 @@ Do the following exercises after you have added product types to
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab670"></a><h4 class="section">Exercise: 2 stars, optional (typing_example_2)</h4>
+<a name="lab669"></a><h4 class="section">Exercise: 2 stars, optional (typing_example_2)</h4>
 
 </div>
 <div class="code code-space">
@@ -1654,13 +1654,13 @@ Do the following exercises after you have added product types to
 </div>
 
 <div class="doc">
-<a name="lab671"></a><h1 class="section">Properties</h1>
+<a name="lab670"></a><h1 class="section">Properties</h1>
 
 <div class="paragraph"> </div>
 
  The fundamental properties of the system that we want to
     check are the same as always: progress and preservation.  Unlike
-    the extension of the STLC with references (chapter <a href="References.html"><font color="gray">References</font></a>),
+    the extension of the STLC with references (chapter <a href="References.html"><span class="inlineref">References</span></a>),
     we don't need to change the <i>statements</i> of these properties to
     take subtyping into account.  However, their proofs do become a
     little bit more involved. 
@@ -1671,7 +1671,7 @@ Do the following exercises after you have added product types to
 </div>
 
 <div class="doc">
-<a name="lab672"></a><h2 class="section">Inversion Lemmas for Subtyping</h2>
+<a name="lab671"></a><h2 class="section">Inversion Lemmas for Subtyping</h2>
 
 <div class="paragraph"> </div>
 
@@ -1700,7 +1700,7 @@ Do the following exercises after you have added product types to
     <span class="inlinecode"><span class="id" type="var">T</span></span> and the existence of subtype relations between their parts. 
 <div class="paragraph"> </div>
 
-<a name="lab673"></a><h4 class="section">Exercise: 2 stars, optional (sub_inversion_Bool)</h4>
+<a name="lab672"></a><h4 class="section">Exercise: 2 stars, optional (sub_inversion_Bool)</h4>
 
 </div>
 <div class="code code-space">
@@ -1719,7 +1719,7 @@ Do the following exercises after you have added product types to
 </div>
 
 <div class="doc">
-<a name="lab674"></a><h4 class="section">Exercise: 3 stars, optional (sub_inversion_arrow)</h4>
+<a name="lab673"></a><h4 class="section">Exercise: 3 stars, optional (sub_inversion_arrow)</h4>
 
 </div>
 <div class="code code-space">
@@ -1746,7 +1746,7 @@ Do the following exercises after you have added product types to
 </div>
 
 <div class="doc">
-<a name="lab675"></a><h2 class="section">Canonical Forms</h2>
+<a name="lab674"></a><h2 class="section">Canonical Forms</h2>
 
 <div class="paragraph"> </div>
 
@@ -1779,7 +1779,7 @@ Do the following exercises after you have added product types to
     type. 
 <div class="paragraph"> </div>
 
-<a name="lab676"></a><h4 class="section">Exercise: 3 stars, optional (canonical_forms_of_arrow_types)</h4>
+<a name="lab675"></a><h4 class="section">Exercise: 3 stars, optional (canonical_forms_of_arrow_types)</h4>
 
 </div>
 <div class="code code-space">
@@ -1814,7 +1814,7 @@ Do the following exercises after you have added product types to
 <span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">s</span> <span class="id" type="var">Hty</span> <span class="id" type="var">Hv</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> <a class="idref" href="Sub.html#TBool"><span class="id" type="constructor">TBool</span></a> <span class="id" type="keyword">as</span> <span class="id" type="var">T</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hty</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hty</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span>. <span class="id" type="tactic">apply</span> <a class="idref" href="Sub.html#sub_inversion_Bool"><span class="id" type="axiom">sub_inversion_Bool</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">subst</span>...<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
@@ -1824,7 +1824,7 @@ Do the following exercises after you have added product types to
 </div>
 
 <div class="doc">
-<a name="lab677"></a><h2 class="section">Progress</h2>
+<a name="lab676"></a><h2 class="section">Progress</h2>
 
 <div class="paragraph"> </div>
 
@@ -1970,7 +1970,7 @@ Do the following exercises after you have added product types to
 </div>
 
 <div class="doc">
-<a name="lab678"></a><h2 class="section">Inversion Lemmas for Typing</h2>
+<a name="lab677"></a><h2 class="section">Inversion Lemmas for Typing</h2>
 
 <div class="paragraph"> </div>
 
@@ -2041,7 +2041,7 @@ Do the following exercises after you have added product types to
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">x</span> <span class="id" type="var">S<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">T</span> <span class="id" type="var">H</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Sub.html#tabs"><span class="id" type="constructor">tabs</span></a> <span class="id" type="var">x</span> <span class="id" type="var">S<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Abs&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">T<sub>12</sub></span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
@@ -2068,7 +2068,7 @@ Similarly...
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">x</span> <span class="id" type="var">T</span> <span class="id" type="var">Hty</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Sub.html#tvar"><span class="id" type="constructor">tvar</span></a> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hty</span>; <span class="id" type="tactic">intros</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Var&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">T</span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
@@ -2087,7 +2087,7 @@ Similarly...
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">T<sub>2</sub></span> <span class="id" type="var">Hty</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Sub.html#tapp"><span class="id" type="constructor">tapp</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hty</span>; <span class="id" type="tactic">intros</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_App&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">T<sub>1</sub></span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
@@ -2133,7 +2133,7 @@ Similarly...
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span> <span class="id" type="var">T</span> <span class="id" type="var">Hty</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Sub.html#tif"><span class="id" type="constructor">tif</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hty</span>; <span class="id" type="tactic">intros</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_If&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
@@ -2184,7 +2184,7 @@ The inversion lemmas for typing and for subtyping between arrow
 </div>
 
 <div class="doc">
-<a name="lab679"></a><h2 class="section">Context Invariance</h2>
+<a name="lab678"></a><h2 class="section">Context Invariance</h2>
 
 <div class="paragraph"> </div>
 
@@ -2264,7 +2264,7 @@ The inversion lemmas for typing and for subtyping between arrow
 </div>
 
 <div class="doc">
-<a name="lab680"></a><h2 class="section">Substitution</h2>
+<a name="lab679"></a><h2 class="section">Substitution</h2>
 
 <div class="paragraph"> </div>
 
@@ -2346,7 +2346,7 @@ The inversion lemmas for typing and for subtyping between arrow
 </div>
 
 <div class="doc">
-<a name="lab681"></a><h2 class="section">Preservation</h2>
+<a name="lab680"></a><h2 class="section">Preservation</h2>
 
 <div class="paragraph"> </div>
 
@@ -2468,7 +2468,7 @@ The inversion lemmas for typing and for subtyping between arrow
 </div>
 
 <div class="doc">
-<a name="lab682"></a><h2 class="section">Records, via Products and Top</h2>
+<a name="lab681"></a><h2 class="section">Records, via Products and Top</h2>
 
 <div class="paragraph"> </div>
 
@@ -2506,11 +2506,11 @@ The inversion lemmas for typing and for subtyping between arrow
 </div>
 
 <div class="doc">
-<a name="lab683"></a><h2 class="section">Exercises</h2>
+<a name="lab682"></a><h2 class="section">Exercises</h2>
 
 <div class="paragraph"> </div>
 
-<a name="lab684"></a><h4 class="section">Exercise: 2 stars (variations)</h4>
+<a name="lab683"></a><h4 class="section">Exercise: 2 stars (variations)</h4>
  Each part of this problem suggests a different way of changing the
     definition of the STLC with Unit and subtyping.  (These changes
     are not cumulative: each part starts from the original language.)
@@ -2680,11 +2680,11 @@ The inversion lemmas for typing and for subtyping between arrow
 </div>
 
 <div class="doc">
-<a name="lab685"></a><h1 class="section">Exercise: Adding Products</h1>
+<a name="lab684"></a><h1 class="section">Exercise: Adding Products</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab686"></a><h4 class="section">Exercise: 4 stars (products)</h4>
+<a name="lab685"></a><h4 class="section">Exercise: 4 stars (products)</h4>
  Adding pairs, projections, and product types to the system we have
     defined is a relatively straightforward matter.  Carry out this
     extension:
@@ -2701,14 +2701,14 @@ The inversion lemmas for typing and for subtyping between arrow
 
 </li>
 <li> Extend the substitution function and value relation as in
-      chapter <a href="MoreSTLC.html"><font color="gray">MoreSTLC</font></a>.
+      chapter <a href="MoreSTLC.html"><span class="inlineref">MoreSTLC</span></a>.
 
 <div class="paragraph"> </div>
 
 
 </li>
 <li> Extend the operational semantics with the same reduction rules
-      as in chapter <a href="MoreSTLC.html"><font color="gray">MoreSTLC</font></a>.
+      as in chapter <a href="MoreSTLC.html"><span class="inlineref">MoreSTLC</span></a>.
 
 <div class="paragraph"> </div>
 
@@ -2731,7 +2731,7 @@ The inversion lemmas for typing and for subtyping between arrow
 </table></center>
 </li>
 <li> Extend the typing relation with the same rules for pairs and
-      projections as in chapter <a href="MoreSTLC.html"><font color="gray">MoreSTLC</font></a>.
+      projections as in chapter <a href="MoreSTLC.html"><span class="inlineref">MoreSTLC</span></a>.
 
 <div class="paragraph"> </div>
 

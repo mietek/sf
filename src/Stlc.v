@@ -4,7 +4,7 @@ Require Import Maps.
 Require Import Smallstep.
 Require Import Types.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * The Simply Typed Lambda-Calculus *)
 
 (** The simply typed lambda-calculus (STLC) is a tiny core
@@ -19,7 +19,7 @@ Require Import Types.
     _variable binding_ and _substitution_.  It which will take some
     work to deal with these. *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Overview *)
 
 (** The STLC is built on some collection of _base types_: 
@@ -49,7 +49,6 @@ Require Import Types.
            | true                    constant true
            | false                   constant false
            | if t1 then t2 else t3   conditional
-
 *)
 
 (** The [\] symbol in a function abstraction [\x:T1.t2] is generally
@@ -140,21 +139,21 @@ Require Import Types.
       - [(\x:Bool. \y:Bool. x) false true] has type [Bool] *)
 
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Syntax *)
 
 (** We begin by formalizing the syntax of the STLC. *)
 
 Module STLC.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Types *)
 
 Inductive ty : Type :=
   | TBool  : ty
   | TArrow : ty -> ty -> ty.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Terms *)
 
 Inductive tm : Type :=
@@ -208,7 +207,7 @@ Notation notB := (tabs x TBool (tif (tvar x) tfalse ttrue)).
 (** (We write these as [Notation]s rather than [Definition]s to make
     things easier for [auto].) *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Operational Semantics *)
 
 (** To define the small-step semantics of STLC terms, we begin,
@@ -217,7 +216,7 @@ Notation notB := (tabs x TBool (tif (tvar x) tfalse ttrue)).
     used in the reduction rule for application expressions.  And
     finally we give the small-step relation itself. *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Values *)
 
 (** To define the values of the STLC, we have a few cases to consider.
@@ -275,7 +274,7 @@ Hint Constructors value.
     always be reducing programs "from the outside in," and that means
     the [step] relation will always be working with closed terms.  *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 (** Now we come to the heart of the STLC: the operation of
@@ -338,7 +337,6 @@ Hint Constructors value.
        [x:=s]false           = false
        [x:=s](if t1 then t2 else t3) =
                        if [x:=s]t1 then [x:=s]t2 else [x:=s]t3
-
 *)
 
 (** ... and formally: *)
@@ -395,7 +393,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 (** The small-step reduction relation for STLC now follows the
@@ -424,7 +422,6 @@ Proof.
                               t2 ==> t2'
                            ----------------                           (ST_App2)
                            v1 t2 ==> v1 t2'
-
 *)
 (** ... plus the usual rules for booleans:
 
@@ -437,7 +434,6 @@ Proof.
                               t1 ==> t1'
          ----------------------------------------------------           (ST_If)
          (if t1 then t2 else t3) ==> (if t1' then t2 else t3)
-
 *)
 
 (** Formally: *)
@@ -470,7 +466,7 @@ Hint Constructors step.
 Notation multistep := (multi step).
 Notation "t1 '==>*' t2" := (multistep t1 t2) (at level 40).
 
-(* ##################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Examples *)
 
 (** Example:
@@ -480,7 +476,6 @@ Notation "t1 '==>*' t2" := (multistep t1 t2) (at level 40).
     i.e.,
 
       (idBB idB) ==>* idB
-
 *)
 
 Lemma step_example1 :
@@ -500,7 +495,6 @@ Proof.
     i.e.,
 
       (idBB (idBB idB)) ==>* idB.
-
 *)
 
 Lemma step_example2 :
@@ -522,7 +516,6 @@ Proof.
     i.e.,
 
        ((idBB notB) ttrue) ==>* tfalse.
-
 *)
 
 Lemma step_example3 :
@@ -544,7 +537,6 @@ Proof.
 i.e.,
 
   (idBB (notB ttrue)) ==>* tfalse.
-
 *)
 
 Lemma step_example4 :
@@ -595,12 +587,12 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Typing *)
 
 (** Next we consider the typing relation of the STLC. *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Contexts *)
 
 (** _Question_: What is the type of the term "[x y]"?
@@ -621,7 +613,7 @@ Proof.
 
 Definition context := partial_map ty.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Typing Relation *)
 
 (** 
@@ -681,7 +673,7 @@ where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
 Hint Constructors has_type.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Examples *)
 
 Example typing_example_1 :
@@ -700,7 +692,6 @@ Proof. auto.  Qed.
 
        empty |- \x:A. \y:A->A. y (y x))
              \in A -> (A->A) -> A.
-
 *)
 
 Example typing_example_2 :
@@ -737,7 +728,6 @@ Proof.
        empty |- \x:Bool->B. \y:Bool->Bool. \z:Bool.
                    y (x z)
              \in T.
-
 *)
 
 Example typing_example_3 :
@@ -758,7 +748,6 @@ Proof with auto.
 
     ~ exists T,
         empty |- \x:Bool. \y:Bool, x y : T.
-
 *)
 
 Example typing_nonexample_1 :
@@ -784,7 +773,6 @@ Proof.
 
     ~ (exists S, exists T,
           empty |- \x:S. x x \in T).
-
 *)
 
 Example typing_nonexample_3 :

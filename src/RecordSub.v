@@ -7,14 +7,14 @@
     presentation here is somewhat terse.  We just comment where things
     are nonstandard. *)
 
-Require Import SfLib.
 Require Import Maps.
+Require Import Smallstep.
 Require Import MoreStlc.
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Core Definitions *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Syntax *)
 
 Inductive ty : Type :=
@@ -36,7 +36,7 @@ Inductive tm : Type :=
   | trnil :  tm
   | trcons : id -> tm -> tm -> tm.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Well-Formedness *)
 
 (** The syntax of terms and types is a bit too loose, in the sense
@@ -86,7 +86,7 @@ Inductive well_formed_ty : ty -> Prop :=
 
 Hint Constructors record_ty record_tm well_formed_ty.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 (** Substitution and reduction are as before. *)
@@ -104,7 +104,7 @@ Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
 
 Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 Inductive value : tm -> Prop :=
@@ -164,7 +164,7 @@ where "t1 '==>' t2" := (step t1 t2).
 
 Hint Constructors step.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Subtyping *)
 
 (** Now we come to the interesting part, where the features we've
@@ -172,7 +172,7 @@ Hint Constructors step.
     relation and developing some of its important technical
     properties. *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Definition *)
 
 (** The definition of subtyping is essentially just what we sketched
@@ -220,7 +220,7 @@ where "T '<:' U" := (subtype T U).
 
 Hint Constructors subtype.
 
-(* ############################################### *)
+(* ================================================================= *)
 (** ** Examples *)
 
 Module Examples.
@@ -291,9 +291,10 @@ Proof with eauto.
 
 End Examples.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Properties of Subtyping *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Well-Formedness *)
 
 (** To get started proving things about subtyping, we need a couple of
@@ -318,11 +319,12 @@ Lemma wf_rcd_lookup : forall i T Ti,
   well_formed_ty Ti.
 Proof with eauto.
   intros i T.
-  induction T; intros; try solve by inversion.
+  induction T; intros; try solve_by_invert.
   - (* TRCons *)
     inversion H. subst. unfold Tlookup in H0.
     destruct (beq_id i i0)...  inversion H0; subst...  Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Field Lookup *)
 
 (** The record matching lemmas get a little more complicated in the
@@ -339,7 +341,7 @@ Lemma rcd_types_match : forall S T i Ti,
 Proof with (eauto using wf_rcd_lookup).
   intros S T i Ti Hsub Hget. generalize dependent Ti.
   induction Hsub; intros Ti Hget;
-    try solve by inversion.
+    try solve_by_invert.
   - (* S_Refl *)
     exists Ti...
   - (* S_Trans *)
@@ -372,6 +374,7 @@ Proof with (eauto using wf_rcd_lookup).
 (* FILL IN HERE *)
 (** [] *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Inversion Lemmas *)
 
 (** **** Exercise: 3 stars, optional (sub_inversion_arrow)  *)
@@ -386,7 +389,7 @@ Proof with eauto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Typing *)
 
 Definition context := partial_map ty.
@@ -429,7 +432,7 @@ where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
 Hint Constructors has_type.
 
-(* ############################################### *)
+(* ================================================================= *)
 (** ** Typing Examples *)
 
 Module Examples2.
@@ -483,9 +486,10 @@ Proof with eauto.
 
 End Examples2.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Properties of Typing *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Well-Formedness *)
 
 Lemma has_type__wf : forall Gamma t T,
@@ -511,6 +515,7 @@ Proof.
   inversion Hrt; subst; inversion Hstp; subst; eauto.
 Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Field Lookup *)
 
 Lemma lookup_field_in_value : forall v T i Ti,
@@ -521,7 +526,7 @@ Lemma lookup_field_in_value : forall v T i Ti,
 Proof with eauto.
   remember empty as Gamma.
   intros t T i Ti Hval Htyp. revert Ti HeqGamma Hval.
-  induction Htyp; intros; subst; try solve by inversion.
+  induction Htyp; intros; subst; try solve_by_invert.
   - (* T_Sub *)
     apply (rcd_types_match S) in H0...
     destruct H0 as [Si [HgetSi Hsub]].
@@ -535,7 +540,7 @@ Proof with eauto.
       destruct (IHHtyp2 Ti) as [vi [get Htyvi]]...
       inversion Hval...  Qed.
 
-(* ########################################## *)
+(* ----------------------------------------------------------------- *)
 (** *** Progress *)
 
 (** **** Exercise: 3 stars (canonical_forms_of_arrow_types)  *)
@@ -662,7 +667,7 @@ Proof with eauto.
           - Otherwise, [tr] is also a value.  So, [{i=t1, tr}] is a
             value by [v_rcons]. *)
 
-(* ########################################## *)
+(* ----------------------------------------------------------------- *)
 (** *** Inversion Lemmas *)
 
 Lemma typing_inversion_var : forall Gamma x T,
@@ -673,7 +678,7 @@ Proof with eauto.
   intros Gamma x T Hty.
   remember (tvar x) as t.
   induction Hty; intros;
-    inversion Heqt; subst; try solve by inversion.
+    inversion Heqt; subst; try solve_by_invert.
   - (* T_Var *)
     exists T...
   - (* T_Sub *)
@@ -688,7 +693,7 @@ Proof with eauto.
   intros Gamma t1 t2 T2 Hty.
   remember (tapp t1 t2) as t.
   induction Hty; intros;
-    inversion Heqt; subst; try solve by inversion.
+    inversion Heqt; subst; try solve_by_invert.
   - (* T_App *)
     exists T1...
   - (* T_Sub *)
@@ -704,7 +709,7 @@ Proof with eauto.
   intros Gamma x S1 t2 T H.
   remember (tabs x S1 t2) as t.
   induction H;
-    inversion Heqt; subst; intros; try solve by inversion.
+    inversion Heqt; subst; intros; try solve_by_invert.
   - (* T_Abs *)
     assert (Hwf := has_type__wf _ _ _ H0).
     exists T12...
@@ -720,7 +725,7 @@ Proof with eauto.
   intros Gamma i t1 Ti H.
   remember (tproj t1 i) as t.
   induction H;
-    inversion Heqt; subst; intros; try solve by inversion.
+    inversion Heqt; subst; intros; try solve_by_invert.
   - (* T_Proj *)
     assert (well_formed_ty Ti) as Hwf.
     { (* pf of assertion *)
@@ -764,7 +769,7 @@ Proof with eauto.
   destruct Hsub as [U1 [U2 [Heq [Hsub1 Hsub2]]]].
   inversion Heq; subst...  Qed.
 
-(* ########################################## *)
+(* ----------------------------------------------------------------- *)
 (** *** Context Invariance *)
 
 Inductive appears_free_in : id -> tm -> Prop :=
@@ -820,7 +825,7 @@ Proof with eauto.
     unfold update, t_update in Hctx.
     rewrite false_beq_id in Hctx...  Qed.
 
-(* ########################################## *)
+(* ----------------------------------------------------------------- *)
 (** *** Preservation *)
 
 Lemma substitution_preserves_typing : forall Gamma x U v t S,
@@ -963,5 +968,5 @@ Proof with eauto.
        for [tr]'s typing derivation, [T_RCons], and a use of the
        [step_preserves_record_tm] lemma. *)
 
-(** $Date: 2016-05-27 14:19:30 -0400 (Fri, 27 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)
 

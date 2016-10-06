@@ -14,14 +14,14 @@
     it correct. *)
 
 Require Import Coq.Bool.Bool.
-Require Import SfLib.
 Require Import Maps.
+Require Import Smallstep.
 Require Import Stlc.
 
 Module STLCChecker.
 Import STLC.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Comparing Types *)
 
 (** First, we need a function to compare two types for equality... *)
@@ -57,7 +57,7 @@ Proof with auto.
     rewrite andb_true_iff in H0. inversion H0 as [Hbeq1 Hbeq2].
     apply IHT1_1 in Hbeq1. apply IHT1_2 in Hbeq2. subst...  Qed.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** The Typechecker *)
 
 (** The typechecker works by walking over the structure of the given
@@ -94,7 +94,7 @@ Fixpoint type_check (Gamma:context) (t:tm) : option ty :=
                    end
   end.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Properties *)
 
 (** To verify that this typechecking algorithm is correct, we show
@@ -111,18 +111,18 @@ Proof with eauto.
   - (* tapp *)
     remember (type_check Gamma t1) as TO1.
     remember (type_check Gamma t2) as TO2.
-    destruct TO1 as [T1|]; try solve by inversion;
-    destruct T1 as [|T11 T12]; try solve by inversion.
-    destruct TO2 as [T2|]; try solve by inversion.
+    destruct TO1 as [T1|]; try solve_by_invert;
+    destruct T1 as [|T11 T12]; try solve_by_invert.
+    destruct TO2 as [T2|]; try solve_by_invert.
     destruct (beq_ty T11 T2) eqn: Heqb;
-    try solve by inversion.
+    try solve_by_invert.
     apply beq_ty__eq in Heqb.
     inversion H0; subst...
   - (* tabs *)
     rename i into y. rename t into T1.
     remember (update Gamma y T1) as G'.
     remember (type_check G' t0) as TO2.
-    destruct TO2; try solve by inversion.
+    destruct TO2; try solve_by_invert.
     inversion H0; subst...
   - (* ttrue *) eauto.
   - (* tfalse *) eauto.
@@ -130,12 +130,12 @@ Proof with eauto.
     remember (type_check Gamma t1) as TOc.
     remember (type_check Gamma t2) as TO1.
     remember (type_check Gamma t3) as TO2.
-    destruct TOc as [Tc|]; try solve by inversion.
-    destruct Tc; try solve by inversion.
-    destruct TO1 as [T1|]; try solve by inversion.
-    destruct TO2 as [T2|]; try solve by inversion.
+    destruct TOc as [Tc|]; try solve_by_invert.
+    destruct Tc; try solve_by_invert.
+    destruct TO1 as [T1|]; try solve_by_invert.
+    destruct TO2 as [T2|]; try solve_by_invert.
     destruct (beq_ty T1 T2) eqn:Heqb;
-    try solve by inversion.
+    try solve_by_invert.
     apply beq_ty__eq in Heqb.
     inversion H0. subst. subst...
 Qed.
@@ -158,4 +158,4 @@ Qed.
 
 End STLCChecker.
 
-(** $Date: 2016-05-26 12:03:56 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)

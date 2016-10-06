@@ -52,7 +52,7 @@
 </div>
 
 <div class="doc">
-<a name="lab346"></a><h1 class="section">Internals</h1>
+<a name="lab345"></a><h1 class="section">Internals</h1>
 
 </div>
 <div class="code code-space">
@@ -71,7 +71,7 @@
 </div>
 
 <div class="doc">
-<a name="lab347"></a><h2 class="section">Lexical Analysis</h2>
+<a name="lab346"></a><h2 class="section">Lexical Analysis</h2>
 
 </div>
 <div class="code code-space">
@@ -79,13 +79,13 @@
 <br/>
 <span class="id" type="keyword">Definition</span> <a name="isWhite"><span class="id" type="definition">isWhite</span></a> (<span class="id" type="var">c</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Strings.Ascii.html#ascii"><span class="id" type="inductive">ascii</span></a>) : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#bool"><span class="id" type="inductive">bool</span></a> :=<br/>
 &nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">n</span> := <a class="idref" href="http://coq.inria.fr/library/Coq.Strings.Ascii.html#nat_of_ascii"><span class="id" type="definition">nat_of_ascii</span></a> <a class="idref" href="ImpParser.html#c"><span class="id" type="variable">c</span></a> <span class="id" type="keyword">in</span><br/>
-&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#orb"><span class="id" type="definition">orb</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#orb"><span class="id" type="definition">orb</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 32)   <span class="comment">(*&nbsp;space&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 9))   <span class="comment">(*&nbsp;tab&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#orb"><span class="id" type="definition">orb</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 10)   <span class="comment">(*&nbsp;linefeed&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 13)). <span class="comment">(*&nbsp;Carriage&nbsp;return.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#orb"><span class="id" type="definition">orb</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#orb"><span class="id" type="definition">orb</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="abbreviation">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 32)   <span class="comment">(*&nbsp;space&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="abbreviation">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 9))   <span class="comment">(*&nbsp;tab&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#orb"><span class="id" type="definition">orb</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="abbreviation">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 10)   <span class="comment">(*&nbsp;linefeed&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="abbreviation">beq_nat</span></a> <a class="idref" href="ImpParser.html#n"><span class="id" type="variable">n</span></a> 13)). <span class="comment">(*&nbsp;Carriage&nbsp;return.&nbsp;*)</span><br/>
 
 <br/>
-<span class="id" type="keyword">Notation</span> "x '&lt;=?' y" := (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="definition">leb</span></a> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+<span class="id" type="keyword">Notation</span> "x '&lt;=?' y" := (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="abbreviation">leb</span></a> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
 &nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 70, <span class="id" type="var">no</span> <span class="id" type="var">associativity</span>) : <span class="id" type="var">nat_scope</span>.<br/>
 
 <br/>
@@ -139,7 +139,7 @@
 &nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="ImpParser.html#xs"><span class="id" type="variable">xs</span></a> <span class="id" type="keyword">with</span><br/>
 &nbsp;&nbsp;| [] ⇒ <a class="idref" href="ImpParser.html#tk"><span class="id" type="variable">tk</span></a><br/>
 &nbsp;&nbsp;| (<span class="id" type="var">x</span>::<span class="id" type="var">xs'</span>) ⇒<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="ImpParser.html#cls"><span class="id" type="variable">cls</span></a>, <a class="idref" href="ImpParser.html#classifyChar"><span class="id" type="definition">classifyChar</span></a> <a class="idref" href="ImpParser.html#x"><span class="id" type="variable">x</span></a>, <span class="id" type="var">x</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="ImpParser.html#cls"><span class="id" type="variable">cls</span></a>, <a class="idref" href="ImpParser.html#classifyChar"><span class="id" type="definition">classifyChar</span></a> <span class="id" type="var">x</span>, <span class="id" type="var">x</span> <span class="id" type="keyword">with</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span>, <span class="id" type="var">_</span>, "("      ⇒<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ImpParser.html#tk"><span class="id" type="variable">tk</span></a> ++ ["("]::(<a class="idref" href="ImpParser.html#tokenize_helper"><span class="id" type="definition">tokenize_helper</span></a> <a class="idref" href="ImpParser.html#other"><span class="id" type="constructor">other</span></a> [] <span class="id" type="var">xs'</span>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span>, <span class="id" type="var">_</span>, ")"      ⇒<br/>
@@ -176,11 +176,11 @@
 </div>
 
 <div class="doc">
-<a name="lab348"></a><h2 class="section">Parsing</h2>
+<a name="lab347"></a><h2 class="section">Parsing</h2>
 
 <div class="paragraph"> </div>
 
-<a name="lab349"></a><h3 class="section">Options With Errors</h3>
+<a name="lab348"></a><h3 class="section">Options With Errors</h3>
 
 <div class="paragraph"> </div>
 
@@ -226,7 +226,7 @@ Some syntactic sugar to make writing nested match-expressions on
 </div>
 
 <div class="doc">
-<a name="lab350"></a><h3 class="section">Symbol Table</h3>
+<a name="lab349"></a><h3 class="section">Symbol Table</h3>
 
 <div class="paragraph"> </div>
 
@@ -253,7 +253,7 @@ Some syntactic sugar to make writing nested match-expressions on
 </div>
 
 <div class="doc">
-<a name="lab351"></a><h3 class="section">Generic Combinators for Building Parsers</h3>
+<a name="lab350"></a><h3 class="section">Generic Combinators for Building Parsers</h3>
 
 </div>
 <div class="code code-space">
@@ -324,7 +324,7 @@ A parser that expects a particular token:
 </div>
 
 <div class="doc">
-<a name="lab352"></a><h3 class="section">A Recursive-Descent Parser for Imp</h3>
+<a name="lab351"></a><h3 class="section">A Recursive-Descent Parser for Imp</h3>
 
 <div class="paragraph"> </div>
 
@@ -572,7 +572,7 @@ Parsing commands:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ImpParser.html#::'DO'_'('_x_','_x_')'_'<=='_x_';'_x"><span class="id" type="notation">DO</span></a> (<span class="id" type="var">c</span>, <span class="id" type="var">rest</span>) &lt;==<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ImpParser.html#parseSimpleCommand"><span class="id" type="definition">parseSimpleCommand</span></a> <span class="id" type="var">steps'</span> <a class="idref" href="ImpParser.html#symtable"><span class="id" type="variable">symtable</span></a> <a class="idref" href="ImpParser.html#xs"><span class="id" type="variable">xs</span></a>;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ImpParser.html#::'DO'_'('_x_','_x_')'_'<--'_x_';'_x_'OR'_x"><span class="id" type="notation">DO</span></a> (<span class="id" type="var">c'</span>, <span class="id" type="var">rest'</span>) &lt;--<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ImpParser.html#firstExpect"><span class="id" type="definition">firstExpect</span></a> ";;" <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ImpParser.html#firstExpect"><span class="id" type="definition">firstExpect</span></a> ";" <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ImpParser.html#parseSequencedCommand"><span class="id" type="definition">parseSequencedCommand</span></a> <span class="id" type="var">steps'</span> <a class="idref" href="ImpParser.html#symtable"><span class="id" type="variable">symtable</span></a>) <span class="id" type="var">rest</span>;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ImpParser.html#SomeE"><span class="id" type="constructor">SomeE</span></a>(<span class="id" type="var">c</span> ;; <span class="id" type="var">c'</span>, <span class="id" type="var">rest'</span>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">OR</span><br/>
@@ -592,7 +592,7 @@ Parsing commands:
 </div>
 
 <div class="doc">
-<a name="lab353"></a><h1 class="section">Examples</h1>
+<a name="lab352"></a><h1 class="section">Examples</h1>
 
 </div>
 <div class="code code-space">

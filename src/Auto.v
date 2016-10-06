@@ -66,6 +66,7 @@ Proof.
     subst st'0.
     apply IHE1_2. assumption.  Qed.
 
+(* ################################################################# *)
 (** * The [auto] and [eauto] Tactics *)
 
 (** Thus far, we have generally written proof scripts that apply
@@ -308,6 +309,7 @@ Proof with auto.
     subst st'0...
 Qed.
 
+(* ################################################################# *)
 (** * Searching Hypotheses *)
 
 (** The proof has become simpler, but there is still an annoying

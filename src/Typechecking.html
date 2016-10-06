@@ -46,8 +46,8 @@
 
 <br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Bool.Bool.html#"><span class="id" type="library">Coq.Bool.Bool</span></a>.<br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Stlc.html#"><span class="id" type="library">Stlc</span></a>.<br/>
 
 <br/>
@@ -58,7 +58,7 @@
 </div>
 
 <div class="doc">
-<a name="lab687"></a><h2 class="section">Comparing Types</h2>
+<a name="lab686"></a><h2 class="section">Comparing Types</h2>
 
 <div class="paragraph"> </div>
 
@@ -116,7 +116,7 @@
 </div>
 
 <div class="doc">
-<a name="lab688"></a><h2 class="section">The Typechecker</h2>
+<a name="lab687"></a><h2 class="section">The Typechecker</h2>
 
 <div class="paragraph"> </div>
 
@@ -161,7 +161,7 @@
 </div>
 
 <div class="doc">
-<a name="lab689"></a><h2 class="section">Properties</h2>
+<a name="lab688"></a><h2 class="section">Properties</h2>
 
 <div class="paragraph"> </div>
 
@@ -184,18 +184,18 @@
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;tapp&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Typechecking.html#STLCChecker.type_check"><span class="id" type="definition">type_check</span></a> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>1</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">TO<sub>1</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Typechecking.html#STLCChecker.type_check"><span class="id" type="definition">type_check</span></a> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>2</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">TO<sub>2</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>1</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>1</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">T<sub>1</sub></span> <span class="id" type="keyword">as</span> [|<span class="id" type="var">T<sub>11</sub></span> <span class="id" type="var">T<sub>12</sub></span>]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>2</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>2</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>1</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>1</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">T<sub>1</sub></span> <span class="id" type="keyword">as</span> [|<span class="id" type="var">T<sub>11</sub></span> <span class="id" type="var">T<sub>12</sub></span>]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>2</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>2</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<a class="idref" href="Typechecking.html#STLCChecker.beq_ty"><span class="id" type="definition">beq_ty</span></a> <span class="id" type="var">T<sub>11</sub></span> <span class="id" type="var">T<sub>2</sub></span>) <span class="id" type="var">eqn</span>: <span class="id" type="var">Heqb</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Typechecking.html#STLCChecker.beq_ty__eq"><span class="id" type="lemma">beq_ty__eq</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">Heqb</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span>; <span class="id" type="tactic">subst</span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;tabs&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rename</span> <span class="id" type="var">i</span> <span class="id" type="var">into</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rename</span> <span class="id" type="var">t</span> <span class="id" type="var">into</span> <span class="id" type="var">T<sub>1</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">y</span> <span class="id" type="var">T<sub>1</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">G'</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Typechecking.html#STLCChecker.type_check"><span class="id" type="definition">type_check</span></a> <span class="id" type="var">G'</span> <span class="id" type="var">t<sub>0</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">TO<sub>2</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span>; <span class="id" type="tactic">subst</span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;ttrue&nbsp;*)</span> <span class="id" type="tactic">eauto</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;tfalse&nbsp;*)</span> <span class="id" type="tactic">eauto</span>.<br/>
@@ -203,12 +203,12 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Typechecking.html#STLCChecker.type_check"><span class="id" type="definition">type_check</span></a> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>1</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">TOc</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Typechecking.html#STLCChecker.type_check"><span class="id" type="definition">type_check</span></a> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>2</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">TO<sub>1</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="Typechecking.html#STLCChecker.type_check"><span class="id" type="definition">type_check</span></a> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>3</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">TO<sub>2</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TOc</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Tc</span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">Tc</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>1</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>1</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>2</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>2</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TOc</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Tc</span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">Tc</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>1</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>1</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">TO<sub>2</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">T<sub>2</sub></span>|]; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<a class="idref" href="Typechecking.html#STLCChecker.beq_ty"><span class="id" type="definition">beq_ty</span></a> <span class="id" type="var">T<sub>1</sub></span> <span class="id" type="var">T<sub>2</sub></span>) <span class="id" type="var">eqn</span>:<span class="id" type="var">Heqb</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Typechecking.html#STLCChecker.beq_ty__eq"><span class="id" type="lemma">beq_ty__eq</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">Heqb</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span>. <span class="id" type="tactic">subst</span>. <span class="id" type="tactic">subst</span>...<br/>
 <span class="id" type="keyword">Qed</span>.<br/>

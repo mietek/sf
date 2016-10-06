@@ -86,7 +86,7 @@ Remark: SSReflect is another package providing powerful tactics.
     from the "LibTactics" library. It does not aim at presenting all
     the features of "LibTactics". The detailed specification of tactics
     can be found in the source file <span class="inlinecode"><span class="id" type="var">LibTactics.v</span></span>. Further documentation
-    as well as demos can be found at <a href="http://www.chargueraud.org/softs/tlc/"><font color="gray">http://www.chargueraud.org/softs/tlc/</font></a>. 
+    as well as demos can be found at <a href="http://www.chargueraud.org/softs/tlc/"><span class="inlineref">http://www.chargueraud.org/softs/tlc/</span></a>. 
 <div class="paragraph"> </div>
 
  In this tutorial, tactics are presented using examples taken from
@@ -101,7 +101,7 @@ Remark: SSReflect is another package providing powerful tactics.
 </div>
 
 <div class="doc">
-<a name="lab865"></a><h1 class="section">Tactics for Introduction and Case Analysis</h1>
+<a name="lab864"></a><h1 class="section">Tactics for Introduction and Case Analysis</h1>
 
 <div class="paragraph"> </div>
 
@@ -130,7 +130,7 @@ Remark: SSReflect is another package providing powerful tactics.
 </div>
 
 <div class="doc">
-<a name="lab866"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">introv</span></span></h2>
+<a name="lab865"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">introv</span></span></h2>
 
 </div>
 <div class="code code-space">
@@ -231,7 +231,7 @@ Remark: the tactic <span class="inlinecode"><span class="id" type="var">introv</
 </div>
 
 <div class="doc">
-<a name="lab867"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">inverts</span></span></h2>
+<a name="lab866"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">inverts</span></span></h2>
 
 </div>
 <div class="code code-space">
@@ -437,7 +437,7 @@ Note: in the rare cases where one needs to perform an inversion
 </div>
 
 <div class="doc">
-<a name="lab868"></a><h1 class="section">Tactics for N-ary Connectives</h1>
+<a name="lab867"></a><h1 class="section">Tactics for N-ary Connectives</h1>
 
 <div class="paragraph"> </div>
 
@@ -469,14 +469,14 @@ Note: in the rare cases where one needs to perform an inversion
 
 <br/>
 <span class="id" type="keyword">Module</span> <a name="NaryExamples"><span class="id" type="module">NaryExamples</span></a>.<br/>
-&nbsp;&nbsp;<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="References.html#"><span class="id" type="library">References</span></a> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="References.html#"><span class="id" type="library">References</span></a> <a class="idref" href="Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="keyword">Import</span> <span class="id" type="var">STLCRef</span>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab869"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">splits</span></span></h2>
+<a name="lab868"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">splits</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -498,7 +498,7 @@ Note: in the rare cases where one needs to perform an inversion
 </div>
 
 <div class="doc">
-<a name="lab870"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">branch</span></span></h2>
+<a name="lab869"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">branch</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -524,7 +524,7 @@ Note: in the rare cases where one needs to perform an inversion
 </div>
 
 <div class="doc">
-<a name="lab871"></a><h2 class="section">The Tactic <span class="inlinecode"><span style="font-family: arial;">&exist;</span></span></h2>
+<a name="lab870"></a><h2 class="section">The Tactic <span class="inlinecode"><span style="font-family: arial;">&exist;</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -546,11 +546,11 @@ Note: in the rare cases where one needs to perform an inversion
 &nbsp;&nbsp;<span class="comment">(*&nbsp;was:&nbsp;<span class="inlinecode"><span class="id" type="var">value</span></span> <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode"><span style="font-family: arial;">&or;</span></span> <span class="inlinecode"><span style="font-family: arial;">&exist;</span></span> <span class="inlinecode"><span class="id" type="var">t'</span>,</span> <span class="inlinecode"><span style="font-family: arial;">&exist;</span></span> <span class="inlinecode"><span class="id" type="var">st'</span>,</span> <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">/</span> <span class="inlinecode"><span class="id" type="var">st</span></span> <span class="inlinecode"><span style="font-family: arial;">&rArr;</span></span> <span class="inlinecode"><span class="id" type="var">t'</span></span> <span class="inlinecode">/</span> <span class="inlinecode"><span class="id" type="var">st'</span></span>&nbsp;*)</span><br/>
 <span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">ST</span> <span class="id" type="var">t</span> <span class="id" type="var">T</span> <span class="id" type="var">st</span> <span class="id" type="var">Ht</span> <span class="id" type="var">HST</span>. <span class="id" type="var">remember</span> (@<a class="idref" href="Maps.html#empty"><span class="id" type="definition">empty</span></a> <a class="idref" href="References.html#STLCRef.ty"><span class="id" type="inductive">ty</span></a>) <span class="id" type="keyword">as</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span>.<br/>
-&nbsp;&nbsp;(<span class="id" type="tactic">induction</span> <span class="id" type="var">Ht</span>); <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>...<br/>
+&nbsp;&nbsp;(<span class="id" type="tactic">induction</span> <span class="id" type="var">Ht</span>); <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_App&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt1</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Ht1p</span> | <span class="id" type="var">Ht1p</span>]...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Ht1p</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Ht1p</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt2</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Ht2p</span> | <span class="id" type="var">Ht2p</span>]...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Ht2p</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>2</sub>'</span> [<span class="id" type="var">st'</span> <span class="id" type="var">Hstep</span>]].<br/>
@@ -576,7 +576,7 @@ Remark: a similar facility for n-ary existentials is provided
 </div>
 
 <div class="doc">
-<a name="lab872"></a><h1 class="section">Tactics for Working with Equality</h1>
+<a name="lab871"></a><h1 class="section">Tactics for Working with Equality</h1>
 
 <div class="paragraph"> </div>
 
@@ -618,7 +618,7 @@ Remark: a similar facility for n-ary existentials is provided
 </div>
 
 <div class="doc">
-<a name="lab873"></a><h2 class="section">The Tactics <span class="inlinecode"><span class="id" type="var">asserts_rewrite</span></span> and <span class="inlinecode"><span class="id" type="var">cuts_rewrite</span></span></h2>
+<a name="lab872"></a><h2 class="section">The Tactics <span class="inlinecode"><span class="id" type="var">asserts_rewrite</span></span> and <span class="inlinecode"><span class="id" type="var">cuts_rewrite</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -694,7 +694,7 @@ More generally, the tactics <span class="inlinecode"><span class="id" type="var"
 </div>
 
 <div class="doc">
-<a name="lab874"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">substs</span></span></h2>
+<a name="lab873"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">substs</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -716,7 +716,7 @@ More generally, the tactics <span class="inlinecode"><span class="id" type="var"
 </div>
 
 <div class="doc">
-<a name="lab875"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">fequals</span></span></h2>
+<a name="lab874"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">fequals</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -740,7 +740,7 @@ More generally, the tactics <span class="inlinecode"><span class="id" type="var"
 </div>
 
 <div class="doc">
-<a name="lab876"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">applys_eq</span></span></h2>
+<a name="lab875"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">applys_eq</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -830,7 +830,7 @@ When we have a mismatch on two arguments, we want to produce
 </div>
 
 <div class="doc">
-<a name="lab877"></a><h1 class="section">Some Convenient Shorthands</h1>
+<a name="lab876"></a><h1 class="section">Some Convenient Shorthands</h1>
 
 <div class="paragraph"> </div>
 
@@ -864,7 +864,7 @@ When we have a mismatch on two arguments, we want to produce
 </div>
 
 <div class="doc">
-<a name="lab878"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">unfolds</span></span></h2>
+<a name="lab877"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">unfolds</span></span></h2>
 
 </div>
 <div class="code code-space">
@@ -918,7 +918,7 @@ Remark: contrary to the tactic <span class="inlinecode"><span class="id" type="v
 </div>
 
 <div class="doc">
-<a name="lab879"></a><h2 class="section">The Tactics <span class="inlinecode"><span class="id" type="var">false</span></span> and <span class="inlinecode"><span class="id" type="var">tryfalse</span></span></h2>
+<a name="lab878"></a><h2 class="section">The Tactics <span class="inlinecode"><span class="id" type="var">false</span></span> and <span class="inlinecode"><span class="id" type="var">tryfalse</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -974,7 +974,7 @@ The tactic <span class="inlinecode"><span class="id" type="var">tryfalse</span><
 </div>
 
 <div class="doc">
-<a name="lab880"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">gen</span></span></h2>
+<a name="lab879"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">gen</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -1018,7 +1018,7 @@ The tactic <span class="inlinecode"><span class="id" type="var">tryfalse</span><
 </div>
 
 <div class="doc">
-<a name="lab881"></a><h2 class="section">The Tactics <span class="inlinecode"><span class="id" type="var">skip</span></span>, <span class="inlinecode"><span class="id" type="var">skip_rewrite</span></span> and <span class="inlinecode"><span class="id" type="var">skip_goal</span></span></h2>
+<a name="lab880"></a><h2 class="section">The Tactics <span class="inlinecode"><span class="id" type="var">skip</span></span>, <span class="inlinecode"><span class="id" type="var">skip_rewrite</span></span> and <span class="inlinecode"><span class="id" type="var">skip_goal</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -1149,7 +1149,7 @@ Remark: the tactic <span class="inlinecode"><span class="id" type="var">skip_rew
 </div>
 
 <div class="doc">
-<a name="lab882"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">sort</span></span></h2>
+<a name="lab881"></a><h2 class="section">The Tactic <span class="inlinecode"><span class="id" type="var">sort</span></span></h2>
 
 </div>
 <div class="code code-space">
@@ -1188,7 +1188,7 @@ The tactic <span class="inlinecode"><span class="id" type="var">sort</span></spa
 </div>
 
 <div class="doc">
-<a name="lab883"></a><h1 class="section">Tactics for Advanced Lemma Instantiation</h1>
+<a name="lab882"></a><h1 class="section">Tactics for Advanced Lemma Instantiation</h1>
 
 <div class="paragraph"> </div>
 
@@ -1220,7 +1220,7 @@ The tactic <span class="inlinecode"><span class="id" type="var">sort</span></spa
 </div>
 
 <div class="doc">
-<a name="lab884"></a><h2 class="section">Working of <span class="inlinecode"><span class="id" type="var">lets</span></span></h2>
+<a name="lab883"></a><h2 class="section">Working of <span class="inlinecode"><span class="id" type="var">lets</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -1417,7 +1417,7 @@ Note: one can write <span class="inlinecode"><span class="id" type="var">lets</s
 </div>
 
 <div class="doc">
-<a name="lab885"></a><h2 class="section">Working of <span class="inlinecode"><span class="id" type="var">applys</span></span>, <span class="inlinecode"><span class="id" type="var">forwards</span></span> and <span class="inlinecode"><span class="id" type="var">specializes</span></span></h2>
+<a name="lab884"></a><h2 class="section">Working of <span class="inlinecode"><span class="id" type="var">applys</span></span>, <span class="inlinecode"><span class="id" type="var">forwards</span></span> and <span class="inlinecode"><span class="id" type="var">specializes</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -1461,7 +1461,7 @@ Note: one can write <span class="inlinecode"><span class="id" type="var">lets</s
 <div class="paragraph"> </div>
 
     Examples of use of <span class="inlinecode"><span class="id" type="var">applys</span></span> appear further on. Several examples of
-    use of <span class="inlinecode"><span class="id" type="var">forwards</span></span> can be found in the tutorial chapter <a href="UseAuto.html"><font color="gray">UseAuto</font></a>. 
+    use of <span class="inlinecode"><span class="id" type="var">forwards</span></span> can be found in the tutorial chapter <a href="UseAuto.html"><span class="inlineref">UseAuto</span></a>. 
 </div>
 <div class="code code-tight">
 
@@ -1469,7 +1469,7 @@ Note: one can write <span class="inlinecode"><span class="id" type="var">lets</s
 </div>
 
 <div class="doc">
-<a name="lab886"></a><h2 class="section">Example of Instantiations</h2>
+<a name="lab885"></a><h2 class="section">Example of Instantiations</h2>
 
 </div>
 <div class="code code-space">
@@ -1574,7 +1574,7 @@ The following proof shows several examples where <span class="inlinecode"><span 
 </div>
 
 <div class="doc">
-<a name="lab887"></a><h1 class="section">Summary</h1>
+<a name="lab886"></a><h1 class="section">Summary</h1>
 
 <div class="paragraph"> </div>
 
@@ -1652,7 +1652,7 @@ The following proof shows several examples where <span class="inlinecode"><span 
 
     If you are interested in using <span class="inlinecode"><span class="id" type="var">LibTactics.v</span></span> in your own developments,
     make sure you get the lastest version from:
-    <a href="http://www.chargueraud.org/softs/tlc/"><font color="gray">http://www.chargueraud.org/softs/tlc/</font></a>.
+    <a href="http://www.chargueraud.org/softs/tlc/"><span class="inlineref">http://www.chargueraud.org/softs/tlc/</span></a>.
 
 <div class="paragraph"> </div>
 

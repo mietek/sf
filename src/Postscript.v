@@ -3,6 +3,7 @@
 
 (** Congratulations: You've made it to the end! *)
 
+(* ################################################################# *)
 (** * Looking Back... *)
 
 (** We've covered a lot of ground.  The topics might be summarized like this:
@@ -54,7 +55,7 @@
            - theory of subtyping
 *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Looking Forward... *)
 
 (** Some good places to go for more...

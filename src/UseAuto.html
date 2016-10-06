@@ -72,8 +72,8 @@ In a machine-checked proof, every single detail has to be
 <span class="id" type="keyword">Import</span> <span class="id" type="var">ListNotations</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Stlc.html#"><span class="id" type="library">Stlc</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="LibTactics.html#"><span class="id" type="library">LibTactics</span></a>.<br/>
 
@@ -81,7 +81,7 @@ In a machine-checked proof, every single detail has to be
 </div>
 
 <div class="doc">
-<a name="lab888"></a><h1 class="section">Basic Features of Proof Search</h1>
+<a name="lab887"></a><h1 class="section">Basic Features of Proof Search</h1>
 
 <div class="paragraph"> </div>
 
@@ -105,7 +105,7 @@ In a machine-checked proof, every single detail has to be
 </div>
 
 <div class="doc">
-<a name="lab889"></a><h2 class="section">Strength of Proof Search</h2>
+<a name="lab888"></a><h2 class="section">Strength of Proof Search</h2>
 
 <div class="paragraph"> </div>
 
@@ -150,7 +150,7 @@ In a machine-checked proof, every single detail has to be
 </div>
 
 <div class="doc">
-<a name="lab890"></a><h2 class="section">Basics</h2>
+<a name="lab889"></a><h2 class="section">Basics</h2>
 
 <div class="paragraph"> </div>
 
@@ -243,7 +243,7 @@ If we are interested to see which proof <span class="inlinecode"><span class="id
 </div>
 
 <div class="doc">
-<a name="lab891"></a><h2 class="section">Conjunctions</h2>
+<a name="lab890"></a><h2 class="section">Conjunctions</h2>
 
 <div class="paragraph"> </div>
 
@@ -358,7 +358,7 @@ This situation is slightly disappointing, since automation is
 </div>
 
 <div class="doc">
-<a name="lab892"></a><h2 class="section">Disjunctions</h2>
+<a name="lab891"></a><h2 class="section">Disjunctions</h2>
 
 <div class="paragraph"> </div>
 
@@ -422,7 +422,7 @@ However, the ability of <span class="inlinecode"><span class="id" type="var">iau
 </div>
 
 <div class="doc">
-<a name="lab893"></a><h2 class="section">Existentials</h2>
+<a name="lab892"></a><h2 class="section">Existentials</h2>
 
 <div class="paragraph"> </div>
 
@@ -470,7 +470,7 @@ A major strength of <span class="inlinecode"><span class="id" type="var">jauto</
 </div>
 
 <div class="doc">
-<a name="lab894"></a><h2 class="section">Negation</h2>
+<a name="lab893"></a><h2 class="section">Negation</h2>
 
 <div class="paragraph"> </div>
 
@@ -519,7 +519,7 @@ We will come back later on to the behavior of proof search with
 </div>
 
 <div class="doc">
-<a name="lab895"></a><h2 class="section">Equalities</h2>
+<a name="lab894"></a><h2 class="section">Equalities</h2>
 
 <div class="paragraph"> </div>
 
@@ -550,7 +550,7 @@ To automate more advanced reasoning on equalities, one should
 </div>
 
 <div class="doc">
-<a name="lab896"></a><h1 class="section">How Proof Search Works</h1>
+<a name="lab895"></a><h1 class="section">How Proof Search Works</h1>
 
 </div>
 <div class="code code-space">
@@ -559,7 +559,7 @@ To automate more advanced reasoning on equalities, one should
 </div>
 
 <div class="doc">
-<a name="lab897"></a><h2 class="section">Search Depth</h2>
+<a name="lab896"></a><h2 class="section">Search Depth</h2>
 
 <div class="paragraph"> </div>
 
@@ -709,7 +709,7 @@ Because <span class="inlinecode"><span class="id" type="tactic">auto</span></spa
 </div>
 
 <div class="doc">
-<a name="lab898"></a><h2 class="section">Backtracking</h2>
+<a name="lab897"></a><h2 class="section">Backtracking</h2>
 
 <div class="paragraph"> </div>
 
@@ -859,7 +859,7 @@ This time, the output message suggests that the proof search
 </div>
 
 <div class="doc">
-<a name="lab899"></a><h2 class="section">Adding Hints</h2>
+<a name="lab898"></a><h2 class="section">Adding Hints</h2>
 
 <div class="paragraph"> </div>
 
@@ -889,7 +889,7 @@ This time, the output message suggests that the proof search
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Le.html#le_refl"><span class="id" type="lemma">Le.le_refl</span></a>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <span class="id" type="var">Le.le_refl</span>.<br/>
 
 <br/>
 </div>
@@ -913,7 +913,7 @@ A convenient shorthand for adding all the constructors of an
 </div>
 
 <div class="doc">
-<a name="lab900"></a><h2 class="section">Integration of Automation in Tactics</h2>
+<a name="lab899"></a><h2 class="section">Integration of Automation in Tactics</h2>
 
 <div class="paragraph"> </div>
 
@@ -1007,7 +1007,7 @@ In the examples that follow, only <span class="inlinecode"><span class="id" type
 </div>
 
 <div class="doc">
-<a name="lab901"></a><h1 class="section">Examples of Use of Automation</h1>
+<a name="lab900"></a><h1 class="section">Examples of Use of Automation</h1>
 
 <div class="paragraph"> </div>
 
@@ -1021,7 +1021,7 @@ In the examples that follow, only <span class="inlinecode"><span class="id" type
 </div>
 
 <div class="doc">
-<a name="lab902"></a><h2 class="section">Determinism</h2>
+<a name="lab901"></a><h2 class="section">Determinism</h2>
 
 </div>
 <div class="code code-space">
@@ -1236,7 +1236,7 @@ To polish the proof script, it remains to factorize the calls
 </div>
 
 <div class="doc">
-<a name="lab903"></a><h2 class="section">Preservation for STLC</h2>
+<a name="lab902"></a><h2 class="section">Preservation for STLC</h2>
 
 </div>
 <div class="code code-space">
@@ -1310,7 +1310,7 @@ Exercise: rewrite this proof using tactics from <span class="inlinecode"><span c
 </div>
 
 <div class="doc">
-<a name="lab904"></a><h2 class="section">Progress for STLC</h2>
+<a name="lab903"></a><h2 class="section">Progress for STLC</h2>
 
 <div class="paragraph"> </div>
 
@@ -1333,7 +1333,7 @@ Exercise: rewrite this proof using tactics from <span class="inlinecode"><span c
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt2</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>([<span class="id" type="var">x<sub>0</sub></span>:=<span class="id" type="var">t<sub>2</sub></span>]<span class="id" type="var">t</span>)...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;steps&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">H<sub>0</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>2</sub>'</span> <span class="id" type="var">Hstp</span>]. <span style="font-family: arial;">&exist;</span>(<a class="idref" href="Stlc.html#STLC.tapp"><span class="id" type="constructor">tapp</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub>'</span>)...<br/>
@@ -1341,7 +1341,7 @@ Exercise: rewrite this proof using tactics from <span class="inlinecode"><span c
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">Hstp</span>]. <span style="font-family: arial;">&exist;</span>(<a class="idref" href="Stlc.html#STLC.tapp"><span class="id" type="constructor">tapp</span></a> <span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">t<sub>2</sub></span>)...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_If&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt1</span>...<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">t<sub>1</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">t<sub>1</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span style="font-family: arial;">&exist;</span>(<a class="idref" href="Stlc.html#STLC.tif"><span class="id" type="constructor">tif</span></a> <span class="id" type="var">x<sub>0</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>)...<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 
@@ -1370,7 +1370,7 @@ Exercise: optimize the above proof.
 </div>
 
 <div class="doc">
-<a name="lab905"></a><h2 class="section">BigStep and SmallStep</h2>
+<a name="lab904"></a><h2 class="section">BigStep and SmallStep</h2>
 
 </div>
 <div class="code code-space">
@@ -1490,7 +1490,7 @@ Exercise: prove the lemma <span class="inlinecode"><span class="id" type="var">m
 </div>
 
 <div class="doc">
-<a name="lab906"></a><h2 class="section">Preservation for STLCRef</h2>
+<a name="lab905"></a><h2 class="section">Preservation for STLCRef</h2>
 
 </div>
 <div class="code code-space">
@@ -1500,7 +1500,7 @@ Exercise: prove the lemma <span class="inlinecode"><span class="id" type="var">m
 &nbsp;&nbsp;<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.omega.Omega.html#"><span class="id" type="library">Coq.omega.Omega</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="References.html#"><span class="id" type="library">References</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="keyword">Import</span> <span class="id" type="var">STLCRef</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <a class="idref" href="References.html#STLCRef.store_weakening"><span class="id" type="lemma">store_weakening</span></a> <a class="idref" href="References.html#STLCRef.extends_refl"><span class="id" type="lemma">extends_refl</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <span class="id" type="var">store_weakening</span> <span class="id" type="var">extends_refl</span>.<br/>
 
 <br/>
 </div>
@@ -1532,11 +1532,11 @@ The proof of preservation for <span class="inlinecode"><span class="id" type="va
 <br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (@<a class="idref" href="Maps.html#empty"><span class="id" type="definition">empty</span></a> <a class="idref" href="References.html#STLCRef.ty"><span class="id" type="inductive">ty</span></a>) <span class="id" type="keyword">as</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span>. <span class="id" type="var">introv</span> <span class="id" type="var">Ht</span>. <span class="id" type="var">gen</span> <span class="id" type="var">t'</span>.<br/>
 &nbsp;&nbsp;(<span class="id" type="tactic">induction</span> <span class="id" type="var">Ht</span>); <span class="id" type="var">introv</span> <span class="id" type="var">HST</span> <span class="id" type="var">Hstep</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;old:&nbsp;<span class="inlinecode"><span class="id" type="tactic">subst</span>;</span> <span class="inlinecode"><span class="id" type="tactic">try</span></span> <span class="inlinecode">(<span class="id" type="var">solve</span></span> <span class="inlinecode"><span class="id" type="tactic">by</span></span> <span class="inlinecode"><span class="id" type="tactic">inversion</span>);</span> <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">Hstep</span>;</span> <span class="inlinecode"><span class="id" type="tactic">subst</span>;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;old:&nbsp;<span class="inlinecode"><span class="id" type="tactic">subst</span>;</span> <span class="inlinecode"><span class="id" type="tactic">try</span></span> <span class="inlinecode"><span class="id" type="var">solve_by_invert</span>;</span> <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">Hstep</span>;</span> <span class="inlinecode"><span class="id" type="tactic">subst</span>;</span>
              <span class="inlinecode"><span class="id" type="tactic">try</span></span> <span class="inlinecode">(<span class="id" type="tactic">eauto</span></span> <span class="inlinecode"><span class="id" type="keyword">using</span></span> <span class="inlinecode"><span class="id" type="var">store_weakening</span>,</span> <span class="inlinecode"><span class="id" type="var">extends_refl</span>)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new:&nbsp;<span class="inlinecode"><span class="id" type="tactic">subst</span></span> <span class="inlinecode"><span style="font-family: serif; font-size:85%;">&Gamma;</span>;</span> <span class="inlinecode"><span class="id" type="var">inverts</span></span> <span class="inlinecode"><span class="id" type="var">Hstep</span>;</span> <span class="inlinecode"><span class="id" type="tactic">eauto</span>.</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We&nbsp;want&nbsp;to&nbsp;be&nbsp;more&nbsp;precise&nbsp;on&nbsp;what&nbsp;exactly&nbsp;we&nbsp;substitute,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;we&nbsp;do&nbsp;not&nbsp;want&nbsp;to&nbsp;call&nbsp;<span class="inlinecode"><span class="id" type="tactic">try</span></span> <span class="inlinecode">(<span class="id" type="var">solve</span></span> <span class="inlinecode"><span class="id" type="tactic">by</span></span> <span class="inlinecode"><span class="id" type="tactic">inversion</span>)</span>&nbsp;which<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;we&nbsp;do&nbsp;not&nbsp;want&nbsp;to&nbsp;call&nbsp;<span class="inlinecode"><span class="id" type="tactic">try</span></span> <span class="inlinecode"><span class="id" type="var">solve_by_invert</span></span>&nbsp;which<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;way&nbsp;to&nbsp;slow.&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span>; <span class="id" type="var">inverts</span> <span class="id" type="var">Hstep</span>; <span class="id" type="tactic">eauto</span>.<br/>
 
@@ -1627,7 +1627,7 @@ The proof of preservation for <span class="inlinecode"><span class="id" type="va
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We'll&nbsp;come&nbsp;back&nbsp;to&nbsp;this&nbsp;proof&nbsp;case&nbsp;further&nbsp;on.&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="References.html#STLCRef.store_Tlookup"><span class="id" type="definition">store_Tlookup</span></a>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">rewrite</span>* <a class="idref" href="http://coq.inria.fr/library/Coq.Lists.List.html#app_nth2"><span class="id" type="lemma">app_nth2</span></a>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Last,&nbsp;we&nbsp;replace&nbsp;<span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode">..;</span> <span class="inlinecode"><span class="id" type="tactic">assumption</span></span>&nbsp;with&nbsp;<span class="inlinecode"><span class="id" type="tactic">apply</span>*</span> <span class="inlinecode">..</span>&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Minus.html#minus_diag"><span class="id" type="lemma">minus_diag</span></a>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Minus.html#minus_diag"><span class="id" type="abbreviation">minus_diag</span></a>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span>* <a class="idref" href="References.html#STLCRef.store_well_typed_app"><span class="id" type="lemma">store_well_typed_app</span></a>.<br/>
 
 <br/>
@@ -1766,7 +1766,7 @@ The optimized proof of preservation is summarized next.
 </div>
 
 <div class="doc">
-<a name="lab907"></a><h2 class="section">Progress for STLCRef</h2>
+<a name="lab906"></a><h2 class="section">Progress for STLCRef</h2>
 
 <div class="paragraph"> </div>
 
@@ -1814,7 +1814,7 @@ The optimized proof of preservation is summarized next.
 </div>
 
 <div class="doc">
-<a name="lab908"></a><h2 class="section">Subtyping</h2>
+<a name="lab907"></a><h2 class="section">Subtyping</h2>
 
 </div>
 <div class="code code-space">
@@ -1895,7 +1895,7 @@ The lemma <span class="inlinecode"><span class="id" type="var">substitution_pres
 </div>
 
 <div class="doc">
-<a name="lab909"></a><h1 class="section">Advanced Topics in Proof Search</h1>
+<a name="lab908"></a><h1 class="section">Advanced Topics in Proof Search</h1>
 
 </div>
 <div class="code code-space">
@@ -1904,7 +1904,7 @@ The lemma <span class="inlinecode"><span class="id" type="var">substitution_pres
 </div>
 
 <div class="doc">
-<a name="lab910"></a><h2 class="section">Stating Lemmas in the Right Way</h2>
+<a name="lab909"></a><h2 class="section">Stating Lemmas in the Right Way</h2>
 
 <div class="paragraph"> </div>
 
@@ -1978,7 +1978,7 @@ It is very important to understand that the hypothesis <span class="inlinecode">
 </div>
 
 <div class="doc">
-<a name="lab911"></a><h2 class="section">Unfolding of Definitions During Proof-Search</h2>
+<a name="lab910"></a><h2 class="section">Unfolding of Definitions During Proof-Search</h2>
 
 <div class="paragraph"> </div>
 
@@ -2094,7 +2094,7 @@ There is actually one exception to the previous rule: a constant
 </div>
 
 <div class="doc">
-<a name="lab912"></a><h2 class="section">Automation for Proving Absurd Goals</h2>
+<a name="lab911"></a><h2 class="section">Automation for Proving Absurd Goals</h2>
 
 <div class="paragraph"> </div>
 
@@ -2168,7 +2168,7 @@ Let's try to add the first lemma, <span class="inlinecode"><span class="id" type
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <a class="idref" href="UseAuto.html#le_not_gt"><span class="id" type="axiom">le_not_gt</span></a>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <span class="id" type="var">le_not_gt</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Lemma</span> <a name="demo_auto_absurd_1"><span class="id" type="lemma">demo_auto_absurd_1</span></a> :<br/>
@@ -2191,7 +2191,7 @@ The lemma <span class="inlinecode"><span class="id" type="var">gt_not_le</span><
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <a class="idref" href="UseAuto.html#le_gt_false"><span class="id" type="axiom">le_gt_false</span></a>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <span class="id" type="var">le_gt_false</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Lemma</span> <a name="demo_auto_absurd_2"><span class="id" type="lemma">demo_auto_absurd_2</span></a> :<br/>
@@ -2291,7 +2291,7 @@ In the above example, <span class="inlinecode"><span class="id" type="var">false
 </div>
 
 <div class="doc">
-<a name="lab913"></a><h2 class="section">Automation for Transitivity Lemmas</h2>
+<a name="lab912"></a><h2 class="section">Automation for Transitivity Lemmas</h2>
 
 <div class="paragraph"> </div>
 
@@ -2333,7 +2333,7 @@ Adding reflexivity as hint is generally a good idea,
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <a class="idref" href="UseAuto.html#subtype_refl"><span class="id" type="axiom">subtype_refl</span></a>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <span class="id" type="var">subtype_refl</span>.<br/>
 
 <br/>
 </div>
@@ -2351,7 +2351,7 @@ Adding transitivity as hint is generally a bad idea.  To
 <span class="id" type="keyword">Section</span> <a name="HintsTransitivity"><span class="id" type="section">HintsTransitivity</span></a>.<br/>
 
 <br/>
-<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <a class="idref" href="UseAuto.html#subtype_trans"><span class="id" type="axiom">subtype_trans</span></a>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <span class="id" type="var">subtype_trans</span>.<br/>
 
 <br/>
 </div>
@@ -2516,7 +2516,7 @@ We may also check that the new external hint does not suffer from the
 </div>
 
 <div class="doc">
-<a name="lab914"></a><h1 class="section">Decision Procedures</h1>
+<a name="lab913"></a><h1 class="section">Decision Procedures</h1>
 
 <div class="paragraph"> </div>
 
@@ -2536,7 +2536,7 @@ We may also check that the new external hint does not suffer from the
 </div>
 
 <div class="doc">
-<a name="lab915"></a><h2 class="section">Omega</h2>
+<a name="lab914"></a><h2 class="section">Omega</h2>
 
 <div class="paragraph"> </div>
 
@@ -2624,7 +2624,7 @@ Note: <span class="inlinecode"><span class="id" type="tactic">omega</span></span
 </div>
 
 <div class="doc">
-<a name="lab916"></a><h2 class="section">Ring</h2>
+<a name="lab915"></a><h2 class="section">Ring</h2>
 
 <div class="paragraph"> </div>
 
@@ -2655,7 +2655,7 @@ Note: <span class="inlinecode"><span class="id" type="tactic">omega</span></span
 </div>
 
 <div class="doc">
-<a name="lab917"></a><h2 class="section">Congruence</h2>
+<a name="lab916"></a><h2 class="section">Congruence</h2>
 
 <div class="paragraph"> </div>
 
@@ -2742,7 +2742,7 @@ One of the strengths of <span class="inlinecode"><span class="id" type="tactic">
 </div>
 
 <div class="doc">
-<a name="lab918"></a><h1 class="section">Summary</h1>
+<a name="lab917"></a><h1 class="section">Summary</h1>
 
 <div class="paragraph"> </div>
 

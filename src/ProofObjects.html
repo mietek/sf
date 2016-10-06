@@ -81,7 +81,7 @@ We have seen that Coq has mechanisms both for <i>programming</i>,
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">ev</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="IndProp.html#ev"><span class="id" type="inductive">ev</span></a>.<br/>
 <span class="comment">(*&nbsp;==&gt;<br/>
 &nbsp;&nbsp;Inductive&nbsp;ev&nbsp;:&nbsp;nat&nbsp;-&gt;&nbsp;Prop&nbsp;:=<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;ev_0&nbsp;:&nbsp;ev&nbsp;0<br/>
@@ -107,7 +107,7 @@ Suppose we introduce an alternative pronunciation of "<span class="inlinecode">:
                  propositions  ~  types
                  proofs        ~  data values
 </pre>
-    See <a href="Bib.html#Wadler 2015"><font color="gray">[Wadler 2015]</font></a> for a brief history and an up-to-date exposition.
+    See <a href="Bib.html#Wadler 2015"><span class="inlineref">[Wadler 2015]</span></a> for a brief history and an up-to-date exposition.
 
 <div class="paragraph"> </div>
 
@@ -152,7 +152,7 @@ As with ordinary data values and functions, we can use the <span class="inlineco
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">ev_4</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4"><span class="id" type="lemma">ev_4</span></a>.<br/>
 <span class="comment">(*&nbsp;===&gt;&nbsp;ev_4&nbsp;=&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;ev&nbsp;4&nbsp;&nbsp;*)</span><br/>
 
@@ -194,7 +194,7 @@ The expression <span class="inlinecode"><span class="id" type="var">ev_SS</span>
     with elements of that type. 
 <div class="paragraph"> </div>
 
- You may recall (as seen in the <a href="Logic.html"><font color="gray">Logic</font></a> chapter) that we can
+ You may recall (as seen in the <a href="Logic.html"><span class="inlineref">Logic</span></a> chapter) that we can
     use function application syntax to instantiate universally
     quantified variables in lemmas, as well as to supply evidence for
     assumptions that these lemmas impose. For instance: 
@@ -223,7 +223,7 @@ We can now see that this feature is a trivial consequence of the
 </div>
 
 <div class="doc">
-<a name="lab243"></a><h1 class="section">Proof Scripts</h1>
+<a name="lab242"></a><h1 class="section">Proof Scripts</h1>
 
 <div class="paragraph"> </div>
 
@@ -287,20 +287,20 @@ All these different ways of building the proof lead to exactly the
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">ev_4</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4"><span class="id" type="lemma">ev_4</span></a>.<br/>
 <span class="comment">(*&nbsp;===&gt;&nbsp;ev_4&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">ev_4'</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4'"><span class="id" type="lemma">ev_4'</span></a>.<br/>
 <span class="comment">(*&nbsp;===&gt;&nbsp;ev_4'&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">ev_4''</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4''"><span class="id" type="lemma">ev_4''</span></a>.<br/>
 <span class="comment">(*&nbsp;===&gt;&nbsp;ev_4''&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">ev_4'''</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4'''"><span class="id" type="definition">ev_4'''</span></a>.<br/>
 <span class="comment">(*&nbsp;===&gt;&nbsp;ev_4'''&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab244"></a><h4 class="section">Exercise: 1 star (eight_is_even)</h4>
+<a name="lab243"></a><h4 class="section">Exercise: 1 star (eight_is_even)</h4>
  Give a tactic proof and a proof object showing that <span class="inlinecode"><span class="id" type="var">ev</span></span> <span class="inlinecode">8</span>. 
 </div>
 <div class="code code-tight">
@@ -311,8 +311,8 @@ All these different ways of building the proof lead to exactly the
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="ev_8'"><span class="id" type="definition">ev_8'</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" type="inductive">ev</span></a> 8 :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="ev_8'"><span class="id" type="definition">ev_8'</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" type="inductive">ev</span></a> 8 <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
 <div class="doc">
@@ -324,7 +324,7 @@ All these different ways of building the proof lead to exactly the
 </div>
 
 <div class="doc">
-<a name="lab245"></a><h1 class="section">Quantifiers, Implications, Functions</h1>
+<a name="lab244"></a><h1 class="section">Quantifiers, Implications, Functions</h1>
 
 <div class="paragraph"> </div>
 
@@ -468,7 +468,7 @@ In general, "<span class="inlinecode"><span class="id" type="var">P</span></span
 </div>
 
 <div class="doc">
-<a name="lab246"></a><h1 class="section">Connectives as Inductive Types</h1>
+<a name="lab245"></a><h1 class="section">Connectives as Inductive Types</h1>
 
 <div class="paragraph"> </div>
 
@@ -487,7 +487,7 @@ In general, "<span class="inlinecode"><span class="id" type="var">P</span></span
 </div>
 
 <div class="doc">
-<a name="lab247"></a><h2 class="section">Conjunction</h2>
+<a name="lab246"></a><h2 class="section">Conjunction</h2>
 
 
 <div class="paragraph"> </div>
@@ -514,13 +514,13 @@ In general, "<span class="inlinecode"><span class="id" type="var">P</span></span
 
 <div class="doc">
 Notice the similarity with the definition of the <span class="inlinecode"><span class="id" type="var">prod</span></span> type,
-    given in chapter <a href="Poly.html"><font color="gray">Poly</font></a>; the only difference is that <span class="inlinecode"><span class="id" type="var">prod</span></span> takes
+    given in chapter <a href="Poly.html"><span class="inlineref">Poly</span></a>; the only difference is that <span class="inlinecode"><span class="id" type="var">prod</span></span> takes
     <span class="inlinecode"><span class="id" type="keyword">Type</span></span> arguments, whereas <span class="inlinecode"><span class="id" type="var">and</span></span> takes <span class="inlinecode"><span class="id" type="keyword">Prop</span></span> arguments. 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">prod</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="Poly.html#prod"><span class="id" type="inductive">prod</span></a>.<br/>
 <span class="comment">(*&nbsp;===&gt;<br/>
 &nbsp;&nbsp;&nbsp;Inductive&nbsp;prod&nbsp;(X&nbsp;Y&nbsp;:&nbsp;Type)&nbsp;:&nbsp;Type&nbsp;:=<br/>
 &nbsp;&nbsp;&nbsp;|&nbsp;pair&nbsp;:&nbsp;X&nbsp;-&gt;&nbsp;Y&nbsp;-&gt;&nbsp;X&nbsp;*&nbsp;Y.&nbsp;*)</span><br/>
@@ -574,21 +574,21 @@ This shows why the inductive definition of <span class="inlinecode"><span class=
 </div>
 
 <div class="doc">
-<a name="lab248"></a><h4 class="section">Exercise: 2 stars, optional (conj_fact)</h4>
+<a name="lab247"></a><h4 class="section">Exercise: 2 stars, optional (conj_fact)</h4>
  Construct a proof object demonstrating the following proposition. 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Props.conj_fact"><span class="id" type="definition">conj_fact</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span>, <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="ProofObjects.html#R"><span class="id" type="variable">R</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="ProofObjects.html#R"><span class="id" type="variable">R</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Props.conj_fact"><span class="id" type="definition">conj_fact</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span>, <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="ProofObjects.html#R"><span class="id" type="variable">R</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="ProofObjects.html#R"><span class="id" type="variable">R</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
 <div class="doc">
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab249"></a><h2 class="section">Disjunction</h2>
+<a name="lab248"></a><h2 class="section">Disjunction</h2>
 
 
 <div class="paragraph"> </div>
@@ -623,22 +623,22 @@ This declaration explains the behavior of the <span class="inlinecode"><span cla
     involving <span class="inlinecode"><span class="id" type="var">or</span></span>, without resorting to tactics. 
 <div class="paragraph"> </div>
 
-<a name="lab250"></a><h4 class="section">Exercise: 2 stars, optional (or_commut'')</h4>
+<a name="lab249"></a><h4 class="section">Exercise: 2 stars, optional (or_commut'')</h4>
  Try to write down an explicit proof object for <span class="inlinecode"><span class="id" type="var">or_commut</span></span> (without
     using <span class="inlinecode"><span class="id" type="keyword">Print</span></span> to peek at the ones we already defined!). 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Props.or_comm"><span class="id" type="definition">or_comm</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span>, <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&or;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&or;</span> <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Props.or_comm"><span class="id" type="definition">or_comm</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span>, <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> <span style="font-family: arial;">&or;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="ProofObjects.html#Q"><span class="id" type="variable">Q</span></a> <span style="font-family: arial;">&or;</span> <a class="idref" href="ProofObjects.html#P"><span class="id" type="variable">P</span></a> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
 <div class="doc">
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab251"></a><h2 class="section">Existential Quantification</h2>
+<a name="lab250"></a><h2 class="section">Existential Quantification</h2>
 
 
 <div class="paragraph"> </div>
@@ -698,21 +698,21 @@ Here's how to define an explicit proof object involving <span class="inlinecode"
 </div>
 
 <div class="doc">
-<a name="lab252"></a><h4 class="section">Exercise: 2 stars, optional (ex_ev_Sn)</h4>
+<a name="lab251"></a><h4 class="section">Exercise: 2 stars, optional (ex_ev_Sn)</h4>
  Complete the definition of the following proof object: 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Props.ex_ev_Sn"><span class="id" type="definition">ex_ev_Sn</span></a> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Logic.html#ex"><span class="id" type="inductive">ex</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">n</span> ⇒ <a class="idref" href="IndProp.html#ev"><span class="id" type="inductive">ev</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="ProofObjects.html#n"><span class="id" type="variable">n</span></a>)) :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Props.ex_ev_Sn"><span class="id" type="definition">ex_ev_Sn</span></a> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Logic.html#ex"><span class="id" type="inductive">ex</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">n</span> ⇒ <a class="idref" href="IndProp.html#ev"><span class="id" type="inductive">ev</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="ProofObjects.html#n"><span class="id" type="variable">n</span></a>)) <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;&nbsp;&nbsp;:=&nbsp;_your_definition_&nbsp;.&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
 <div class="doc">
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab253"></a><h2 class="section"><span class="inlinecode"><span class="id" type="var">True</span></span> and <span class="inlinecode"><span class="id" type="var">False</span></span></h2>
+<a name="lab252"></a><h2 class="section"><span class="inlinecode"><span class="id" type="var">True</span></span> and <span class="inlinecode"><span class="id" type="var">False</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -756,7 +756,7 @@ That is, <span class="inlinecode"><span class="id" type="var">False</span></span
 </div>
 
 <div class="doc">
-<a name="lab254"></a><h1 class="section">Programming with Tactics</h1>
+<a name="lab253"></a><h1 class="section">Programming with Tactics</h1>
 
 <div class="paragraph"> </div>
 
@@ -776,7 +776,7 @@ That is, <span class="inlinecode"><span class="id" type="var">False</span></span
 <span class="id" type="tactic">apply</span> <span class="id" type="var">n</span>. <span class="id" type="keyword">Defined</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Print</span> <span class="id" type="var">add1</span>.<br/>
+<span class="id" type="keyword">Print</span> <a class="idref" href="ProofObjects.html#add1"><span class="id" type="definition">add1</span></a>.<br/>
 <span class="comment">(*&nbsp;==&gt;<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;add1&nbsp;=&nbsp;fun&nbsp;n&nbsp;:&nbsp;nat&nbsp;=&gt;&nbsp;S&nbsp;n<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;nat&nbsp;-&gt;&nbsp;nat<br/>
@@ -811,7 +811,7 @@ Notice that we terminate the <span class="inlinecode"><span class="id" type="key
 </div>
 
 <div class="doc">
-<a name="lab255"></a><h1 class="section">Equality</h1>
+<a name="lab254"></a><h1 class="section">Equality</h1>
 
 <div class="paragraph"> </div>
 
@@ -846,7 +846,7 @@ The way to think about this definition is that, given a set <span class="inlinec
     <span class="inlinecode"><span class="id" type="var">X</span></span> yields evidence that <span class="inlinecode"><span class="id" type="var">x</span></span> is equal to <span class="inlinecode"><span class="id" type="var">x</span></span>. 
 <div class="paragraph"> </div>
 
-<a name="lab256"></a><h4 class="section">Exercise: 2 stars (leibniz_equality)</h4>
+<a name="lab255"></a><h4 class="section">Exercise: 2 stars (leibniz_equality)</h4>
  The inductive definition of equality corresponds to <i>Leibniz
     equality</i>: what we mean when we say "<span class="inlinecode"><span class="id" type="var">x</span></span> and <span class="inlinecode"><span class="id" type="var">y</span></span> are equal" is
     that every property on <span class="inlinecode"><span class="id" type="var">P</span></span> that is true of <span class="inlinecode"><span class="id" type="var">x</span></span> is also true of
@@ -917,7 +917,7 @@ The <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></
 </div>
 
 <div class="doc">
-<a name="lab257"></a><h2 class="section">Inversion, Again</h2>
+<a name="lab256"></a><h2 class="section">Inversion, Again</h2>
 
 <div class="paragraph"> </div>
 

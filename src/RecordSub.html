@@ -28,8 +28,8 @@
 <div class="paragraph"> </div>
 
  In this chapter, we combine two significant extensions of the pure
-    STLC &mdash; records (from chapter <a href="Records.html"><font color="gray">Records</font></a>) and subtyping (from
-    chapter <a href="Sub.html"><font color="gray">Sub</font></a>) &mdash; and explore their interactions.  Most of the
+    STLC &mdash; records (from chapter <a href="Records.html"><span class="inlineref">Records</span></a>) and subtyping (from
+    chapter <a href="Sub.html"><span class="inlineref">Sub</span></a>) &mdash; and explore their interactions.  Most of the
     concepts have already been discussed in those chapters, so the
     presentation here is somewhat terse.  We just comment where things
     are nonstandard. 
@@ -37,15 +37,15 @@
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="MoreStlc.html#"><span class="id" type="library">MoreStlc</span></a>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab745"></a><h1 class="section">Core Definitions</h1>
+<a name="lab744"></a><h1 class="section">Core Definitions</h1>
 
 </div>
 <div class="code code-space">
@@ -54,7 +54,7 @@
 </div>
 
 <div class="doc">
-<a name="lab746"></a><h3 class="section">Syntax</h3>
+<a name="lab745"></a><h3 class="section">Syntax</h3>
 
 </div>
 <div class="code code-space">
@@ -84,7 +84,7 @@
 </div>
 
 <div class="doc">
-<a name="lab747"></a><h3 class="section">Well-Formedness</h3>
+<a name="lab746"></a><h3 class="section">Well-Formedness</h3>
 
 <div class="paragraph"> </div>
 
@@ -147,7 +147,7 @@
 </div>
 
 <div class="doc">
-<a name="lab748"></a><h3 class="section">Substitution</h3>
+<a name="lab747"></a><h3 class="section">Substitution</h3>
 
 <div class="paragraph"> </div>
 
@@ -174,7 +174,7 @@
 </div>
 
 <div class="doc">
-<a name="lab749"></a><h3 class="section">Reduction</h3>
+<a name="lab748"></a><h3 class="section">Reduction</h3>
 
 </div>
 <div class="code code-space">
@@ -247,7 +247,7 @@
 </div>
 
 <div class="doc">
-<a name="lab750"></a><h1 class="section">Subtyping</h1>
+<a name="lab749"></a><h1 class="section">Subtyping</h1>
 
 <div class="paragraph"> </div>
 
@@ -262,12 +262,12 @@
 </div>
 
 <div class="doc">
-<a name="lab751"></a><h2 class="section">Definition</h2>
+<a name="lab750"></a><h2 class="section">Definition</h2>
 
 <div class="paragraph"> </div>
 
  The definition of subtyping is essentially just what we sketched
-    in the discussion of record subtyping in chapter <a href="Sub.html"><font color="gray">Sub</font></a>, but we
+    in the discussion of record subtyping in chapter <a href="Sub.html"><span class="inlineref">Sub</span></a>, but we
     need to add well-formedness side conditions to some of the rules.
     Also, we replace the "n-ary" width, depth, and permutation
     subtyping rules by binary rules that deal with just the first
@@ -320,7 +320,7 @@
 </div>
 
 <div class="doc">
-<a name="lab752"></a><h2 class="section">Examples</h2>
+<a name="lab751"></a><h2 class="section">Examples</h2>
 
 </div>
 <div class="code code-space">
@@ -365,7 +365,7 @@ The following facts are mostly easy to prove in Coq.  To get full
     paper! 
 <div class="paragraph"> </div>
 
-<a name="lab753"></a><h4 class="section">Exercise: 2 stars</h4>
+<a name="lab752"></a><h4 class="section">Exercise: 2 stars</h4>
 
 </div>
 <div class="code code-space">
@@ -380,7 +380,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab754"></a><h4 class="section">Exercise: 1 star</h4>
+<a name="lab753"></a><h4 class="section">Exercise: 1 star</h4>
 
 </div>
 <div class="code code-space">
@@ -396,7 +396,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab755"></a><h4 class="section">Exercise: 1 star</h4>
+<a name="lab754"></a><h4 class="section">Exercise: 1 star</h4>
 
 </div>
 <div class="code code-space">
@@ -412,7 +412,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab756"></a><h4 class="section">Exercise: 2 stars</h4>
+<a name="lab755"></a><h4 class="section">Exercise: 2 stars</h4>
 
 </div>
 <div class="code code-space">
@@ -436,11 +436,11 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab757"></a><h2 class="section">Properties of Subtyping</h2>
+<a name="lab756"></a><h2 class="section">Properties of Subtyping</h2>
 
 <div class="paragraph"> </div>
 
-<a name="lab758"></a><h3 class="section">Well-Formedness</h3>
+<a name="lab757"></a><h3 class="section">Well-Formedness</h3>
 
 <div class="paragraph"> </div>
 
@@ -475,7 +475,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 <div class="proofscript" id="proof2" onclick="toggleDisplay('proof2');toggleDisplay('proofcontrol2')">
 <span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">i</span> <span class="id" type="var">T</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">T</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">T</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;TRCons&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">subst</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="RecordSub.html#Tlookup"><span class="id" type="definition">Tlookup</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>0</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <span class="id" type="var">i</span> <span class="id" type="var">i<sub>0</sub></span>)... <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span>; <span class="id" type="tactic">subst</span>... <span class="id" type="keyword">Qed</span>.<br/>
@@ -485,7 +485,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab759"></a><h3 class="section">Field Lookup</h3>
+<a name="lab758"></a><h3 class="section">Field Lookup</h3>
 
 <div class="paragraph"> </div>
 
@@ -508,7 +508,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 <span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> (<span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <a class="idref" href="RecordSub.html#wf_rcd_lookup"><span class="id" type="lemma">wf_rcd_lookup</span></a>).<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span> <span class="id" type="var">i</span> <span class="id" type="var">Ti</span> <span class="id" type="var">Hsub</span> <span class="id" type="var">Hget</span>. <span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">Ti</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hsub</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">Ti</span> <span class="id" type="var">Hget</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;S_Refl&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">Ti</span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;S_Trans&nbsp;*)</span><br/>
@@ -539,7 +539,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab760"></a><h4 class="section">Exercise: 3 stars (rcd_types_match_informal)</h4>
+<a name="lab759"></a><h4 class="section">Exercise: 3 stars (rcd_types_match_informal)</h4>
  Write a careful informal proof of the <span class="inlinecode"><span class="id" type="var">rcd_types_match</span></span>
     lemma. 
 </div>
@@ -553,11 +553,11 @@ The following facts are mostly easy to prove in Coq.  To get full
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab761"></a><h3 class="section">Inversion Lemmas</h3>
+<a name="lab760"></a><h3 class="section">Inversion Lemmas</h3>
 
 <div class="paragraph"> </div>
 
-<a name="lab762"></a><h4 class="section">Exercise: 3 stars, optional (sub_inversion_arrow)</h4>
+<a name="lab761"></a><h4 class="section">Exercise: 3 stars, optional (sub_inversion_arrow)</h4>
 
 </div>
 <div class="code code-space">
@@ -584,7 +584,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab763"></a><h1 class="section">Typing</h1>
+<a name="lab762"></a><h1 class="section">Typing</h1>
 
 </div>
 <div class="code code-space">
@@ -637,7 +637,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab764"></a><h2 class="section">Typing Examples</h2>
+<a name="lab763"></a><h2 class="section">Typing Examples</h2>
 
 </div>
 <div class="code code-space">
@@ -650,7 +650,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab765"></a><h4 class="section">Exercise: 1 star</h4>
+<a name="lab764"></a><h4 class="section">Exercise: 1 star</h4>
 
 </div>
 <div class="code code-space">
@@ -683,7 +683,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab766"></a><h4 class="section">Exercise: 2 stars</h4>
+<a name="lab765"></a><h4 class="section">Exercise: 2 stars</h4>
 
 </div>
 <div class="code code-space">
@@ -711,7 +711,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab767"></a><h4 class="section">Exercise: 2 stars, optional</h4>
+<a name="lab766"></a><h4 class="section">Exercise: 2 stars, optional</h4>
 
 </div>
 <div class="code code-space">
@@ -745,11 +745,11 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab768"></a><h2 class="section">Properties of Typing</h2>
+<a name="lab767"></a><h2 class="section">Properties of Typing</h2>
 
 <div class="paragraph"> </div>
 
-<a name="lab769"></a><h3 class="section">Well-Formedness</h3>
+<a name="lab768"></a><h3 class="section">Well-Formedness</h3>
 
 </div>
 <div class="code code-space">
@@ -789,7 +789,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab770"></a><h3 class="section">Field Lookup</h3>
+<a name="lab769"></a><h3 class="section">Field Lookup</h3>
 
 </div>
 <div class="code code-space">
@@ -805,7 +805,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 <span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> <a class="idref" href="Maps.html#empty"><span class="id" type="definition">empty</span></a> <span class="id" type="keyword">as</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">T</span> <span class="id" type="var">i</span> <span class="id" type="var">Ti</span> <span class="id" type="var">Hval</span> <span class="id" type="var">Htyp</span>. <span class="id" type="var">revert</span> <span class="id" type="var">Ti</span> <span class="id" type="var">HeqGamma</span> <span class="id" type="var">Hval</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Htyp</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Htyp</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> (<a class="idref" href="RecordSub.html#rcd_types_match"><span class="id" type="lemma">rcd_types_match</span></a> <span class="id" type="var">S</span>) <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>0</sub></span>...<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">H<sub>0</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Si</span> [<span class="id" type="var">HgetSi</span> <span class="id" type="var">Hsub</span>]].<br/>
@@ -824,11 +824,11 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab771"></a><h3 class="section">Progress</h3>
+<a name="lab770"></a><h3 class="section">Progress</h3>
 
 <div class="paragraph"> </div>
 
-<a name="lab772"></a><h4 class="section">Exercise: 3 stars (canonical_forms_of_arrow_types)</h4>
+<a name="lab771"></a><h4 class="section">Exercise: 3 stars (canonical_forms_of_arrow_types)</h4>
 
 </div>
 <div class="code code-space">
@@ -1049,7 +1049,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab773"></a><h3 class="section">Inversion Lemmas</h3>
+<a name="lab772"></a><h3 class="section">Inversion Lemmas</h3>
 
 </div>
 <div class="code code-space">
@@ -1065,7 +1065,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">x</span> <span class="id" type="var">T</span> <span class="id" type="var">Hty</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="RecordSub.html#tvar"><span class="id" type="constructor">tvar</span></a> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hty</span>; <span class="id" type="tactic">intros</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Var&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">T</span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
@@ -1084,7 +1084,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">T<sub>2</sub></span> <span class="id" type="var">Hty</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="RecordSub.html#tapp"><span class="id" type="constructor">tapp</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hty</span>; <span class="id" type="tactic">intros</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_App&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">T<sub>1</sub></span>...<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Sub&nbsp;*)</span><br/>
@@ -1104,7 +1104,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">x</span> <span class="id" type="var">S<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">T</span> <span class="id" type="var">H</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="RecordSub.html#tabs"><span class="id" type="constructor">tabs</span></a> <span class="id" type="var">x</span> <span class="id" type="var">S<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Abs&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">Hwf</span> := <a class="idref" href="RecordSub.html#has_type__wf"><span class="id" type="lemma">has_type__wf</span></a> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H<sub>0</sub></span>).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">T<sub>12</sub></span>...<br/>
@@ -1124,7 +1124,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span style="font-family: serif; font-size:85%;">&Gamma;</span> <span class="id" type="var">i</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">Ti</span> <span class="id" type="var">H</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="var">remember</span> (<a class="idref" href="RecordSub.html#tproj"><span class="id" type="constructor">tproj</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">i</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">t</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Heqt</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Proj&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<a class="idref" href="RecordSub.html#well_formed_ty"><span class="id" type="inductive">well_formed_ty</span></a> <span class="id" type="var">Ti</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">Hwf</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="comment">(*&nbsp;pf&nbsp;of&nbsp;assertion&nbsp;*)</span><br/>
@@ -1181,7 +1181,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab774"></a><h3 class="section">Context Invariance</h3>
+<a name="lab773"></a><h3 class="section">Context Invariance</h3>
 
 </div>
 <div class="code code-space">
@@ -1253,7 +1253,7 @@ The following facts are mostly easy to prove in Coq.  To get full
 </div>
 
 <div class="doc">
-<a name="lab775"></a><h3 class="section">Preservation</h3>
+<a name="lab774"></a><h3 class="section">Preservation</h3>
 
 </div>
 <div class="code code-space">

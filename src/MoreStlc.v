@@ -1,12 +1,11 @@
 (** * MoreStlc: More on the Simply Typed Lambda-Calculus *)
 
-Require Import SfLib.
 Require Import Maps.
 Require Import Types.
 Require Import Smallstep.
 Require Import Stlc.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Simple Extensions to STLC *)
 
 (** The simply typed lambda-calculus has enough structure to make its
@@ -16,13 +15,15 @@ Require Import Stlc.
     features that have straightforward treatments at the level of
     typing. *)
 
+(* ================================================================= *)
 (** ** Numbers *)
 
 (** As we saw in exercise [stlc_arith] at the end of the [StlcProp]
     chapter, adding types, constants, and primitive operations for
     numbers is easy -- basically just a matter of combining the
-    [Types} and \CHAP{Stlc] chapters. *)
+    [Types] and [Stlc] chapters. *)
 
+(* ================================================================= *)
 (** ** Let Bindings *)
 
 (** When writing a complex expression, it is useful to be able
@@ -50,7 +51,6 @@ Require Import Stlc.
        t ::=                Terms
            | ...               (other terms same as before)
            | let x=t in t      let-binding
-
 *)
 
 (**
@@ -68,9 +68,9 @@ Require Import Stlc.
                 Gamma |- t1 : T1      Gamma , x:T1 |- t2 : T2
                 --------------------------------------------            (T_Let)
                         Gamma |- let x=t1 in t2 : T2
-
 *)
 
+(* ================================================================= *)
 (** ** Pairs *)
 
 (** Our functional programming examples in Coq have made
@@ -92,7 +92,6 @@ Require Import Stlc.
           let sum = x.fst + x.snd in
           let diff = x.fst - x.snd in
           (sum,diff)
-
 *)
 
 (** Adding pairs to the simply typed lambda-calculus, then, involves
@@ -116,7 +115,6 @@ Require Import Stlc.
        T ::=                Types
            | T * T             product type
            | ...
-
 *)
 
 (** For reduction, we need several new rules specifying how pairs and
@@ -143,7 +141,6 @@ Require Import Stlc.
 
                           ------------------                       (ST_SndPair)
                           (v1,v2).snd ==> v2
-
 *)
 
 (** Rules [ST_FstPair] and [ST_SndPair] say that, when a fully
@@ -176,7 +173,6 @@ Require Import Stlc.
                         Gamma |- t1 : T11*T12
                         ---------------------                           (T_Snd)
                         Gamma |- t1.snd : T12
-
 *)
 
 (** [T_Pair] says that [(t1,t2)] has type [T1*T2] if [t1] has
@@ -185,6 +181,7 @@ Require Import Stlc.
    will reduce to a pair), then the types of the projections from
    this pair are [T11] and [T12]. *)
 
+(* ================================================================= *)
 (** ** Unit *)
 
 (** Another handy base type, found especially in languages in
@@ -213,7 +210,6 @@ Require Import Stlc.
 
                          --------------------                          (T_Unit)
                          Gamma |- unit : Unit
-
 *)
 
 (** It may seem a little strange to bother defining a type that
@@ -229,6 +225,7 @@ Require Import Stlc.
     have a type for the (trivial) result of an expression that is
     evaluated only for its effect. *)
 
+(* ================================================================= *)
 (** ** Sums *)
 
 (** Many programs need to deal with values that can take two distinct
@@ -242,7 +239,6 @@ Require Import Stlc.
    one of two given types, e.g.:
 
        Nat + Bool
-
 *)
 
 (** We create elements of these types by _tagging_ elements of
@@ -281,14 +277,12 @@ Require Import Stlc.
     construct (a very simplified form of Coq's [match]) to destruct
     them. For example, the following procedure converts a [Nat+Bool]
     into a [Nat]: *)
-(**
-
+(** 
     getNat =
       \x:Nat+Bool.
         case x of
           inl n => n
         | inr b => if b then 1 else 0
-
 *)
 
 (** More formally... *)
@@ -311,7 +305,6 @@ Require Import Stlc.
        T ::=                Types
            | T + T             sum type
            | ...
-
 *)
 
 (** Reduction:
@@ -337,7 +330,6 @@ Require Import Stlc.
             ----------------------------------------------         (ST_CaseInr)
             case (inr T v0) of inl x1 => t1 | inr x2 => t2
                            ==>  [x2:=v0]t2
-
 *)
 
 (** Typing:
@@ -377,6 +369,7 @@ Require Import Stlc.
     languages adopt other solutions), but it is easy to understand and
     formalize. *)
 
+(* ================================================================= *)
 (** ** Lists *)
 
 (** The typing features we have seen can be classified into _base
@@ -404,7 +397,6 @@ Require Import Stlc.
       lcase x of nil -> 0
          | a::x' -> lcase x' of nil -> a
                        | b::x'' -> a+b
-
 *)
 (**
     Syntax:
@@ -424,7 +416,6 @@ Require Import Stlc.
        T ::=                Types
            | List T            list of Ts
            | ...
-
 *)
 
 (** Reduction:
@@ -449,7 +440,6 @@ Require Import Stlc.
             -----------------------------------------------      (ST_LcaseCons)
             (lcase (cons vh vt) of nil -> t2 | xh::xt -> t3)
                           ==> [xh:=vh,xt:=vt]t3
-
 *)
 
 (** Typing:
@@ -466,9 +456,9 @@ Require Import Stlc.
                    Gamma , h:T1, t:List T1 |- t3 : T
           -------------------------------------------------           (T_Lcase)
           Gamma |- (lcase t1 of nil -> t2 | h::t -> t3) : T
-
 *)
 
+(* ================================================================= *)
 (** ** General Recursion *)
 
 (** Another facility found in most programming languages (including
@@ -495,7 +485,6 @@ Require Import Stlc.
          (\f:Nat->Nat.
             \x:Nat.
                if x=0 then 1 else x * (f (pred x)))
-
 *)
 
 (** The intuition is that the higher-order function [f] passed
@@ -535,8 +524,7 @@ Require Import Stlc.
                            Gamma |- t1 : T1->T1
                            --------------------                         (T_Fix)
                            Gamma |- fix t1 : T1
-
- *)
+*)
 
 (** Let's see how [ST_FixAbs] works by reducing [fact 3 = fix F 3],
     where [F = (\f. \x. if x=0 then 1 else x * (f (pred x)))] (we are
@@ -615,7 +603,6 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 [==>] [ST_MultNats]
 
 6
-
 *)
 
 (** **** Exercise: 1 star, optional (halve_fix)  *)
@@ -676,10 +663,9 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 
       even = evenodd.fst
       odd  = evenodd.snd
-
 *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Records *)
 
 (** As a final example of a basic extension of the STLC, let's look
@@ -743,7 +729,6 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
                     Gamma |- t : {..., i:Ti, ...}
                     -----------------------------                      (T_Proj)
                           Gamma |- t.i : Ti
-
 *)
 
 (** There are several ways to approach formalizing the above
@@ -780,7 +765,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
         pairs and product types.  We sketch this approach in the next
         section. *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Encoding Records (Optional) *)
 
 (** First, observe that we can encode arbitrary-size tuples using
@@ -861,6 +846,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
     to the most frequently used labels.  Indeed, there are industrial
     compilers that essentially do this! *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Variants (Optional) *)
 
 (** Just as products can be generalized to records, sums can be
@@ -876,10 +862,10 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
     treatments can be found in many textbooks -- e.g., Types and
     Programming Languages. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Exercise: Formalizing the Extensions *)
 
-(** **** Exercise: 4 stars, optional (STLC_extensions)  *)
+(** **** Exercise: 4 stars (STLC_extensions)  *)
 (** In this exercise, you will formalize some of the extensions
     described in this chapter.  We've provided the necessary additions
     to the syntax of terms and types, and we've included a few
@@ -906,7 +892,7 @@ if 3=0 then 1 else 3 * (fix F (pred 3))
 
 Module STLCExtended.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Syntax and Operational Semantics *)
 
 Inductive ty : Type :=
@@ -959,10 +945,9 @@ Inductive tm : Type :=
     we'll write this:
 
        if0 x then ... else ...
-
 *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
@@ -1016,7 +1001,7 @@ Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
 Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 (** Next we define the values of our language. *)
@@ -1158,7 +1143,7 @@ Notation "t1 '==>*' t2" := (multistep t1 t2) (at level 40).
 
 Hint Constructors step.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Typing *)
 
 Definition context := partial_map ty.
@@ -1245,7 +1230,7 @@ where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
 Hint Constructors has_type.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Examples *)
 
 (** This section presents formalized versions of the examples from
@@ -1259,6 +1244,7 @@ Hint Constructors has_type.
 
 Module Examples.
 
+(* ----------------------------------------------------------------- *)
 (** *** Preliminaries *)
 
 (** First, let's define a few variable names: *)
@@ -1307,6 +1293,7 @@ Hint Extern 2 (has_type _ (tlcase _ _ _ _ _) _) =>
 *)
 Hint Extern 2 (_ = _) => compute; reflexivity.
 
+(* ----------------------------------------------------------------- *)
 (** *** Numbers *)
 
 Module Numtest.
@@ -1345,6 +1332,7 @@ Qed.
 
 End Numtest.
 
+(* ----------------------------------------------------------------- *)
 (** *** Products *)
 
 Module Prodtest.
@@ -1371,6 +1359,7 @@ Proof. unfold test. normalize. Qed.
 
 End Prodtest.
 
+(* ----------------------------------------------------------------- *)
 (** *** [let] *)
 
 Module LetTest.
@@ -1394,6 +1383,7 @@ Proof. unfold test. normalize. Qed.
 
 End LetTest.
 
+(* ----------------------------------------------------------------- *)
 (** *** Sums *)
 
 Module Sumtest1.
@@ -1451,6 +1441,7 @@ Proof. unfold test. normalize. Qed.
 
 End Sumtest2.
 
+(* ----------------------------------------------------------------- *)
 (** *** Lists *)
 
 Module ListTest.
@@ -1479,6 +1470,7 @@ Proof. unfold test. normalize. Qed.
 
 End ListTest.
 
+(* ----------------------------------------------------------------- *)
 (** *** [fix] *)
 
 Module FixTest1.
@@ -1647,14 +1639,14 @@ End FixTest4.
 
 End Examples.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Properties of Typing *)
 
 (** The proofs of progress and preservation for this enriched system
     are essentially the same (though of course longer) as for the pure
     STLC. *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Progress *)
 
 Theorem progress : forall t T,
@@ -1694,7 +1686,7 @@ Proof with eauto.
            [t1 = tabs x T11 t12], since abstractions are the 
            only values that can have an arrow type.  But
            [(tabs x T11 t12) t2 ==> [x:=t2]t12] by [ST_AppAbs]. *)
-        inversion H; subst; try (solve by inversion).
+        inversion H; subst; try solve_by_invert.
         exists (subst x t2 t12)...
       * (* t2 steps *)
         (* If [t1] is a value and [t2 ==> t2'], 
@@ -1710,7 +1702,7 @@ Proof with eauto.
     right.
     destruct IHHt...
     + (* t1 is a value *)
-      inversion H; subst; try solve by inversion.
+      inversion H; subst; try solve_by_invert.
       exists (tnat (S n1))...
     + (* t1 steps *)
       inversion H as [t1' Hstp].
@@ -1719,7 +1711,7 @@ Proof with eauto.
     right.
     destruct IHHt...
     + (* t1 is a value *)
-      inversion H; subst; try solve by inversion.
+      inversion H; subst; try solve_by_invert.
       exists (tnat (pred n1))...
     + (* t1 steps *)
       inversion H as [t1' Hstp].
@@ -1730,8 +1722,8 @@ Proof with eauto.
     + (* t1 is a value *)
       destruct IHHt2...
       * (* t2 is a value *)
-        inversion H; subst; try solve by inversion.
-        inversion H0; subst; try solve by inversion.
+        inversion H; subst; try solve_by_invert.
+        inversion H0; subst; try solve_by_invert.
         exists (tnat (mult n1 n0))...
       * (* t2 steps *)
         inversion H0 as [t2' Hstp].
@@ -1743,7 +1735,7 @@ Proof with eauto.
     right.
     destruct IHHt1...
     + (* t1 is a value *)
-      inversion H; subst; try solve by inversion.
+      inversion H; subst; try solve_by_invert.
       destruct n1 as [|n1'].
       * (* n1=0 *)
         exists t2...
@@ -1766,7 +1758,7 @@ Proof with eauto.
     right.
     destruct IHHt...
     + (* t1 is a value *)
-      inversion H; subst; try solve by inversion.
+      inversion H; subst; try solve_by_invert.
       exists v1...
     + (* t1 steps *)
       inversion H as [t1' Hstp].
@@ -1775,7 +1767,7 @@ Proof with eauto.
     right.
     destruct IHHt...
     + (* t1 is a value *)
-      inversion H; subst; try solve by inversion.
+      inversion H; subst; try solve_by_invert.
       exists v2...
     + (* t1 steps *)
       inversion H as [t1' Hstp].
@@ -1798,7 +1790,7 @@ Proof with eauto.
     right.
     destruct IHHt1...
     + (* t0 is a value *)
-      inversion H; subst; try solve by inversion.
+      inversion H; subst; try solve_by_invert.
       * (* t0 is inl *)
         exists ([x1:=v]t1)...
       * (* t0 is inr *)
@@ -1822,7 +1814,7 @@ Proof with eauto.
     right.
     destruct IHHt1...
     + (* t1 is a value *)
-      inversion H; subst; try solve by inversion.
+      inversion H; subst; try solve_by_invert.
       * (* t1=tnil *)
         exists t2...
       * (* t1=tcons v1 vl *)
@@ -1834,7 +1826,7 @@ Proof with eauto.
   (* FILL IN HERE *)
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Context Invariance *)
 
 Inductive appears_free_in : id -> tm -> Prop :=
@@ -1996,7 +1988,7 @@ Proof with eauto.
     rewrite false_beq_id in Hctx...
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 Lemma substitution_preserves_typing : forall Gamma x U v t S,
@@ -2135,7 +2127,7 @@ Proof with eauto.
         subst. rewrite false_beq_id...
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Preservation *)
 
 Theorem preservation : forall t t' T,
@@ -2200,4 +2192,4 @@ Qed.
 
 End STLCExtended.
 
-(* $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(* $Date: 2016-09-14 17:48:09 -0400 (Wed, 14 Sep 2016) $ *)

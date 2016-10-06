@@ -1,40 +1,78 @@
 Symbols.vo Symbols.glob Symbols.v.beautified: Symbols.v
+Symbols.vio: Symbols.v
 Preface.vo Preface.glob Preface.v.beautified: Preface.v
+Preface.vio: Preface.v
 Basics.vo Basics.glob Basics.v.beautified: Basics.v
+Basics.vio: Basics.v
 Induction.vo Induction.glob Induction.v.beautified: Induction.v Basics.vo
+Induction.vio: Induction.v Basics.vio
 Lists.vo Lists.glob Lists.v.beautified: Lists.v Induction.vo
+Lists.vio: Lists.v Induction.vio
 Poly.vo Poly.glob Poly.v.beautified: Poly.v Lists.vo
+Poly.vio: Poly.v Lists.vio
 Tactics.vo Tactics.glob Tactics.v.beautified: Tactics.v Poly.vo
+Tactics.vio: Tactics.v Poly.vio
 Logic.vo Logic.glob Logic.v.beautified: Logic.v Tactics.vo
+Logic.vio: Logic.v Tactics.vio
 IndProp.vo IndProp.glob IndProp.v.beautified: IndProp.v Logic.vo
+IndProp.vio: IndProp.v Logic.vio
 Maps.vo Maps.glob Maps.v.beautified: Maps.v
+Maps.vio: Maps.v
 ProofObjects.vo ProofObjects.glob ProofObjects.v.beautified: ProofObjects.v IndProp.vo
+ProofObjects.vio: ProofObjects.v IndProp.vio
 IndPrinciples.vo IndPrinciples.glob IndPrinciples.v.beautified: IndPrinciples.v ProofObjects.vo
-SfLib.vo SfLib.glob SfLib.v.beautified: SfLib.v
+IndPrinciples.vio: IndPrinciples.v ProofObjects.vio
 Rel.vo Rel.glob Rel.v.beautified: Rel.v IndProp.vo
-Imp.vo Imp.glob Imp.v.beautified: Imp.v Maps.vo SfLib.vo
+Rel.vio: Rel.v IndProp.vio
+Imp.vo Imp.glob Imp.v.beautified: Imp.v Maps.vo
+Imp.vio: Imp.v Maps.vio
 ImpParser.vo ImpParser.glob ImpParser.v.beautified: ImpParser.v Maps.vo Imp.vo
-ImpCEvalFun.vo ImpCEvalFun.glob ImpCEvalFun.v.beautified: ImpCEvalFun.v SfLib.vo Imp.vo Maps.vo
-Extraction.vo Extraction.glob Extraction.v.beautified: Extraction.v SfLib.vo ImpCEvalFun.vo Imp.vo ImpParser.vo
-Equiv.vo Equiv.glob Equiv.v.beautified: Equiv.v SfLib.vo Maps.vo Imp.vo
-Hoare.vo Hoare.glob Hoare.v.beautified: Hoare.v SfLib.vo Imp.vo Maps.vo
-Hoare2.vo Hoare2.glob Hoare2.v.beautified: Hoare2.v SfLib.vo Maps.vo Imp.vo Hoare.vo
+ImpParser.vio: ImpParser.v Maps.vio Imp.vio
+ImpCEvalFun.vo ImpCEvalFun.glob ImpCEvalFun.v.beautified: ImpCEvalFun.v Imp.vo Maps.vo
+ImpCEvalFun.vio: ImpCEvalFun.v Imp.vio Maps.vio
+Extraction.vo Extraction.glob Extraction.v.beautified: Extraction.v ImpCEvalFun.vo Imp.vo ImpParser.vo
+Extraction.vio: Extraction.v ImpCEvalFun.vio Imp.vio ImpParser.vio
+Equiv.vo Equiv.glob Equiv.v.beautified: Equiv.v Maps.vo Imp.vo
+Equiv.vio: Equiv.v Maps.vio Imp.vio
+Hoare.vo Hoare.glob Hoare.v.beautified: Hoare.v Imp.vo Maps.vo
+Hoare.vio: Hoare.v Imp.vio Maps.vio
+Hoare2.vo Hoare2.glob Hoare2.v.beautified: Hoare2.v Maps.vo Imp.vo Hoare.vo
+Hoare2.vio: Hoare2.v Maps.vio Imp.vio Hoare.vio
 HoareAsLogic.vo HoareAsLogic.glob HoareAsLogic.v.beautified: HoareAsLogic.v Imp.vo Hoare.vo
-Smallstep.vo Smallstep.glob Smallstep.v.beautified: Smallstep.v SfLib.vo Maps.vo Imp.vo
+HoareAsLogic.vio: HoareAsLogic.v Imp.vio Hoare.vio
+Smallstep.vo Smallstep.glob Smallstep.v.beautified: Smallstep.v Maps.vo Imp.vo
+Smallstep.vio: Smallstep.v Maps.vio Imp.vio
 Auto.vo Auto.glob Auto.v.beautified: Auto.v Maps.vo Imp.vo
-Types.vo Types.glob Types.v.beautified: Types.v SfLib.vo Maps.vo Imp.vo Smallstep.vo
+Auto.vio: Auto.v Maps.vio Imp.vio
+Types.vo Types.glob Types.v.beautified: Types.v Maps.vo Imp.vo Smallstep.vo
+Types.vio: Types.v Maps.vio Imp.vio Smallstep.vio
 Stlc.vo Stlc.glob Stlc.v.beautified: Stlc.v Maps.vo Smallstep.vo Types.vo
-StlcProp.vo StlcProp.glob StlcProp.v.beautified: StlcProp.v SfLib.vo Maps.vo Types.vo Stlc.vo Smallstep.vo
-MoreStlc.vo MoreStlc.glob MoreStlc.v.beautified: MoreStlc.v SfLib.vo Maps.vo Types.vo Smallstep.vo Stlc.vo
-Sub.vo Sub.glob Sub.v.beautified: Sub.v SfLib.vo Maps.vo Types.vo
-Typechecking.vo Typechecking.glob Typechecking.v.beautified: Typechecking.v SfLib.vo Maps.vo Stlc.vo
-Records.vo Records.glob Records.v.beautified: Records.v SfLib.vo Maps.vo Imp.vo Smallstep.vo Stlc.vo
-References.vo References.glob References.v.beautified: References.v SfLib.vo Maps.vo Smallstep.vo
-RecordSub.vo RecordSub.glob RecordSub.v.beautified: RecordSub.v SfLib.vo Maps.vo MoreStlc.vo
-Norm.vo Norm.glob Norm.v.beautified: Norm.v SfLib.vo Maps.vo Smallstep.vo
+Stlc.vio: Stlc.v Maps.vio Smallstep.vio Types.vio
+StlcProp.vo StlcProp.glob StlcProp.v.beautified: StlcProp.v Maps.vo Types.vo Stlc.vo Smallstep.vo
+StlcProp.vio: StlcProp.v Maps.vio Types.vio Stlc.vio Smallstep.vio
+MoreStlc.vo MoreStlc.glob MoreStlc.v.beautified: MoreStlc.v Maps.vo Types.vo Smallstep.vo Stlc.vo
+MoreStlc.vio: MoreStlc.v Maps.vio Types.vio Smallstep.vio Stlc.vio
+Sub.vo Sub.glob Sub.v.beautified: Sub.v Maps.vo Types.vo Smallstep.vo
+Sub.vio: Sub.v Maps.vio Types.vio Smallstep.vio
+Typechecking.vo Typechecking.glob Typechecking.v.beautified: Typechecking.v Maps.vo Smallstep.vo Stlc.vo
+Typechecking.vio: Typechecking.v Maps.vio Smallstep.vio Stlc.vio
+Records.vo Records.glob Records.v.beautified: Records.v Maps.vo Imp.vo Smallstep.vo Stlc.vo
+Records.vio: Records.v Maps.vio Imp.vio Smallstep.vio Stlc.vio
+References.vo References.glob References.v.beautified: References.v Maps.vo Smallstep.vo
+References.vio: References.v Maps.vio Smallstep.vio
+RecordSub.vo RecordSub.glob RecordSub.v.beautified: RecordSub.v Maps.vo Smallstep.vo MoreStlc.vo
+RecordSub.vio: RecordSub.v Maps.vio Smallstep.vio MoreStlc.vio
+Norm.vo Norm.glob Norm.v.beautified: Norm.v Maps.vo Smallstep.vo
+Norm.vio: Norm.v Maps.vio Smallstep.vio
 LibTactics.vo LibTactics.glob LibTactics.v.beautified: LibTactics.v
-UseTactics.vo UseTactics.glob UseTactics.v.beautified: UseTactics.v Maps.vo Imp.vo Types.vo Smallstep.vo LibTactics.vo Stlc.vo Equiv.vo References.vo SfLib.vo Hoare.vo Sub.vo
-UseAuto.vo UseAuto.glob UseAuto.v.beautified: UseAuto.v SfLib.vo Maps.vo Stlc.vo LibTactics.vo Imp.vo StlcProp.vo Smallstep.vo References.vo Sub.vo
-PE.vo PE.glob PE.v.beautified: PE.v SfLib.vo Maps.vo Imp.vo
+LibTactics.vio: LibTactics.v
+UseTactics.vo UseTactics.glob UseTactics.v.beautified: UseTactics.v Maps.vo Imp.vo Types.vo Smallstep.vo LibTactics.vo Stlc.vo Equiv.vo References.vo Hoare.vo Sub.vo
+UseTactics.vio: UseTactics.v Maps.vio Imp.vio Types.vio Smallstep.vio LibTactics.vio Stlc.vio Equiv.vio References.vio Hoare.vio Sub.vio
+UseAuto.vo UseAuto.glob UseAuto.v.beautified: UseAuto.v Maps.vo Smallstep.vo Stlc.vo LibTactics.vo Imp.vo StlcProp.vo References.vo Sub.vo
+UseAuto.vio: UseAuto.v Maps.vio Smallstep.vio Stlc.vio LibTactics.vio Imp.vio StlcProp.vio References.vio Sub.vio
+PE.vo PE.glob PE.v.beautified: PE.v Maps.vo Imp.vo Smallstep.vo
+PE.vio: PE.v Maps.vio Imp.vio Smallstep.vio
 Postscript.vo Postscript.glob Postscript.v.beautified: Postscript.v
+Postscript.vio: Postscript.v
 Bib.vo Bib.glob Bib.v.beautified: Bib.v
+Bib.vio: Bib.v

@@ -33,11 +33,10 @@ Require Import Coq.Arith.Arith.
 Require Import Coq.omega.Omega.
 Require Import Coq.Lists.List.
 Import ListNotations.
-Require Import SfLib.
 Require Import Maps.
 Require Import Smallstep.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Definitions *)
 
 (** Pretty much every programming language provides some form of
@@ -70,7 +69,7 @@ Require Import Smallstep.
     distinctions and rendering some operations such as dereferencing
     implicit instead of explicit. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Syntax *)
 
 (** In this chapter, we study adding mutable references to the
@@ -94,7 +93,7 @@ Module STLCRef.
          operator.  If [r] is a reference, [r := 7] will store the
          value [7] in the cell referenced by [r]. *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Types *)
 
 (** We start with the simply typed lambda calculus over the
@@ -111,7 +110,6 @@ Module STLCRef.
           | Unit
           | T -> T
           | Ref T
-
 *)
 
 Inductive ty : Type :=
@@ -120,7 +118,7 @@ Inductive ty : Type :=
   | TArrow : ty -> ty -> ty
   | TRef   : ty -> ty.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Terms *)
 
 (** Besides variables, abstractions, applications,
@@ -132,7 +130,6 @@ Inductive ty : Type :=
           | !t                 dereference
           | t := t             assignment
           | l                  location
-
 *)
 
 Inductive tm  : Type :=
@@ -172,7 +169,7 @@ Inductive tm  : Type :=
     would be easy to do so, since there are no very interesting
     interactions between those features and references.) *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Typing (Preview) *)
 
 (** Informally, the typing rules for allocation, dereferencing, and
@@ -195,7 +192,7 @@ Inductive tm  : Type :=
     will motivate some changes to the other rules; we'll come back to
     this later. *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Values and Substitution *)
 
 (** Besides abstractions and numbers, we have two new types of values:
@@ -248,10 +245,10 @@ Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
 
 Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Pragmatics *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Side Effects and Sequencing *)
 
 (** The fact that we've chosen the result of an assignment
@@ -276,7 +273,6 @@ Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
     assignments:
 
        r:=succ(!r); r:=succ(!r); r:=succ(!r); r:=succ(!r); !r
-
 *)
 (** Formally, we introduce sequencing as a _derived form_
     [tseq] that expands into an abstraction and an application. *)
@@ -284,7 +280,7 @@ Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 Definition tseq t1 t2 :=
   tapp (tabs (Id 0) TUnit t2) t1.
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** References and Aliasing *)
 
 (** It is important to bear in mind the difference between the
@@ -320,7 +316,7 @@ Definition tseq t1 t2 :=
     _unless_ we happen to do it in a context where [r] and [s] are
     aliases for the same cell! *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Shared State *)
 
 (** Of course, aliasing is also a large part of what makes references
@@ -333,7 +329,6 @@ Definition tseq t1 t2 :=
       let incc = \_:Unit. (c := succ (!c); !c) in
       let decc = \_:Unit. (c := pred (!c); !c) in
       ...
-
 *)
 
 (** Note that, since their argument types are [Unit], the
@@ -354,7 +349,7 @@ Definition tseq t1 t2 :=
     example, if we replace the [...] with [(incc unit; incc unit; decc
     unit)], the result of the whole program will be [1]. *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Objects *)
 
 (** We can go a step further and write a _function_ that creates [c],
@@ -367,7 +362,6 @@ Definition tseq t1 t2 :=
              let incc = \_:Unit. (c := succ (!c); !c) in
              let decc = \_:Unit. (c := pred (!c); !c) in
              {i=incc, d=decc}
-
 *)
 
 (** Now, each time we call [newcounter], we get a new record of
@@ -382,8 +376,7 @@ Definition tseq t1 t2 :=
       let r1 = c1.i unit in
       let r2 = c2.i unit in
       r2  // yields 1, not 2!
-
- *)
+*)
 
 (** **** Exercise: 1 star (store_draw)  *)
 (** Draw (on paper) the contents of the store at the point in
@@ -393,7 +386,7 @@ Definition tseq t1 t2 :=
 (* FILL IN HERE *)
 (** [] *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** References to Compound Types *)
 
 (** A reference cell need not contain just a number: the primitives
@@ -449,7 +442,7 @@ would it behave the same? *)
 (* FILL IN HERE *)
 (** [] *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Null References *)
 
 (** There is one final significant difference between our
@@ -475,7 +468,7 @@ would it behave the same? *)
     Then a "nullable reference to a [T]" is simply an element of the
     type [Option (Ref T)].  *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Garbage Collection *)
 
 (** A last issue that we should mention before we move on with
@@ -502,10 +495,10 @@ would it behave the same? *)
 (* FILL IN HERE *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Operational Semantics *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Locations *)
 
 (** The most subtle aspect of the treatment of references
@@ -548,7 +541,7 @@ would it behave the same? *)
     about the type of location [n+4].  In C, pointer arithmetic is a
     notorious source of type-safety violations. *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Stores *)
 
 (** Recall that, in the small-step operational semantics for
@@ -647,7 +640,7 @@ Proof with auto.
       simpl; apply IHl1'...
 Qed.
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Reduction *)
 
 (** Next, we need to extend the operational semantics to take
@@ -854,7 +847,7 @@ Notation "t1 '/' st '==>*' t2 '/' st'" :=
                (multistep (t1,st) (t2,st'))
                (at level 40, st at level 39, t2 at level 39).
 
-(* ################################### *)
+(* ################################################################# *)
 (** * Typing *)
 
 (** The contexts assigning types to free variables are exactly the
@@ -862,8 +855,8 @@ Notation "t1 '/' st '==>*' t2 '/' st'" :=
 
 Definition context := partial_map ty.
 
-(* ################################### *)
 
+(* ================================================================= *)
 (** ** Store typings *)
 
 (** Having extended our syntax and reduction rules to accommodate
@@ -932,7 +925,6 @@ Definition context := partial_map ty.
     to this store:
 
    [\x:Nat. (!(loc 1)) x, \x:Nat. (!(loc 0)) x]
-
 *)
 
 (** **** Exercise: 2 stars (cyclic_store)  *)
@@ -991,7 +983,7 @@ Definition store_Tlookup (n:nat) (ST:store_ty) :=
     rather than a concrete store.  The rest of the typing rules are 
     analogously augmented with store typings. *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** The Typing Relation *)
 
 (** We can now formalize the typing relation for the STLC with
@@ -1016,7 +1008,6 @@ Definition store_Tlookup (n:nat) (ST:store_ty) :=
                         Gamma; ST |- t2 : T11
                     -----------------------------                    (T_Assign)
                     Gamma; ST |- t1 := t2 : Unit
-
 *)
 
 Reserved Notation "Gamma ';' ST '|-' t '\in' T" (at level 40).
@@ -1093,7 +1084,7 @@ Hint Constructors has_type.
     allocated cells; this intuition is formalized in the statement of
     the type preservation theorem below.  *)
 
-(* ################################### *)
+(* ################################################################# *)
 (** * Properties *)
 
 (** Our final task is to check that standard type safety
@@ -1104,7 +1095,7 @@ Hint Constructors has_type.
     constructs.  The preservation theorem is a bit more interesting,
     so let's look at it first.  *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Well-Typed Stores *)
 
 (** Since we have extended both the reduction relation (with
@@ -1170,7 +1161,7 @@ Abort.
     domain of [ST], and it will not be the case that [t'] (which
     definitely mentions [l]) is typable under [ST]. *)
 
-(* ############################################ *)
+(* ================================================================= *)
 (** ** Extending Store Typings *)
 
 (** Evidently, since the store can increase in size during reduction,
@@ -1243,7 +1234,7 @@ Proof.
   induction ST; auto.
 Qed.
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Preservation, Finally *)
 
 (** We can now give the final, correct statement of the type
@@ -1276,7 +1267,7 @@ Definition preservation_theorem := forall ST t t' T st st',
 
     In order to prove this, we'll need a few lemmas, as usual. *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Substitution Lemma *)
 
 (** First, we need an easy extension of the standard substitution
@@ -1413,7 +1404,7 @@ Proof with eauto.
       rewrite false_beq_id...
 Qed.
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Assignment Preserves Store Typing *)
 
 (** Next, we must show that replacing the contents of a cell in the
@@ -1442,7 +1433,7 @@ Proof with auto.
     apply H0...
 Qed.
 
-(* ######################################## *)
+(* ================================================================= *)
 (** ** Weakening for Stores *)
 
 (** Finally, we need a lemma on store typings, stating that, if a
@@ -1504,7 +1495,7 @@ Proof with auto.
       rewrite minus_diag. simpl. trivial.
 Qed.
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Preservation! *)
 
 (** Now that we've got everything set up right, the proof of
@@ -1533,7 +1524,7 @@ Proof with eauto using store_weakening, extends_refl.
   intros ST t t' T st st' Ht.
   generalize dependent t'.
   induction Ht; intros t' HST Hstep;
-    subst; try (solve by inversion); inversion Hstep; subst;
+    subst; try solve_by_invert; inversion Hstep; subst;
     try (eauto using store_weakening, extends_refl).
   (* T_App *)
   - (* ST_AppAbs *) exists ST.
@@ -1623,7 +1614,7 @@ Qed.
 (* FILL IN HERE *)
 [] *)
 
-(* ################################### *)
+(* ================================================================= *)
 (** ** Progress *)
 
 (** As we've said, progress for this system is pretty easy to prove;
@@ -1636,11 +1627,11 @@ Theorem progress : forall ST t T st,
   (value t \/ exists t', exists st', t / st ==> t' / st').
 Proof with eauto.
   intros ST t T st Ht HST. remember (@empty ty) as Gamma.
-  induction Ht; subst; try solve by inversion...
+  induction Ht; subst; try solve_by_invert...
   - (* T_App *)
     right. destruct IHHt1 as [Ht1p | Ht1p]...
     + (* t1 is a value *)
-      inversion Ht1p; subst; try solve by inversion.
+      inversion Ht1p; subst; try solve_by_invert.
       destruct IHHt2 as [Ht2p | Ht2p]...
       * (* t2 steps *)
         inversion Ht2p as [t2' [st' Hstep]].
@@ -1698,7 +1689,7 @@ Proof with eauto.
   - (* T_Deref *)
     right. destruct IHHt as [Ht1p | Ht1p]...
     + (* t1 is a value *)
-      inversion Ht1p; subst; try solve by inversion.
+      inversion Ht1p; subst; try solve_by_invert.
       eexists. eexists. apply ST_DerefLoc...
       inversion Ht; subst. inversion HST; subst.
       rewrite <- H...
@@ -1710,7 +1701,7 @@ Proof with eauto.
     + (* t1 is a value *)
       destruct IHHt2 as [Ht2p|Ht2p]...
       * (* t2 is a value *)
-        inversion Ht1p; subst; try solve by inversion.
+        inversion Ht1p; subst; try solve_by_invert.
         eexists. eexists. apply ST_Assign...
         inversion HST; subst. inversion Ht1; subst.
         rewrite H in H5...
@@ -1722,7 +1713,7 @@ Proof with eauto.
       exists (tassign t1' t2). exists st'...
 Qed.
 
-(* ################################### *)
+(* ################################################################# *)
 (** * References and Nontermination *)
 
 (** An important fact about the STLC (proved in chapter [Norm]) is
@@ -1860,8 +1851,8 @@ Qed.
     sure it gives the correct result when applied to the argument
     [4].) *)
 
-Definition factorial : tm :=
-  (* FILL IN HERE *) admit.
+Definition factorial : tm 
+  (* REPLACE THIS LINE WITH   := _your_definition_ . *). Admitted.
 
 Lemma factorial_type : empty; nil |- factorial \in (TArrow TNat TNat).
 Proof with eauto.
@@ -1880,7 +1871,7 @@ Qed.
 *)
 (** [] *)
 
-(* ################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
 
 (** **** Exercise: 5 stars, optional (garabage_collector)  *)
@@ -1893,4 +1884,4 @@ Qed.
 End RefsAndNontermination.
 End STLCRef.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)
