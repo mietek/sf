@@ -3184,7 +3184,7 @@ Tactic Notation "destructs" constr(N) constr(T) :=
 (** Underlying implementation of [branch]. *)
 
 Ltac branch_tactic K N :=
-  match constr:(K,N) with
+  match constr:((K,N)) with
   | (_,0) => fail 1
   | (0,_) => fail 1
   | (1,1) => idtac
