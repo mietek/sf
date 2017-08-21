@@ -29,15 +29,13 @@
 <div class="code code-tight">
 
 <br/>
-
-<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Export</span> <a class="idref" href="Lists.html#"><span class="id" type="library">Lists</span></a>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab93"></a><h1 class="section">Polymorphism</h1>
+<a name="lab94"></a><h1 class="section">Polymorphism</h1>
 
 <div class="paragraph"> </div>
 
@@ -53,7 +51,7 @@
 </div>
 
 <div class="doc">
-<a name="lab94"></a><h2 class="section">Polymorphic Lists</h2>
+<a name="lab95"></a><h2 class="section">Polymorphic Lists</h2>
 
 <div class="paragraph"> </div>
 
@@ -78,7 +76,7 @@
 ... but this would quickly become tedious, partly because we
     have to make up different constructor names for each datatype, but
     mostly because we would also need to define new versions of all
-    our list manipulating functions (<span class="inlinecode"><span class="id" type="var">length</span></span>, <span class="inlinecode"><span class="id" type="var">rev</span></span>, etc.)  for each
+    our list manipulating functions (<span class="inlinecode"><span class="id" type="var">length</span></span>, <span class="inlinecode"><span class="id" type="var">rev</span></span>, etc.) for each
     new datatype definition. 
 <div class="paragraph"> </div>
 
@@ -104,7 +102,7 @@ This is exactly like the definition of <span class="inlinecode"><span class="id"
     <span class="inlinecode"><span class="id" type="var">natlist</span></span> in the types of the constructors have been replaced by
     <span class="inlinecode"><span class="id" type="var">list</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span>.  (We can re-use the constructor names <span class="inlinecode"><span class="id" type="var">nil</span></span> and <span class="inlinecode"><span class="id" type="var">cons</span></span>
     because the earlier definition of <span class="inlinecode"><span class="id" type="var">natlist</span></span> was inside of a
-    <span class="inlinecode"><span class="id" type="keyword">Module</span></span> definition that is now out of scope.) 
+    <span class="inlinecode"><span class="id" type="keyword">Module</span></span> definition that is now out of scope.)
 
 <div class="paragraph"> </div>
 
@@ -113,7 +111,7 @@ This is exactly like the definition of <span class="inlinecode"><span class="id"
     <span class="inlinecode"><span class="id" type="keyword">Inductive</span></span> definitions; or, to put it another way, <span class="inlinecode"><span class="id" type="var">list</span></span> is a
     function from <span class="inlinecode"><span class="id" type="keyword">Type</span></span>s to <span class="inlinecode"><span class="id" type="keyword">Type</span></span>s.  For any particular type <span class="inlinecode"><span class="id" type="var">X</span></span>,
     the type <span class="inlinecode"><span class="id" type="var">list</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> is an <span class="inlinecode"><span class="id" type="keyword">Inductive</span></span>ly defined set of lists whose
-    elements are things of type <span class="inlinecode"><span class="id" type="var">X</span></span>. 
+    elements are of type <span class="inlinecode"><span class="id" type="var">X</span></span>. 
 <div class="paragraph"> </div>
 
  With this definition, when we use the constructors <span class="inlinecode"><span class="id" type="var">nil</span></span> and
@@ -134,12 +132,13 @@ This is exactly like the definition of <span class="inlinecode"><span class="id"
 </div>
 
 <div class="doc">
-(Side note on notation: In .v files, the "forall" quantifier is
-    spelled out in letters.  In the generated HTML files, <span class="inlinecode"><span style="font-family: arial;">&forall;</span></span> is
-    usually typeset as the usual mathematical "upside down A," but
-    you'll see the spelled-out "forall" in a few places, as in the
-    above comments.  This is just a quirk of typesetting: there is no
-    difference in meaning.) 
+(Side note on notation: In .v files, the "forall" quantifier
+    is spelled out in letters.  In the generated HTML files and in the
+    way various IDEs show .v files (with certain settings of their
+    display controls), <span class="inlinecode"><span style="font-family: arial;">&forall;</span></span> is usually typeset as the usual
+    mathematical "upside down A," but you'll still see the spelled-out
+    "forall" in a few places.  This is just a quirk of typesetting:
+    there is no difference in meaning.) 
 <div class="paragraph"> </div>
 
  The "<span class="inlinecode"><span style="font-family: arial;">&forall;</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span>" in these types can be read as an additional
@@ -210,7 +209,7 @@ To use <span class="inlinecode"><span class="id" type="tactic">repeat</span></sp
 </div>
 
 <div class="doc">
-<a name="lab95"></a><h4 class="section">Exercise: 2 stars (mumble_grumble)</h4>
+<a name="lab96"></a><h4 class="section">Exercise: 2 starsM (mumble_grumble)</h4>
  Consider the following two inductively defined types. 
 </div>
 <div class="code code-tight">
@@ -270,12 +269,12 @@ Which of the following are well-typed elements of <span class="inlinecode"><span
 </div>
 
 <div class="doc">
-<a name="lab96"></a><h3 class="section">Type Annotation Inference</h3>
+<a name="lab97"></a><h3 class="section">Type Annotation Inference</h3>
 
 <div class="paragraph"> </div>
 
  Let's write the definition of <span class="inlinecode"><span class="id" type="tactic">repeat</span></span> again, but this time we
-    won't specify the types of any of the arguments. Will Coq still
+    won't specify the types of any of the arguments.  Will Coq still
     accept it? 
 </div>
 <div class="code code-tight">
@@ -329,11 +328,11 @@ It has exactly the same type type as <span class="inlinecode"><span class="id" t
 </div>
 
 <div class="doc">
-<a name="lab97"></a><h3 class="section">Type Argument Synthesis</h3>
+<a name="lab98"></a><h3 class="section">Type Argument Synthesis</h3>
 
 <div class="paragraph"> </div>
 
- To we use a polymorphic function, we need to pass it one or
+ To use a polymorphic function, we need to pass it one or
     more types in addition to its other arguments.  For example, the
     recursive call in the body of the <span class="inlinecode"><span class="id" type="tactic">repeat</span></span> function above must
     pass along the type <span class="inlinecode"><span class="id" type="var">X</span></span>.  But since the second argument to
@@ -379,8 +378,8 @@ It has exactly the same type type as <span class="inlinecode"><span class="id" t
 
 <div class="paragraph"> </div>
 
-    Using implicit arguments, the <span class="inlinecode"><span class="id" type="var">count</span></span> function can be written
-    like this: 
+    Using implicit arguments, the <span class="inlinecode"><span class="id" type="var">count</span></span> function can be written like
+    this: 
 </div>
 <div class="code code-tight">
 
@@ -423,7 +422,7 @@ In this instance, we don't save much by writing <span class="inlinecode"><span c
 </div>
 
 <div class="doc">
-<a name="lab98"></a><h3 class="section">Implicit Arguments</h3>
+<a name="lab99"></a><h3 class="section">Implicit Arguments</h3>
 
 <div class="paragraph"> </div>
 
@@ -460,7 +459,7 @@ Now, we don't have to supply type arguments at all:
 <div class="doc">
 Alternatively, we can declare an argument to be implicit
     when defining the function itself, by surrounding it in curly
-    braces.  For example: 
+    braces instead of parens.  For example: 
 </div>
 <div class="code code-tight">
 
@@ -552,7 +551,11 @@ Because <span class="inlinecode"><span class="id" type="var">X</span></span> is 
 </div>
 
 <div class="doc">
-One small problem with declaring arguments <span class="inlinecode"><span class="id" type="keyword">Implicit</span></span> is
+<a name="lab100"></a><h3 class="section">Supplying Type Arguments Explicitly</h3>
+
+<div class="paragraph"> </div>
+
+ One small problem with declaring arguments <span class="inlinecode"><span class="id" type="keyword">Implicit</span></span> is
     that, occasionally, Coq does not have enough local information to
     determine a type argument; in such cases, we need to tell Coq that
     we want to give the argument explicitly just this time.  For
@@ -634,11 +637,11 @@ Now lists can be written just the way we'd hope:
 </div>
 
 <div class="doc">
-<a name="lab99"></a><h3 class="section">Exercises</h3>
+<a name="lab101"></a><h3 class="section">Exercises</h3>
 
 <div class="paragraph"> </div>
 
-<a name="lab100"></a><h4 class="section">Exercise: 2 stars, optional (poly_exercises)</h4>
+<a name="lab102"></a><h4 class="section">Exercise: 2 stars, optional (poly_exercises)</h4>
  Here are a few simple exercises, just like ones in the <span class="inlinecode"><span class="id" type="var">Lists</span></span>
     chapter, for practice with polymorphism.  Complete the proofs below. 
 </div>
@@ -667,7 +670,7 @@ Now lists can be written just the way we'd hope:
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab101"></a><h4 class="section">Exercise: 2 stars, optional (more_poly_exercises)</h4>
+<a name="lab103"></a><h4 class="section">Exercise: 2 stars, optional (more_poly_exercises)</h4>
  Here are some slightly more interesting ones... 
 </div>
 <div class="code code-tight">
@@ -694,7 +697,7 @@ Now lists can be written just the way we'd hope:
 </div>
 
 <div class="doc">
-<a name="lab102"></a><h2 class="section">Polymorphic Pairs</h2>
+<a name="lab104"></a><h2 class="section">Polymorphic Pairs</h2>
 
 <div class="paragraph"> </div>
 
@@ -791,7 +794,7 @@ The following function takes two lists and combines them
 </div>
 
 <div class="doc">
-<a name="lab103"></a><h4 class="section">Exercise: 1 star, optional (combine_checks)</h4>
+<a name="lab105"></a><h4 class="section">Exercise: 1 star, optionalM (combine_checks)</h4>
  Try answering the following questions on paper and
     checking your answers in coq:
 
@@ -811,32 +814,32 @@ The following function takes two lists and combines them
 <div class="paragraph"> </div>
 
 </div>
-      print?   <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+      print? 
 </li>
 </ul>
-
+ <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab104"></a><h4 class="section">Exercise: 2 stars, recommended (split)</h4>
+<a name="lab106"></a><h4 class="section">Exercise: 2 stars, recommended (split)</h4>
  The function <span class="inlinecode"><span class="id" type="tactic">split</span></span> is the right inverse of <span class="inlinecode"><span class="id" type="var">combine</span></span>: it takes a
     list of pairs and returns a pair of lists.  In many functional
     languages, it is called <span class="inlinecode"><span class="id" type="var">unzip</span></span>.
 
 <div class="paragraph"> </div>
 
-    Uncomment the material below and fill in the definition of
-    <span class="inlinecode"><span class="id" type="tactic">split</span></span>.  Make sure it passes the given unit test. 
+    Fill in the definition of <span class="inlinecode"><span class="id" type="tactic">split</span></span> below.  Make sure it passes the
+    given unit test. 
 </div>
 <div class="code code-tight">
 
 <br/>
 <span class="id" type="keyword">Fixpoint</span> <a name="split"><span class="id" type="definition">split</span></a> {<span class="id" type="var">X</span> <span class="id" type="var">Y</span> : <span class="id" type="keyword">Type</span>} (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> (<a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>*<a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>))<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: (<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>) * (<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: (<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>) * (<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>)<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="test_split"><span class="id" type="definition">test_split</span></a>:<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#split"><span class="id" type="definition">split</span></a> [(1,<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>);(2,<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>)] = ([1;2],[<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>;<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>]).<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#split"><span class="id" type="axiom">split</span></a> [(1,<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>);(2,<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>)] = ([1;2],[<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>;<a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>]).<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
@@ -850,7 +853,7 @@ The following function takes two lists and combines them
 </div>
 
 <div class="doc">
-<a name="lab105"></a><h2 class="section">Polymorphic Options</h2>
+<a name="lab107"></a><h2 class="section">Polymorphic Options</h2>
 
 <div class="paragraph"> </div>
 
@@ -882,7 +885,7 @@ We can now rewrite the <span class="inlinecode"><span class="id" type="var">nth_
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <a class="idref" href="Poly.html#option"><span class="id" type="inductive">option</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> :=<br/>
 &nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="Poly.html#l"><span class="id" type="variable">l</span></a> <span class="id" type="keyword">with</span><br/>
 &nbsp;&nbsp;| [] ⇒ <a class="idref" href="Poly.html#None"><span class="id" type="constructor">None</span></a><br/>
-&nbsp;&nbsp;| <span class="id" type="var">a</span> :: <span class="id" type="var">l'</span> ⇒ <span class="id" type="keyword">if</span> <a class="idref" href="Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#O"><span class="id" type="constructor">O</span></a> <span class="id" type="keyword">then</span> <a class="idref" href="Poly.html#Some"><span class="id" type="constructor">Some</span></a> <span class="id" type="var">a</span> <span class="id" type="keyword">else</span> <a class="idref" href="Poly.html#nth_error"><span class="id" type="definition">nth_error</span></a> <span class="id" type="var">l'</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#pred"><span class="id" type="definition">pred</span></a> <a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">a</span> :: <span class="id" type="var">l'</span> ⇒ <span class="id" type="keyword">if</span> <a class="idref" href="Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#O"><span class="id" type="constructor">O</span></a> <span class="id" type="keyword">then</span> <a class="idref" href="Poly.html#Some"><span class="id" type="constructor">Some</span></a> <span class="id" type="var">a</span> <span class="id" type="keyword">else</span> <a class="idref" href="Poly.html#nth_error"><span class="id" type="definition">nth_error</span></a> <span class="id" type="var">l'</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#pred"><span class="id" type="abbreviation">pred</span></a> <a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>)<br/>
 &nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
 
 <br/>
@@ -906,7 +909,7 @@ We can now rewrite the <span class="inlinecode"><span class="id" type="var">nth_
 </div>
 
 <div class="doc">
-<a name="lab106"></a><h4 class="section">Exercise: 1 star, optional (hd_error_poly)</h4>
+<a name="lab108"></a><h4 class="section">Exercise: 1 star, optional (hd_error_poly)</h4>
  Complete the definition of a polymorphic version of the
     <span class="inlinecode"><span class="id" type="var">hd_error</span></span> function from the last chapter. Be sure that it
     passes the unit tests below. 
@@ -914,8 +917,8 @@ We can now rewrite the <span class="inlinecode"><span class="id" type="var">nth_
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="hd_error"><span class="id" type="definition">hd_error</span></a> {<span class="id" type="var">X</span> : <span class="id" type="keyword">Type</span>} (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>) : <a class="idref" href="Poly.html#option"><span class="id" type="inductive">option</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="hd_error"><span class="id" type="definition">hd_error</span></a> {<span class="id" type="var">X</span> : <span class="id" type="keyword">Type</span>} (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>) : <a class="idref" href="Poly.html#option"><span class="id" type="inductive">option</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 </div>
@@ -927,12 +930,12 @@ Once again, to force the implicit arguments to be explicit,
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Check</span> @<a class="idref" href="Poly.html#hd_error"><span class="id" type="definition">hd_error</span></a>.<br/>
+<span class="id" type="keyword">Check</span> @<a class="idref" href="Poly.html#hd_error"><span class="id" type="axiom">hd_error</span></a>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="test_hd_error1"><span class="id" type="definition">test_hd_error1</span></a> : <a class="idref" href="Poly.html#hd_error"><span class="id" type="definition">hd_error</span></a> [1;2] = <a class="idref" href="Poly.html#Some"><span class="id" type="constructor">Some</span></a> 1.<br/>
+<span class="id" type="keyword">Example</span> <a name="test_hd_error1"><span class="id" type="definition">test_hd_error1</span></a> : <a class="idref" href="Poly.html#hd_error"><span class="id" type="axiom">hd_error</span></a> [1;2] = <a class="idref" href="Poly.html#Some"><span class="id" type="constructor">Some</span></a> 1.<br/>
 &nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
-<span class="id" type="keyword">Example</span> <a name="test_hd_error2"><span class="id" type="definition">test_hd_error2</span></a> : <a class="idref" href="Poly.html#hd_error"><span class="id" type="definition">hd_error</span></a>  [[1];[2]]  = <a class="idref" href="Poly.html#Some"><span class="id" type="constructor">Some</span></a> [1].<br/>
+<span class="id" type="keyword">Example</span> <a name="test_hd_error2"><span class="id" type="definition">test_hd_error2</span></a> : <a class="idref" href="Poly.html#hd_error"><span class="id" type="axiom">hd_error</span></a>  [[1];[2]]  = <a class="idref" href="Poly.html#Some"><span class="id" type="constructor">Some</span></a> [1].<br/>
 &nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
@@ -945,7 +948,7 @@ Once again, to force the implicit arguments to be explicit,
 </div>
 
 <div class="doc">
-<a name="lab107"></a><h1 class="section">Functions as Data</h1>
+<a name="lab109"></a><h1 class="section">Functions as Data</h1>
 
 <div class="paragraph"> </div>
 
@@ -961,7 +964,7 @@ Once again, to force the implicit arguments to be explicit,
 </div>
 
 <div class="doc">
-<a name="lab108"></a><h2 class="section">Higher-Order Functions</h2>
+<a name="lab110"></a><h2 class="section">Higher-Order Functions</h2>
 
 <div class="paragraph"> </div>
 
@@ -1000,7 +1003,7 @@ The argument <span class="inlinecode"><span class="id" type="var">f</span></span
 </div>
 
 <div class="doc">
-<a name="lab109"></a><h2 class="section">Filter</h2>
+<a name="lab111"></a><h2 class="section">Filter</h2>
 
 <div class="paragraph"> </div>
 
@@ -1050,7 +1053,7 @@ For example, if we apply <span class="inlinecode"><span class="id" type="var">fi
 
 <div class="doc">
 We can use <span class="inlinecode"><span class="id" type="var">filter</span></span> to give a concise version of the
-    <span class="inlinecode"><span class="id" type="var">countoddmembers</span></span> function from the <a href="Lists.html"><font color="gray">Lists</font></a> chapter. 
+    <span class="inlinecode"><span class="id" type="var">countoddmembers</span></span> function from the <a href="Lists.html"><span class="inlineref">Lists</span></a> chapter. 
 </div>
 <div class="code code-tight">
 
@@ -1070,7 +1073,7 @@ We can use <span class="inlinecode"><span class="id" type="var">filter</span></s
 </div>
 
 <div class="doc">
-<a name="lab110"></a><h2 class="section">Anonymous Functions</h2>
+<a name="lab112"></a><h2 class="section">Anonymous Functions</h2>
 
 <div class="paragraph"> </div>
 
@@ -1120,7 +1123,7 @@ The expression <span class="inlinecode">(<span class="id" type="keyword">fun</sp
 </div>
 
 <div class="doc">
-<a name="lab111"></a><h4 class="section">Exercise: 2 stars (filter_even_gt<sub>7</sub>)</h4>
+<a name="lab113"></a><h4 class="section">Exercise: 2 stars (filter_even_gt<sub>7</sub>)</h4>
  Use <span class="inlinecode"><span class="id" type="var">filter</span></span> (instead of <span class="inlinecode"><span class="id" type="keyword">Fixpoint</span></span>) to write a Coq function
     <span class="inlinecode"><span class="id" type="var">filter_even_gt<sub>7</sub></span></span> that takes a list of natural numbers as input
     and returns a list of just those that are even and greater than
@@ -1129,17 +1132,17 @@ The expression <span class="inlinecode">(<span class="id" type="keyword">fun</sp
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="filter_even_gt<sub>7</sub>"><span class="id" type="definition">filter_even_gt<sub>7</sub></span></a> (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>) : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="filter_even_gt<sub>7</sub>"><span class="id" type="definition">filter_even_gt<sub>7</sub></span></a> (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>) : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="test_filter_even_gt7_1"><span class="id" type="definition">test_filter_even_gt7_1</span></a> :<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#filter_even_gt<sub>7</sub>"><span class="id" type="definition">filter_even_gt<sub>7</sub></span></a> [1;2;6;9;10;3;12;8] = [10;12;8].<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#filter_even_gt<sub>7</sub>"><span class="id" type="axiom">filter_even_gt<sub>7</sub></span></a> [1;2;6;9;10;3;12;8] = [10;12;8].<br/>
 &nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="test_filter_even_gt7_2"><span class="id" type="definition">test_filter_even_gt7_2</span></a> :<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#filter_even_gt<sub>7</sub>"><span class="id" type="definition">filter_even_gt<sub>7</sub></span></a> [5;2;6;19;129] = [].<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#filter_even_gt<sub>7</sub>"><span class="id" type="axiom">filter_even_gt<sub>7</sub></span></a> [5;2;6;19;129] = [].<br/>
 &nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
@@ -1147,7 +1150,7 @@ The expression <span class="inlinecode">(<span class="id" type="keyword">fun</sp
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab112"></a><h4 class="section">Exercise: 3 stars (partition)</h4>
+<a name="lab114"></a><h4 class="section">Exercise: 3 stars (partition)</h4>
  Use <span class="inlinecode"><span class="id" type="var">filter</span></span> to write a Coq function <span class="inlinecode"><span class="id" type="var">partition</span></span>:
 
 <div class="paragraph"> </div>
@@ -1172,13 +1175,13 @@ The expression <span class="inlinecode">(<span class="id" type="keyword">fun</sp
 <span class="id" type="keyword">Definition</span> <a name="partition"><span class="id" type="definition">partition</span></a> {<span class="id" type="var">X</span> : <span class="id" type="keyword">Type</span>}<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">test</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Basics.html#bool"><span class="id" type="inductive">bool</span></a>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> * <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> * <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="test_partition1"><span class="id" type="definition">test_partition1</span></a>: <a class="idref" href="Poly.html#partition"><span class="id" type="definition">partition</span></a> <a class="idref" href="Basics.html#oddb"><span class="id" type="definition">oddb</span></a> [1;2;3;4;5] = ([1;3;5], [2;4]).<br/>
+<span class="id" type="keyword">Example</span> <a name="test_partition1"><span class="id" type="definition">test_partition1</span></a>: <a class="idref" href="Poly.html#partition"><span class="id" type="axiom">partition</span></a> <a class="idref" href="Basics.html#oddb"><span class="id" type="definition">oddb</span></a> [1;2;3;4;5] = ([1;3;5], [2;4]).<br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
-<span class="id" type="keyword">Example</span> <a name="test_partition2"><span class="id" type="definition">test_partition2</span></a>: <a class="idref" href="Poly.html#partition"><span class="id" type="definition">partition</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> ⇒ <a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>) [5;9;0] = ([], [5;9;0]).<br/>
+<span class="id" type="keyword">Example</span> <a name="test_partition2"><span class="id" type="definition">test_partition2</span></a>: <a class="idref" href="Poly.html#partition"><span class="id" type="axiom">partition</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> ⇒ <a class="idref" href="Basics.html#false"><span class="id" type="constructor">false</span></a>) [5;9;0] = ([], [5;9;0]).<br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
 
@@ -1191,7 +1194,7 @@ The expression <span class="inlinecode">(<span class="id" type="keyword">fun</sp
 </div>
 
 <div class="doc">
-<a name="lab113"></a><h2 class="section">Map</h2>
+<a name="lab115"></a><h2 class="section">Map</h2>
 
 <div class="paragraph"> </div>
 
@@ -1217,7 +1220,7 @@ It takes a function <span class="inlinecode"><span class="id" type="var">f</span
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="test_map1"><span class="id" type="definition">test_map1</span></a>: <a class="idref" href="Poly.html#map"><span class="id" type="definition">map</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> ⇒ <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="definition">plus</span></a> 3 <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a>) [2;0;2] = [5;3;5].<br/>
+<span class="id" type="keyword">Example</span> <a name="test_map1"><span class="id" type="definition">test_map1</span></a>: <a class="idref" href="Poly.html#map"><span class="id" type="definition">map</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> ⇒ <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="abbreviation">plus</span></a> 3 <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a>) [2;0;2] = [5;3;5].<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
@@ -1256,11 +1259,11 @@ It can even be applied to a list of numbers and
 </div>
 
 <div class="doc">
-<a name="lab114"></a><h3 class="section">Exercises</h3>
+<a name="lab116"></a><h3 class="section">Exercises</h3>
 
 <div class="paragraph"> </div>
 
-<a name="lab115"></a><h4 class="section">Exercise: 3 stars (map_rev)</h4>
+<a name="lab117"></a><h4 class="section">Exercise: 3 stars (map_rev)</h4>
  Show that <span class="inlinecode"><span class="id" type="var">map</span></span> and <span class="inlinecode"><span class="id" type="var">rev</span></span> commute.  You may need to define an
     auxiliary lemma. 
 </div>
@@ -1277,7 +1280,7 @@ It can even be applied to a list of numbers and
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab116"></a><h4 class="section">Exercise: 2 stars, recommended (flat_map)</h4>
+<a name="lab118"></a><h4 class="section">Exercise: 2 stars, recommended (flat_map)</h4>
  The function <span class="inlinecode"><span class="id" type="var">map</span></span> maps a <span class="inlinecode"><span class="id" type="var">list</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> to a <span class="inlinecode"><span class="id" type="var">list</span></span> <span class="inlinecode"><span class="id" type="var">Y</span></span> using a function
     of type <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">Y</span></span>.  We can define a similar function, <span class="inlinecode"><span class="id" type="var">flat_map</span></span>,
     which maps a <span class="inlinecode"><span class="id" type="var">list</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> to a <span class="inlinecode"><span class="id" type="var">list</span></span> <span class="inlinecode"><span class="id" type="var">Y</span></span> using a function <span class="inlinecode"><span class="id" type="var">f</span></span> of type
@@ -1298,12 +1301,12 @@ It can even be applied to a list of numbers and
 
 <br/>
 <span class="id" type="keyword">Fixpoint</span> <a name="flat_map"><span class="id" type="definition">flat_map</span></a> {<span class="id" type="var">X</span> <span class="id" type="var">Y</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">f</span>:<a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) (<span class="id" type="var">l</span>:<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: (<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: (<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>)<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="test_flat_map1"><span class="id" type="definition">test_flat_map1</span></a>:<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#flat_map"><span class="id" type="definition">flat_map</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">n</span> ⇒ [<a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>]) [1;5;4]<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#flat_map"><span class="id" type="axiom">flat_map</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">n</span> ⇒ [<a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="Poly.html#n"><span class="id" type="variable">n</span></a>]) [1;5;4]<br/>
 &nbsp;&nbsp;= [1; 1; 1; 5; 5; 5; 4; 4; 4].<br/>
 &nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
@@ -1330,14 +1333,15 @@ It can even be applied to a list of numbers and
 </div>
 
 <div class="doc">
-<a name="lab117"></a><h4 class="section">Exercise: 2 stars, optional (implicit_args)</h4>
+<a name="lab119"></a><h4 class="section">Exercise: 2 stars, optional (implicit_args)</h4>
  The definitions and uses of <span class="inlinecode"><span class="id" type="var">filter</span></span> and <span class="inlinecode"><span class="id" type="var">map</span></span> use implicit
     arguments in many places.  Replace the curly braces around the
     implicit arguments with parentheses, and then fill in explicit
     type parameters where necessary and use Coq to check that you've
     done so correctly.  (This exercise is not to be turned in; it is
     probably easiest to do it on a <i>copy</i> of this file that you can
-    throw away afterwards.)  <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+    throw away afterwards.) 
+ <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 </div>
 <div class="code code-tight">
 
@@ -1345,7 +1349,7 @@ It can even be applied to a list of numbers and
 </div>
 
 <div class="doc">
-<a name="lab118"></a><h2 class="section">Fold</h2>
+<a name="lab120"></a><h2 class="section">Fold</h2>
 
 <div class="paragraph"> </div>
 
@@ -1401,7 +1405,7 @@ Intuitively, the behavior of the <span class="inlinecode"><span class="id" type=
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="fold_example1"><span class="id" type="definition">fold_example1</span></a> :<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#fold"><span class="id" type="definition">fold</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="definition">mult</span></a> [1;2;3;4] 1 = 24.<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#fold"><span class="id" type="definition">fold</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="abbreviation">mult</span></a> [1;2;3;4] 1 = 24.<br/>
 <div class="togglescript" id="proofcontrol4" onclick="toggleDisplay('proof4');toggleDisplay('proofcontrol4')"><span class="show"></span></div>
 <div class="proofscript" id="proof4" onclick="toggleDisplay('proof4');toggleDisplay('proofcontrol4')">
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
@@ -1427,7 +1431,7 @@ Intuitively, the behavior of the <span class="inlinecode"><span class="id" type=
 </div>
 
 <div class="doc">
-<a name="lab119"></a><h4 class="section">Exercise: 1 star, advanced (fold_types_different)</h4>
+<a name="lab121"></a><h4 class="section">Exercise: 1 star, advancedM (fold_types_different)</h4>
  Observe that the type of <span class="inlinecode"><span class="id" type="var">fold</span></span> is parameterized by <i>two</i> type
     variables, <span class="inlinecode"><span class="id" type="var">X</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span>, and the parameter <span class="inlinecode"><span class="id" type="var">f</span></span> is a binary operator
     that takes an <span class="inlinecode"><span class="id" type="var">X</span></span> and a <span class="inlinecode"><span class="id" type="var">Y</span></span> and returns a <span class="inlinecode"><span class="id" type="var">Y</span></span>.  Can you think of a
@@ -1437,10 +1441,19 @@ Intuitively, the behavior of the <span class="inlinecode"><span class="id" type=
 <div class="code code-tight">
 
 <br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
 </div>
 
 <div class="doc">
-<a name="lab120"></a><h2 class="section">Functions That Construct Functions</h2>
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab122"></a><h2 class="section">Functions That Construct Functions</h2>
 
 <div class="paragraph"> </div>
 
@@ -1485,7 +1498,7 @@ In fact, the multiple-argument functions we have already
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Check</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="definition">plus</span></a>.<br/>
+<span class="id" type="keyword">Check</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="abbreviation">plus</span></a>.<br/>
 <span class="comment">(*&nbsp;==&gt;&nbsp;nat&nbsp;-&gt;&nbsp;nat&nbsp;-&gt;&nbsp;nat&nbsp;*)</span><br/>
 
 <br/>
@@ -1505,7 +1518,7 @@ Each <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></s
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="plus3"><span class="id" type="definition">plus3</span></a> := <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="definition">plus</span></a> 3.<br/>
+<span class="id" type="keyword">Definition</span> <a name="plus3"><span class="id" type="definition">plus3</span></a> := <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="abbreviation">plus</span></a> 3.<br/>
 <span class="id" type="keyword">Check</span> <a class="idref" href="Poly.html#plus3"><span class="id" type="definition">plus3</span></a>.<br/>
 
 <br/>
@@ -1513,14 +1526,14 @@ Each <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></s
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 <span class="id" type="keyword">Example</span> <a name="test_plus3'"><span class="id" type="definition">test_plus3'</span></a> :   <a class="idref" href="Poly.html#doit3times"><span class="id" type="definition">doit3times</span></a> <a class="idref" href="Poly.html#plus3"><span class="id" type="definition">plus3</span></a> 0 = 9.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
-<span class="id" type="keyword">Example</span> <a name="test_plus3''"><span class="id" type="definition">test_plus3''</span></a> :  <a class="idref" href="Poly.html#doit3times"><span class="id" type="definition">doit3times</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="definition">plus</span></a> 3) 0 = 9.<br/>
+<span class="id" type="keyword">Example</span> <a name="test_plus3''"><span class="id" type="definition">test_plus3''</span></a> :  <a class="idref" href="Poly.html#doit3times"><span class="id" type="definition">doit3times</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="abbreviation">plus</span></a> 3) 0 = 9.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab121"></a><h1 class="section">Additional Exercises</h1>
+<a name="lab123"></a><h1 class="section">Additional Exercises</h1>
 
 </div>
 <div class="code code-space">
@@ -1532,7 +1545,7 @@ Each <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></s
 </div>
 
 <div class="doc">
-<a name="lab122"></a><h4 class="section">Exercise: 2 stars (fold_length)</h4>
+<a name="lab124"></a><h4 class="section">Exercise: 2 stars (fold_length)</h4>
  Many common functions on lists can be implemented in terms of
    <span class="inlinecode"><span class="id" type="var">fold</span></span>.  For example, here is an alternative definition of <span class="inlinecode"><span class="id" type="var">length</span></span>: 
 </div>
@@ -1567,15 +1580,15 @@ Prove the correctness of <span class="inlinecode"><span class="id" type="var">fo
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab123"></a><h4 class="section">Exercise: 3 stars (fold_map)</h4>
+<a name="lab125"></a><h4 class="section">Exercise: 3 starsM (fold_map)</h4>
  We can also define <span class="inlinecode"><span class="id" type="var">map</span></span> in terms of <span class="inlinecode"><span class="id" type="var">fold</span></span>.  Finish <span class="inlinecode"><span class="id" type="var">fold_map</span></span>
     below. 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Exercises.fold_map"><span class="id" type="definition">fold_map</span></a> {<span class="id" type="var">X</span> <span class="id" type="var">Y</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">f</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#Exercises.list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>) : <a class="idref" href="Poly.html#Exercises.list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Exercises.fold_map"><span class="id" type="definition">fold_map</span></a> {<span class="id" type="var">X</span> <span class="id" type="var">Y</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">f</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#Exercises.list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a>) : <a class="idref" href="Poly.html#Exercises.list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 </div>
@@ -1594,7 +1607,7 @@ Write down a theorem <span class="inlinecode"><span class="id" type="var">fold_m
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab124"></a><h4 class="section">Exercise: 2 stars, advanced (currying)</h4>
+<a name="lab126"></a><h4 class="section">Exercise: 2 stars, advanced (currying)</h4>
  In Coq, a function <span class="inlinecode"><span class="id" type="var">f</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">A</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">B</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">C</span></span> really has the type <span class="inlinecode"><span class="id" type="var">A</span></span>
     <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode">(<span class="id" type="var">B</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">C</span>)</span>.  That is, if you give <span class="inlinecode"><span class="id" type="var">f</span></span> a value of type <span class="inlinecode"><span class="id" type="var">A</span></span>, it
     will give you function <span class="inlinecode"><span class="id" type="var">f'</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">B</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">C</span></span>.  If you then give <span class="inlinecode"><span class="id" type="var">f'</span></span> a
@@ -1630,20 +1643,20 @@ As an exercise, define its inverse, <span class="inlinecode"><span class="id" ty
 
 <br/>
 <span class="id" type="keyword">Definition</span> <a name="Exercises.prod_uncurry"><span class="id" type="definition">prod_uncurry</span></a> {<span class="id" type="var">X</span> <span class="id" type="var">Y</span> <span class="id" type="var">Z</span> : <span class="id" type="keyword">Type</span>}<br/>
-&nbsp;&nbsp;(<span class="id" type="var">f</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Z"><span class="id" type="variable">Z</span></a>) (<span class="id" type="var">p</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> * <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) : <a class="idref" href="Poly.html#Z"><span class="id" type="variable">Z</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+&nbsp;&nbsp;(<span class="id" type="var">f</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Z"><span class="id" type="variable">Z</span></a>) (<span class="id" type="var">p</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> * <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) : <a class="idref" href="Poly.html#Z"><span class="id" type="variable">Z</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-As a trivial example of the usefulness of currying, we can use it
+As a (trivial) example of the usefulness of currying, we can use it
     to shorten one of the examples that we saw above: 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.test_map2"><span class="id" type="definition">test_map2</span></a>: <a class="idref" href="Poly.html#Exercises.map"><span class="id" type="definition">map</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> ⇒ <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="definition">plus</span></a> 3 <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a>) [2;0;2] = [5;3;5].<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.test_map2"><span class="id" type="definition">test_map2</span></a>: <a class="idref" href="Poly.html#Exercises.map"><span class="id" type="definition">map</span></a> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> ⇒ <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#plus"><span class="id" type="abbreviation">plus</span></a> 3 <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a>) [2;0;2] = [5;3;5].<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
@@ -1657,20 +1670,20 @@ Thought exercise: before running the following commands, can you
 
 <br/>
 <span class="id" type="keyword">Check</span> @<a class="idref" href="Poly.html#Exercises.prod_curry"><span class="id" type="definition">prod_curry</span></a>.<br/>
-<span class="id" type="keyword">Check</span> @<a class="idref" href="Poly.html#Exercises.prod_uncurry"><span class="id" type="definition">prod_uncurry</span></a>.<br/>
+<span class="id" type="keyword">Check</span> @<a class="idref" href="Poly.html#Exercises.prod_uncurry"><span class="id" type="axiom">prod_uncurry</span></a>.<br/>
 
 <br/>
 <span class="id" type="keyword">Theorem</span> <a name="Exercises.uncurry_curry"><span class="id" type="lemma">uncurry_curry</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span> <span class="id" type="var">Y</span> <span class="id" type="var">Z</span> : <span class="id" type="keyword">Type</span>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">f</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Z"><span class="id" type="variable">Z</span></a>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">x</span> <span class="id" type="var">y</span>,<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#Exercises.prod_curry"><span class="id" type="definition">prod_curry</span></a> (<a class="idref" href="Poly.html#Exercises.prod_uncurry"><span class="id" type="definition">prod_uncurry</span></a> <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a>) <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Poly.html#y"><span class="id" type="variable">y</span></a> = <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Poly.html#y"><span class="id" type="variable">y</span></a>.<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#Exercises.prod_curry"><span class="id" type="definition">prod_curry</span></a> (<a class="idref" href="Poly.html#Exercises.prod_uncurry"><span class="id" type="axiom">prod_uncurry</span></a> <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a>) <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Poly.html#y"><span class="id" type="variable">y</span></a> = <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Poly.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Poly.html#y"><span class="id" type="variable">y</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Theorem</span> <a name="Exercises.curry_uncurry"><span class="id" type="lemma">curry_uncurry</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span> <span class="id" type="var">Y</span> <span class="id" type="var">Z</span> : <span class="id" type="keyword">Type</span>)<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">f</span> : (<a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> * <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>) <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Poly.html#Z"><span class="id" type="variable">Z</span></a>) (<span class="id" type="var">p</span> : <a class="idref" href="Poly.html#X"><span class="id" type="variable">X</span></a> * <a class="idref" href="Poly.html#Y"><span class="id" type="variable">Y</span></a>),<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#Exercises.prod_uncurry"><span class="id" type="definition">prod_uncurry</span></a> (<a class="idref" href="Poly.html#Exercises.prod_curry"><span class="id" type="definition">prod_curry</span></a> <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a>) <a class="idref" href="Poly.html#p"><span class="id" type="variable">p</span></a> = <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Poly.html#p"><span class="id" type="variable">p</span></a>.<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#Exercises.prod_uncurry"><span class="id" type="axiom">prod_uncurry</span></a> (<a class="idref" href="Poly.html#Exercises.prod_curry"><span class="id" type="definition">prod_curry</span></a> <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a>) <a class="idref" href="Poly.html#p"><span class="id" type="variable">p</span></a> = <a class="idref" href="Poly.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Poly.html#p"><span class="id" type="variable">p</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>
@@ -1679,7 +1692,7 @@ Thought exercise: before running the following commands, can you
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab125"></a><h4 class="section">Exercise: 2 stars, advanced (nth_error_informal)</h4>
+<a name="lab127"></a><h4 class="section">Exercise: 2 stars, advancedM (nth_error_informal)</h4>
  Recall the definition of the <span class="inlinecode"><span class="id" type="var">nth_error</span></span> function:
 
 <div class="paragraph"> </div>
@@ -1706,7 +1719,7 @@ Thought exercise: before running the following commands, can you
  <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab126"></a><h4 class="section">Exercise: 4 stars, advanced (church_numerals)</h4>
+<a name="lab128"></a><h4 class="section">Exercise: 4 stars, advanced (church_numerals)</h4>
  This exercise explores an alternative way of defining natural
     numbers, using the so-called <i>Church numerals</i>, named after
     mathematician Alonzo Church.  We can represent a natural number
@@ -1786,19 +1799,19 @@ Complete the definitions of the following functions. Make sure
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.succ"><span class="id" type="definition">succ</span></a> (<span class="id" type="var">n</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.succ"><span class="id" type="definition">succ</span></a> (<span class="id" type="var">n</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.succ_1"><span class="id" type="definition">succ_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.succ"><span class="id" type="definition">succ</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.succ_1"><span class="id" type="definition">succ_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.succ"><span class="id" type="axiom">succ</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.succ_2"><span class="id" type="definition">succ_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.succ"><span class="id" type="definition">succ</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> = <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.succ_2"><span class="id" type="definition">succ_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.succ"><span class="id" type="axiom">succ</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> = <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.succ_3"><span class="id" type="definition">succ_3</span></a> : <a class="idref" href="Poly.html#Exercises.Church.succ"><span class="id" type="definition">succ</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> = <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.succ_3"><span class="id" type="definition">succ_3</span></a> : <a class="idref" href="Poly.html#Exercises.Church.succ"><span class="id" type="axiom">succ</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> = <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
@@ -1810,20 +1823,20 @@ Addition of two natural numbers:
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.plus"><span class="id" type="definition">plus</span></a> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.plus"><span class="id" type="definition">plus</span></a> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.plus_1"><span class="id" type="definition">plus_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.plus_1"><span class="id" type="definition">plus_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.plus_2"><span class="id" type="definition">plus_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.plus_2"><span class="id" type="definition">plus_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
 <span class="id" type="keyword">Example</span> <a name="Exercises.Church.plus_3"><span class="id" type="definition">plus_3</span></a> :<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> (<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>) <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> (<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>).<br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> (<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>) <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> (<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>).<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
@@ -1835,19 +1848,19 @@ Multiplication:
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.mult"><span class="id" type="definition">mult</span></a> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.mult"><span class="id" type="definition">mult</span></a> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.mult_1"><span class="id" type="definition">mult_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="definition">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.mult_1"><span class="id" type="definition">mult_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="axiom">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.mult_2"><span class="id" type="definition">mult_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="definition">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> (<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>) = <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.mult_2"><span class="id" type="definition">mult_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="axiom">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> (<a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>) = <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.mult_3"><span class="id" type="definition">mult_3</span></a> : <a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="definition">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.mult_3"><span class="id" type="definition">mult_3</span></a> : <a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="axiom">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
@@ -1865,19 +1878,19 @@ Exponentiation:
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.exp"><span class="id" type="definition">exp</span></a> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a> :=<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="Exercises.Church.exp"><span class="id" type="definition">exp</span></a> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a>) : <a class="idref" href="Poly.html#Exercises.Church.nat"><span class="id" type="definition">nat</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.exp_1"><span class="id" type="definition">exp_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.exp"><span class="id" type="definition">exp</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.exp_1"><span class="id" type="definition">exp_1</span></a> : <a class="idref" href="Poly.html#Exercises.Church.exp"><span class="id" type="axiom">exp</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.exp_2"><span class="id" type="definition">exp_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.exp"><span class="id" type="definition">exp</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="definition">plus</span></a> (<a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="definition">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> (<a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="definition">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>)) <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.exp_2"><span class="id" type="definition">exp_2</span></a> : <a class="idref" href="Poly.html#Exercises.Church.exp"><span class="id" type="axiom">exp</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> = <a class="idref" href="Poly.html#Exercises.Church.plus"><span class="id" type="axiom">plus</span></a> (<a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="axiom">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> (<a class="idref" href="Poly.html#Exercises.Church.mult"><span class="id" type="axiom">mult</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a> <a class="idref" href="Poly.html#Exercises.Church.two"><span class="id" type="definition">two</span></a>)) <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <a name="Exercises.Church.exp_3"><span class="id" type="definition">exp_3</span></a> : <a class="idref" href="Poly.html#Exercises.Church.exp"><span class="id" type="definition">exp</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
+<span class="id" type="keyword">Example</span> <a name="Exercises.Church.exp_3"><span class="id" type="definition">exp_3</span></a> : <a class="idref" href="Poly.html#Exercises.Church.exp"><span class="id" type="axiom">exp</span></a> <a class="idref" href="Poly.html#Exercises.Church.three"><span class="id" type="definition">three</span></a> <a class="idref" href="Poly.html#Exercises.Church.zero"><span class="id" type="definition">zero</span></a> = <a class="idref" href="Poly.html#Exercises.Church.one"><span class="id" type="definition">one</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>

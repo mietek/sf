@@ -1,12 +1,11 @@
 (** * Records: Adding Records to STLC *)
 
-Require Import SfLib.
 Require Import Maps.
 Require Import Imp.
 Require Import Smallstep.
 Require Import Stlc.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Adding Records *)
 
 (** We saw in chapter [MoreStlc] how records can be treated as just
@@ -58,15 +57,14 @@ Require Import Stlc.
                        Gamma |- t : {..., i:Ti, ...}
                        -----------------------------                   (T_Proj)
                              Gamma |- t.i : Ti
-
 *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Formalizing Records *)
 
 Module STLCExtendedRecords.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Syntax and Operational Semantics *)
 
 (** The most obvious way to formalize the syntax of record types would
@@ -131,15 +129,15 @@ Inductive tm : Type :=
 
 (** Some examples... *)
 
-Notation a := (Id 0).
-Notation f := (Id 1).
-Notation g := (Id 2).
-Notation l := (Id 3).
-Notation A := (TBase (Id 4)).
-Notation B := (TBase (Id 5)).
-Notation k := (Id 6).
-Notation i1 := (Id 7).
-Notation i2 := (Id 8).
+Notation a := (Id "a").
+Notation f := (Id "f").
+Notation g := (Id "g").
+Notation l := (Id "l").
+Notation A := (TBase (Id "A")).
+Notation B := (TBase (Id "B")).
+Notation k := (Id "k").
+Notation i1 := (Id "i1").
+Notation i2 := (Id "i2").
 
 (** [{ i1:A }] *)
 
@@ -150,7 +148,7 @@ Notation i2 := (Id 8).
 (* Check (TRCons i1 (TArrow A B)
            (TRCons i2 A TRNil)). *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Well-Formedness *)
 
 (** One issue with generalizing the abstract syntax for records from
@@ -216,7 +214,7 @@ Inductive record_tm : tm -> Prop :=
 
 Hint Constructors record_tm.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 (** Substitution extends easily. *)
@@ -234,7 +232,7 @@ Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
 
 Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 (** A record is a value if all of its fields are. *)
@@ -297,7 +295,7 @@ Notation "t1 '==>*' t2" := (multistep t1 t2) (at level 40).
 
 Hint Constructors step.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Typing *)
 
 (** Next we define the typing rules.  These are nearly direct
@@ -363,7 +361,7 @@ where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
 Hint Constructors has_type.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Examples *)
 
 (** **** Exercise: 2 stars (examples)  *)
@@ -407,14 +405,14 @@ Example typing_nonexample_2 : forall y,
 Proof.
   (* FILL IN HERE *) Admitted.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Properties of Typing *)
 
 (** The proofs of progress and preservation for this system are
     essentially the same as for the pure simply typed lambda-calculus,
     but we need to add some technical lemmas involving records. *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Well-Formedness *)
 
 Lemma wf_rcd_lookup : forall i T Ti,
@@ -423,7 +421,7 @@ Lemma wf_rcd_lookup : forall i T Ti,
   well_formed_ty Ti.
 Proof with eauto.
   intros i T.
-  induction T; intros; try solve by inversion.
+  induction T; intros; try solve_by_invert.
   - (* TRCons *)
     inversion H. subst. unfold Tlookup in H0.
     destruct (beq_id i i0)...
@@ -449,7 +447,7 @@ Proof with eauto.
     eapply wf_rcd_lookup...
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Field Lookup *)
 
 (** Lemma: If [empty |- v : T] and [Tlookup i T] returns [Some Ti],
@@ -493,7 +491,7 @@ Lemma lookup_field_in_value : forall v T i Ti,
 Proof with eauto.
   intros v T i Ti Hval Htyp Hget.
   remember (@empty ty) as Gamma.
-  induction Htyp; subst; try solve by inversion...
+  induction Htyp; subst; try solve_by_invert...
   - (* T_RCons *)
     simpl in Hget. simpl. destruct (beq_id i i0).
     + (* i is first *)
@@ -503,7 +501,7 @@ Proof with eauto.
       destruct IHHtyp2 as [vi [Hgeti Htypi]]...
       inversion Hval... Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Progress *)
 
 Theorem progress : forall t T,
@@ -525,7 +523,7 @@ Proof with eauto.
     inversion H.
   - (* T_Abs *)
     (* If the [T_Abs] rule was the last used, then 
-    [t = tabs x T11 t12], which is a value. *)
+       [t = tabs x T11 t12], which is a value. *)
     left...
   - (* T_App *)
     (* If the last rule applied was T_App, then [t = t1 t2], 
@@ -543,7 +541,7 @@ Proof with eauto.
          [t1 = tabs x T11 t12], since abstractions are the only 
          values that can have an arrow type.  But
          [(tabs x T11 t12) t2 ==> [x:=t2]t12] by [ST_AppAbs]. *)
-        inversion H; subst; try (solve by inversion).
+        inversion H; subst; try solve_by_invert.
         exists ([x:=t2]t12)...
       * (* t2 steps *)
         (* If [t1] is a value and [t2 ==> t2'], then 
@@ -601,7 +599,7 @@ Proof with eauto.
       right. destruct H1 as [t' Hstp].
       exists (trcons i t' tr)...  Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Context Invariance *)
 
 Inductive appears_free_in : id -> tm -> Prop :=
@@ -658,7 +656,7 @@ Proof with eauto.
     rewrite false_beq_id in Hctx...
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Preservation *)
 
 Lemma substitution_preserves_typing : forall Gamma x U v t S,
@@ -811,5 +809,5 @@ Qed.
 
 End STLCExtendedRecords.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-11-29 16:09:40 -0500 (Tue, 29 Nov 2016) $ *)
 

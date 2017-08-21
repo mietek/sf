@@ -4,7 +4,7 @@ Require Import Maps.
 Require Import Smallstep.
 Require Import Types.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * The Simply Typed Lambda-Calculus *)
 
 (** The simply typed lambda-calculus (STLC) is a tiny core
@@ -19,7 +19,7 @@ Require Import Types.
     _variable binding_ and _substitution_.  It which will take some
     work to deal with these. *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Overview *)
 
 (** The STLC is built on some collection of _base types_: 
@@ -49,7 +49,6 @@ Require Import Types.
            | true                    constant true
            | false                   constant false
            | if t1 then t2 else t3   conditional
-
 *)
 
 (** The [\] symbol in a function abstraction [\x:T1.t2] is generally
@@ -140,21 +139,21 @@ Require Import Types.
       - [(\x:Bool. \y:Bool. x) false true] has type [Bool] *)
 
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Syntax *)
 
-(** We begin by formalizing the syntax of the STLC. *)
+(** We next formalize the syntax of the STLC. *)
 
 Module STLC.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Types *)
 
 Inductive ty : Type :=
   | TBool  : ty
   | TArrow : ty -> ty -> ty.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Terms *)
 
 Inductive tm : Type :=
@@ -168,14 +167,14 @@ Inductive tm : Type :=
 (** Note that an abstraction [\x:T.t] (formally, [tabs x T t]) is
     always annotated with the type [T] of its parameter, in contrast
     to Coq (and other functional languages like ML, Haskell, etc.),
-    which use _type inference_ to fill in missing annotations.  We're
+    which use type inference to fill in missing annotations.  We're
     not considering type inference here. *)
 
 (** Some examples... *)
 
-Definition x := (Id 0).
-Definition y := (Id 1).
-Definition z := (Id 2).
+Definition x := (Id "x").
+Definition y := (Id "y").
+Definition z := (Id "z").
 Hint Unfold x.
 Hint Unfold y.
 Hint Unfold z.
@@ -208,7 +207,7 @@ Notation notB := (tabs x TBool (tif (tvar x) tfalse ttrue)).
 (** (We write these as [Notation]s rather than [Definition]s to make
     things easier for [auto].) *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Operational Semantics *)
 
 (** To define the small-step semantics of STLC terms, we begin,
@@ -217,7 +216,7 @@ Notation notB := (tabs x TBool (tif (tvar x) tfalse ttrue)).
     used in the reduction rule for application expressions.  And
     finally we give the small-step relation itself. *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Values *)
 
 (** To define the values of the STLC, we have a few cases to consider.
@@ -241,8 +240,8 @@ Notation notB := (tabs x TBool (tif (tvar x) tfalse ttrue)).
         whether [t1] is one or not -- in other words, we can say that
         reduction stops at abstractions.
 
-    Coq, in its built-in functional programming langauge Gallina,
-    makes the first choice -- for example,
+    Our usual way of evaluating expressions in Coq makes the first
+    choice -- for example,
 
          Compute (fun x:bool => 3 + 4)
 
@@ -270,12 +269,15 @@ Hint Constructors value.
     in a STLC term.  A complete program is _closed_ -- that is, it
     contains no free variables.
 
+    (Conversely, a term with free variables is often called an _open 
+    term_.) 
+
     Having made the choice not to reduce under abstractions, we don't
     need to worry about whether variables are values, since we'll
     always be reducing programs "from the outside in," and that means
     the [step] relation will always be working with closed terms.  *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 (** Now we come to the heart of the STLC: the operation of
@@ -338,7 +340,6 @@ Hint Constructors value.
        [x:=s]false           = false
        [x:=s](if t1 then t2 else t3) =
                        if [x:=s]t1 then [x:=s]t2 else [x:=s]t3
-
 *)
 
 (** ... and formally: *)
@@ -372,6 +373,9 @@ where "'[' x ':=' s ']' t" := (subst x s t).
     extra complexity here, but it must be dealt with when formalizing
     richer languages. *)
 
+(** See, for example, [Aydemir 2008] for further discussion
+    of this issue. *)
+
 (** **** Exercise: 3 stars (substi)  *)
 (** The definition that we gave above uses Coq's [Fixpoint] facility
     to define substitution as a _function_.  Suppose, instead, we
@@ -395,7 +399,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 (** The small-step reduction relation for STLC now follows the
@@ -424,7 +428,6 @@ Proof.
                               t2 ==> t2'
                            ----------------                           (ST_App2)
                            v1 t2 ==> v1 t2'
-
 *)
 (** ... plus the usual rules for booleans:
 
@@ -437,7 +440,6 @@ Proof.
                               t1 ==> t1'
          ----------------------------------------------------           (ST_If)
          (if t1 then t2 else t3) ==> (if t1' then t2 else t3)
-
 *)
 
 (** Formally: *)
@@ -470,17 +472,16 @@ Hint Constructors step.
 Notation multistep := (multi step).
 Notation "t1 '==>*' t2" := (multistep t1 t2) (at level 40).
 
-(* ##################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Examples *)
 
 (** Example:
 
-      ((\x:Bool->Bool. x) (\x:Bool. x)) ==>* (\x:Bool. x)
+      (\x:Bool->Bool. x) (\x:Bool. x) ==>* \x:Bool. x
 
     i.e.,
 
-      (idBB idB) ==>* idB
-
+      idBB idB ==>* idB
 *)
 
 Lemma step_example1 :
@@ -494,13 +495,12 @@ Proof.
 
 (** Example:
 
-      ((\x:Bool->Bool. x) ((\x:Bool->Bool. x) (\x:Bool. x)))
-            ==>* (\x:Bool. x)
+      (\x:Bool->Bool. x) ((\x:Bool->Bool. x) (\x:Bool. x))
+            ==>* \x:Bool. x
 
     i.e.,
 
       (idBB (idBB idB)) ==>* idB.
-
 *)
 
 Lemma step_example2 :
@@ -515,14 +515,14 @@ Proof.
 
 (** Example:
 
-      ((\x:Bool->Bool. x) (\x:Bool. if x then false
-                                    else true)) true)
+      (\x:Bool->Bool. x) 
+         (\x:Bool. if x then false else true) 
+         true
             ==>* false
 
     i.e.,
 
-       ((idBB notB) ttrue) ==>* tfalse.
-
+       (idBB notB) ttrue ==>* tfalse.
 *)
 
 Lemma step_example3 :
@@ -537,14 +537,13 @@ Proof.
 
 (** Example:
 
-((\x:Bool -> Bool. x) ((\x:Bool. if x then false
-                               else true) true))
-      ==>* false
+      (\x:Bool -> Bool. x) 
+         ((\x:Bool. if x then false else true) true)
+            ==>* false
 
-i.e.,
+    i.e.,
 
-  (idBB (notB ttrue)) ==>* tfalse.
-
+      idBB (notB ttrue) ==>* tfalse.
 *)
 
 Lemma step_example4 :
@@ -583,24 +582,24 @@ Proof. normalize.  Qed.
 (** Try to do this one both with and without [normalize]. *)
 
 Lemma step_example5 :
-       (tapp (tapp idBBBB idBB) idB)
+       tapp (tapp idBBBB idBB) idB
   ==>* idB.
 Proof.
   (* FILL IN HERE *) Admitted.
 
 Lemma step_example5_with_normalize :
-       (tapp (tapp idBBBB idBB) idB)
+       tapp (tapp idBBBB idBB) idB
   ==>* idB.
 Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Typing *)
 
 (** Next we consider the typing relation of the STLC. *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Contexts *)
 
 (** _Question_: What is the type of the term "[x y]"?
@@ -621,7 +620,7 @@ Proof.
 
 Definition context := partial_map ty.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Typing Relation *)
 
 (** 
@@ -681,7 +680,7 @@ where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
 Hint Constructors has_type.
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Examples *)
 
 Example typing_example_1 :
@@ -700,7 +699,6 @@ Proof. auto.  Qed.
 
        empty |- \x:A. \y:A->A. y (y x))
              \in A -> (A->A) -> A.
-
 *)
 
 Example typing_example_2 :
@@ -737,7 +735,6 @@ Proof.
        empty |- \x:Bool->B. \y:Bool->Bool. \z:Bool.
                    y (x z)
              \in T.
-
 *)
 
 Example typing_example_3 :
@@ -758,7 +755,6 @@ Proof with auto.
 
     ~ exists T,
         empty |- \x:Bool. \y:Bool, x y : T.
-
 *)
 
 Example typing_nonexample_1 :
@@ -784,7 +780,6 @@ Proof.
 
     ~ (exists S, exists T,
           empty |- \x:S. x x \in T).
-
 *)
 
 Example typing_nonexample_3 :
@@ -799,5 +794,5 @@ Proof.
 
 End STLC.
 
-(** $Date: 2016-05-26 17:51:14 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-12-20 12:03:19 -0500 (Tue, 20 Dec 2016) $ *)
 

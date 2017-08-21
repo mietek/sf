@@ -41,14 +41,14 @@
     entirely trivial to prove, since each reduction of a term can
     duplicate redexes in subterms. *)
 
-(** **** Exercise: 2 stars  *)
+(** **** Exercise: 2 starsM (norm_fail)  *)
 (** Where do we fail if we attempt to prove normalization by a
     straightforward induction on the size of a well-typed term? *)
 
 (* FILL IN HERE *)
 (** [] *)
 
-(** **** Exercise: 5 stars, recommended  *)
+(** **** Exercise: 5 stars, recommended (norm)  *)
 (** The best ways to understand an intricate proof like this is
     are (1) to help fill it in and (2) to extend it.  We've left out some
     parts of the following development, including some proofs of lemmas
@@ -56,7 +56,7 @@
     in. *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Language *)
 
 (** We begin by repeating the relevant language definition, which is
@@ -65,12 +65,11 @@
     won't need progress.)  You may just wish to skip down to the
     Normalization section... *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Syntax and Operational Semantics *)
 
 Require Import Coq.Lists.List.
 Import ListNotations.
-Require Import SfLib.
 Require Import Maps.
 Require Import Smallstep.
 Hint Constructors multi.
@@ -96,7 +95,7 @@ Inductive tm : Type :=
   | tif : tm -> tm -> tm -> tm.
           (* i.e., [if t0 then t1 else t2] *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
@@ -116,7 +115,7 @@ Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
 
 Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 Inductive value : tm -> Prop :=
@@ -190,7 +189,7 @@ Proof with eauto.
   intros t H; induction H; intros [t' ST]; inversion ST...
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Typing *)
 
 Definition context := partial_map ty.
@@ -235,7 +234,7 @@ Hint Constructors has_type.
 Hint Extern 2 (has_type _ (tapp _ _) _) => eapply T_App; auto.
 Hint Extern 2 (_ = _) => compute; reflexivity.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Context Invariance *)
 
 Inductive appears_free_in : id -> tm -> Prop :=
@@ -319,7 +318,7 @@ Proof.
   destruct (free_in_context _ _ _ _ H1 H) as [T' C].
   inversion C.  Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Preservation *)
 
 Lemma substitution_preserves_typing : forall Gamma x U v t S,
@@ -441,7 +440,7 @@ Proof with eauto.
     inversion HT...
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Determinism *)
 
 Lemma step_deterministic :
@@ -500,7 +499,7 @@ Proof with eauto.
    - f_equal...
 Qed.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Normalization *)
 
 (** Now for the actual normalization proof.
@@ -629,7 +628,7 @@ Qed.
     value.  *)
 
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** **  Membership in [R_T] Is Invariant Under Reduction *)
 
 (** We start with a preliminary lemma that shows a kind of strong
@@ -711,7 +710,7 @@ Proof.
     eapply preservation;  eauto. auto.
 Qed.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Closed Instances of Terms of Type [t] Belong to [R_T] *)
 
 (** Now we proceed to show that every term of type [T] belongs to
@@ -739,7 +738,7 @@ Qed.
     [x1:T1,..xn:Tn |- t : T]; the most interesting case will be the one
     for abstraction. *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Multisubstitutions, Multi-Extensions, and Instantiations *)
 
 (** However, before we can proceed to formalize the statement and
@@ -826,7 +825,7 @@ Inductive instantiation :  tass -> env -> Prop :=
 
 (** We now proceed to prove various properties of these definitions. *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** More Substitution Facts *)
 
 (** First we need some additional lemmas on (ordinary) substitution. *)
@@ -891,7 +890,7 @@ Proof with eauto.
    + simpl. rewrite false_beq_id... rewrite false_beq_id...
   (* FILL IN HERE *) Admitted.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Properties of Multi-Substitutions *)
 
 Lemma msubst_closed: forall t, closed t -> forall ss, msubst ss t = t.
@@ -959,7 +958,7 @@ Qed.
 
 (* FILL IN HERE *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Properties of Multi-Extensions *)
 
 (** We need to connect the behavior of type assignments with that of
@@ -987,7 +986,7 @@ Proof.
       subst. rewrite false_beq_id; congruence.
 Qed.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Properties of Instantiations *)
 
 (** These are strightforward. *)
@@ -998,7 +997,7 @@ Lemma instantiation_domains_match: forall {c} {e},
       lookup x c = Some T -> exists t, lookup x e = Some t.
 Proof.
   intros c e V. induction V; intros x0 T0 C.
-    solve by inversion .
+    solve_by_invert.
     simpl in *.
     destruct (beq_id x x0); eauto.
 Qed.
@@ -1020,7 +1019,7 @@ Lemma instantiation_R : forall c e,
       lookup x e = Some t -> R T t.
 Proof.
   intros c e V. induction V; intros x' t' T' G E.
-    solve by inversion.
+    solve_by_invert.
     unfold lookup in *.  destruct (beq_id x x').
       inversion G; inversion E; subst.  auto.
       eauto.
@@ -1036,7 +1035,7 @@ Proof.
 Qed.
 
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Congruence Lemmas on Multistep *)
 
 (** We'll need just a few of these; add them as the demand arises. *)
@@ -1052,7 +1051,7 @@ Qed.
 
 (* FILL IN HERE *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** The R Lemma. *)
 
 (** We can finally put everything together.
@@ -1139,7 +1138,7 @@ Proof.
 
   (* FILL IN HERE *) Admitted.
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Normalization Theorem *)
 
 Theorem normalization : forall t T, has_type empty t T -> halts t.
@@ -1151,4 +1150,4 @@ Proof.
   eapply V_nil.
 Qed.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-10-19 09:26:05 -0400 (Wed, 19 Oct 2016) $ *)

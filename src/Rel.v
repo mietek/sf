@@ -42,7 +42,7 @@ Check le : relation nat.
     to the left of the [:], which makes Coq generate a somewhat nicer
     induction principle for reasoning about [<=].) *)
 
-(* ######################################################### *)
+(* ################################################################# *)
 (** * Basic Properties *)
 
 (** As anyone knows who has taken an undergraduate discrete math
@@ -52,6 +52,7 @@ Check le : relation nat.
     of relations, constructions that build one relation from another,
     etc.  For example... *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Partial Functions *)
 
 (** A relation [R] on a set [X] is a _partial function_ if, for every
@@ -107,6 +108,7 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Reflexive Relations *)
 
 (** A _reflexive_ relation on a set [X] is one for which every element
@@ -120,6 +122,7 @@ Theorem le_reflexive :
 Proof.
   unfold reflexive. intros n. apply le_n.  Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Transitive Relations *)
 
 (** A relation [R] is _transitive_ if [R a c] holds whenever [R a b]
@@ -214,6 +217,7 @@ Proof.
     later chapters, but, for a bit of additional practice working with
     relations in Coq, let's look at a few other common ones... *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Symmetric and Antisymmetric Relations *)
 
 (** A relation [R] is _symmetric_ if [R a b] implies [R b a]. *)
@@ -251,6 +255,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Equivalence Relations *)
 
 (** A relation is an _equivalence_ if it's reflexive, symmetric, and
@@ -259,6 +264,7 @@ Proof.
 Definition equivalence {X:Type} (R: relation X) :=
   (reflexive R) /\ (symmetric R) /\ (transitive R).
 
+(* ----------------------------------------------------------------- *)
 (** *** Partial Orders and Preorders *)
 
 (** A relation is a _partial order_ when it's reflexive,
@@ -283,7 +289,7 @@ Proof.
       + (* antisym *) apply le_antisymmetric.
       + (* transitive. *) apply le_trans.  Qed.
 
-(* ########################################################### *)
+(* ################################################################# *)
 (** * Reflexive, Transitive Closure *)
 
 (** The _reflexive, transitive closure_ of a relation [R] is the

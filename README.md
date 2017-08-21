@@ -1,9 +1,9 @@
 _software-foundations_
 ======================
 
-Mirror of [“Software Foundations”](http://www.cis.upenn.edu/~bcpierce/sf/), by Benjamin Pierce et al., version 4.0 (May 2016).
+Mirror of [“Software Foundations”](http://www.cis.upenn.edu/~bcpierce/sf/), by Benjamin Pierce et al., Version 4.2 (Spring, 2017) .
 
-Includes a [PDF version](doc/pdf/pierce-2016.pdf) of the book.
+Includes a [PDF version](doc/pdf/pierce-2017.pdf) of the book.
 
 
 Usage

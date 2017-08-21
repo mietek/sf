@@ -1,7 +1,7 @@
 (** * Induction: Proof by Induction *)
 
-(** First, we import all of our definitions from the previous
-    chapter. *)
+(** Before getting started, we need to import all of our
+    definitions from the previous chapter: *)
 
 Require Export Basics.
 
@@ -17,22 +17,25 @@ Require Export Basics.
 
      - From the command line:
 
-         Run [coqc Basics.v]
+         [coqc Basics.v]
 
-    *)
+   If you have trouble (e.g., if you get complaints about missing
+   identifiers later in the file), it may be because the "load path"
+   for Coq is not set up correctly.  The [Print LoadPath.] command may
+   be helpful in sorting out such issues. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Proof by Induction *)
 
 (** We proved in the last chapter that [0] is a neutral element
-    for [+] on the left using an easy argument based on
-    simplification.  The fact that it is also a neutral element on the
-    _right_... *)
+    for [+] on the left, using an easy argument based on
+    simplification.  We also observed that proving the fact that it is
+    also a neutral element on the _right_... *)
 
 Theorem plus_n_O_firsttry : forall n:nat,
   n = n + 0.
 
-(** ... cannot be proved in the same simple way.  Just applying
+(** ... can't be done in the same simple way.  Just applying
   [reflexivity] doesn't work, since the [n] in [n + 0] is an arbitrary
   unknown number, so the [match] in the definition of [+] can't be
   simplified.  *)
@@ -43,11 +46,9 @@ Proof.
 Abort.
 
 (** And reasoning by cases using [destruct n] doesn't get us much
-   further: the branch of the case analysis where we assume [n = 0]
-   goes through fine, but in the branch where [n = S n'] for some [n'] we
-   get stuck in exactly the same way.  We could use [destruct n'] to
-   get one step further, but, since [n] can be arbitrarily large, if we
-   try to keep on like this we'll never be done. *)
+    further: the branch of the case analysis where we assume [n = 0]
+    goes through fine, but in the branch where [n = S n'] for some [n'] we
+    get stuck in exactly the same way. *)
 
 Theorem plus_n_O_secondtry : forall n:nat,
   n = n + 0.
@@ -59,25 +60,28 @@ Proof.
     simpl.       (* ...but here we are stuck again *)
 Abort.
 
+(** We could use [destruct n'] to get one step further, but,
+    since [n] can be arbitrarily large, if we just go on like this
+    we'll never finish. *)
+
 (** To prove interesting facts about numbers, lists, and other
     inductively defined sets, we usually need a more powerful
     reasoning principle: _induction_.
 
     Recall (from high school, a discrete math course, etc.) the
-    principle of induction over natural numbers: If [P(n)] is some
+    _principle of induction over natural numbers_: If [P(n)] is some
     proposition involving a natural number [n] and we want to show
-    that [P] holds for _all_ numbers [n], we can reason like this:
+    that [P] holds for all numbers [n], we can reason like this:
          - show that [P(O)] holds;
          - show that, for any [n'], if [P(n')] holds, then so does
            [P(S n')];
          - conclude that [P(n)] holds for all [n].
 
-    In Coq, the steps are the same but the order is backwards: we
-    begin with the goal of proving [P(n)] for all [n] and break it
-    down (by applying the [induction] tactic) into two separate
-    subgoals: first showing [P(O)] and then showing [P(n') -> P(S
-    n')].  Here's how this works for the theorem at hand: *)
-
+    In Coq, the steps are the same: we begin with the goal of proving
+    [P(n)] for all [n] and break it down (by applying the [induction]
+    tactic) into two separate subgoals: one where we must show [P(O)]
+    and another where we must show [P(n') -> P(S n')].  Here's how
+    this works for the theorem at hand: *)
 
 Theorem plus_n_O : forall n:nat, n = n + 0.
 Proof.
@@ -87,15 +91,22 @@ Proof.
 
 (** Like [destruct], the [induction] tactic takes an [as...]
     clause that specifies the names of the variables to be introduced
-    in the subgoals.  In the first branch, [n] is replaced by [0] and
-    the goal becomes [0 + 0 = 0], which follows by simplification.  In
-    the second, [n] is replaced by [S n'] and the assumption [n' + 0 =
-    n'] is added to the context (with the name [IHn'], i.e., the
-    Induction Hypothesis for [n'] -- notice that this name is
-    explicitly chosen in the [as...] clause of the call to [induction]
-    rather than letting Coq choose one arbitrarily). The goal in this
-    case becomes [(S n') + 0 = S n'], which simplifies to [S (n' + 0)
-    = S n'], which in turn follows from [IHn']. *)
+    in the subgoals.  Since there are two subgoals, the [as...] clause
+    has two parts, separated by [|].  (Strictly speaking, we can omit
+    the [as...] clause and Coq will choose names for us.  In practice,
+    this is a bad idea, as Coq's automatic choices tend to be
+    confusing.)
+
+    In the first subgoal, [n] is replaced by [0].  No new variables
+    are introduced (so the first part of the [as...] is empty), and
+    the goal becomes [0 + 0 = 0], which follows by simplification.
+
+    In the second subgoal, [n] is replaced by [S n'], and the
+    assumption [n' + 0 = n'] is added to the context with the name
+    [IHn'] (i.e., the Induction Hypothesis for [n']).  These two names
+    are specified in the second part of the [as...] clause.  The goal
+    in this case becomes [(S n') + 0 = S n'], which simplifies to
+    [S (n' + 0) = S n'], which in turn follows from [IHn']. *)
 
 Theorem minus_diag : forall n,
   minus n n = 0.
@@ -121,7 +132,7 @@ Theorem mult_0_r : forall n:nat,
 Proof.
   (* FILL IN HERE *) Admitted.
 
-Theorem plus_n_Sm : forall n m : nat, 
+Theorem plus_n_Sm : forall n m : nat,
   S (n + m) = n + (S m).
 Proof.
   (* FILL IN HERE *) Admitted.
@@ -154,11 +165,12 @@ Proof.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (evenb_S)  *)
-(** One inconveninent aspect of our definition of [evenb n] is that it
-    may need to perform a recursive call on [n - 2]. This makes proofs
-    about [evenb n] harder when done by induction on [n], since we may
-    need an induction hypothesis about [n - 2]. The following lemma
-    gives a better characterization of [evenb (S n)]: *)
+(** One inconveninent aspect of our definition of [evenb n] is the
+    recursive call on [n - 2]. This makes proofs about [evenb n]
+    harder when done by induction on [n], since we may need an
+    induction hypothesis about [n - 2]. The following lemma gives an
+    alternative characterization of [evenb (S n)] that works better
+    with induction: *)
 
 Theorem evenb_S : forall n : nat,
   evenb (S n) = negb (evenb n).
@@ -166,15 +178,15 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 1 star (destruct_induction)  *)
-(** Briefly explain the difference between the tactics [destruct] 
+(** **** Exercise: 1 starM (destruct_induction)  *)
+(** Briefly explain the difference between the tactics [destruct]
     and [induction].
 
 (* FILL IN HERE *)
 *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Proofs Within Proofs *)
 
 (** In Coq, as in informal mathematics, large proofs are often
@@ -212,32 +224,32 @@ Proof.
     make progress on whatever we were trying to prove in the first
     place. *)
 
-(** The [assert] tactic is handy in many sorts of situations.  For
-    example, suppose we want to prove that [(n + m) + (p + q) = (m +
-    n) + (p + q)]. The only difference between the two sides of the
-    [=] is that the arguments [m] and [n] to the first inner [+] are
-    swapped, so it seems we should be able to use the commutativity of
-    addition ([plus_comm]) to rewrite one into the other.  However,
-    the [rewrite] tactic is a little stupid about _where_ it applies
-    the rewrite.  There are three uses of [+] here, and it turns out
-    that doing [rewrite -> plus_comm] will affect only the _outer_
-    one... *)
+(** Another example of [assert]... *)
+
+(** For example, suppose we want to prove that [(n + m) + (p + q)
+    = (m + n) + (p + q)]. The only difference between the two sides of
+    the [=] is that the arguments [m] and [n] to the first inner [+]
+    are swapped, so it seems we should be able to use the
+    commutativity of addition ([plus_comm]) to rewrite one into the
+    other.  However, the [rewrite] tactic is not very smart about
+    _where_ it applies the rewrite.  There are three uses of [+] here,
+    and it turns out that doing [rewrite -> plus_comm] will affect
+    only the _outer_ one... *)
 
 Theorem plus_rearrange_firsttry : forall n m p q : nat,
   (n + m) + (p + q) = (m + n) + (p + q).
 Proof.
   intros n m p q.
-  (* We just need to swap (n + m) for (m + n)...
-     it seems like plus_comm should do the trick! *)
+  (* We just need to swap (n + m) for (m + n)... seems
+     like plus_comm should do the trick! *)
   rewrite -> plus_comm.
   (* Doesn't work...Coq rewrote the wrong plus! *)
 Abort.
 
-(** To get [plus_comm] to apply at the point where we want it to, we
-    can introduce a local lemma stating that [n + m = m + n] (for the
-    particular [m] and [n] that we are talking about here), prove this
-    lemma using [plus_comm], and then use it to do the desired
-    rewrite. *)
+(** To use [plus_comm] at the point where we need it, we can introduce
+    a local lemma stating that [n + m = m + n] (for the particular [m]
+    and [n] that we are talking about here), prove this lemma using
+    [plus_comm], and then use it to do the desired rewrite. *)
 
 Theorem plus_rearrange : forall n m p q : nat,
   (n + m) + (p + q) = (m + n) + (p + q).
@@ -247,7 +259,143 @@ Proof.
   { rewrite -> plus_comm. reflexivity. }
   rewrite -> H. reflexivity.  Qed.
 
-(* ###################################################################### *)
+(* ################################################################# *)
+(** * Formal vs. Informal Proof *)
+
+(** "_Informal proofs are algorithms; formal proofs are code_." *)
+
+(** What constitutes a successful proof of a mathematical claim?
+    The question has challenged philosophers for millennia, but a
+    rough and ready definition could be this: A proof of a
+    mathematical proposition [P] is a written (or spoken) text that
+    instills in the reader or hearer the certainty that [P] is true --
+    an unassailable argument for the truth of [P].  That is, a proof
+    is an act of communication.
+
+    Acts of communication may involve different sorts of readers.  On
+    one hand, the "reader" can be a program like Coq, in which case
+    the "belief" that is instilled is that [P] can be mechanically
+    derived from a certain set of formal logical rules, and the proof
+    is a recipe that guides the program in checking this fact.  Such
+    recipes are _formal_ proofs.
+
+    Alternatively, the reader can be a human being, in which case the
+    proof will be written in English or some other natural language,
+    and will thus necessarily be _informal_.  Here, the criteria for
+    success are less clearly specified.  A "valid" proof is one that
+    makes the reader believe [P].  But the same proof may be read by
+    many different readers, some of whom may be convinced by a
+    particular way of phrasing the argument, while others may not be.
+    Some readers may be particularly pedantic, inexperienced, or just
+    plain thick-headed; the only way to convince them will be to make
+    the argument in painstaking detail.  But other readers, more
+    familiar in the area, may find all this detail so overwhelming
+    that they lose the overall thread; all they want is to be told the
+    main ideas, since it is easier for them to fill in the details for
+    themselves than to wade through a written presentation of them.
+    Ultimately, there is no universal standard, because there is no
+    single way of writing an informal proof that is guaranteed to
+    convince every conceivable reader.
+
+    In practice, however, mathematicians have developed a rich set of
+    conventions and idioms for writing about complex mathematical
+    objects that -- at least within a certain community -- make
+    communication fairly reliable.  The conventions of this stylized
+    form of communication give a fairly clear standard for judging
+    proofs good or bad.
+
+    Because we are using Coq in this course, we will be working
+    heavily with formal proofs.  But this doesn't mean we can
+    completely forget about informal ones!  Formal proofs are useful
+    in many ways, but they are _not_ very efficient ways of
+    communicating ideas between human beings. *)
+
+(** For example, here is a proof that addition is associative: *)
+
+Theorem plus_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
+  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+(** Coq is perfectly happy with this.  For a human, however, it
+    is difficult to make much sense of it.  We can use comments and
+    bullets to show the structure a little more clearly... *)
+
+Theorem plus_assoc'' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n' IHn'].
+  - (* n = 0 *)
+    reflexivity.
+  - (* n = S n' *)
+    simpl. rewrite -> IHn'. reflexivity.   Qed.
+
+(** ... and if you're used to Coq you may be able to step
+    through the tactics one after the other in your mind and imagine
+    the state of the context and goal stack at each point, but if the
+    proof were even a little bit more complicated this would be next
+    to impossible.
+
+    A (pedantic) mathematician might write the proof something like
+    this: *)
+
+(** - _Theorem_: For any [n], [m] and [p],
+
+      n + (m + p) = (n + m) + p.
+
+    _Proof_: By induction on [n].
+
+    - First, suppose [n = 0].  We must show
+
+        0 + (m + p) = (0 + m) + p.
+
+      This follows directly from the definition of [+].
+
+    - Next, suppose [n = S n'], where
+
+        n' + (m + p) = (n' + m) + p.
+
+      We must show
+
+        (S n') + (m + p) = ((S n') + m) + p.
+
+      By the definition of [+], this follows from
+
+        S (n' + (m + p)) = S ((n' + m) + p),
+
+      which is immediate from the induction hypothesis.  _Qed_. *)
+
+(** The overall form of the proof is basically similar, and of
+    course this is no accident: Coq has been designed so that its
+    [induction] tactic generates the same sub-goals, in the same
+    order, as the bullet points that a mathematician would write.  But
+    there are significant differences of detail: the formal proof is
+    much more explicit in some ways (e.g., the use of [reflexivity])
+    but much less explicit in others (in particular, the "proof state"
+    at any given point in the Coq proof is completely implicit,
+    whereas the informal proof reminds the reader several times where
+    things stand). *)
+
+(** **** Exercise: 2 stars, advanced, recommendedM (plus_comm_informal)  *)
+(** Translate your solution for [plus_comm] into an informal proof:
+
+    Theorem: Addition is commutative.
+
+    Proof: (* FILL IN HERE *)
+*)
+(** [] *)
+
+(** **** Exercise: 2 stars, optionalM (beq_nat_refl_informal)  *)
+(** Write an informal proof of the following theorem, using the
+    informal proof of [plus_assoc] as a model.  Don't just
+    paraphrase the Coq tactics into English!
+
+    Theorem: [true = beq_nat n n] for any [n].
+
+    Proof: (* FILL IN HERE *)
+[] *)
+
+(* ################################################################# *)
 (** * More Exercises *)
 
 (** **** Exercise: 3 stars, recommended (mult_comm)  *)
@@ -357,36 +505,39 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, recommended (binary_commute)  *)
+(** **** Exercise: 3 stars, recommendedM (binary_commute)  *)
 (** Recall the [incr] and [bin_to_nat] functions that you
     wrote for the [binary] exercise in the [Basics] chapter.  Prove
     that the following diagram commutes:
 
-               bin --------- incr -------> bin
-                |                           |
-            bin_to_nat                  bin_to_nat
-                |                           |
-                v                           v
-               nat ---------- S ---------> nat
+                            incr
+              bin ----------------------> bin
+               |                           |
+    bin_to_nat |                           |  bin_to_nat
+               |                           |
+               v                           v
+              nat ----------------------> nat
+                             S
 
-    That is, incrementing a binary number and then converting it to 
+    That is, incrementing a binary number and then converting it to
     a (unary) natural number yields the same result as first converting
-    it to a natural number and then incrementing.  
+    it to a natural number and then incrementing.
     Name your theorem [bin_to_nat_pres_incr] ("pres" for "preserves").
 
-    Before you start working on this exercise, please copy the
-    definitions from your solution to the [binary] exercise here so
-    that this file can be graded on its own.  If you find yourself
-    wanting to change your original definitions to make the property
-    easier to prove, feel free to do so! *)
+    Before you start working on this exercise, copy the definitions
+    from your solution to the [binary] exercise here so that this file
+    can be graded on its own.  If you want to change your original
+    definitions to make the property easier to prove, feel free to
+    do so! *)
 
 (* FILL IN HERE *)
 (** [] *)
 
-(** **** Exercise: 5 stars, advanced (binary_inverse)  *)
+(** **** Exercise: 5 stars, advancedM (binary_inverse)  *)
 (** This exercise is a continuation of the previous exercise about
     binary numbers.  You will need your definitions and theorems from
-    there to complete this one.
+    there to complete this one; please copy them to this file to make
+    it self contained for grading.
 
     (a) First, write a function to convert natural numbers to binary
         numbers.  Then prove that starting with any natural number,
@@ -411,140 +562,4 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ###################################################################### *)
-(** * Formal vs. Informal Proof (Optional) *)
-
-(** "_Informal proofs are algorithms; formal proofs are code_." *)
-
-(** The question of what constitutes a proof of a mathematical
-    claim has challenged philosophers for millennia, but a rough and
-    ready definition could be this: A proof of a mathematical
-    proposition [P] is a written (or spoken) text that instills in the
-    reader or hearer the certainty that [P] is true.  That is, a proof
-    is an act of communication.
-
-    Acts of communication may involve different sorts of readers.  On
-    one hand, the "reader" can be a program like Coq, in which case
-    the "belief" that is instilled is that [P] can be mechanically
-    derived from a certain set of formal logical rules, and the proof
-    is a recipe that guides the program in checking this fact.  Such
-    recipes are _formal_ proofs.
-
-    Alternatively, the reader can be a human being, in which case the
-    proof will be written in English or some other natural language,
-    and will thus necessarily be _informal_.  Here, the criteria for
-    success are less clearly specified.  A "valid" proof is one that
-    makes the reader believe [P].  But the same proof may be read by
-    many different readers, some of whom may be convinced by a
-    particular way of phrasing the argument, while others may not be.
-    Some readers may be particularly pedantic, inexperienced, or just
-    plain thick-headed; the only way to convince them will be to make
-    the argument in painstaking detail.  But other readers, more
-    familiar in the area, may find all this detail so overwhelming
-    that they lose the overall thread; all they want is to be told the
-    main ideas, since it is easier for them to fill in the details for
-    themselves than to wade through a written presentation of them.
-    Ultimately, there is no universal standard, because there is no
-    single way of writing an informal proof that is guaranteed to
-    convince every conceivable reader.
-
-    In practice, however, mathematicians have developed a rich set of
-    conventions and idioms for writing about complex mathematical
-    objects that -- at least within a certain community -- make
-    communication fairly reliable.  The conventions of this stylized
-    form of communication give a fairly clear standard for judging
-    proofs good or bad.
-
-    Because we are using Coq in this course, we will be working
-    heavily with formal proofs.  But this doesn't mean we can
-    completely forget about informal ones!  Formal proofs are useful
-    in many ways, but they are _not_ very efficient ways of
-    communicating ideas between human beings. *)
-
-(** For example, here is a proof that addition is associative: *)
-
-Theorem plus_assoc' : forall n m p : nat,
-  n + (m + p) = (n + m) + p.
-Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
-  simpl. rewrite -> IHn'. reflexivity.  Qed.
-
-(** Coq is perfectly happy with this.  For a human, however, it
-    is difficult to make much sense of it.  We can use comments and
-    bullets to show the structure a little more clearly... *)
-
-Theorem plus_assoc'' : forall n m p : nat,
-  n + (m + p) = (n + m) + p.
-Proof.
-  intros n m p. induction n as [| n' IHn'].
-  - (* n = 0 *)
-    reflexivity.
-  - (* n = S n' *)
-    simpl. rewrite -> IHn'. reflexivity.   Qed.
-
-(** ... and if you're used to Coq you may be able to step
-    through the tactics one after the other in your mind and imagine
-    the state of the context and goal stack at each point, but if the
-    proof were even a little bit more complicated this would be next
-    to impossible.
-
-    A (pedantic) mathematician might write the proof something like
-    this: *)
-
-(** - _Theorem_: For any [n], [m] and [p],
-
-      n + (m + p) = (n + m) + p.
-
-    _Proof_: By induction on [n].
-
-    - First, suppose [n = 0].  We must show
-
-        0 + (m + p) = (0 + m) + p.
-
-      This follows directly from the definition of [+].
-
-    - Next, suppose [n = S n'], where
-
-        n' + (m + p) = (n' + m) + p.
-
-      We must show
-
-        (S n') + (m + p) = ((S n') + m) + p.
-
-      By the definition of [+], this follows from
-
-        S (n' + (m + p)) = S ((n' + m) + p),
-
-      which is immediate from the induction hypothesis.  _Qed_. *)
-
-
-(** The overall form of the proof is basically similar, and of
-    course this is no accident: Coq has been designed so that its
-    [induction] tactic generates the same sub-goals, in the same
-    order, as the bullet points that a mathematician would write.  But
-    there are significant differences of detail: the formal proof is
-    much more explicit in some ways (e.g., the use of [reflexivity])
-    but much less explicit in others (in particular, the "proof state"
-    at any given point in the Coq proof is completely implicit,
-    whereas the informal proof reminds the reader several times where
-    things stand). *)
-
-(** **** Exercise: 2 stars, advanced, recommended (plus_comm_informal)  *)
-(** Translate your solution for [plus_comm] into an informal proof:
-
-    Theorem: Addition is commutative.
-
-    Proof: (* FILL IN HERE *)
-*)
-(** [] *)
-
-(** **** Exercise: 2 stars, optional (beq_nat_refl_informal)  *)
-(** Write an informal proof of the following theorem, using the
-    informal proof of [plus_assoc] as a model.  Don't just
-    paraphrase the Coq tactics into English!
-
-    Theorem: [true = beq_nat n n] for any [n].
-
-    Proof: (* FILL IN HERE *)
-[] *)
-
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-10-07 14:01:19 -0400 (Fri, 07 Oct 2016) $ *)

@@ -106,10 +106,10 @@ Check (ev_SS 2 (ev_SS 0 ev_0)).
     [nil] can be thought of as a function from types to empty lists
     with elements of that type. *)
 
-(** You may recall (as seen in the [Logic] chapter) that we can
-    use function application syntax to instantiate universally
-    quantified variables in lemmas, as well as to supply evidence for
-    assumptions that these lemmas impose. For instance: *)
+(** We saw in the [Logic] chapter that we can use function
+    application syntax to instantiate universally quantified variables
+    in lemmas, as well as to supply evidence for assumptions that
+    these lemmas impose.  For instance: *)
 
 Theorem ev_4': ev 4.
 Proof.
@@ -122,7 +122,7 @@ Qed.
     according to the same basic rules used for programs in the
     language. *)
 
-(* ##################################################### *)
+(* ################################################################# *)
 (** * Proof Scripts *)
 
 (** The _proof objects_ we've been discussing lie at the core of how
@@ -145,11 +145,11 @@ Proof.
   Show Proof.
 Qed.
 
-(** At any given moment, Coq has constructed a term with some
-    "holes" (indicated by [?1], [?2], and so on), and it knows what
-    type of evidence is needed at each hole.  *)
+(** At any given moment, Coq has constructed a term with a
+    "hole" (indicated by [?Goal] here, and so on), and it knows what
+    type of evidence is needed to fill this hole.  
 
-(** Each of the holes corresponds to a subgoal, and the proof is
+    Each hole corresponds to a subgoal, and the proof is
     finished when there are no more subgoals.  At this point, the
     evidence we've built stored in the global context under the name
     given in the [Theorem] command. *)
@@ -182,11 +182,11 @@ Theorem ev_8 : ev 8.
 Proof.
   (* FILL IN HERE *) Admitted.
 
-Definition ev_8' : ev 8 :=
-  (* FILL IN HERE *) admit.
+Definition ev_8' : ev 8 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 (** [] *)
 
-(* ##################################################### *)
+(* ################################################################# *)
 (** * Quantifiers, Implications, Functions *)
 
 (** In Coq's computational universe (where data structures and
@@ -220,9 +220,6 @@ Definition ev_plus4' : forall n, ev n -> ev (4 + n) :=
   fun (n : nat) => fun (H : ev n) =>
     ev_SS (S (S n)) (ev_SS n H).
 
-Check ev_plus4'.
-(* ===> ev_plus4' : forall n : nat, ev n -> ev (4 + n) *)
-
 (** Recall that [fun n => blah] means "the function that, given [n],
     yields [blah]," and that Coq treats [4 + n] and [S (S (S (S n)))]
     as synonyms. Another equivalent way to write this definition is: *)
@@ -238,14 +235,15 @@ Check ev_plus4''.
     second argument's type, [ev n], mentions the _value_ of the first
     argument, [n].  While such _dependent types_ are not found in
     conventional programming languages, they can be useful in
-    programming too, as recent work in the functional programming
-    community demonstrates.
+    programming too, as the recent flurry of activity in the
+    functional programming community demonstrates.
 
     Notice that both implication ([->]) and quantification ([forall])
     correspond to functions on evidence.  In fact, they are really the
     same thing: [->] is just a shorthand for a degenerate use of
     [forall] where there is no dependency, i.e., no need to give a
-    name to the type on the LHS of the arrow. *)
+    name to the type on the left-hand side of the arrow. *)
+
 
 (** For example, consider this proposition: *)
 
@@ -270,13 +268,50 @@ Definition ev_plus2'' : Prop :=
 (** In general, "[P -> Q]" is just syntactic sugar for
     "[forall (_:P), Q]". *)
 
-(* ###################################################################### *)
-(** * Connectives as Inductive Types *)
+(* ################################################################# *)
+(** * Programming with Tactics *)
+
+(** If we can build proofs by giving explicit terms rather than
+    executing tactic scripts, you may be wondering whether we can
+    build _programs_ using _tactics_ rather than explicit terms.
+    Naturally, the answer is yes! *)
+
+Definition add1 : nat -> nat.
+intro n.
+Show Proof.
+apply S.
+Show Proof.
+apply n. Defined.
+
+Print add1.
+(* ==>
+    add1 = fun n : nat => S n
+         : nat -> nat
+*)
+
+Compute add1 2.
+(* ==> 3 : nat *)
+
+(** Notice that we terminate the [Definition] with a [.] rather than
+    with [:=] followed by a term.  This tells Coq to enter _proof
+    scripting mode_ to build an object of type [nat -> nat].  Also, we
+    terminate the proof with [Defined] rather than [Qed]; this makes
+    the definition _transparent_ so that it can be used in computation
+    like a normally-defined function.  ([Qed]-defined objects are
+    opaque during computation.)
+
+    This feature is mainly useful for writing functions with dependent
+    types, which we won't explore much further in this book.  But it
+    does illustrate the uniformity and orthogonality of the basic
+    ideas in Coq. *)
+
+(* ################################################################# *)
+(** * Logical Connectives as Inductive Types *)
 
 (** Inductive definitions are powerful enough to express most of the
     connectives and quantifiers we have seen so far.  Indeed, only
     universal quantification (and thus implication) is built into Coq;
-    all the others are defined inductively.  We study these
+    all the others are defined inductively.  We'll see these
     definitions in this section. *)
 
 Module Props.
@@ -337,8 +372,8 @@ Definition and_comm' P Q : P /\ Q <-> Q /\ P :=
 (** **** Exercise: 2 stars, optional (conj_fact)  *)
 (** Construct a proof object demonstrating the following proposition. *)
 
-Definition conj_fact : forall P Q R, P /\ Q -> Q /\ R -> P /\ R :=
-  (* FILL IN HERE *) admit.
+Definition conj_fact : forall P Q R, P /\ Q -> Q /\ R -> P /\ R 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 (** [] *)
 
 (** ** Disjunction
@@ -365,8 +400,8 @@ End Or.
 (** Try to write down an explicit proof object for [or_commut] (without
     using [Print] to peek at the ones we already defined!). *)
 
-Definition or_comm : forall P Q, P \/ Q -> Q \/ P :=
-  (* FILL IN HERE *) admit.
+Definition or_comm : forall P Q, P \/ Q -> Q \/ P 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 (** [] *)
 
 (** ** Existential Quantification
@@ -404,16 +439,17 @@ Definition some_nat_is_even : exists n, ev n :=
 (** **** Exercise: 2 stars, optional (ex_ev_Sn)  *)
 (** Complete the definition of the following proof object: *)
 
-Definition ex_ev_Sn : ex (fun n => ev (S n)) :=
-(* FILL IN HERE *) admit.
+Definition ex_ev_Sn : ex (fun n => ev (S n)) 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 (** [] *)
 
+(* ================================================================= *)
 (** ** [True] and [False] *)
 
 (** The inductive definition of the [True] proposition is simple: *)
 
 Inductive True : Prop :=
-  I : True.
+  | I : True.
 
 (** It has one constructor (so every proof of [True] is the same, so
     being given a proof of [True] is not informative.) *)
@@ -428,44 +464,7 @@ Inductive False : Prop :=.
 
 End Props.
 
-(* ##################################################### *)
-(** * Programming with Tactics *)
-
-(** If we can build proofs by giving explicit terms rather than
-    executing tactic scripts, you may be wondering whether we can
-    build _programs_ using _tactics_ rather than explicit terms.
-    Naturally, the answer is yes! *)
-
-Definition add1 : nat -> nat.
-intro n.
-Show Proof.
-apply S.
-Show Proof.
-apply n. Defined.
-
-Print add1.
-(* ==>
-    add1 = fun n : nat => S n
-         : nat -> nat
-*)
-
-Compute add1 2.
-(* ==> 3 : nat *)
-
-(** Notice that we terminate the [Definition] with a [.] rather than
-    with [:=] followed by a term.  This tells Coq to enter _proof
-    scripting mode_ to build an object of type [nat -> nat].  Also, we
-    terminate the proof with [Defined] rather than [Qed]; this makes
-    the definition _transparent_ so that it can be used in computation
-    like a normally-defined function.  ([Qed]-defined objects are
-    opaque during computation.)
-
-    This feature is mainly useful for writing functions with dependent
-    types, which we won't explore much further in this book.  But it
-    does illustrate the uniformity and orthogonality of the basic
-    ideas in Coq. *)
-
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Equality *)
 
 (** Even Coq's equality relation is not built in.  It has the
@@ -535,7 +534,7 @@ End MyEquality.
 Definition quiz6 : exists x,  x + 3 = 4
   := ex_intro (fun z => (z + 3 = 4)) 1 (refl_equal 4).
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Inversion, Again *)
 
 (** We've seen [inversion] used with both equality hypotheses and
@@ -587,5 +586,5 @@ Definition quiz6 : exists x,  x + 3 = 4
    must be the same!  The [inversion] tactic adds this fact to the
    context. *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2017-01-30 18:47:45 -0500 (Mon, 30 Jan 2017) $ *)
 

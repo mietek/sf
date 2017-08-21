@@ -27,9 +27,9 @@
 
 <div class="paragraph"> </div>
 
- This chapter introduces several more proof strategies and
-    tactics that allow us to prove more interesting properties of
-    functional programs.  We will see:
+ This chapter introduces several additional proof strategies
+    and tactics that allow us to begin proving more interesting
+    properties of functional programs.  We will see:
 
 <div class="paragraph"> </div>
 
@@ -42,7 +42,7 @@
       the fact that they are injective and disjoint);
 
 </li>
-<li> how to create a strong induction hypothesis (and when such
+<li> how to strengthen an induction hypothesis (and when such
       strengthening is required); and
 
 </li>
@@ -60,12 +60,12 @@
 </div>
 
 <div class="doc">
-<a name="lab127"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> Tactic</h1>
+<a name="lab129"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> Tactic</h1>
 
 <div class="paragraph"> </div>
 
  We often encounter situations where the goal to be proved is
-    exactly the same as some hypothesis in the context or some
+    <i>exactly</i> the same as some hypothesis in the context or some
     previously proved lemma. 
 </div>
 <div class="code code-tight">
@@ -83,10 +83,9 @@
 </div>
 
 <div class="doc">
-At this point, we could finish with "<span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">eq<sub>2</sub></span>.</span>
-    <span class="inlinecode"><span class="id" type="tactic">reflexivity</span>.</span>" as we have done several times before.  We can
-    achieve the same effect in a single step by using the <span class="inlinecode"><span class="id" type="tactic">apply</span></span>
-    tactic instead: 
+Here, we could finish with "<span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">eq<sub>2</sub></span>.</span>  <span class="inlinecode"><span class="id" type="tactic">reflexivity</span>.</span>" as we
+    have done several times before.  We can achieve the same effect in
+    a single step by using the <span class="inlinecode"><span class="id" type="tactic">apply</span></span> tactic instead: 
 </div>
 <div class="code code-tight">
 
@@ -145,7 +144,7 @@ You may find it instructive to experiment with this proof
 </div>
 
 <div class="doc">
-<a name="lab128"></a><h4 class="section">Exercise: 2 stars, optional (silly_ex)</h4>
+<a name="lab130"></a><h4 class="section">Exercise: 2 stars, optional (silly_ex)</h4>
  Complete the following proof without using <span class="inlinecode"><span class="id" type="tactic">simpl</span></span>. 
 </div>
 <div class="code code-tight">
@@ -177,36 +176,30 @@ You may find it instructive to experiment with this proof
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">H</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;Here&nbsp;we&nbsp;cannot&nbsp;use&nbsp;<span class="inlinecode"><span class="id" type="tactic">apply</span></span>&nbsp;directly&nbsp;*)</span><br/>
-<span class="id" type="keyword">Abort</span>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-In this case we can use the <span class="inlinecode"><span class="id" type="tactic">symmetry</span></span> tactic, which switches the
-    left and right sides of an equality in the goal. 
+Here we cannot use <span class="inlinecode"><span class="id" type="tactic">apply</span></span> directly, but we can use the <span class="inlinecode"><span class="id" type="tactic">symmetry</span></span>
+    tactic, which switches the left and right sides of an equality in
+    the goal. 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <a name="silly3"><span class="id" type="lemma">silly3</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">n</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Basics.html#true"><span class="id" type="constructor">true</span></a> = <a class="idref" href="Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a> 5  <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a>)) 7 = <a class="idref" href="Basics.html#true"><span class="id" type="constructor">true</span></a>.<br/>
-<span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">H</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">symmetry</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="comment">(*&nbsp;Actually,&nbsp;this&nbsp;<span class="inlinecode"><span class="id" type="tactic">simpl</span></span>&nbsp;is&nbsp;unnecessary,&nbsp;since<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode"><span class="id" type="tactic">apply</span></span>&nbsp;will&nbsp;perform&nbsp;simplification&nbsp;first.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="comment">(*&nbsp;(This&nbsp;<span class="inlinecode"><span class="id" type="tactic">simpl</span></span>&nbsp;is&nbsp;optional,&nbsp;since&nbsp;<span class="inlinecode"><span class="id" type="tactic">apply</span></span>&nbsp;will&nbsp;perform<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simplification&nbsp;first,&nbsp;if&nbsp;needed.)&nbsp;*)</span><br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab129"></a><h4 class="section">Exercise: 3 stars (apply_exercise1)</h4>
+<a name="lab131"></a><h4 class="section">Exercise: 3 stars (apply_exercise1)</h4>
  (<i>Hint</i>: You can use <span class="inlinecode"><span class="id" type="tactic">apply</span></span> with previously defined lemmas, not
-    just hypotheses in the context.  Remember that <span class="inlinecode"><span class="id" type="var">SearchAbout</span></span> is
+    just hypotheses in the context.  Remember that <span class="inlinecode"><span class="id" type="var">Search</span></span> is
     your friend.) 
 </div>
 <div class="code code-tight">
@@ -223,7 +216,7 @@ In this case we can use the <span class="inlinecode"><span class="id" type="tact
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab130"></a><h4 class="section">Exercise: 1 star, optional (apply_rewrite)</h4>
+<a name="lab132"></a><h4 class="section">Exercise: 1 star, optionalM (apply_rewrite)</h4>
  Briefly explain the difference between the tactics <span class="inlinecode"><span class="id" type="tactic">apply</span></span> and
     <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span>.  What are the situations where both can usefully be
     applied?
@@ -239,7 +232,7 @@ In this case we can use the <span class="inlinecode"><span class="id" type="tact
 </div>
 
 <div class="doc">
-<a name="lab131"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode">...</span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">...</span> Tactic</h1>
+<a name="lab133"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode">...</span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">...</span> Tactic</h1>
 
 <div class="paragraph"> </div>
 
@@ -306,7 +299,8 @@ If we simply tell Coq <span class="inlinecode"><span class="id" type="tactic">ap
 <div class="code code-tight">
 
 <br/>
-&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Tactics.html#trans_eq"><span class="id" type="lemma">trans_eq</span></a> <span class="id" type="keyword">with</span> (<span class="id" type="var">m</span>:=[<span class="id" type="var">c</span>;<span class="id" type="var">d</span>]). <span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>1</sub></span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Tactics.html#trans_eq"><span class="id" type="lemma">trans_eq</span></a> <span class="id" type="keyword">with</span> (<span class="id" type="var">m</span>:=[<span class="id" type="var">c</span>;<span class="id" type="var">d</span>]).<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>1</sub></span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
 </div>
@@ -318,7 +312,7 @@ Actually, we usually don't have to include the name <span class="inlinecode"><sp
     <span class="inlinecode"><span class="id" type="var">trans_eq</span></span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">[<span class="id" type="var">c</span>;<span class="id" type="var">d</span>]</span>. 
 <div class="paragraph"> </div>
 
-<a name="lab132"></a><h4 class="section">Exercise: 3 stars, optional (apply_with_exercise)</h4>
+<a name="lab134"></a><h4 class="section">Exercise: 3 stars, optional (apply_with_exercise)</h4>
 
 </div>
 <div class="code code-space">
@@ -339,7 +333,7 @@ Actually, we usually don't have to include the name <span class="inlinecode"><sp
 </div>
 
 <div class="doc">
-<a name="lab133"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> Tactic</h1>
+<a name="lab135"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> Tactic</h1>
 
 <div class="paragraph"> </div>
 
@@ -372,19 +366,17 @@ Actually, we usually don't have to include the name <span class="inlinecode"><sp
 
 </li>
 <li> The constructors <span class="inlinecode"><span class="id" type="var">O</span></span> and <span class="inlinecode"><span class="id" type="var">S</span></span> are <i>disjoint</i>.  That is, <span class="inlinecode"><span class="id" type="var">O</span></span> is not
-      equal to <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> for any <span class="inlinecode"><span class="id" type="var">n</span></span>. 
+      equal to <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> for any <span class="inlinecode"><span class="id" type="var">n</span></span>.
+
 </li>
 </ul>
-
-<div class="paragraph"> </div>
-
- Similar principles apply to all inductively defined types: all
+    Similar principles apply to all inductively defined types: all
     constructors are injective, and the values built from distinct
     constructors are never equal.  For lists, the <span class="inlinecode"><span class="id" type="var">cons</span></span> constructor
     is injective and <span class="inlinecode"><span class="id" type="var">nil</span></span> is different from every non-empty list.
     For booleans, <span class="inlinecode"><span class="id" type="var">true</span></span> and <span class="inlinecode"><span class="id" type="var">false</span></span> are different.  (Since neither
-    <span class="inlinecode"><span class="id" type="var">true</span></span> nor <span class="inlinecode"><span class="id" type="var">false</span></span> take any arguments, their injectivity is not an
-    issue.)  And so on. 
+    <span class="inlinecode"><span class="id" type="var">true</span></span> nor <span class="inlinecode"><span class="id" type="var">false</span></span> take any arguments, their injectivity is not
+    interesting.)  And so on. 
 <div class="paragraph"> </div>
 
  Coq provides a tactic called <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> that allows us to
@@ -404,7 +396,7 @@ Actually, we usually don't have to include the name <span class="inlinecode"><sp
 </div>
 
 <div class="doc">
-By writing <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> at this point, we ask Coq to
+By writing <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> at this point, we are asking Coq to
     generate all equations that it can infer from <span class="inlinecode"><span class="id" type="var">H</span></span> as additional
     hypotheses, replacing variables in the goal as it goes. In the
     present example, this amounts to adding a new hypothesis <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span>
@@ -413,7 +405,9 @@ By writing <span class="inlinecode"><span class="id" type="tactic">inversion</sp
 <div class="code code-tight">
 
 <br/>
-&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
 </div>
@@ -435,8 +429,8 @@ Here's a more interesting example that shows how multiple
 </div>
 
 <div class="doc">
-It is possible to name the equations that <span class="inlinecode"><span class="id" type="tactic">inversion</span></span>
-    generates with an <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode">...</span> clause: 
+We can name the equations that <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> generates with an
+    <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode">...</span> clause: 
 </div>
 <div class="code code-tight">
 
@@ -445,13 +439,13 @@ It is possible to name the equations that <span class="inlinecode"><span class="
 &nbsp;&nbsp;[<a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a>] = [<a class="idref" href="Tactics.html#m"><span class="id" type="variable">m</span></a>] <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;<a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="Tactics.html#m"><span class="id" type="variable">m</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">o</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Hno</span>]. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Hnm</span>]. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab134"></a><h4 class="section">Exercise: 1 star (inversion_ex<sub>3</sub>)</h4>
+<a name="lab136"></a><h4 class="section">Exercise: 1 star (inversion_ex<sub>3</sub>)</h4>
 
 </div>
 <div class="code code-space">
@@ -467,26 +461,9 @@ It is possible to name the equations that <span class="inlinecode"><span class="
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
- While the injectivity of constructors allows us to reason
-    that <span class="inlinecode"><span style="font-family: arial;">&forall;</span></span> <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">nat</span>),</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, the converse of
-    this implication is an instance of a more general fact about
-    constructors and functions, which we will find useful below: 
-</div>
-<div class="code code-tight">
-
-<br/>
-<span class="id" type="keyword">Theorem</span> <a name="f_equal"><span class="id" type="lemma">f_equal</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">A</span> <span class="id" type="var">B</span> : <span class="id" type="keyword">Type</span>) (<span class="id" type="var">f</span>: <a class="idref" href="Tactics.html#A"><span class="id" type="variable">A</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Tactics.html#B"><span class="id" type="variable">B</span></a>) (<span class="id" type="var">x</span> <span class="id" type="var">y</span>: <a class="idref" href="Tactics.html#A"><span class="id" type="variable">A</span></a>),<br/>
-&nbsp;&nbsp;<a class="idref" href="Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="Tactics.html#y"><span class="id" type="variable">y</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Tactics.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="Tactics.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Tactics.html#y"><span class="id" type="variable">y</span></a>.<br/>
-<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">A</span> <span class="id" type="var">B</span> <span class="id" type="var">f</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
-
-<br/>
-</div>
-
-<div class="doc">
-When used on a hypothesis involving an equality between
+ When used on a hypothesis involving an equality between
     <i>different</i> constructors (e.g., <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">O</span></span>), <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> solves the
-    goal immediately. To see why this makes sense, consider the
-    following proof: 
+    goal immediately.  Consider the following proof: 
 </div>
 <div class="code code-tight">
 
@@ -543,9 +520,9 @@ If we use <span class="inlinecode"><span class="id" type="tactic">inversion</spa
 </div>
 
 <div class="doc">
-This is an instance of a general logical principle known as
-    the <i>principle of explosion</i>, which asserts that a contradiction
-    entails anything, even false things.  For instance: 
+This is an instance of a logical principle known as the <i>principle
+    of explosion</i>, which asserts that a contradictory hypothesis
+    entails anything, even false things! 
 </div>
 <div class="code code-tight">
 
@@ -569,13 +546,13 @@ This is an instance of a general logical principle known as
 <div class="doc">
 If you find the principle of explosion confusing, remember
     that these proofs are not actually showing that the conclusion of
-    the statement holds.  Rather, they are arguing that the situation
-    described by the premise can never arise, so the implication is
-    vacuous.  We'll explore the principle of explosion of more detail
-    in the next chapter. 
+    the statement holds.  Rather, they are arguing that, if the
+    nonsensical situation described by the premise did somehow arise,
+    then the nonsensical conclusion would follow.  We'll explore the
+    principle of explosion of more detail in the next chapter. 
 <div class="paragraph"> </div>
 
-<a name="lab135"></a><h4 class="section">Exercise: 1 star (inversion_ex<sub>6</sub>)</h4>
+<a name="lab137"></a><h4 class="section">Exercise: 1 star (inversion_ex<sub>6</sub>)</h4>
 
 </div>
 <div class="code code-space">
@@ -598,7 +575,7 @@ If you find the principle of explosion confusing, remember
 <div class="paragraph"> </div>
 
 <div class="code code-tight">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c</span>&nbsp;<span class="id" type="var">a<sub>1</sub></span>&nbsp;<span class="id" type="var">a<sub>2</sub></span>&nbsp;... <span class="id" type="var">an</span>&nbsp;=&nbsp;<span class="id" type="var">d</span>&nbsp;<span class="id" type="var">b<sub>1</sub></span>&nbsp;<span class="id" type="var">b<sub>2</sub></span>&nbsp;... <span class="id" type="var">bm</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c</span>&nbsp;<span class="id" type="var">a<sub>1</sub></span>&nbsp;<span class="id" type="var">a<sub>2</sub></span>&nbsp;... <span class="id" type="var">an</span>&nbsp;=&nbsp;<span class="id" type="var">d</span>&nbsp;<span class="id" type="var">b<sub>1</sub></span>&nbsp;<span class="id" type="var">b<sub>2</sub></span>&nbsp;... <span class="id" type="var">bm</span>
 <div class="paragraph"> </div>
 
 </div>
@@ -610,7 +587,7 @@ If you find the principle of explosion confusing, remember
 <ul class="doclist">
 <li> If <span class="inlinecode"><span class="id" type="var">c</span></span> and <span class="inlinecode"><span class="id" type="var">d</span></span> are the same constructor, then, by the
       injectivity of this constructor, we know that <span class="inlinecode"><span class="id" type="var">a<sub>1</sub></span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">b<sub>1</sub></span></span>, <span class="inlinecode"><span class="id" type="var">a<sub>2</sub></span></span> <span class="inlinecode">=</span>
-      <span class="inlinecode"><span class="id" type="var">b<sub>2</sub></span></span>, etc.; <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> adds these facts to the context, and
+      <span class="inlinecode"><span class="id" type="var">b<sub>2</sub></span></span>, etc.  The <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> adds these facts to the context and
       tries to use them to rewrite the goal.
 
 <div class="paragraph"> </div>
@@ -619,19 +596,31 @@ If you find the principle of explosion confusing, remember
 </li>
 <li> If <span class="inlinecode"><span class="id" type="var">c</span></span> and <span class="inlinecode"><span class="id" type="var">d</span></span> are different constructors, then the hypothesis
       <span class="inlinecode"><span class="id" type="var">H</span></span> is contradictory, and the current goal doesn't have to be
-      considered. In this case, <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> marks the current goal
-      as completed and pops it off the goal stack. 
+      considered at all.  In this case, <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> marks the
+      current goal as completed and pops it off the goal stack. 
 </li>
 </ul>
 
+<div class="paragraph"> </div>
+
+ The injectivity of constructors allows us to reason that
+    <span class="inlinecode"><span style="font-family: arial;">&forall;</span></span> <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">nat</span>),</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">&rarr;</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  The converse of this
+    implication is an instance of a more general fact about both
+    constructors and functions, which we will find useful in a few
+    places below: 
 </div>
 <div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="f_equal"><span class="id" type="lemma">f_equal</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">A</span> <span class="id" type="var">B</span> : <span class="id" type="keyword">Type</span>) (<span class="id" type="var">f</span>: <a class="idref" href="Tactics.html#A"><span class="id" type="variable">A</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Tactics.html#B"><span class="id" type="variable">B</span></a>) (<span class="id" type="var">x</span> <span class="id" type="var">y</span>: <a class="idref" href="Tactics.html#A"><span class="id" type="variable">A</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="Tactics.html#y"><span class="id" type="variable">y</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Tactics.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="Tactics.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="Tactics.html#y"><span class="id" type="variable">y</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">A</span> <span class="id" type="var">B</span> <span class="id" type="var">f</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab136"></a><h1 class="section">Using Tactics on Hypotheses</h1>
+<a name="lab138"></a><h1 class="section">Using Tactics on Hypotheses</h1>
 
 <div class="paragraph"> </div>
 
@@ -704,7 +693,7 @@ Forward reasoning starts from what is <i>given</i> (premises,
     about.  
 <div class="paragraph"> </div>
 
-<a name="lab137"></a><h4 class="section">Exercise: 3 stars, recommended (plus_n_n_injective)</h4>
+<a name="lab139"></a><h4 class="section">Exercise: 3 stars, recommended (plus_n_n_injective)</h4>
  Practice using "in" variants in this exercise.  (Hint: use
     <span class="inlinecode"><span class="id" type="var">plus_n_Sm</span></span>.) 
 </div>
@@ -728,7 +717,7 @@ Forward reasoning starts from what is <i>given</i> (premises,
 </div>
 
 <div class="doc">
-<a name="lab138"></a><h1 class="section">Varying the Induction Hypothesis</h1>
+<a name="lab140"></a><h1 class="section">Varying the Induction Hypothesis</h1>
 
 <div class="paragraph"> </div>
 
@@ -738,12 +727,12 @@ Forward reasoning starts from what is <i>given</i> (premises,
     assumptions we move (using <span class="inlinecode"><span class="id" type="tactic">intros</span></span>) from the goal to the context
     before invoking the <span class="inlinecode"><span class="id" type="tactic">induction</span></span> tactic.  For example, suppose
     we want to show that the <span class="inlinecode"><span class="id" type="var">double</span></span> function is injective &mdash; i.e.,
-    that it always maps different arguments to different results:
+    that it maps different arguments to different results:
 
 <div class="paragraph"> </div>
 
 <div class="code code-tight">
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Theorem</span>&nbsp;<span class="id" type="var">double_injective</span>:&nbsp;<span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>&nbsp;<span class="id" type="var">m</span>,&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Theorem</span>&nbsp;<span class="id" type="var">double_injective</span>:&nbsp;<span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>&nbsp;<span class="id" type="var">m</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">double</span>&nbsp;<span class="id" type="var">n</span>&nbsp;=&nbsp;<span class="id" type="var">double</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">&rarr;</span>&nbsp;<span class="id" type="var">n</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>.
 <div class="paragraph"> </div>
 
@@ -781,13 +770,13 @@ Forward reasoning starts from what is <i>given</i> (premises,
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">intros</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">m</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span>  <span class="id" type="tactic">apply</span> <a class="idref" href="Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span> <span class="id" type="tactic">apply</span> <a class="idref" href="Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-At this point, the induction hypothesis, <span class="inlinecode"><span class="id" type="var">IHn'</span></span>, does not give us
+At this point, the induction hypothesis, <span class="inlinecode"><span class="id" type="var">IHn'</span></span>, does <i>not</i> give us
     <span class="inlinecode"><span class="id" type="var">n'</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m'</span></span> &mdash; there is an extra <span class="inlinecode"><span class="id" type="var">S</span></span> in the way &mdash; so the goal is
     not provable. 
 </div>
@@ -909,13 +898,12 @@ What went wrong?
     whether <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> is <span class="inlinecode">10</span>, so <span class="inlinecode"><span class="id" type="var">Q</span></span> is useless.) 
 <div class="paragraph"> </div>
 
- To summarize: Trying to carry out this proof by induction on <span class="inlinecode"><span class="id" type="var">n</span></span>
-    when <span class="inlinecode"><span class="id" type="var">m</span></span> is already in the context doesn't work because we are
-    then trying to prove a relation involving <i>every</i> <span class="inlinecode"><span class="id" type="var">n</span></span> but just a
-    <i>single</i> <span class="inlinecode"><span class="id" type="var">m</span></span>. 
+ Trying to carry out this proof by induction on <span class="inlinecode"><span class="id" type="var">n</span></span> when <span class="inlinecode"><span class="id" type="var">m</span></span> is
+    already in the context doesn't work because we are then trying to
+    prove a relation involving <i>every</i> <span class="inlinecode"><span class="id" type="var">n</span></span> but just a <i>single</i> <span class="inlinecode"><span class="id" type="var">m</span></span>. 
 <div class="paragraph"> </div>
 
- The good proof of <span class="inlinecode"><span class="id" type="var">double_injective</span></span> leaves <span class="inlinecode"><span class="id" type="var">m</span></span> in the goal
+ The successful proof of <span class="inlinecode"><span class="id" type="var">double_injective</span></span> leaves <span class="inlinecode"><span class="id" type="var">m</span></span> in the goal
     statement at the point where the <span class="inlinecode"><span class="id" type="tactic">induction</span></span> tactic is invoked on
     <span class="inlinecode"><span class="id" type="var">n</span></span>: 
 </div>
@@ -1001,14 +989,14 @@ At this point, since we are in the second branch of the <span class="inlinecode"
 <div class="doc">
 What you should take away from all this is that we need to be
     careful about using induction to try to prove something too
-    specific: If we're proving a property of <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span> by induction
-    on <span class="inlinecode"><span class="id" type="var">n</span></span>, we may need to leave <span class="inlinecode"><span class="id" type="var">m</span></span> generic. 
+    specific: To prove a property of <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span> by induction on <span class="inlinecode"><span class="id" type="var">n</span></span>,
+    it is sometimes important to leave <span class="inlinecode"><span class="id" type="var">m</span></span> generic. 
 <div class="paragraph"> </div>
 
  The following exercise requires the same pattern. 
 <div class="paragraph"> </div>
 
-<a name="lab139"></a><h4 class="section">Exercise: 2 stars (beq_nat_true)</h4>
+<a name="lab141"></a><h4 class="section">Exercise: 2 stars (beq_nat_true)</h4>
 
 </div>
 <div class="code code-space">
@@ -1022,7 +1010,7 @@ What you should take away from all this is that we need to be
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab140"></a><h4 class="section">Exercise: 2 stars, advanced (beq_nat_true_informal)</h4>
+<a name="lab142"></a><h4 class="section">Exercise: 2 stars, advancedM (beq_nat_true_informal)</h4>
  Give a careful informal proof of <span class="inlinecode"><span class="id" type="var">beq_nat_true</span></span>, being as explicit
     as possible about quantifiers. 
 </div>
@@ -1038,9 +1026,9 @@ What you should take away from all this is that we need to be
 
  The strategy of doing fewer <span class="inlinecode"><span class="id" type="tactic">intros</span></span> before an <span class="inlinecode"><span class="id" type="tactic">induction</span></span> to
     obtain a more general IH doesn't always work by itself; sometimes
-    a little <i>rearrangement</i> of quantified variables is needed.
-    Suppose, for example, that we wanted to prove <span class="inlinecode"><span class="id" type="var">double_injective</span></span>
-    by induction on <span class="inlinecode"><span class="id" type="var">m</span></span> instead of <span class="inlinecode"><span class="id" type="var">n</span></span>. 
+    some <i>rearrangement</i> of quantified variables is needed.  Suppose,
+    for example, that we wanted to prove <span class="inlinecode"><span class="id" type="var">double_injective</span></span> by
+    induction on <span class="inlinecode"><span class="id" type="var">m</span></span> instead of <span class="inlinecode"><span class="id" type="var">n</span></span>. 
 </div>
 <div class="code code-tight">
 
@@ -1055,7 +1043,7 @@ What you should take away from all this is that we need to be
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span> <span class="id" type="tactic">intros</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span>  <span class="id" type="tactic">apply</span> <a class="idref" href="Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">apply</span> <a class="idref" href="Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Stuck&nbsp;again&nbsp;here,&nbsp;just&nbsp;like&nbsp;before.&nbsp;*)</span><br/>
 <span class="id" type="keyword">Abort</span>.<br/>
 
@@ -1063,7 +1051,7 @@ What you should take away from all this is that we need to be
 </div>
 
 <div class="doc">
-The problem here is that, to do induction on <span class="inlinecode"><span class="id" type="var">m</span></span>, we must first
+The problem is that, to do induction on <span class="inlinecode"><span class="id" type="var">m</span></span>, we must first
     introduce <span class="inlinecode"><span class="id" type="var">n</span></span>.  (If we simply say <span class="inlinecode"><span class="id" type="tactic">induction</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> without
     introducing anything first, Coq will automatically introduce <span class="inlinecode"><span class="id" type="var">n</span></span>
     for us!)  
@@ -1071,10 +1059,10 @@ The problem here is that, to do induction on <span class="inlinecode"><span clas
 
  What can we do about this?  One possibility is to rewrite the
     statement of the lemma so that <span class="inlinecode"><span class="id" type="var">m</span></span> is quantified before <span class="inlinecode"><span class="id" type="var">n</span></span>.  This
-    will work, but it's not nice: We don't want to have to twist the
+    works, but it's not nice: We don't want to have to twist the
     statements of lemmas to fit the needs of a particular strategy for
-    proving them &mdash; we want to state them in the most clear and
-    natural way. 
+    proving them!  Rather we want to state them in the clearest and
+    most natural way. 
 <div class="paragraph"> </div>
 
  What we can do instead is to first introduce all the quantified
@@ -1171,9 +1159,9 @@ Let's look at an informal proof of this theorem.  Note that
 
 <div class="paragraph"> </div>
 
- Before we close this section and move on to some exercises, let's
-    digress briefly and use <span class="inlinecode"><span class="id" type="var">beq_nat_true</span></span> to prove a similar property
-    about identifiers that we'll need in later chapters: 
+ Before we close this section and move on to some exercises,
+    let's digress briefly and use <span class="inlinecode"><span class="id" type="var">beq_nat_true</span></span> to prove a similar
+    property of identifiers that we'll need in later chapters: 
 </div>
 <div class="code code-tight">
 
@@ -1190,7 +1178,7 @@ Let's look at an informal proof of this theorem.  Note that
 </div>
 
 <div class="doc">
-<a name="lab141"></a><h4 class="section">Exercise: 3 stars, recommended (gen_dep_practice)</h4>
+<a name="lab143"></a><h4 class="section">Exercise: 3 stars, recommended (gen_dep_practice)</h4>
  Prove this by induction on <span class="inlinecode"><span class="id" type="var">l</span></span>. 
 </div>
 <div class="code code-tight">
@@ -1205,62 +1193,6 @@ Let's look at an informal proof of this theorem.  Note that
 
 <div class="doc">
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
-<div class="paragraph"> </div>
-
-<a name="lab142"></a><h4 class="section">Exercise: 3 stars, optional (app_length_cons)</h4>
- Prove this by induction on <span class="inlinecode"><span class="id" type="var">l<sub>1</sub></span></span>, without using <span class="inlinecode"><span class="id" type="var">app_length</span></span>
-    from <span class="inlinecode"><span class="id" type="var">Lists</span></span>. 
-</div>
-<div class="code code-tight">
-
-<br/>
-<span class="id" type="keyword">Theorem</span> <a name="app_length_cons"><span class="id" type="lemma">app_length_cons</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span> : <span class="id" type="keyword">Type</span>) (<span class="id" type="var">l<sub>1</sub></span> <span class="id" type="var">l<sub>2</sub></span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Tactics.html#X"><span class="id" type="variable">X</span></a>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> : <a class="idref" href="Tactics.html#X"><span class="id" type="variable">X</span></a>) (<span class="id" type="var">n</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Poly.html#length"><span class="id" type="definition">length</span></a> (<a class="idref" href="Tactics.html#l<sub>1</sub>"><span class="id" type="variable">l<sub>1</sub></span></a> ++ (<a class="idref" href="Tactics.html#x"><span class="id" type="variable">x</span></a> :: <a class="idref" href="Tactics.html#l<sub>2</sub>"><span class="id" type="variable">l<sub>2</sub></span></a>)) = <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="Poly.html#length"><span class="id" type="definition">length</span></a> (<a class="idref" href="Tactics.html#l<sub>1</sub>"><span class="id" type="variable">l<sub>1</sub></span></a> ++ <a class="idref" href="Tactics.html#l<sub>2</sub>"><span class="id" type="variable">l<sub>2</sub></span></a>)) = <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a>.<br/>
-<span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
-</div>
-
-<div class="doc">
-<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
-<div class="paragraph"> </div>
-
-<a name="lab143"></a><h4 class="section">Exercise: 4 stars, optional (app_length_twice)</h4>
- Prove this by induction on <span class="inlinecode"><span class="id" type="var">l</span></span>, without using <span class="inlinecode"><span class="id" type="var">app_length</span></span> from <span class="inlinecode"><span class="id" type="var">Lists</span></span>. 
-</div>
-<div class="code code-tight">
-
-<br/>
-<span class="id" type="keyword">Theorem</span> <a name="app_length_twice"><span class="id" type="lemma">app_length_twice</span></a> : <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) (<span class="id" type="var">n</span>:<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>) (<span class="id" type="var">l</span>:<a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="Tactics.html#X"><span class="id" type="variable">X</span></a>),<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Poly.html#length"><span class="id" type="definition">length</span></a> <a class="idref" href="Tactics.html#l"><span class="id" type="variable">l</span></a> = <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Poly.html#length"><span class="id" type="definition">length</span></a> (<a class="idref" href="Tactics.html#l"><span class="id" type="variable">l</span></a> ++ <a class="idref" href="Tactics.html#l"><span class="id" type="variable">l</span></a>) = <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a> + <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a>.<br/>
-<span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
-</div>
-
-<div class="doc">
-<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
-<div class="paragraph"> </div>
-
-<a name="lab144"></a><h4 class="section">Exercise: 3 stars, optional (double_induction)</h4>
- Prove the following principle of induction over two naturals. 
-</div>
-<div class="code code-tight">
-
-<br/>
-<span class="id" type="keyword">Theorem</span> <a name="double_induction"><span class="id" type="lemma">double_induction</span></a>: <span style="font-family: arial;">&forall;</span>(<span class="id" type="var">P</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a> <span style="font-family: arial;">&rarr;</span> <span class="id" type="keyword">Prop</span>),<br/>
-&nbsp;&nbsp;<a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> 0 0 <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;(<span style="font-family: arial;">&forall;</span><span class="id" type="var">m</span>, <a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> <a class="idref" href="Tactics.html#m"><span class="id" type="variable">m</span></a> 0 <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="Tactics.html#m"><span class="id" type="variable">m</span></a>) 0) <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;(<span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>, <a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> 0 <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> 0 (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a>)) <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;(<span style="font-family: arial;">&forall;</span><span class="id" type="var">m</span> <span class="id" type="var">n</span>, <a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> <a class="idref" href="Tactics.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="Tactics.html#m"><span class="id" type="variable">m</span></a>) (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a>)) <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;<span style="font-family: arial;">&forall;</span><span class="id" type="var">m</span> <span class="id" type="var">n</span>, <a class="idref" href="Tactics.html#P"><span class="id" type="variable">P</span></a> <a class="idref" href="Tactics.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Tactics.html#n"><span class="id" type="variable">n</span></a>.<br/>
-<span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
-</div>
-
-<div class="doc">
-<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 </div>
 <div class="code code-tight">
 
@@ -1268,7 +1200,7 @@ Let's look at an informal proof of this theorem.  Note that
 </div>
 
 <div class="doc">
-<a name="lab145"></a><h1 class="section">Unfolding Definitions</h1>
+<a name="lab144"></a><h1 class="section">Unfolding Definitions</h1>
 
 <div class="paragraph"> </div>
 
@@ -1343,8 +1275,8 @@ At this point, a deeper discussion of unfolding and simplification
 
     You may already have observed that tactics like <span class="inlinecode"><span class="id" type="tactic">simpl</span></span>,
     <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span>, and <span class="inlinecode"><span class="id" type="tactic">apply</span></span> will often unfold the definitions of
-    functions automatically when it allows them to make progress.  For
-    example, if we define <span class="inlinecode"><span class="id" type="var">foo</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> to be the constant <span class="inlinecode">5</span>, 
+    functions automatically when this allows them to make progress.  For
+    example, if we define <span class="inlinecode"><span class="id" type="var">foo</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> to be the constant <span class="inlinecode">5</span>... 
 </div>
 <div class="code code-tight">
 
@@ -1445,8 +1377,8 @@ This approach works, but it depends on our recognizing that the
 
 <div class="paragraph"> </div>
 
-    A more straightforward way to finish the proof is to explicitly
-    tell Coq to unfold <span class="inlinecode"><span class="id" type="var">bar</span></span>. 
+    A more straightforward way to make progress is to explicitly tell
+    Coq to unfold <span class="inlinecode"><span class="id" type="var">bar</span></span>. 
 </div>
 <div class="code code-tight">
 
@@ -1476,7 +1408,7 @@ Now it is apparent that we are stuck on the <span class="inlinecode"><span class
 </div>
 
 <div class="doc">
-<a name="lab146"></a><h1 class="section">Using <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> on Compound Expressions</h1>
+<a name="lab145"></a><h1 class="section">Using <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> on Compound Expressions</h1>
 
 <div class="paragraph"> </div>
 
@@ -1527,12 +1459,12 @@ After unfolding <span class="inlinecode"><span class="id" type="var">sillyfun</s
     are replaced by <span class="inlinecode"><span class="id" type="var">c</span></span>. 
 <div class="paragraph"> </div>
 
-<a name="lab147"></a><h4 class="section">Exercise: 3 stars, optional (combine_split)</h4>
+<a name="lab146"></a><h4 class="section">Exercise: 3 stars, optional (combine_split)</h4>
 
 </div>
 <div class="code code-space">
 <span class="id" type="keyword">Theorem</span> <a name="combine_split"><span class="id" type="lemma">combine_split</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">X</span> <span class="id" type="var">Y</span> (<span class="id" type="var">l</span> : <a class="idref" href="Poly.html#list"><span class="id" type="inductive">list</span></a> (<a class="idref" href="Tactics.html#X"><span class="id" type="variable">X</span></a> * <a class="idref" href="Tactics.html#Y"><span class="id" type="variable">Y</span></a>)) <span class="id" type="var">l<sub>1</sub></span> <span class="id" type="var">l<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;<a class="idref" href="Poly.html#split"><span class="id" type="definition">split</span></a> <a class="idref" href="Tactics.html#l"><span class="id" type="variable">l</span></a> = (<a class="idref" href="Tactics.html#l<sub>1</sub>"><span class="id" type="variable">l<sub>1</sub></span></a>, <a class="idref" href="Tactics.html#l<sub>2</sub>"><span class="id" type="variable">l<sub>2</sub></span></a>) <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Poly.html#split"><span class="id" type="axiom">split</span></a> <a class="idref" href="Tactics.html#l"><span class="id" type="variable">l</span></a> = (<a class="idref" href="Tactics.html#l<sub>1</sub>"><span class="id" type="variable">l<sub>1</sub></span></a>, <a class="idref" href="Tactics.html#l<sub>2</sub>"><span class="id" type="variable">l<sub>2</sub></span></a>) <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;<a class="idref" href="Poly.html#combine"><span class="id" type="definition">combine</span></a> <a class="idref" href="Tactics.html#l<sub>1</sub>"><span class="id" type="variable">l<sub>1</sub></span></a> <a class="idref" href="Tactics.html#l<sub>2</sub>"><span class="id" type="variable">l<sub>2</sub></span></a> = <a class="idref" href="Tactics.html#l"><span class="id" type="variable">l</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
@@ -1627,7 +1559,7 @@ We get stuck at this point because the context does not
 </div>
 
 <div class="doc">
-<a name="lab148"></a><h4 class="section">Exercise: 2 stars (destruct_eqn_practice)</h4>
+<a name="lab147"></a><h4 class="section">Exercise: 2 stars (destruct_eqn_practice)</h4>
 
 </div>
 <div class="code code-space">
@@ -1647,7 +1579,7 @@ We get stuck at this point because the context does not
 </div>
 
 <div class="doc">
-<a name="lab149"></a><h1 class="section">Review</h1>
+<a name="lab148"></a><h1 class="section">Review</h1>
 
 <div class="paragraph"> </div>
 
@@ -1777,8 +1709,8 @@ We get stuck at this point because the context does not
 
 
 </li>
-<li> <span class="inlinecode"><span class="id" type="tactic">assert</span></span> <span class="inlinecode">(<span class="id" type="var">e</span>)</span> <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span>: introduce a "local lemma" <span class="inlinecode"><span class="id" type="var">e</span></span> and call it
-        <span class="inlinecode"><span class="id" type="var">H</span></span>
+<li> <span class="inlinecode"><span class="id" type="tactic">assert</span></span> <span class="inlinecode">(<span class="id" type="var">H</span>:</span> <span class="inlinecode"><span class="id" type="var">e</span>)</span> (or <span class="inlinecode"><span class="id" type="tactic">assert</span></span> <span class="inlinecode">(<span class="id" type="var">e</span>)</span> <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span>): introduce a "local
+        lemma" <span class="inlinecode"><span class="id" type="var">e</span></span> and call it <span class="inlinecode"><span class="id" type="var">H</span></span>
 
 <div class="paragraph"> </div>
 
@@ -1797,11 +1729,11 @@ We get stuck at this point because the context does not
 </div>
 
 <div class="doc">
-<a name="lab150"></a><h1 class="section">Additional Exercises</h1>
+<a name="lab149"></a><h1 class="section">Additional Exercises</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab151"></a><h4 class="section">Exercise: 3 stars (beq_nat_sym)</h4>
+<a name="lab150"></a><h4 class="section">Exercise: 3 stars (beq_nat_sym)</h4>
 
 </div>
 <div class="code code-space">
@@ -1815,7 +1747,7 @@ We get stuck at this point because the context does not
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab152"></a><h4 class="section">Exercise: 3 stars, advanced, optional (beq_nat_sym_informal)</h4>
+<a name="lab151"></a><h4 class="section">Exercise: 3 stars, advancedM? (beq_nat_sym_informal)</h4>
  Give an informal proof of this lemma that corresponds to your
     formal proof above:
 
@@ -1831,7 +1763,7 @@ We get stuck at this point because the context does not
 
 <div class="paragraph"> </div>
 
-<a name="lab153"></a><h4 class="section">Exercise: 3 stars, optional (beq_nat_trans)</h4>
+<a name="lab152"></a><h4 class="section">Exercise: 3 stars, optional (beq_nat_trans)</h4>
 
 </div>
 <div class="code code-space">
@@ -1847,7 +1779,7 @@ We get stuck at this point because the context does not
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab154"></a><h4 class="section">Exercise: 3 stars, advanced (split_combine)</h4>
+<a name="lab153"></a><h4 class="section">Exercise: 3 stars, advancedM (split_combine)</h4>
  We proved, in an exercise above, that for all lists of pairs,
     <span class="inlinecode"><span class="id" type="var">combine</span></span> is the inverse of <span class="inlinecode"><span class="id" type="tactic">split</span></span>.  How would you formalize the
     statement that <span class="inlinecode"><span class="id" type="tactic">split</span></span> is the inverse of <span class="inlinecode"><span class="id" type="var">combine</span></span>?  When is this
@@ -1860,16 +1792,18 @@ We get stuck at this point because the context does not
     <span class="inlinecode"><span class="id" type="var">combine</span></span>. Then, prove that the property holds. (Be sure to leave
     your induction hypothesis general by not doing <span class="inlinecode"><span class="id" type="tactic">intros</span></span> on more
     things than necessary.  Hint: what property do you need of <span class="inlinecode"><span class="id" type="var">l<sub>1</sub></span></span>
-    and <span class="inlinecode"><span class="id" type="var">l<sub>2</sub></span></span> for <span class="inlinecode"><span class="id" type="tactic">split</span></span> <span class="inlinecode"><span class="id" type="var">combine</span></span> <span class="inlinecode"><span class="id" type="var">l<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">l<sub>2</sub></span></span> <span class="inlinecode">=</span> <span class="inlinecode">(<span class="id" type="var">l<sub>1</sub></span>,<span class="id" type="var">l<sub>2</sub></span>)</span> to be true?)  
+    and <span class="inlinecode"><span class="id" type="var">l<sub>2</sub></span></span> for <span class="inlinecode"><span class="id" type="tactic">split</span></span> <span class="inlinecode"><span class="id" type="var">combine</span></span> <span class="inlinecode"><span class="id" type="var">l<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">l<sub>2</sub></span></span> <span class="inlinecode">=</span> <span class="inlinecode">(<span class="id" type="var">l<sub>1</sub></span>,<span class="id" type="var">l<sub>2</sub></span>)</span> to be true?) 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="split_combine_statement"><span class="id" type="definition">split_combine_statement</span></a> : <span class="id" type="keyword">Prop</span> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="split_combine_statement"><span class="id" type="definition">split_combine_statement</span></a> : <span class="id" type="keyword">Prop</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;("<span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="keyword">Prop</span></span>"&nbsp;means&nbsp;that&nbsp;we&nbsp;are&nbsp;giving&nbsp;a&nbsp;name&nbsp;to&nbsp;a<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logical&nbsp;proposition&nbsp;here.)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <a name="split_combine"><span class="id" type="lemma">split_combine</span></a> : <a class="idref" href="Tactics.html#split_combine_statement"><span class="id" type="definition">split_combine_statement</span></a>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="split_combine"><span class="id" type="lemma">split_combine</span></a> : <a class="idref" href="Tactics.html#split_combine_statement"><span class="id" type="axiom">split_combine_statement</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 
@@ -1880,7 +1814,7 @@ We get stuck at this point because the context does not
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab155"></a><h4 class="section">Exercise: 3 stars, advanced (filter_exercise)</h4>
+<a name="lab154"></a><h4 class="section">Exercise: 3 stars, advanced (filter_exercise)</h4>
  This one is a bit challenging.  Pay attention to the form of your
     induction hypothesis. 
 </div>
@@ -1899,7 +1833,7 @@ We get stuck at this point because the context does not
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab156"></a><h4 class="section">Exercise: 4 stars, advanced, recommended (forall_exists_challenge)</h4>
+<a name="lab155"></a><h4 class="section">Exercise: 4 stars, advanced, recommended (forall_exists_challenge)</h4>
  Define two recursive <span class="inlinecode"><span class="id" type="var">Fixpoints</span></span>, <span class="inlinecode"><span class="id" type="var">forallb</span></span> and <span class="inlinecode"><span class="id" type="var">existsb</span></span>.  The
     first checks whether every element in a list satisfies a given
     predicate:

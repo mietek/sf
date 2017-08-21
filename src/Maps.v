@@ -1,13 +1,12 @@
 (** * Maps: Total and Partial Maps *)
 
-(** Maps (or dictionaries) are ubiquitous data structures, both in
-    software construction generally and in the theory of programming
-    languages in particular; we're going to need them in many places
-    in the coming chapters.  They also make a nice case study using
-    ideas we've seen in previous chapters, including building data
-    structures out of higher-order functions (from [Basics] and
-    [Poly]) and the use of reflection to streamline proofs (from
-    [IndProp]).
+(** Maps (or dictionaries) are ubiquitous data structures both
+    generally and in the theory of programming languages in
+    particular; we're going to need them in many places in the coming
+    chapters.  They also make a nice case study using ideas we've seen
+    in previous chapters, including building data structures out of
+    higher-order functions (from [Basics] and [Poly]) and the use of
+    reflection to streamline proofs (from [IndProp]).
 
     We'll define two flavors of maps: _total_ maps, which include a
     "default" element to be returned when a key being looked up
@@ -15,10 +14,10 @@
     indicate success or failure.  The latter is defined in terms of
     the former, using [None] as the default element. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * The Coq Standard Library *)
 
-(** One small digression before we start.
+(** One small digression before we get to maps.
 
     Unlike the chapters we have seen so far, this one does not
     [Require Import] the chapter before it (and, transitively, all the
@@ -31,15 +30,16 @@
 
 Require Import Coq.Arith.Arith.
 Require Import Coq.Bool.Bool.
+Require Import Coq.Strings.String.
 Require Import Coq.Logic.FunctionalExtensionality.
 
 (** Documentation for the standard library can be found at
     http://coq.inria.fr/library/.  
 
-    The [SearchAbout] command is a good way to look for theorems 
-    involving objects of specific types. *)
+    The [Search] command is a good way to look for theorems involving 
+    objects of specific types.  Take a minute now to experiment with it. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Identifiers *)
 
 (** First, we need a type for the keys that we use to index into our
@@ -49,30 +49,42 @@ Require Import Coq.Logic.FunctionalExtensionality.
     function for [id]s and its fundamental property. *)
 
 Inductive id : Type :=
-  | Id : nat -> id.
+  | Id : string -> id.
 
-Definition beq_id id1 id2 :=
-  match id1,id2 with
-    | Id n1, Id n2 => beq_nat n1 n2
+Definition beq_id x y :=
+  match x,y with
+    | Id n1, Id n2 => if string_dec n1 n2 then true else false
   end.
+
+(** (The function [string_dec] comes from Coq's string library.
+    If you check its result type, you'll see that it does not actually
+    return a [bool], but rather a type that looks like [{x = y} + {x
+    <> y}], called a [sumbool], which can be thought of as an
+    "evidence-carrying boolean."  Formally, an element of [sumbool] is
+    either a proof that two things are equal or a proof that they are
+    unequal, together with a tag indicating which.  But for present
+    purposes you can think of it as just a fancy [bool].) *)
 
 Theorem beq_id_refl : forall id, true = beq_id id id.
 Proof.
-  intros [n]. simpl. rewrite <- beq_nat_refl.
-  reflexivity. Qed.
+  intros [n]. simpl. destruct (string_dec n n).
+  - reflexivity.
+  - destruct n0. reflexivity.
+Qed.
 
 (** The following useful property of [beq_id] follows from an
-    analogous lemma about numbers: *)
+    analogous lemma about strings: *)
 
-Theorem beq_id_true_iff : forall id1 id2 : id,
-  beq_id id1 id2 = true <-> id1 = id2.
+Theorem beq_id_true_iff : forall x y : id,
+  beq_id x y = true <-> x = y.
 Proof.
    intros [n1] [n2].
    unfold beq_id.
-   rewrite beq_nat_true_iff.
-   split.
-   - (* -> *) intros H. rewrite H. reflexivity.
-   - (* <- *) intros H. inversion H. reflexivity.
+   destruct (string_dec n1 n2).
+   - subst. split. reflexivity. reflexivity.
+   - split.
+     + intros contra. inversion contra.
+     + intros H. inversion H. subst. destruct n. reflexivity.
 Qed.
 
 (** Similarly: *)
@@ -93,18 +105,18 @@ Proof.
   intros x y. rewrite beq_id_false_iff.
   intros H. apply H. Qed.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Total Maps *)
 
 (** Our main job in this chapter will be to build a definition of
     partial maps that is similar in behavior to the one we saw in the
-    [Lists] chapter, plus accompanying lemmas about their behavior.
+    [Lists] chapter, plus accompanying lemmas about its behavior.
 
     This time around, though, we're going to use _functions_, rather
     than lists of key-value pairs, to build maps.  The advantage of
     this representation is that it offers a more _extensional_ view of
     maps, where two maps that respond to queries in the same way will
-    be represented as literally the same thing (the same function),
+    be represented as literally the same thing (the very same function),
     rather than just "equivalent" data structures.  This, in turn,
     simplifies proofs that use maps.
 
@@ -114,7 +126,7 @@ Proof.
 
 Definition total_map (A:Type) := id -> A.
 
-(** Intuitively, a total map over an element type [A] _is_ just a
+(** Intuitively, a total map over an element type [A] is just a
     function that can be used to look up [id]s, yielding [A]s.
 
     The function [t_empty] yields an empty total map, given a default
@@ -132,43 +144,51 @@ Definition t_update {A:Type} (m : total_map A)
                     (x : id) (v : A) :=
   fun x' => if beq_id x x' then v else m x'.
 
-(** This definition is a nice example of higher-order programming.
-    The [t_update] function takes a _function_ [m] and yields a new
-    function [fun x' => ...] that behaves like the desired map.
+(** This definition is a nice example of higher-order programming:
+    [t_update] takes a _function_ [m] and yields a new function 
+    [fun x' => ...] that behaves like the desired map.
 
     For example, we can build a map taking [id]s to [bool]s, where [Id
     3] is mapped to [true] and every other key is mapped to [false],
     like this: *)
 
 Definition examplemap :=
-  t_update (t_update (t_empty false) (Id 1) false)
-           (Id 3) true.
+  t_update (t_update (t_empty false) (Id "foo") false)
+           (Id "bar") true.
 
 (** This completes the definition of total maps.  Note that we don't
     need to define a [find] operation because it is just function
     application! *)
 
-Example update_example1 : examplemap (Id 0) = false.
+Example update_example1 : examplemap (Id "baz") = false.
 Proof. reflexivity. Qed.
 
-Example update_example2 : examplemap (Id 1) = false.
+Example update_example2 : examplemap (Id "foo") = false.
 Proof. reflexivity. Qed.
 
-Example update_example3 : examplemap (Id 2) = false.
+Example update_example3 : examplemap (Id "quux") = false.
 Proof. reflexivity. Qed.
 
-Example update_example4 : examplemap (Id 3) = true.
+Example update_example4 : examplemap (Id "bar") = true.
 Proof. reflexivity. Qed.
 
 (** To use maps in later chapters, we'll need several fundamental
     facts about how they behave.  Even if you don't work the following
     exercises, make sure you thoroughly understand the statements of
     the lemmas!  (Some of the proofs require the functional
-    extensionality axiom discussed in the [Logic] chapter, which is
-    also included in the standard library.) *)
+    extensionality axiom, which is discussed in the [Logic]
+    chapter.) *)
+
+(** **** Exercise: 1 star, optional (t_apply_empty)  *)
+(** First, the empty map returns its default element for all keys: *)
+
+Lemma t_apply_empty:  forall A x v, @t_empty A v x = v.
+Proof.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 2 stars, optional (t_update_eq)  *)
-(** First, if we update a map [m] at a key [x] with a new value [v]
+(** Next, if we update a map [m] at a key [x] with a new value [v]
     and then look up [x] in the map resulting from the [update], we
     get back [v]: *)
 
@@ -210,7 +230,7 @@ Proof.
     by proving a fundamental _reflection lemma_ relating the equality
     proposition on [id]s with the boolean function [beq_id]. *)
 
-(** **** Exercise: 2 stars (beq_idP)  *)
+(** **** Exercise: 2 stars, optional (beq_idP)  *)
 (** Use the proof of [beq_natP] in chapter [IndProp] as a template to
     prove the following: *)
 
@@ -225,7 +245,7 @@ Proof.
     sense of [=]) of [x1] and [x2]. *)
 
 (** **** Exercise: 2 stars (t_update_same)  *)
-(** Using the example in chapter [IndProp] as a template, use
+(** With the example in chapter [IndProp] as a template, use
     [beq_idP] to prove the following theorem, which states that if we
     update a map to assign key [x] the same value as it already has in
     [m], then the result is equal to [m]: *)
@@ -250,7 +270,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Partial maps *)
 
 (** Finally, we define _partial maps_ on top of total maps.  A partial
@@ -266,8 +286,14 @@ Definition update {A:Type} (m : partial_map A)
                   (x : id) (v : A) :=
   t_update m x (Some v).
 
-(** We can now lift all of the basic lemmas about total maps to
-    partial maps.  *)
+(** We now straightforwardly lift all of the basic lemmas about total
+    maps to partial maps.  *)
+
+Lemma apply_empty : forall A x, @empty A x = None.
+Proof.
+  intros. unfold empty. rewrite t_apply_empty.
+  reflexivity.
+Qed.
 
 Lemma update_eq : forall A (m: partial_map A) x v,
   (update m x v) x = Some v.
@@ -310,5 +336,5 @@ Proof.
   apply t_update_permute.
 Qed.
 
-(** $Date: 2015-12-11 17:17:29 -0500 (Fri, 11 Dec 2015) $ *)
+(** $Date: 2016-11-22 16:39:52 -0500 (Tue, 22 Nov 2016) $ *)
 

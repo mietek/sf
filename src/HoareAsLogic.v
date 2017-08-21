@@ -20,6 +20,7 @@
 Require Import Imp.
 Require Import Hoare.
 
+(* ################################################################# *)
 (** * Definitions *)
 
 Inductive hoare_proof : Assertion -> com -> Assertion -> Type :=
@@ -102,6 +103,7 @@ Print sample_proof.
             (APlus (AId X) (ANum 2)))
 *)
 
+(* ################################################################# *)
 (** * Properties *)
 
 (** **** Exercise: 2 stars (hoare_proof_sound)  *)
@@ -287,4 +289,4 @@ Proof.
     section of chapter [Hoare2] on formalizing decorated programs
     shows how we can do even better. *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-11-06 11:48:34 -0500 (Sun, 06 Nov 2016) $ *)

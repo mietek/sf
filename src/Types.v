@@ -11,14 +11,13 @@
     Coq!). *)
 
 Require Import Coq.Arith.Arith.
-Require Import SfLib.
 Require Import Maps.
 Require Import Imp.
 Require Import Smallstep.
 
 Hint Constructors multi.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Typed Arithmetic Expressions *)
 
 (** To motivate the discussion of type systems, let's begin as
@@ -32,7 +31,7 @@ Hint Constructors multi.
 
     The language definition is completely routine. *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Syntax *)
 
 (** Here is the syntax, informally:
@@ -72,10 +71,10 @@ Hint Constructors bvalue nvalue.
 Hint Unfold value.
 Hint Unfold update.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Operational Semantics *)
 
-(** And here is the single-step relation, first informally... *)
+(** Here is the single-step relation, first informally... *)
 (**
 
                     ------------------------------                  (ST_IfTrue)
@@ -113,7 +112,6 @@ Hint Unfold update.
                               t1 ==> t1'
                        ------------------------                     (ST_Iszero)
                        iszero t1 ==> iszero t1'
-
 *)
 
 (** ... and then formally: *)
@@ -157,13 +155,13 @@ Hint Constructors step.
     in the _next_ reduction step is being applied to the right kinds
     of operands.  For example, the term [succ true] (i.e., 
     [tsucc ttrue] in the formal syntax) cannot take a step, but the
-    almost-as-obviously nonsensical term
+    almost as obviously nonsensical term
 
        succ (if true then true else true)
 
     can take a step (once, before becoming stuck). *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Normal Forms and Values *)
 
 (** The first interesting thing to notice about this [step] relation
@@ -187,12 +185,12 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** However, although values and normal forms are not the same in this
+(** However, although values and normal forms are _not_ the same in this
     language, the set of values is included in the set of normal
     forms.  This is important because it shows we did not accidentally
     define things so that some value could still take a step. *)
 
-(** **** Exercise: 3 stars, advanced (value_is_nf)  *)
+(** **** Exercise: 3 stars (value_is_nf)  *)
 Lemma value_is_nf : forall t,
   value t -> step_normal_form t.
 Proof.
@@ -217,7 +215,7 @@ Proof with eauto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Typing *)
 
 (** The next critical observation is that, although this
@@ -262,7 +260,6 @@ Inductive ty : Type :=
                             |- t1 \in Nat
                         ---------------------                        (T_IsZero)
                         |- iszero t1 \in Bool
-
 *)
 
 Reserved Notation "'|-' t '\in' T" (at level 40).
@@ -315,7 +312,7 @@ Qed.
 Example has_type_not :
   ~ (|- tif tfalse tzero ttrue \in TBool).
 Proof.
-  intros Contra. solve by inversion 2.  Qed.
+  intros Contra. solve_by_inverts 2.  Qed.
 
 (** **** Exercise: 1 star, optional (succ_hastype_nat__hastype_nat)  *)
 Example succ_hastype_nat__hastype_nat : forall t,
@@ -325,7 +322,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Canonical forms *)
 
 (** The following two lemmas capture the fundamental property that the
@@ -349,23 +346,23 @@ Proof.
   auto.
 Qed.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Progress *)
 
 (** The typing relation enjoys two critical properties.  The first is
     that well-typed normal forms are not stuck -- or conversely, if a
     term is well typed, then either it is a value or it can take at
-    least one step. *)
+    least one step.  We call this _progress_. *)
 
+(** **** Exercise: 3 stars (finish_progress)  *)
 Theorem progress : forall t T,
   |- t \in T ->
   value t \/ exists t', t ==> t'.
 
-(** **** Exercise: 3 stars (finish_progress)  *)
 (** Complete the formal proof of the [progress] property.  (Make sure
-    you understand the informal proof fragment in the following
-    exercise before starting -- this will save you a lot of time.) *)
-
+    you understand the parts we've given of the informal proof in the
+    following exercise before starting -- this will save you a lot of
+    time.) *)
 Proof with auto.
   intros t T HT.
   induction HT...
@@ -384,7 +381,7 @@ Proof with auto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced (finish_progress_informal)  *)
+(** **** Exercise: 3 stars, advancedM (finish_progress_informal)  *)
 (** Complete the corresponding informal proof: *)
 
 (** _Theorem_: If [|- t \in T], then either [t] is a value or else
@@ -413,35 +410,21 @@ Proof with auto.
 
 (** This theorem is more interesting than the strong progress theorem
     that we saw in the [Smallstep] chapter, where _all_ normal forms
-    were values.  Here, a term can be stuck, but only if it is ill
+    were values.  Here a term can be stuck, but only if it is ill
     typed. *)
 
-(** **** Exercise: 1 star (step_review)  *)
-(** Quick review: answer _true_ or _false_.  In this language...
-      - Every well-typed normal form is a value.
-
-      - Every value is a normal form.
-
-      - The single-step reduction relation is
-        a partial function (i.e., it is deterministic).
-
-      - The single-step reduction relation is a _total_ function.
-
-*)
-(** [] *)
-
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Type Preservation *)
 
 (** The second critical property of typing is that, when a well-typed
     term takes a step, the result is also a well-typed term. *)
 
+(** **** Exercise: 2 stars (finish_preservation)  *)
 Theorem preservation : forall t t' T,
   |- t \in T ->
   t ==> t' ->
   |- t' \in T.
 
-(** **** Exercise: 2 stars (finish_preservation)  *)
 (** Complete the formal proof of the [preservation] property.  (Again,
     make sure you understand the informal proof fragment in the
     following exercise first.) *)
@@ -454,7 +437,7 @@ Proof with auto.
          intros t' HE;
          (* and we can deal with several impossible
             cases all at once *)
-         try (solve by inversion).
+         try solve_by_invert.
     - (* T_If *) inversion HE; subst; clear HE.
       + (* ST_IFTrue *) assumption.
       + (* ST_IfFalse *) assumption.
@@ -463,7 +446,7 @@ Proof with auto.
     (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced (finish_preservation_informal)  *)
+(** **** Exercise: 3 stars, advancedM (finish_preservation_informal)  *)
 (** Complete the following informal proof: *)
 
 (** _Theorem_: If [|- t \in T] and [t ==> t'], then [|- t' \in T]. *)
@@ -515,10 +498,10 @@ Proof with eauto.
     typing statements as sentences, where the term is the subject and
     the type is the predicate. *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Type Soundness *)
 
-(** Putting progress and preservation together, it follows that a
+(** Putting progress and preservation together, we see that a
     well-typed term can never reach a stuck state.  *)
 
 Definition multistep := (multi step).
@@ -534,7 +517,8 @@ Proof.
   apply IHP.  apply (preservation x y T HT H).
   unfold stuck. split; auto.   Qed.
 
-(* ###################################################################### *)
+
+(* ################################################################# *)
 (** * Aside: the [normalize] Tactic *)
 
 (** When experimenting with definitions of programming languages
@@ -545,30 +529,31 @@ Proof.
     example, reducing an arithmetic expression using the small-step
     relation [astep]. *)
 
-Notation " t '/' st '==>a*' t' " := (multi (astep st) t t')
-                                    (at level 40, st at level 39).
+Module NormalizePlayground.
+Import Smallstep.
 
-Example astep_example1 :
-  (APlus (ANum 3) (AMult (ANum 3) (ANum 4))) / empty_state
-  ==>a* (ANum 15).
+Example step_example1 :
+  (P (C 3) (P (C 3) (C 4))) 
+  ==>* (C 10).
 Proof.
-  apply multi_step with (APlus (ANum 3) (ANum 12)).
-    apply AS_Plus2.
-      apply av_num.
-      apply AS_Mult.
-  apply multi_step with (ANum 15).
-    apply AS_Plus.
+  apply multi_step with (P (C 3) (C 7)).
+    apply ST_Plus2.
+      apply v_const.
+      apply ST_PlusConstConst.
+  apply multi_step with (C 10).
+    apply ST_PlusConstConst.
   apply multi_refl.
 Qed.
 
-(** We repeatedly apply [multi_step] until we get to a normal
-    form. The proofs for the intermediate steps are simple enough that
-    [auto], with appropriate hints, can solve them. *)
+(** The proof repeatedly applies [multi_step] until the term reaches a
+    normal form.  Fortunately The sub-proofs for the intermediate
+    steps are simple enough that [auto], with appropriate hints, can
+    solve them. *)
 
-Hint Constructors astep aval.
-Example astep_example1' :
-  (APlus (ANum 3) (AMult (ANum 3) (ANum 4))) / empty_state
-  ==>a* (ANum 15).
+Hint Constructors step value.
+Example step_example1' :
+  (P (C 3) (P (C 3) (C 4)))
+  ==>* (C 10).
 Proof.
   eapply multi_step. auto. simpl.
   eapply multi_step. auto. simpl.
@@ -579,67 +564,74 @@ Qed.
     pattern.  In addition, before each step, we print out the current
     goal, so that we can follow how the term is being reduced. *)
 
-Tactic Notation "print_goal" := match goal with |- ?x => idtac x end.
-Tactic Notation "normalize" :=
-   repeat (print_goal; eapply multi_step ;
-             [ (eauto 10; fail) | (instantiate; simpl)]);
-   apply multi_refl.
+Tactic Notation "print_goal" :=
+  match goal with |- ?x => idtac x end.
 
-Example astep_example1'' :
-  (APlus (ANum 3) (AMult (ANum 3) (ANum 4))) / empty_state
-  ==>a* (ANum 15).
+Tactic Notation "normalize" :=
+  repeat (print_goal; eapply multi_step ;
+            [ (eauto 10; fail) | (instantiate; simpl)]);
+  apply multi_refl.
+
+Example step_example1'' :
+  (P (C 3) (P (C 3) (C 4))) 
+  ==>* (C 10).
 Proof.
   normalize.
-  (* At this point in the proof script, the Coq response shows
+  (* The [print_goal] in the [normalize] tactic shows
      a trace of how the expression reduced...
-   (APlus (ANum 3) (AMult (ANum 3) (ANum 4)) / empty_state ==>a* ANum 15)
-   (multi (astep empty_state) (APlus (ANum 3) (ANum 12)) (ANum 15))
-   (multi (astep empty_state) (ANum 15) (ANum 15))    *)
+         (P (C 3) (P (C 3) (C 4)) ==>* C 10)
+         (P (C 3) (C 7) ==>* C 10)
+         (C 10 ==>* C 10)                      
+  *)
 Qed.
 
-(** The [normalize] tactic also provides a simple way to calculate
-    what the normal form of a term is, by proving a goal with an
-    existentially bound variable. *)
+(** The [normalize] tactic also provides a simple way to calculate the
+    normal form of a term, by starting with a goal with an existentially
+    bound variable. *)
 
-Example astep_example1''' : exists e',
-  (APlus (ANum 3) (AMult (ANum 3) (ANum 4))) / empty_state
-  ==>a* e'.
+Example step_example1''' : exists e',
+  (P (C 3) (P (C 3) (C 4)))
+  ==>* e'.
 Proof.
   eapply ex_intro. normalize.
-
-(* This time, the trace will be:
-
-    (APlus (ANum 3) (AMult (ANum 3) (ANum 4)) / empty_state ==>a* ??)
-    (multi (astep empty_state) (APlus (ANum 3) (ANum 12)) ??)
-    (multi (astep empty_state) (ANum 15) ??)
-
-   where ?? is the variable ``guessed'' by eapply.
-*)
+(* This time, the trace is:
+       (P (C 3) (P (C 3) (C 4)) ==>* ?e')
+       (P (C 3) (C 7) ==>* ?e')
+       (C 10 ==>* ?e')
+   where ?e' is the variable ``guessed'' by eapply. *)
 Qed.
 
 (** **** Exercise: 1 star (normalize_ex)  *)
 Theorem normalize_ex : exists e',
-  (AMult (ANum 3) (AMult (ANum 2) (ANum 1))) / empty_state
-  ==>a* e'.
+  (P (C 3) (P (C 2) (C 1))) 
+  ==>* e'.
 Proof.
   (* FILL IN HERE *) Admitted.
-
 (** [] *)
 
 (** **** Exercise: 1 star, optional (normalize_ex')  *)
 (** For comparison, prove it using [apply] instead of [eapply]. *)
 
 Theorem normalize_ex' : exists e',
-  (AMult (ANum 3) (AMult (ANum 2) (ANum 1))) / empty_state
-  ==>a* e'.
+  (P (C 3) (P (C 2) (C 1))) 
+  ==>* e'.
 Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+End NormalizePlayground.
+Tactic Notation "print_goal" :=
+  match goal with |- ?x => idtac x end.
+Tactic Notation "normalize" :=
+  repeat (print_goal; eapply multi_step ;
+            [ (eauto 10; fail) | (instantiate; simpl)]);
+  apply multi_refl.
+
+
+(* ================================================================= *)
 (** ** Additional Exercises *)
 
-(** **** Exercise: 2 stars, recommended (subject_expansion)  *)
+(** **** Exercise: 2 stars, recommendedM (subject_expansion)  *)
 (** Having seen the subject reduction property, one might
     wonder whether the opposity property -- subject _expansion_ --
     also holds.  That is, is it always the case that, if [t ==> t']
@@ -650,7 +642,7 @@ Proof.
     (* FILL IN HERE *)
 [] *)
 
-(** **** Exercise: 2 stars (variation1)  *)
+(** **** Exercise: 2 starsM (variation1)  *)
 (** Suppose, that we add this new rule to the typing relation:
 
       | T_SuccBool : forall t,
@@ -669,7 +661,7 @@ Proof.
 
 [] *)
 
-(** **** Exercise: 2 stars (variation2)  *)
+(** **** Exercise: 2 starsM (variation2)  *)
 (** Suppose, instead, that we add this new rule to the [step] relation:
 
       | ST_Funny1 : forall t2 t3,
@@ -732,7 +724,7 @@ Proof.
     break just one of the properties and leave the others alone.
 [] *)
 
-(** **** Exercise: 1 star (remove_predzero)  *)
+(** **** Exercise: 1 starM (remove_predzero)  *)
 (** The reduction rule [E_PredZero] is a bit counter-intuitive: we
     might feel that it makes more sense for the predecessor of zero to
     be undefined, rather than being defined to be zero.  Can we
@@ -742,7 +734,7 @@ Proof.
 (* FILL IN HERE *)
 [] *)
 
-(** **** Exercise: 4 stars, advanced (prog_pres_bigstep)  *)
+(** **** Exercise: 4 stars, advancedM (prog_pres_bigstep)  *)
 (** Suppose our evaluation relation is defined in the big-step style.
     What are the appropriate analogs of the progress and preservation
     properties?  (You do not need to prove them.)
@@ -750,4 +742,4 @@ Proof.
 (* FILL IN HERE *)
 [] *)
 
-(** $Date: 2016-05-26 17:51:14 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-12-20 11:35:30 -0500 (Tue, 20 Dec 2016) $ *)

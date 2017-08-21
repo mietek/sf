@@ -4,10 +4,8 @@ Require Import Coq.Bool.Bool.
 Require Import Coq.Arith.Arith.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.omega.Omega.
-Require Import SfLib.
 Require Import Imp.
 Require Import Maps.
-(* /TERSE: HIDEFROMHTML *)
 
 (** In the past couple of chapters, we've begun applying the
     mathematical tools developed in the first part of the course to
@@ -79,7 +77,22 @@ Require Import Maps.
     that the structure of proofs directly mirrors the structure of the
     programs that they are about. *)
 
-(* ####################################################### *)
+(** This chapter:
+       - A systematic method for reasoning about the correctness of
+         particular programs in Imp
+
+    Goals:
+      - a natural notation for _program specifications_ and
+      - a _compositional_ proof technique for program correctness
+
+    Plan:
+      - assertions (Hoare Triples)
+      - proof rules
+      - decorated programs
+      - loop invariants
+      - examples *)
+
+(* ################################################################# *)
 (** * Assertions *)
 
 (** To talk about specifications of programs, the first thing we
@@ -125,8 +138,15 @@ End ExAssertions.
     we'll write just
 
       Z * Z <= m /\ ~((S Z) * (S Z) <= m).
-
 *)
+
+(** This example also illustrates a convention that we'll use
+    throughout the Hoare Logic chapters: in informal assertions,
+    capital letters like {X], [Y], and [Z] are Imp variables, while
+    lowercase letters like [x], [y], [m], and [n] are ordinary Coq
+    variables (of type [nat]).  This is why, when translating from
+    informal to formal, we replace [X] with [st X] but leave [m]
+    alone. *)
 
 (** Given two assertions [P] and [Q], we say that [P] _implies_ [Q],
     written [P ->> Q] (in ASCII, [P -][>][> Q]), if, whenever [P]
@@ -150,7 +170,7 @@ Open Scope hoare_spec_scope.
 Notation "P <<->> Q" :=
   (P ->> Q /\ Q ->> P) (at level 80) : hoare_spec_scope.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Hoare Triples *)
 
 (** Next, we need a way of making formal claims about the
@@ -180,7 +200,6 @@ Definition hoare_triple
     have a compact notation:
 
        {{P}} c {{Q}}.
-
 *)
 (** (The traditional notation is [{P} c {Q}], but single braces
     are already used for other things in Coq.)  *)
@@ -207,7 +226,6 @@ Notation "{{ P }}  c  {{ Q }}" :=
    6) {{True}}
       c
       {{(Z * Z) <= m /\ ~ (((S Z) * (S Z)) <= m)}}
-
 *)
 
 (** [] *)
@@ -237,7 +255,6 @@ Notation "{{ P }}  c  {{ Q }}" :=
    9) {{X = 1}}
       WHILE X <> 0 DO X ::= X + 1 END
       {{X = 100}}
-
 *)
 (** [] *)
 
@@ -266,7 +283,7 @@ Proof.
   unfold not in H. apply H in HP.
   inversion HP.  Qed.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Proof Rules *)
 
 (** The goal of Hoare logic is to provide a _compositional_
@@ -280,7 +297,7 @@ Proof.
     will then be able to prove programs correct using these proof
     rules, without ever unfolding the definition of [hoare_triple]. *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Assignment *)
 
 (** The rule for assignment is the most fundamental of the Hoare logic
@@ -292,8 +309,9 @@ Proof.
 
     In English: if we start out in a state where the value of [Y]
     is [1] and we assign [Y] to [X], then we'll finish in a
-    state where [X] is [1].  That is, the property of being equal
-    to [1] gets transferred from [Y] to [X].
+    state where [X] is [1].  
+    That is, the property of being equal to [1] gets transferred 
+    from [Y] to [X]. 
 
     Similarly, in
 
@@ -301,15 +319,15 @@ Proof.
 
     the same property (being equal to one) gets transferred to
     [X] from the expression [Y + Z] on the right-hand side of
-    the assignment.
+    the assignment. *)
 
-    More generally, if [a] is _any_ arithmetic expression, then
+(** More generally, if [a] is _any_ arithmetic expression, then
 
        {{ a = 1 }}  X ::= a {{ X = 1 }}
 
-    is a valid Hoare triple.
+    is a valid Hoare triple. *)
 
-    This can be made even more general. To conclude that an
+(** This can be made even more general. To conclude that an
     arbitrary property [Q] holds after [X ::= a], we need to assume
     that [Q] holds before [X ::= a], but _with all occurrences of_ [X]
     replaced by [a] in [Q]. This leads to the Hoare rule for
@@ -318,9 +336,9 @@ Proof.
       {{ Q [X |-> a] }} X ::= a {{ Q }}
 
     where "[Q [X |-> a]]" is pronounced "[Q] where [a] is substituted
-    for [X]".
+    for [X]". *)
 
-    For example, these are valid applications of the assignment
+(** For example, these are valid applications of the assignment
     rule:
 
       {{ (X <= 5) [X |-> X + 1]
@@ -337,7 +355,6 @@ Proof.
          i.e., (0 <= 3 /\ 3 <= 5)}}
       X ::= 3
       {{ 0 <= X /\ X <= 5 }}
-
 *)
 
 (** To formalize the rule, we must first formalize the idea of
@@ -348,7 +365,7 @@ Proof.
     mentions [X], [P'] should instead mention [a].
 
     Since [P] is an arbitrary Coq proposition, we can't directly
-    "edit" its text.  Instead, we can achieve the effect we want by
+    "edit" its text.  Instead, we can achieve the same effect by
     evaluating [P] in an updated state: *)
 
 Definition assn_sub X a P : Assertion :=
@@ -357,12 +374,12 @@ Definition assn_sub X a P : Assertion :=
 
 Notation "P [ X |-> a ]" := (assn_sub X a P) (at level 10).
 
-(** That is, [P [X |-> a]] is an assertion -- let's call it [P'] -- 
+(** That is, [P [X |-> a]] stands for an assertion -- let's call it [P'] -- 
     that is just like [P] except that, wherever [P] looks up the 
     variable [X] in the current state, [P'] instead uses the value 
-    of the expression [a].
+    of the expression [a]. *)
 
-    To see how this works, let's calculate what happens with a couple
+(** To see how this works, let's calculate what happens with a couple
     of examples.  First, suppose [P'] is [(X <= 5) [X |-> 3]] -- that
     is, more formally, [P'] is the Coq expression
 
@@ -381,15 +398,15 @@ Notation "P [ X |-> a ]" := (assn_sub X a P) (at level 10).
     fun st =>
       ((t_update st X 3) X) <= 5)
 
-    and by further simplification to
+    and finally to
 
     fun st =>
       (3 <= 5).
 
     That is, [P'] is the assertion that [3] is less than or equal to
-    [5] (as expected).
+    [5] (as expected). *)
 
-    For a more interesting example, suppose [P'] is [(X <= 5) [X |->
+(** For a more interesting example, suppose [P'] is [(X <= 5) [X |->
     X+1]].  Formally, [P'] is the Coq expression
 
     fun st =>
@@ -409,11 +426,11 @@ Notation "P [ X |-> a ]" := (assn_sub X a P) (at level 10).
     That is, [P'] is the assertion that [X+1] is at most [5].
 *)
 
-(** Now we can give the precise proof rule for assignment:
+(** Now, using the concept of substitution, we can give the precise 
+    proof rule for assignment:
 
       ------------------------------ (hoare_asgn)
       {{Q [X |-> a]}} X ::= a {{Q}}
-
 *)
 
 (** We can prove formally that this rule is indeed valid. *)
@@ -433,9 +450,10 @@ Example assn_sub_example :
   (X ::= (ANum 3))
   {{fun st => st X = 3}}.
 Proof.
+  (* WORKED IN CLASS *)
   apply hoare_asgn.  Qed.
 
-(** **** Exercise: 2 stars (hoare_asgn_examples)  *)
+(** **** Exercise: 2 starsM (hoare_asgn_examples)  *)
 (** Translate these informal Hoare triples...
 
     1) {{ (X <= 5) [X |-> X + 1] }}
@@ -452,7 +470,7 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(** **** Exercise: 2 stars (hoare_asgn_wrong)  *)
+(** **** Exercise: 2 stars, recommendedM (hoare_asgn_wrong)  *)
 (** The assignment rule looks backward to almost everyone the first
     time they see it.  If it still seems puzzling, it may help
     to think a little about alternative "forward" rules.  Here is a
@@ -471,7 +489,7 @@ Proof.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced (hoare_asgn_fwd)  *)
-(** However, by using an auxiliary variable [m] to remember the 
+(** However, by using a _parameter_ [m] (a Coq number) to remember the 
     original value of [X] we can define a Hoare rule for assignment 
     that does, intuitively, "work forwards" rather than backwards.
 
@@ -483,9 +501,8 @@ Proof.
 
     Note that we use the original value of [X] to reconstruct the
     state [st'] before the assignment took place. Prove that this rule
-    is correct (the first hypothesis is the functional extensionality
-    axiom, which you will need at some point). Also note that this
-    rule is more complicated than [hoare_asgn].
+    is correct.  (Also note that this rule is more complicated than 
+    [hoare_asgn].)
 *)
 
 Theorem hoare_asgn_fwd :
@@ -497,7 +514,6 @@ Theorem hoare_asgn_fwd :
   {{fun st => P (t_update st X m) 
             /\ st X = aeval (t_update st X m) a }}.
 Proof.
-  intros functional_extensionality m a P.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
@@ -511,7 +527,6 @@ Proof.
         X ::= a
       {{fun st => exists m, P (t_update st X m) /\
                      st X = aeval (t_update st X m) a }}
-
 *)
 
 Theorem hoare_asgn_fwd_exists :
@@ -527,7 +542,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Consequence *)
 
 (** Sometimes the preconditions and postconditions we get from the
@@ -536,6 +551,7 @@ Proof.
     different syntactic form that fails to unify with the goal we are
     trying to prove, or they actually may be logically weaker (for
     preconditions) or stronger (for postconditions) than what we need.
+
     For instance, while
 
       {{(X = 3) [X |-> 3]}} X ::= 3 {{X = 3}},
@@ -547,7 +563,7 @@ Proof.
     does not.  This triple is valid, but it is not an instance of
     [hoare_asgn] because [True] and [(X = 3) [X |-> 3]] are not
     syntactically equal assertions.  However, they are logically
-    equivalent, so if one triple is valid, then the other must
+    _equivalent_, so if one triple is valid, then the other must
     certainly be as well.  We can capture this observation with the
     following rule:
 
@@ -555,8 +571,9 @@ Proof.
                   P <<->> P'
          -----------------------------   (hoare_consequence_pre_equiv)
                 {{P}} c {{Q}}
+*)
 
-    Taking this line of thought a bit further, we can see that
+(** Taking this line of thought a bit further, we can see that
     strengthening the precondition or weakening the postcondition of a
     valid triple always produces another valid triple. This
     observation is captured by two _Rules of Consequence_.
@@ -570,7 +587,6 @@ Proof.
                   Q' ->> Q
          -----------------------------    (hoare_consequence_post)
                 {{P}} c {{Q}}
-
 *)
 
 (** Here are the formal versions: *)
@@ -607,13 +623,14 @@ Proof.
 Example hoare_asgn_example1 :
   {{fun st => True}} (X ::= (ANum 1)) {{fun st => st X = 1}}.
 Proof.
+  (* WORKED IN CLASS *)
   apply hoare_consequence_pre
     with (P' := (fun st => st X = 1) [X |-> ANum 1]).
   apply hoare_asgn.
   intros st H. unfold assn_sub, t_update. simpl. reflexivity.
 Qed.
 
-(** Finally, for convenience in some proofs, we can state a combined
+(** Finally, for convenience in proofs, we can state a combined
     rule of consequence that allows us to vary both the precondition
     and the postcondition at the same time.
 
@@ -622,7 +639,6 @@ Qed.
                    Q' ->> Q
          -----------------------------   (hoare_consequence)
                 {{P}} c {{Q}}
-
 *)
 
 Theorem hoare_consequence : forall (P P' Q Q' : Assertion) c,
@@ -636,13 +652,15 @@ Proof.
   apply hoare_consequence_post with (Q' := Q').
   assumption. assumption. assumption.  Qed.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Digression: The [eapply] Tactic *)
 
-(** This is a good moment to introduce another convenient feature of
-    Coq.  We had to write "[with (P' := ...)]" explicitly in the proof
-    of [hoare_asgn_example1] and [hoare_consequence] above, to make
-    sure that all of the metavariables in the premises to the
+(** This is a good moment to take another look at the [eapply] tactic,
+    which we introduced briefly in the [Auto] chapter.
+
+    We had to write "[with (P' := ...)]" explicitly in the proof of
+    [hoare_asgn_example1] and [hoare_consequence] above, to make sure
+    that all of the metavariables in the premises to the
     [hoare_consequence_pre] rule would be set to specific
     values.  (Since [P'] doesn't appear in the conclusion of
     [hoare_consequence_pre], the process of unifying the conclusion
@@ -747,7 +765,7 @@ Proof.
   intros P Q HP HQ. destruct HP as [y HP']. eapply HQ. eassumption.
 Qed.
 
-(** **** Exercise: 2 stars (hoare_asgn_examples_2)  *)
+(** **** Exercise: 2 starsM (hoare_asgn_examples_2)  *)
 (** Translate these informal Hoare triples...
 
        {{ X + 1 <= 5 }}  X ::= X + 1  {{ X <= 5 }}
@@ -760,7 +778,8 @@ Qed.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ####################################################### *)
+
+(* ================================================================= *)
 (** ** Skip *)
 
 (** Since [SKIP] doesn't change the state, it preserves any
@@ -768,7 +787,6 @@ Qed.
 
       --------------------  (hoare_skip)
       {{ P }} SKIP {{ P }}
-
 *)
 
 Theorem hoare_skip : forall P,
@@ -777,7 +795,7 @@ Proof.
   intros P st st' H HP. inversion H. subst.
   assumption.  Qed.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Sequencing *)
 
 (** More interestingly, if the command [c1] takes any state where
@@ -790,7 +808,6 @@ Proof.
         {{ Q }} c2 {{ R }}
        ---------------------  (hoare_seq)
        {{ P }} c1;;c2 {{ R }}
-
 *)
 
 Theorem hoare_seq : forall P Q R c1 c2,
@@ -820,7 +837,6 @@ Proof.
       {{ X = n }}    <---- decoration for Q
     SKIP
       {{ X = n }}
-
 *)
 
 (** Here's an example of a program involving both assignment and
@@ -843,7 +859,7 @@ Qed.
     [hoare_consequence_pre] and the [eapply] tactic, as in this
     example. *)
 
-(** **** Exercise: 2 stars (hoare_asgn_example4)  *)
+(** **** Exercise: 2 stars, recommended (hoare_asgn_example4)  *)
 (** Translate this "decorated program" into a formal proof:
 
                    {{ True }} ->>
@@ -854,7 +870,8 @@ Qed.
     Y ::= 2
                    {{ X = 1 /\ Y = 2 }}
 
-*)
+   (Note the use of "[->>]" decorations, each marking a use of 
+   [hoare_consequence_pre].) *)
 
 Example hoare_asgn_example4 :
   {{fun st => True}} (X ::= (ANum 1);; Y ::= (ANum 2))
@@ -869,10 +886,10 @@ Proof.
 
       {{X <= Y}} c {{Y <= X}}
 
-*)
+    Your proof should not need to use [unfold hoare_triple]. *)
 
-Definition swap_program : com :=
-  (* FILL IN HERE *) admit.
+Definition swap_program : com 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 
 Theorem swap_exercise :
   {{fun st => st X <= st Y}}
@@ -882,20 +899,19 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars (hoarestate1)  *)
+(** **** Exercise: 3 starsM (hoarestate1)  *)
 (** Explain why the following proposition can't be proven:
 
       forall (a : aexp) (n : nat),
          {{fun st => aeval st a = n}}
          (X ::= (ANum 3);; Y ::= a)
          {{fun st => st Y = n}}.
-
 *)
 
 (* FILL IN HERE *)
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Conditionals *)
 
 (** What sort of rule do we want for reasoning about conditional
@@ -909,8 +925,9 @@ Proof.
               {{P}} c2 {{Q}}
       --------------------------------
       {{P}} IFB b THEN c1 ELSE c2 {{Q}}
+*)
 
-   However, this is rather weak. For example, using this rule,
+(** However, this is rather weak. For example, using this rule,
    we cannot show 
 
      {{ True }}
@@ -936,7 +953,6 @@ Proof.
               {{P /\ ~b}} c2 {{Q}}
       ------------------------------------  (hoare_if)
       {{P}} IFB b THEN c1 ELSE c2 FI {{Q}}
-
 *)
 
 (** To interpret this rule formally, we need to do a little work.
@@ -986,6 +1002,7 @@ Proof.
       split. assumption.
              apply bexp_eval_false. assumption. Qed.
 
+(* ----------------------------------------------------------------- *)
 (** *** Example *)
 
 (** Here is a formal proof that the program we used to motivate the
@@ -1014,7 +1031,8 @@ Proof.
 Qed.
 
 (** **** Exercise: 2 stars (if_minus_plus)  *)
-(** Prove the following hoare triple using [hoare_if]: *)
+(** Prove the following hoare triple using [hoare_if].  Do not
+    use [unfold hoare_triple].  *)
 
 Theorem if_minus_plus :
   {{fun st => True}}
@@ -1025,12 +1043,12 @@ Theorem if_minus_plus :
   {{fun st => st Y = st X + st Z}}.
 Proof.
   (* FILL IN HERE *) Admitted.
+(** [] *)
 
-(* ####################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Exercise: One-sided conditionals *)
 
-(** **** Exercise: 4 stars (if1_hoare)  *)
-
+(** **** Exercise: 4 starsM (if1_hoare)  *)
 (** In this exercise we consider extending Imp with "one-sided
     conditionals" of the form [IF1 b THEN c FI]. Here [b] is a
     boolean expression, and [c] is a command. If [b] evaluates to
@@ -1124,7 +1142,6 @@ Notation "{{ P }}  c  {{ Q }}" := (hoare_triple P c Q)
     X ::= X + Y
   FI
   {{ X = Z }}
-
 *)
 
 (** Hint: Your proof of this triple may need to use the other proof
@@ -1142,7 +1159,7 @@ Proof. (* FILL IN HERE *) Admitted.
 End If1.
 (** [] *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Loops *)
 
 (** Finally, we need a rule for reasoning about while loops. *)
@@ -1166,7 +1183,6 @@ End If1.
 (**
 
       {{P}} WHILE b DO c END {{P}}.
-
 *)
 
 (** But, as we remarked above for the conditional, we know a
@@ -1176,7 +1192,6 @@ End If1.
 (**
 
       {{P}} WHILE b DO c END {{P /\ ~b}}
-
 *)
 
 (** What about the case where the loop body _does_ get executed?
@@ -1193,7 +1208,6 @@ End If1.
                    {{P}} c {{P}}
         -----------------------------------
         {{P}} WHILE b DO c END {{P /\ ~b}}
-
 *)
 (** This is almost the rule we want, but again it can be improved a
     little: at the beginning of the loop body, we know not only that
@@ -1264,9 +1278,7 @@ Proof.
     exfalso. apply Hb; reflexivity.
     apply leb_iff_conv in Heqle. omega.
 Qed.
-
-(** We can use the while rule to prove the following Hoare triple,
-    which may seem surprising at first... *)
+(** We can use the WHILE rule to prove the following Hoare triple... *)
 
 Theorem always_loop_hoare : forall P Q,
   {{P}} WHILE BTrue DO SKIP END {{Q}}.
@@ -1296,14 +1308,16 @@ Proof.
     build in the fact that the commands terminate. However, in this
     course we will only talk about partial correctness. *)
 
-(* ####################################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Exercise: [REPEAT] *)
 
-(** **** Exercise: 4 stars, advanced (hoare_repeat)  *)
+(** **** Exercise: 4 stars, advancedM (hoare_repeat)  *)
 (** In this exercise, we'll add a new command to our language of
     commands: [REPEAT] c [UNTIL] a [END]. You will write the
-    evaluation rule for [repeat] and add a new Hoare rule to
-    the language for programs involving it. *)
+    evaluation rule for [repeat] and add a new Hoare rule to the
+    language for programs involving it.  (You may recall that the
+    evaluation rule is given in an example in the [Auto] chapter.
+    Try to figure it out yourself here rather than peeking.) *)
 
 Module RepeatExercise.
 
@@ -1382,7 +1396,7 @@ Notation "{{ P }}  c  {{ Q }}" :=
   (hoare_triple P c Q) (at level 90, c at next level).
 
 (** To make sure you've got the evaluation rules for [REPEAT] right,
-    prove that [ex1_repeat evaluates correctly. *)
+    prove that [ex1_repeat] evaluates correctly. *)
 
 Definition ex1_repeat :=
   REPEAT
@@ -1411,13 +1425,12 @@ Proof.
     X ::= X - 1
   UNTIL X = 0 END
   {{ X = 0 /\ Y > 0 }}
-
 *)
 
 End RepeatExercise.
 (** [] *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Summary *)
 
 (** So far, we've introduced Hoare Logic as a tool for reasoning about
@@ -1454,8 +1467,9 @@ End RepeatExercise.
     In the next chapter, we'll see how these rules are used to prove
     that programs satisfy specifications of their behavior. *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
+
 
 (** **** Exercise: 3 stars (himp_hoare)  *)
 (** In this exercise, we will derive proof rules for the [HAVOC]
@@ -1512,11 +1526,7 @@ Inductive ceval : com -> state -> state -> Prop :=
 
   where "c1 '/' st '\\' st'" := (ceval c1 st st').
 
-(** The definition of Hoare triples is exactly as before. Unlike our
-    notion of program equivalence, which had subtle consequences with
-    occassionally nonterminating commands (exercise [havoc_diverge]),
-    this definition is still fully satisfactory. Convince yourself of
-    this before proceeding. *)
+(** The definition of Hoare triples is exactly as before. *)
 
 Definition hoare_triple (P:Assertion) (c:com) (Q:Assertion) : Prop :=
   forall st st', c / st \\ st' -> P st -> Q st'.
@@ -1528,8 +1538,8 @@ Notation "{{ P }}  c  {{ Q }}" := (hoare_triple P c Q)
 (** Complete the Hoare rule for [HAVOC] commands below by defining
     [havoc_pre] and prove that the resulting rule is correct. *)
 
-Definition havoc_pre (X : id) (Q : Assertion) : Assertion :=
-(* FILL IN HERE *) admit.
+Definition havoc_pre (X : id) (Q : Assertion) : Assertion 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 
 Theorem hoare_havoc : forall (Q : Assertion) (X : id),
   {{ havoc_pre X Q }} HAVOC X {{ Q }}.
@@ -1539,5 +1549,5 @@ Proof.
 End Himp.
 (** [] *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2017-02-02 10:32:28 -0500 (Thu, 02 Feb 2017) $ *)
 

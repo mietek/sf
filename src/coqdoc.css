@@ -164,6 +164,12 @@ h4.section {
     color: rgb(50%,50%,80%); 
 } 
 
+.inlineref { 
+    display: inline;
+/*    font-family: monospace; */
+    color: rgb(50%,50%,80%); 
+} 
+
 .show { 
     display: inline;
 /*    background-color: rgb(95%,95%,95%); */

@@ -1,24 +1,24 @@
 (** * Tactics: More Basic Tactics *)
 
-(** This chapter introduces several more proof strategies and
-    tactics that allow us to prove more interesting properties of
-    functional programs.  We will see:
+(** This chapter introduces several additional proof strategies
+    and tactics that allow us to begin proving more interesting
+    properties of functional programs.  We will see:
 
     - how to use auxiliary lemmas in both "forward-style" and
       "backward-style" proofs;
     - how to reason about data constructors (in particular, how to use
       the fact that they are injective and disjoint);
-    - how to create a strong induction hypothesis (and when such
+    - how to strengthen an induction hypothesis (and when such
       strengthening is required); and
     - more details on how to reason by case analysis. *)
 
 Require Export Poly.
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * The [apply] Tactic *)
 
 (** We often encounter situations where the goal to be proved is
-    exactly the same as some hypothesis in the context or some
+    _exactly_ the same as some hypothesis in the context or some
     previously proved lemma. *)
 
 Theorem silly1 : forall (n m o p : nat),
@@ -29,10 +29,9 @@ Proof.
   intros n m o p eq1 eq2.
   rewrite <- eq1.
 
-(** At this point, we could finish with "[rewrite -> eq2.
-    reflexivity.]" as we have done several times before.  We can
-    achieve the same effect in a single step by using the [apply]
-    tactic instead: *)
+(** Here, we could finish with "[rewrite -> eq2.  reflexivity.]" as we
+    have done several times before.  We can achieve the same effect in
+    a single step by using the [apply] tactic instead: *)
 
   apply eq2.  Qed.
 
@@ -91,25 +90,19 @@ Theorem silly3_firsttry : forall (n : nat),
 Proof.
   intros n H.
   simpl.
-  (* Here we cannot use [apply] directly *)
-Abort.
 
-(** In this case we can use the [symmetry] tactic, which switches the
-    left and right sides of an equality in the goal. *)
+(** Here we cannot use [apply] directly, but we can use the [symmetry]
+    tactic, which switches the left and right sides of an equality in
+    the goal. *)
 
-Theorem silly3 : forall (n : nat),
-     true = beq_nat n 5  ->
-     beq_nat (S (S n)) 7 = true.
-Proof.
-  intros n H.
   symmetry.
-  simpl. (* Actually, this [simpl] is unnecessary, since
-            [apply] will perform simplification first. *)
+  simpl. (* (This [simpl] is optional, since [apply] will perform
+            simplification first, if needed.) *)
   apply H.  Qed.
 
 (** **** Exercise: 3 stars (apply_exercise1)  *)
 (** (_Hint_: You can use [apply] with previously defined lemmas, not
-    just hypotheses in the context.  Remember that [SearchAbout] is
+    just hypotheses in the context.  Remember that [Search] is
     your friend.) *)
 
 Theorem rev_exercise1 : forall (l l' : list nat),
@@ -119,7 +112,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 1 star, optional (apply_rewrite)  *)
+(** **** Exercise: 1 star, optionalM (apply_rewrite)  *)
 (** Briefly explain the difference between the tactics [apply] and
     [rewrite].  What are the situations where both can usefully be
     applied?
@@ -128,7 +121,7 @@ Proof.
 *)
 (** [] *)
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * The [apply ... with ...] Tactic *)
 
 (** The following silly example uses two rewrites in a row to
@@ -170,7 +163,8 @@ Proof.
     an instantiation for [m]: we have to supply one explicitly by
     adding [with (m:=[c,d])] to the invocation of [apply]. *)
 
-  apply trans_eq with (m:=[c;d]). apply eq1. apply eq2.   Qed.
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
 
 (** Actually, we usually don't have to include the name [m] in
     the [with] clause; Coq is often smart enough to figure out which
@@ -186,7 +180,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * The [inversion] Tactic *)
 
 (** Recall the definition of natural numbers:
@@ -206,15 +200,15 @@ Proof.
       must be the case that [n = m].
 
     - The constructors [O] and [S] are _disjoint_.  That is, [O] is not
-      equal to [S n] for any [n]. *)
+      equal to [S n] for any [n].
 
-(** Similar principles apply to all inductively defined types: all
+    Similar principles apply to all inductively defined types: all
     constructors are injective, and the values built from distinct
     constructors are never equal.  For lists, the [cons] constructor
     is injective and [nil] is different from every non-empty list.
     For booleans, [true] and [false] are different.  (Since neither
-    [true] nor [false] take any arguments, their injectivity is not an
-    issue.)  And so on. *)
+    [true] nor [false] take any arguments, their injectivity is not
+    interesting.)  And so on. *)
 
 (** Coq provides a tactic called [inversion] that allows us to
     exploit these principles in proofs. To see how to use it, let's
@@ -226,13 +220,15 @@ Theorem S_injective : forall (n m : nat),
 Proof.
   intros n m H.
 
-(** By writing [inversion H] at this point, we ask Coq to
+(** By writing [inversion H] at this point, we are asking Coq to
     generate all equations that it can infer from [H] as additional
     hypotheses, replacing variables in the goal as it goes. In the
     present example, this amounts to adding a new hypothesis [H1 : n =
     m] and replacing [n] by [m] in the goal. *)
 
-  inversion H. reflexivity.  Qed.
+  inversion H.
+  reflexivity.
+Qed.
 
 (** Here's a more interesting example that shows how multiple
     equations can be derived at once. *)
@@ -243,14 +239,14 @@ Theorem inversion_ex1 : forall (n m o : nat),
 Proof.
   intros n m o H. inversion H. reflexivity. Qed.
 
-(** It is possible to name the equations that [inversion]
-    generates with an [as ...] clause: *)
+(** We can name the equations that [inversion] generates with an
+    [as ...] clause: *)
 
 Theorem inversion_ex2 : forall (n m : nat),
   [n] = [m] ->
   n = m.
 Proof.
-  intros n o H. inversion H as [Hno]. reflexivity.  Qed.
+  intros n m H. inversion H as [Hnm]. reflexivity.  Qed.
 
 (** **** Exercise: 1 star (inversion_ex3)  *)
 Example inversion_ex3 : forall (X : Type) (x y z : X) (l j : list X),
@@ -261,19 +257,9 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** While the injectivity of constructors allows us to reason
-    that [forall (n m : nat), S n = S m -> n = m], the converse of
-    this implication is an instance of a more general fact about
-    constructors and functions, which we will find useful below: *)
-
-Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
-  x = y -> f x = f y.
-Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
-
 (** When used on a hypothesis involving an equality between
     _different_ constructors (e.g., [S n = O]), [inversion] solves the
-    goal immediately. To see why this makes sense, consider the
-    following proof: *)
+    goal immediately.  Consider the following proof: *)
 
 Theorem beq_nat_0_l : forall n,
    beq_nat 0 n = true -> n = 0.
@@ -302,9 +288,9 @@ Proof.
 
     intros H. inversion H. Qed.
 
-(** This is an instance of a general logical principle known as
-    the _principle of explosion_, which asserts that a contradiction
-    entails anything, even false things.  For instance: *)
+(** This is an instance of a logical principle known as the _principle
+    of explosion_, which asserts that a contradictory hypothesis
+    entails anything, even false things! *)
 
 Theorem inversion_ex4 : forall (n : nat),
   S n = O ->
@@ -320,10 +306,10 @@ Proof.
 
 (** If you find the principle of explosion confusing, remember
     that these proofs are not actually showing that the conclusion of
-    the statement holds.  Rather, they are arguing that the situation
-    described by the premise can never arise, so the implication is
-    vacuous.  We'll explore the principle of explosion of more detail
-    in the next chapter. *)
+    the statement holds.  Rather, they are arguing that, if the
+    nonsensical situation described by the premise did somehow arise,
+    then the nonsensical conclusion would follow.  We'll explore the
+    principle of explosion of more detail in the next chapter. *)
 
 (** **** Exercise: 1 star (inversion_ex6)  *)
 Example inversion_ex6 : forall (X : Type)
@@ -338,23 +324,32 @@ Proof.
 (** To summarize this discussion, suppose [H] is a hypothesis in the
     context or a previously proven lemma of the form
 
-      c a1 a2 ... an = d b1 b2 ... bm
+        c a1 a2 ... an = d b1 b2 ... bm
 
     for some constructors [c] and [d] and arguments [a1 ... an] and
     [b1 ... bm].  Then [inversion H] has the following effect:
 
     - If [c] and [d] are the same constructor, then, by the
       injectivity of this constructor, we know that [a1 = b1], [a2 =
-      b2], etc.; [inversion H] adds these facts to the context, and
+      b2], etc.  The [inversion H] adds these facts to the context and
       tries to use them to rewrite the goal.
 
     - If [c] and [d] are different constructors, then the hypothesis
       [H] is contradictory, and the current goal doesn't have to be
-      considered. In this case, [inversion H] marks the current goal
-      as completed and pops it off the goal stack. *)
+      considered at all.  In this case, [inversion H] marks the
+      current goal as completed and pops it off the goal stack. *)
 
+(** The injectivity of constructors allows us to reason that
+    [forall (n m : nat), S n = S m -> n = m].  The converse of this
+    implication is an instance of a more general fact about both
+    constructors and functions, which we will find useful in a few
+    places below: *)
 
-(* ###################################################### *)
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+(* ################################################################# *)
 (** * Using Tactics on Hypotheses *)
 
 (** By default, most tactics work on the goal formula and leave
@@ -417,7 +412,7 @@ Proof.
     (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Varying the Induction Hypothesis *)
 
 (** Sometimes it is important to control the exact form of the
@@ -426,9 +421,9 @@ Proof.
     assumptions we move (using [intros]) from the goal to the context
     before invoking the [induction] tactic.  For example, suppose
     we want to show that the [double] function is injective -- i.e.,
-    that it always maps different arguments to different results:
+    that it maps different arguments to different results:
 
-    Theorem double_injective: forall n m, 
+    Theorem double_injective: forall n m,
       double n = double m -> n = m.
 
     The way we _start_ this proof is a bit delicate: if we begin with
@@ -451,9 +446,9 @@ Proof.
     + (* m = S m' *) inversion eq.
   - (* n = S n' *) intros eq. destruct m as [| m'].
     + (* m = O *) inversion eq.
-    + (* m = S m' *)  apply f_equal.
+    + (* m = S m' *) apply f_equal.
 
-(** At this point, the induction hypothesis, [IHn'], does not give us
+(** At this point, the induction hypothesis, [IHn'], does _not_ give us
     [n' = m'] -- there is an extra [S] in the way -- so the goal is
     not provable. *)
 
@@ -508,12 +503,11 @@ Proof.
     stuck: knowing that [double (S n)] is [10] tells us nothing about
     whether [double n] is [10], so [Q] is useless.) *)
 
-(** To summarize: Trying to carry out this proof by induction on [n]
-    when [m] is already in the context doesn't work because we are
-    then trying to prove a relation involving _every_ [n] but just a
-    _single_ [m]. *)
+(** Trying to carry out this proof by induction on [n] when [m] is
+    already in the context doesn't work because we are then trying to
+    prove a relation involving _every_ [n] but just a _single_ [m]. *)
 
-(** The good proof of [double_injective] leaves [m] in the goal
+(** The successful proof of [double_injective] leaves [m] in the goal
     statement at the point where the [induction] tactic is invoked on
     [n]: *)
 
@@ -562,8 +556,8 @@ Proof.
 
 (** What you should take away from all this is that we need to be
     careful about using induction to try to prove something too
-    specific: If we're proving a property of [n] and [m] by induction
-    on [n], we may need to leave [m] generic. *)
+    specific: To prove a property of [n] and [m] by induction on [n],
+    it is sometimes important to leave [m] generic. *)
 
 (** The following exercise requires the same pattern. *)
 
@@ -574,7 +568,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, advanced (beq_nat_true_informal)  *)
+(** **** Exercise: 2 stars, advancedM (beq_nat_true_informal)  *)
 (** Give a careful informal proof of [beq_nat_true], being as explicit
     as possible about quantifiers. *)
 
@@ -583,9 +577,9 @@ Proof.
 
 (** The strategy of doing fewer [intros] before an [induction] to
     obtain a more general IH doesn't always work by itself; sometimes
-    a little _rearrangement_ of quantified variables is needed.
-    Suppose, for example, that we wanted to prove [double_injective]
-    by induction on [m] instead of [n]. *)
+    some _rearrangement_ of quantified variables is needed.  Suppose,
+    for example, that we wanted to prove [double_injective] by
+    induction on [m] instead of [n]. *)
 
 Theorem double_injective_take2_FAILED : forall n m,
      double n = double m ->
@@ -597,21 +591,21 @@ Proof.
     + (* n = S n' *) inversion eq.
   - (* m = S m' *) intros eq. destruct n as [| n'].
     + (* n = O *) inversion eq.
-    + (* n = S n' *)  apply f_equal.
+    + (* n = S n' *) apply f_equal.
         (* Stuck again here, just like before. *)
 Abort.
 
-(** The problem here is that, to do induction on [m], we must first
+(** The problem is that, to do induction on [m], we must first
     introduce [n].  (If we simply say [induction m] without
     introducing anything first, Coq will automatically introduce [n]
     for us!)  *)
 
 (** What can we do about this?  One possibility is to rewrite the
     statement of the lemma so that [m] is quantified before [n].  This
-    will work, but it's not nice: We don't want to have to twist the
+    works, but it's not nice: We don't want to have to twist the
     statements of lemmas to fit the needs of a particular strategy for
-    proving them -- we want to state them in the most clear and
-    natural way. *)
+    proving them!  Rather we want to state them in the clearest and
+    most natural way. *)
 
 (** What we can do instead is to first introduce all the quantified
     variables and then _re-generalize_ one or more of them,
@@ -677,9 +671,9 @@ Proof.
         that [S n' = S m'].  Since [S n' = n] and [S m' = m], this is just
         what we wanted to show. [] *)
 
-(** Before we close this section and move on to some exercises, let's
-    digress briefly and use [beq_nat_true] to prove a similar property
-    about identifiers that we'll need in later chapters: *) 
+(** Before we close this section and move on to some exercises,
+    let's digress briefly and use [beq_nat_true] to prove a similar
+    property of identifiers that we'll need in later chapters: *)
 
 Theorem beq_id_true : forall x y,
   beq_id x y = true -> x = y.
@@ -699,42 +693,8 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, optional (app_length_cons)  *)
-(** Prove this by induction on [l1], without using [app_length]
-    from [Lists]. *)
 
-Theorem app_length_cons : forall (X : Type) (l1 l2 : list X)
-                                  (x : X) (n : nat),
-     length (l1 ++ (x :: l2)) = n ->
-     S (length (l1 ++ l2)) = n.
-Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
-
-(** **** Exercise: 4 stars, optional (app_length_twice)  *)
-(** Prove this by induction on [l], without using [app_length] from [Lists]. *)
-
-Theorem app_length_twice : forall (X:Type) (n:nat) (l:list X),
-     length l = n ->
-     length (l ++ l) = n + n.
-Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
-
-(** **** Exercise: 3 stars, optional (double_induction)  *)
-(** Prove the following principle of induction over two naturals. *)
-
-Theorem double_induction: forall (P : nat -> nat -> Prop),
-  P 0 0 ->
-  (forall m, P m 0 -> P (S m) 0) ->
-  (forall n, P 0 n -> P 0 (S n)) ->
-  (forall m n, P m n -> P (S m) (S n)) ->
-  forall m n, P m n.
-Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
-
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Unfolding Definitions *)
 
 (** It sometimes happens that we need to manually unfold a Definition
@@ -764,7 +724,7 @@ Proof.
     about multiplication at our disposal.  In particular, we know that
     it is commutative and associative, and from these facts it is not
     hard to finish the proof. *)
-  
+
   rewrite mult_assoc.
   assert (H : n * m * n = n * n * m).
   { rewrite mult_comm. apply mult_assoc. }
@@ -776,8 +736,8 @@ Qed.
 
     You may already have observed that tactics like [simpl],
     [reflexivity], and [apply] will often unfold the definitions of
-    functions automatically when it allows them to make progress.  For
-    example, if we define [foo m] to be the constant [5], *)
+    functions automatically when this allows them to make progress.  For
+    example, if we define [foo m] to be the constant [5]... *)
 
 Definition foo (x: nat) := 5.
 
@@ -839,8 +799,8 @@ Qed.
     [match] hidden inside [bar] is what was preventing us from making
     progress.
 
-    A more straightforward way to finish the proof is to explicitly
-    tell Coq to unfold [bar]. *)
+    A more straightforward way to make progress is to explicitly tell
+    Coq to unfold [bar]. *)
 
 Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
 Proof.
@@ -856,7 +816,7 @@ Proof.
   - reflexivity.
 Qed.
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Using [destruct] on Compound Expressions *)
 
 (** We have seen many examples where [destruct] is used to
@@ -972,7 +932,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ################################################################## *)
+(* ################################################################# *)
 (** * Review *)
 
 (** We've now seen many of Coq's most fundamental tactics.  We'll
@@ -1028,14 +988,14 @@ Proof.
       - [inversion]: reason by injectivity and distinctness of
         constructors
 
-      - [assert (e) as H]: introduce a "local lemma" [e] and call it
-        [H]
+      - [assert (H: e)] (or [assert (e) as H]): introduce a "local
+        lemma" [e] and call it [H]
 
       - [generalize dependent x]: move the variable [x] (and anything
         else that depends on it) from the context back to an explicit
         hypothesis in the goal formula *)
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
 
 (** **** Exercise: 3 stars (beq_nat_sym)  *)
@@ -1045,7 +1005,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced, optional (beq_nat_sym_informal)  *)
+(** **** Exercise: 3 stars, advancedM? (beq_nat_sym_informal)  *)
 (** Give an informal proof of this lemma that corresponds to your
     formal proof above:
 
@@ -1065,7 +1025,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, advanced (split_combine)  *)
+(** **** Exercise: 3 stars, advancedM (split_combine)  *)
 (** We proved, in an exercise above, that for all lists of pairs,
     [combine] is the inverse of [split].  How would you formalize the
     statement that [split] is the inverse of [combine]?  When is this
@@ -1076,10 +1036,12 @@ Proof.
     [combine]. Then, prove that the property holds. (Be sure to leave
     your induction hypothesis general by not doing [intros] on more
     things than necessary.  Hint: what property do you need of [l1]
-    and [l2] for [split] [combine l1 l2 = (l1,l2)] to be true?)  *)
+    and [l2] for [split] [combine l1 l2 = (l1,l2)] to be true?) *)
 
-Definition split_combine_statement : Prop :=
-(* FILL IN HERE *) admit.
+Definition split_combine_statement : Prop
+  (* ("[: Prop]" means that we are giving a name to a
+     logical proposition here.) *)
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 
 Theorem split_combine : split_combine_statement.
 Proof.
@@ -1133,6 +1095,6 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-10-08 18:36:21 -0400 (Sat, 08 Oct 2016) $ *)
 
 

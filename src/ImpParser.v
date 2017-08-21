@@ -17,7 +17,10 @@
     make out -- but most readers will probably want to just skim down
     to the Examples section at the very end to get the punchline. *)
 
-(* ####################################################### *)
+
+(* DROP *)
+
+(* ################################################################# *)
 (** * Internals *)
 
 Require Import Coq.Strings.String.
@@ -29,7 +32,7 @@ Import ListNotations.
 Require Import Maps.
 Require Import Imp.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Lexical Analysis *)
 
 Definition isWhite (c : ascii) : bool :=
@@ -112,9 +115,10 @@ Example tokenize_ex1 :
        "a"; "+"; "c"; ")"; ")"]%string.
 Proof. reflexivity. Qed.
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Parsing *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Options With Errors *)
 
 (** An [option] type with error messages: *)
@@ -143,24 +147,7 @@ Notation "'DO' ( x , y ) <-- e1 ; e2 'OR' e3"
        end)
    (right associativity, at level 60, e2 at next level).
 
-(** *** Symbol Table *)
-
-(** Build a mapping from [tokens] to [nats].  A real parser would do
-    this incrementally as it encountered new symbols, but passing
-    around the symbol table inside the parsing functions is a bit
-    inconvenient, so instead we do it as a first pass. *)
-
-Fixpoint build_symtable (xs : list token) (n : nat)
-                      : (token -> nat) :=
-  match xs with
-  | [] => (fun s => n)
-  | x::xs =>
-    if (forallb isLowerAlpha (list_of_string x))
-    then (fun s => if string_dec s x then n
-                   else (build_symtable xs (S n) s))
-    else build_symtable xs n
-  end.
-
+(* ----------------------------------------------------------------- *)
 (** *** Generic Combinators for Building Parsers *)
 
 Open Scope string_scope.
@@ -201,18 +188,18 @@ Definition firstExpect {T} (t : token) (p : parser T)
 Definition expect (t : token) : parser unit :=
   firstExpect t (fun xs => SomeE(tt, xs)).
 
+(* ----------------------------------------------------------------- *)
 (** *** A Recursive-Descent Parser for Imp *)
 
 (** Identifiers: *)
 
-Definition parseIdentifier (symtable :string->nat)
-                           (xs : list token)
+Definition parseIdentifier (xs : list token)
                          : optionE (id * list token) :=
 match xs with
 | [] => NoneE "Expected identifier"
 | x::xs' =>
     if forallb isLowerAlpha (list_of_string x) then
-      SomeE (Id (symtable x), xs')
+      SomeE (Id x, xs')
     else
       NoneE ("Illegal identifier:'" ++ x ++ "'")
 end.
@@ -238,50 +225,50 @@ end.
 
 (** Parse arithmetic expressions *)
 
-Fixpoint parsePrimaryExp (steps:nat) symtable
+Fixpoint parsePrimaryExp (steps:nat) 
                          (xs : list token)
                        : optionE (aexp * list token) :=
   match steps with
   | 0 => NoneE "Too many recursive calls"
   | S steps' =>
-      DO (i, rest) <-- parseIdentifier symtable xs ;
+      DO (i, rest) <-- parseIdentifier xs ;
           SomeE (AId i, rest)
       OR DO (n, rest) <-- parseNumber xs ;
           SomeE (ANum n, rest)
                 OR (DO (e, rest) <== firstExpect "("
-                       (parseSumExp steps' symtable) xs;
+                       (parseSumExp steps') xs;
           DO (u, rest') <== expect ")" rest ;
           SomeE(e,rest'))
   end
 
-with parseProductExp (steps:nat) symtable
+with parseProductExp (steps:nat)
                      (xs : list token) :=
   match steps with
   | 0 => NoneE "Too many recursive calls"
   | S steps' =>
     DO (e, rest) <==
-      parsePrimaryExp steps' symtable xs ;
+      parsePrimaryExp steps' xs ;
     DO (es, rest') <==
-       many (firstExpect "*" (parsePrimaryExp steps' symtable))
+       many (firstExpect "*" (parsePrimaryExp steps'))
             steps' rest;
     SomeE (fold_left AMult es e, rest')
   end
 
-with parseSumExp (steps:nat) symtable (xs : list token)  :=
+with parseSumExp (steps:nat) (xs : list token)  :=
   match steps with
   | 0 => NoneE "Too many recursive calls"
   | S steps' =>
     DO (e, rest) <==
-      parseProductExp steps' symtable xs ;
+      parseProductExp steps' xs ;
     DO (es, rest') <==
       many (fun xs =>
         DO (e,rest') <--
            firstExpect "+"
-             (parseProductExp steps' symtable) xs;
+             (parseProductExp steps') xs;
            SomeE ( (true, e), rest')
         OR DO (e,rest') <==
         firstExpect "-"
-           (parseProductExp steps' symtable) xs;
+           (parseProductExp steps') xs;
             SomeE ( (false, e), rest'))
         steps' rest;
       SomeE (fold_left (fun e0 term =>
@@ -297,7 +284,7 @@ Definition parseAExp := parseSumExp.
 
 (** Parsing boolean expressions: *)
 
-Fixpoint parseAtomicExp (steps:nat) (symtable : string->nat)
+Fixpoint parseAtomicExp (steps:nat)
                         (xs : list token)  :=
 match steps with
   | 0 => NoneE "Too many recursive calls"
@@ -308,22 +295,22 @@ match steps with
          SomeE (BFalse,rest)
      OR DO (e,rest) <-- 
             firstExpect "not" 
-               (parseAtomicExp steps' symtable) 
+               (parseAtomicExp steps') 
                xs;
          SomeE (BNot e, rest)
      OR DO (e,rest) <-- 
               firstExpect "(" 
-                (parseConjunctionExp steps' symtable) xs;
+                (parseConjunctionExp steps') xs;
           (DO (u,rest') <== expect ")" rest; 
               SomeE (e, rest'))
-     OR DO (e, rest) <== parseProductExp steps' symtable xs;
+     OR DO (e, rest) <== parseProductExp steps' xs;
             (DO (e', rest') <--
               firstExpect "==" 
-                (parseAExp steps' symtable) rest;
+                (parseAExp steps') rest;
               SomeE (BEq e e', rest')
              OR DO (e', rest') <--
                firstExpect "<=" 
-                 (parseAExp steps' symtable) rest;
+                 (parseAExp steps') rest;
                SomeE (BLe e e', rest')
              OR
                NoneE 
@@ -331,16 +318,15 @@ match steps with
 end
 
 with parseConjunctionExp (steps:nat)
-                         (symtable : string->nat)
                          (xs : list token) :=
   match steps with
   | 0 => NoneE "Too many recursive calls"
   | S steps' =>
     DO (e, rest) <==
-      parseAtomicExp steps' symtable xs ;
+      parseAtomicExp steps' xs ;
     DO (es, rest') <==
        many (firstExpect "&&"
-               (parseAtomicExp steps' symtable))
+               (parseAtomicExp steps'))
             steps' rest;
     SomeE (fold_left BAnd es e, rest')
   end.
@@ -350,12 +336,12 @@ Definition parseBExp := parseConjunctionExp.
 Check parseConjunctionExp.
 
 Definition testParsing {X : Type}
-           (p : nat -> (string -> nat) ->
+           (p : nat -> 
                 list token ->
                 optionE (X * list token))
            (s : string) :=
   let t := tokenize s in 
-  p 100 (build_symtable t 0) t.
+  p 100 t.
 
 (*
 Eval compute in 
@@ -368,7 +354,6 @@ Eval compute in
 (** Parsing commands: *)
 
 Fixpoint parseSimpleCommand (steps:nat) 
-                            (symtable:string->nat) 
                             (xs : list token) :=
   match steps with
   | 0 => NoneE "Too many recursive calls"
@@ -376,43 +361,42 @@ Fixpoint parseSimpleCommand (steps:nat)
     DO (u, rest) <-- expect "SKIP" xs;
       SomeE (SKIP, rest)
     OR DO (e,rest) <--
-         firstExpect "IF" (parseBExp steps' symtable) xs;
+         firstExpect "IF" (parseBExp steps') xs;
        DO (c,rest')  <==
          firstExpect "THEN" 
-           (parseSequencedCommand steps' symtable) rest;
+           (parseSequencedCommand steps') rest;
        DO (c',rest'') <==
          firstExpect "ELSE" 
-           (parseSequencedCommand steps' symtable) rest';
+           (parseSequencedCommand steps') rest';
        DO (u,rest''') <==
          expect "END" rest'';
        SomeE(IFB e THEN c ELSE c' FI, rest''')
     OR DO (e,rest) <--
          firstExpect "WHILE" 
-           (parseBExp steps' symtable) xs;
+           (parseBExp steps') xs;
        DO (c,rest') <==
          firstExpect "DO" 
-           (parseSequencedCommand steps' symtable) rest;
+           (parseSequencedCommand steps') rest;
        DO (u,rest'') <==
          expect "END" rest';
        SomeE(WHILE e DO c END, rest'')
     OR DO (i, rest) <==
-         parseIdentifier symtable xs;
+         parseIdentifier xs;
        DO (e, rest') <==
-         firstExpect ":=" (parseAExp steps' symtable) rest;
+         firstExpect ":=" (parseAExp steps') rest;
        SomeE(i ::= e, rest')
   end
 
 with parseSequencedCommand (steps:nat)
-                           (symtable:string->nat)
                            (xs : list token) :=
   match steps with
   | 0 => NoneE "Too many recursive calls"
   | S steps' =>
       DO (c, rest) <==
-        parseSimpleCommand steps' symtable xs;
+        parseSimpleCommand steps' xs;
       DO (c', rest') <--
-        firstExpect ";;" 
-          (parseSequencedCommand steps' symtable) rest;
+        firstExpect ";" 
+          (parseSequencedCommand steps') rest;
         SomeE(c ;; c', rest')
       OR
         SomeE(c, rest)
@@ -422,10 +406,9 @@ Definition bignumber := 1000.
 
 Definition parse (str : string) : optionE (com * list token) :=
   let tokens := tokenize str in
-  parseSequencedCommand bignumber
-                        (build_symtable tokens 0) tokens.
+  parseSequencedCommand bignumber tokens.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Examples *)
 
 (*
@@ -509,4 +492,6 @@ Compute parse "
      []).
 *)
 
-(** $Date: 2016-05-26 12:03:56 -0400 (Thu, 26 May 2016) $ *)
+(* /DROP *)
+
+(** $Date: 2017-01-31 19:12:59 -0500 (Tue, 31 Jan 2017) $ *)

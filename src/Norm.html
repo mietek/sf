@@ -54,7 +54,7 @@ This optional chapter is based on chapter 12 of <i>Types and
     normalization property does not extend to full-blown programming
     languages, because these languages nearly always extend the simply
     typed lambda-calculus with constructs, such as general
-    recursion (see the <a href="MoreStlc.html"><font color="gray">MoreStlc</font></a> chapter) or recursive types, that
+    recursion (see the <a href="MoreStlc.html"><span class="inlineref">MoreStlc</span></a> chapter) or recursive types, that
     can be used to write nonterminating programs.  However, the issue
     of normalization reappears at the level of <i>types</i> when we
     consider the metatheory of polymorphic versions of the lambda
@@ -83,7 +83,7 @@ This optional chapter is based on chapter 12 of <i>Types and
     duplicate redexes in subterms. 
 <div class="paragraph"> </div>
 
-<a name="lab776"></a><h4 class="section">Exercise: 2 stars</h4>
+<a name="lab785"></a><h4 class="section">Exercise: 2 starsM (norm_fail)</h4>
  Where do we fail if we attempt to prove normalization by a
     straightforward induction on the size of a well-typed term? 
 </div>
@@ -97,7 +97,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab777"></a><h4 class="section">Exercise: 5 stars, recommended</h4>
+<a name="lab786"></a><h4 class="section">Exercise: 5 stars, recommended (norm)</h4>
  The best ways to understand an intricate proof like this is
     are (1) to help fill it in and (2) to extend it.  We've left out some
     parts of the following development, including some proofs of lemmas
@@ -110,12 +110,12 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab778"></a><h1 class="section">Language</h1>
+<a name="lab787"></a><h1 class="section">Language</h1>
 
 <div class="paragraph"> </div>
 
  We begin by repeating the relevant language definition, which is
-    similar to those in the <a href="MoreStlc.html"><font color="gray">MoreStlc</font></a> chapter, plus supporting
+    similar to those in the <a href="MoreStlc.html"><span class="inlineref">MoreStlc</span></a> chapter, plus supporting
     results including type preservation and step determinism.  (We
     won't need progress.)  You may just wish to skip down to the
     Normalization section... 
@@ -126,7 +126,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab779"></a><h3 class="section">Syntax and Operational Semantics</h3>
+<a name="lab788"></a><h3 class="section">Syntax and Operational Semantics</h3>
 
 </div>
 <div class="code code-space">
@@ -134,7 +134,6 @@ This optional chapter is based on chapter 12 of <i>Types and
 <br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Lists.List.html#"><span class="id" type="library">Coq.Lists.List</span></a>.<br/>
 <span class="id" type="keyword">Import</span> <span class="id" type="var">ListNotations</span>.<br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br/>
 <span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <a class="idref" href="Norm.html#multi"><span class="id" type="inductive">multi</span></a>.<br/>
@@ -166,7 +165,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab780"></a><h3 class="section">Substitution</h3>
+<a name="lab789"></a><h3 class="section">Substitution</h3>
 
 </div>
 <div class="code code-space">
@@ -194,7 +193,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab781"></a><h3 class="section">Reduction</h3>
+<a name="lab790"></a><h3 class="section">Reduction</h3>
 
 </div>
 <div class="code code-space">
@@ -285,7 +284,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab782"></a><h3 class="section">Typing</h3>
+<a name="lab791"></a><h3 class="section">Typing</h3>
 
 </div>
 <div class="code code-space">
@@ -340,7 +339,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab783"></a><h3 class="section">Context Invariance</h3>
+<a name="lab792"></a><h3 class="section">Context Invariance</h3>
 
 </div>
 <div class="code code-space">
@@ -445,7 +444,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab784"></a><h3 class="section">Preservation</h3>
+<a name="lab793"></a><h3 class="section">Preservation</h3>
 
 </div>
 <div class="code code-space">
@@ -581,7 +580,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab785"></a><h3 class="section">Determinism</h3>
+<a name="lab794"></a><h3 class="section">Determinism</h3>
 
 </div>
 <div class="code code-space">
@@ -650,7 +649,7 @@ This optional chapter is based on chapter 12 of <i>Types and
 </div>
 
 <div class="doc">
-<a name="lab786"></a><h1 class="section">Normalization</h1>
+<a name="lab795"></a><h1 class="section">Normalization</h1>
 
 <div class="paragraph"> </div>
 
@@ -850,7 +849,7 @@ Now we proceed to show the main result, which is that every
 </div>
 
 <div class="doc">
-<a name="lab787"></a><h2 class="section">Membership in <span class="inlinecode"><span class="id" type="var">R_T</span></span> Is Invariant Under Reduction</h2>
+<a name="lab796"></a><h2 class="section">Membership in <span class="inlinecode"><span class="id" type="var">R_T</span></span> Is Invariant Under Reduction</h2>
 
 <div class="paragraph"> </div>
 
@@ -981,7 +980,7 @@ In the reverse direction, we must add the fact that <span class="inlinecode"><sp
 </div>
 
 <div class="doc">
-<a name="lab788"></a><h2 class="section">Closed Instances of Terms of Type <span class="inlinecode"><span class="id" type="var">t</span></span> Belong to <span class="inlinecode"><span class="id" type="var">R_T</span></span></h2>
+<a name="lab797"></a><h2 class="section">Closed Instances of Terms of Type <span class="inlinecode"><span class="id" type="var">t</span></span> Belong to <span class="inlinecode"><span class="id" type="var">R_T</span></span></h2>
 
 <div class="paragraph"> </div>
 
@@ -1022,7 +1021,7 @@ In the reverse direction, we must add the fact that <span class="inlinecode"><sp
 </div>
 
 <div class="doc">
-<a name="lab789"></a><h3 class="section">Multisubstitutions, Multi-Extensions, and Instantiations</h3>
+<a name="lab798"></a><h3 class="section">Multisubstitutions, Multi-Extensions, and Instantiations</h3>
 
 <div class="paragraph"> </div>
 
@@ -1153,7 +1152,7 @@ We now proceed to prove various properties of these definitions.
 </div>
 
 <div class="doc">
-<a name="lab790"></a><h3 class="section">More Substitution Facts</h3>
+<a name="lab799"></a><h3 class="section">More Substitution Facts</h3>
 
 <div class="paragraph"> </div>
 
@@ -1245,7 +1244,7 @@ We now proceed to prove various properties of these definitions.
 </div>
 
 <div class="doc">
-<a name="lab791"></a><h3 class="section">Properties of Multi-Substitutions</h3>
+<a name="lab800"></a><h3 class="section">Properties of Multi-Substitutions</h3>
 
 </div>
 <div class="code code-space">
@@ -1359,7 +1358,7 @@ You'll need similar functions for the other term constructors.
 </div>
 
 <div class="doc">
-<a name="lab792"></a><h3 class="section">Properties of Multi-Extensions</h3>
+<a name="lab801"></a><h3 class="section">Properties of Multi-Extensions</h3>
 
 <div class="paragraph"> </div>
 
@@ -1402,7 +1401,7 @@ You'll need similar functions for the other term constructors.
 </div>
 
 <div class="doc">
-<a name="lab793"></a><h3 class="section">Properties of Instantiations</h3>
+<a name="lab802"></a><h3 class="section">Properties of Instantiations</h3>
 
 <div class="paragraph"> </div>
 
@@ -1419,7 +1418,7 @@ You'll need similar functions for the other term constructors.
 <div class="proofscript" id="proof28" onclick="toggleDisplay('proof28');toggleDisplay('proofcontrol28')">
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">e</span> <span class="id" type="var">V</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">V</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">x<sub>0</sub></span> <span class="id" type="var">T<sub>0</sub></span> <span class="id" type="var">C</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span> .<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span> <span class="id" type="keyword">in</span> *.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <span class="id" type="var">x</span> <span class="id" type="var">x<sub>0</sub></span>); <span class="id" type="tactic">eauto</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
@@ -1449,7 +1448,7 @@ You'll need similar functions for the other term constructors.
 <div class="proofscript" id="proof30" onclick="toggleDisplay('proof30');toggleDisplay('proofcontrol30')">
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">e</span> <span class="id" type="var">V</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">V</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">x'</span> <span class="id" type="var">t'</span> <span class="id" type="var">T'</span> <span class="id" type="var">G</span> <span class="id" type="var">E</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Norm.html#lookup"><span class="id" type="definition">lookup</span></a> <span class="id" type="keyword">in</span> *. <span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <span class="id" type="var">x</span> <span class="id" type="var">x'</span>).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">G</span>; <span class="id" type="tactic">inversion</span> <span class="id" type="var">E</span>; <span class="id" type="tactic">subst</span>. <span class="id" type="tactic">auto</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eauto</span>.<br/>
@@ -1473,7 +1472,7 @@ You'll need similar functions for the other term constructors.
 </div>
 
 <div class="doc">
-<a name="lab794"></a><h3 class="section">Congruence Lemmas on Multistep</h3>
+<a name="lab803"></a><h3 class="section">Congruence Lemmas on Multistep</h3>
 
 <div class="paragraph"> </div>
 
@@ -1501,7 +1500,7 @@ You'll need similar functions for the other term constructors.
 </div>
 
 <div class="doc">
-<a name="lab795"></a><h3 class="section">The R Lemma.</h3>
+<a name="lab804"></a><h3 class="section">The R Lemma.</h3>
 
 <div class="paragraph"> </div>
 
@@ -1615,7 +1614,7 @@ And at long last, the main lemma.
 </div>
 
 <div class="doc">
-<a name="lab796"></a><h3 class="section">Normalization Theorem</h3>
+<a name="lab805"></a><h3 class="section">Normalization Theorem</h3>
 
 </div>
 <div class="code code-space">

@@ -1,6 +1,5 @@
 (** * StlcProp: Properties of STLC *)
 
-Require Import SfLib.
 Require Import Maps.
 Require Import Types.
 Require Import Stlc.
@@ -12,7 +11,7 @@ Import STLC.
     Typed Lambda Calculus -- in particular, the type safety
     theorem. *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Canonical Forms *)
 
 (** As we saw for the simple calculus in the [Types] chapter, the
@@ -41,15 +40,15 @@ Proof.
   exists x0. exists t0.  auto.
 Qed.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Progress *)
 
-(** As before, the _progress_ theorem tells us that closed, well-typed
+(** The _progress_ theorem tells us that closed, well-typed
     terms are not stuck: either a well-typed term is a value, or it
     can take a reduction step.  The proof is a relatively
     straightforward extension of the progress proof we saw in the
-    [Types] chapter.  We'll give the proof in English first, then the
-    formal version. *)
+    [Types] chapter.  We'll give the proof in English first, then
+    the formal version. *)
 
 Theorem progress : forall t T,
      empty |- t \in T ->
@@ -65,14 +64,14 @@ Theorem progress : forall t T,
       is a value.
 
     - If the last rule of the derivation is [T_App], then [t] has the
-      form [t1 t2] for som e[t1] and [t2], where we know that [t1] and
-      [t2] are also well typed in the empty context; in particular,
-      there exists a type [T2] such that [|- t1 \in T2 -> T] and [|-
-      t2 \in T2].  By the induction hypothesis, either [t1] is a value
-      or it can take a reduction step.
+      form [t1 t2] for some [t1] and [t2], where [|- t1 \in T2 -> T]
+      and [|- t2 \in T2] for some type [T2].  By the induction
+      hypothesis, either [t1] is a value or it can take a reduction
+      step.
 
         - If [t1] is a value, then consider [t2], which by the other
-          induction hypothesis must also either be a value or take a step.
+          induction hypothesis must also either be a value or take a
+          step.
 
             - Suppose [t2] is a value.  Since [t1] is a value with an
               arrow type, it must be a lambda abstraction; hence [t1
@@ -93,7 +92,6 @@ Theorem progress : forall t T,
 
         - Otherwise, [t1] takes a step, and therefore so does [t] (by
           [ST_If]). *)
-
 Proof with eauto.
   intros t T Ht.
   remember (@empty ty) as Gamma.
@@ -131,7 +129,7 @@ Proof with eauto.
       inversion H as [t1' Hstp]. exists (tif t1' t2 t3)...
 Qed.
 
-(** **** Exercise: 3 stars, optional (progress_from_term_ind)  *)
+(** **** Exercise: 3 stars, advanced (progress_from_term_ind)  *)
 (** Show that progress can also be proved by induction on terms
     instead of induction on typing derivations. *)
 
@@ -144,21 +142,21 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Preservation *)
 
-(** The other half of the type soundness property is the preservation
-    of types during reduction.  For this, we need to develop some
-    technical machinery for reasoning about variables and
-    substitution.  Working from top to bottom (from the high-level
+(** The other half of the type soundness property is the
+    preservation of types during reduction.  For this part, we'll need
+    to develop some technical machinery for reasoning about variables
+    and substitution.  Working from top to bottom (from the high-level
     property we are actually interested in to the lowest-level
     technical lemmas that are needed by various cases of the more
     interesting proofs), the story goes like this:
 
       - The _preservation theorem_ is proved by induction on a typing
-        derivation, pretty much as we did in the [Types] chapter.  The
-        one case that is significantly different is the one for the
-        [ST_AppAbs] rule, whose definition uses the substitution
+        derivation, pretty much as we did in the [Types] chapter.
+        The one case that is significantly different is the one for
+        the [ST_AppAbs] rule, whose definition uses the substitution
         operation.  To see that this step preserves typing, we need to
         know that the substitution itself does.  So we prove a...
 
@@ -167,11 +165,11 @@ Proof.
         of [t].  The proof goes by induction on the form of [t] and
         requires looking at all the different cases in the definition
         of substitition.  This time, the tricky cases are the ones for
-        variables and for function abstractions.  In both cases, we
-        discover that we need to take a term [s] that has been shown
-        to be well-typed in some context [Gamma] and consider the same
-        term [s] in a slightly different context [Gamma'].  For this
-        we prove a...
+        variables and for function abstractions.  In both, we discover
+        that we need to take a term [s] that has been shown to be
+        well-typed in some context [Gamma] and consider the same term
+        [s] in a slightly different context [Gamma'].  For this we
+        prove a...
 
       - _context invariance_ lemma, showing that typing is preserved
         under "inessential changes" to the context [Gamma] -- in
@@ -186,7 +184,7 @@ Proof.
    To make Coq happy, we need to formalize the story in the opposite
    order... *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Free Occurrences *)
 
 (** A variable [x] _appears free in_ a term _t_ if [t] contains some
@@ -221,21 +219,29 @@ Inductive appears_free_in : id -> tm -> Prop :=
 
 Hint Constructors appears_free_in.
 
-(** A term in which no variables appear free is said to be _closed_. *)
+(** The _free variables_ of a term are just the variables that appear
+    free in it.  A term with no free variables is said to be
+    _closed_. *)
 
 Definition closed (t:tm) :=
   forall x, ~ appears_free_in x t.
 
-(** **** Exercise: 1 star (afi)  *)
-(** If the definition of [appears_free_in] is not crystal clear to
-    you, it is a good idea to take a piece of paper and write out the
-    rules in informal inference-rule notation.  (Although it is a
-    rather low-level, technical definition, understanding it is
-    crucial to understanding substitution and its properties, which
-    are really the crux of the lambda-calculus.) *)
+(** An _open_ term is one that is not closed (or not known to be
+    closed). *)
+
+(** **** Exercise: 1 starM (afi)  *)
+(** In the space below, write out the rules of the [appears_free_in]
+    relation in informal inference-rule notation.  (Use whatever
+    notational conventions you like -- the point of the exercise is
+    just for you to think a bit about the meaning of each rule.)
+    Although this is a rather low-level, technical definition,
+    understanding it is crucial to understanding substitution and its
+    properties, which are really the crux of the lambda-calculus. *)
+
+(* FILL IN HERE *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Substitution *)
 
 (** To prove that substitution preserves typing, we first need a
@@ -249,15 +255,15 @@ Lemma free_in_context : forall x t T Gamma,
    Gamma |- t \in T ->
    exists T', Gamma x = Some T'.
 
-(** _Proof_: We show, by induction on the proof that [x] appears
-      free in [t], that, for all contexts [Gamma], if [t] is well
-      typed under [Gamma], then [Gamma] assigns some type to [x].
+(** _Proof_: We show, by induction on the proof that [x] appears free
+      in [t], that, for all contexts [Gamma], if [t] is well typed
+      under [Gamma], then [Gamma] assigns some type to [x].
 
-      - If the last rule used was [afi_var], then [t = x], and from
-        the assumption that [t] is well typed under [Gamma] we have
+      - If the last rule used is [afi_var], then [t = x], and from the
+        assumption that [t] is well typed under [Gamma] we have
         immediately that [Gamma] assigns a type to [x].
 
-      - If the last rule used was [afi_app1], then [t = t1 t2] and [x]
+      - If the last rule used is [afi_app1], then [t = t1 t2] and [x]
         appears free in [t1].  Since [t] is well typed under [Gamma],
         we can see from the typing rules that [t1] must also be, and
         the IH then tells us that [Gamma] assigns [x] a type.
@@ -269,14 +275,15 @@ Lemma free_in_context : forall x t T Gamma,
         conclusion we want.
 
       - The only remaining case is [afi_abs].  In this case [t =
-        \y:T11.t12], and [x] appears free in [t12]; we also know that
-        [x] is different from [y].  The difference from the previous
-        cases is that whereas [t] is well typed under [Gamma], its
-        body [t12] is well typed under [(Gamma, y:T11)], so the IH
-        allows us to conclude that [x] is assigned some type by the
-        extended context [(Gamma, y:T11)].  To conclude that [Gamma]
-        assigns a type to [x], we appeal to lemma [update_neq], noting
-        that [x] and [y] are different variables. *)
+        \y:T11.t12] and [x] appears free in [t12], and we also know
+        that [x] is different from [y].  The difference from the
+        previous cases is that, whereas [t] is well typed under
+        [Gamma], its body [t12] is well typed under [(Gamma, y:T11)],
+        so the IH allows us to conclude that [x] is assigned some type
+        by the extended context [(Gamma, y:T11)].  To conclude that
+        [Gamma] assigns a type to [x], we appeal to lemma
+        [update_neq], noting that [x] and [y] are different
+        variables. *)
 
 Proof.
   intros x t T Gamma H H0. generalize dependent Gamma.
@@ -289,7 +296,7 @@ Proof.
     rewrite update_neq in H7; assumption.
 Qed.
 
-(** Next, we'll need the fact that any term [t] which is well typed in
+(** Next, we'll need the fact that any term [t] that is well typed in
     the empty context is closed (it has no free variables). *)
 
 (** **** Exercise: 2 stars, optional (typable_empty__closed)  *)
@@ -373,16 +380,16 @@ Qed.
 
 (** Now we come to the conceptual heart of the proof that reduction
     preserves types -- namely, the observation that _substitution_
-    preserves types.
+    preserves types. *)
 
-    Formally, the so-called _Substitution Lemma_ says this: Suppose we
-    have a term [t] with a free variable [x], and suppose we've been
-    able to assign a type [T] to [t] under the assumption that [x] has
+(** Formally, the so-called _substitution lemma_ says this:
+    Suppose we have a term [t] with a free variable [x], and suppose
+    we've assigned a type [T] to [t] under the assumption that [x] has
     some type [U].  Also, suppose that we have some other term [v] and
     that we've shown that [v] has type [U].  Then, since [v] satisfies
-    the assumption we made about [x] when typing [t], we should be
-    able to substitute [v] for each of the occurrences of [x] in [t]
-    and obtain a new term that still has type [T]. *)
+    the assumption we made about [x] when typing [t], we can
+    substitute [v] for each of the occurrences of [x] in [t] and
+    obtain a new term that still has type [T]. *)
 
 (** _Lemma_: If [Gamma,x:U |- t \in T] and [|- v \in U], then [Gamma |-
     [x:=v]t \in T]. *)
@@ -402,7 +409,7 @@ Lemma substitution_preserves_typing : forall Gamma x U t v T,
     worry about free variables in [v] clashing with the variable being
     introduced into the context by [T_Abs].
 
-    The substitution lemma can be viewed as a kind of "commutation"
+    The substitution lemma can be viewed as a kind of commutation
     property.  Intuitively, it says that substitution and typing can
     be done in either order: we can either assign types to the terms
     [t] and [v] separately (under suitable contexts) and then combine
@@ -456,7 +463,7 @@ Lemma substitution_preserves_typing : forall Gamma x U t v T,
 
       - The remaining cases are similar to the application case.
 
-    One more technical note: This proof is a rare case where an
+    _Technical note_: This proof is a rare case where an
     induction on terms, rather than typing derivations, yields a
     simpler argument.  The reason for this is that the assumption
     [update Gamma x U |- t \in T] is not completely generic, in the
@@ -465,7 +472,8 @@ Lemma substitution_preserves_typing : forall Gamma x U t v T,
     native induction tactic does not give us the induction hypothesis
     that we want.  It is possible to work around this, but the needed
     generalization is a little tricky.  The term [t], on the other
-    hand, _is_ completely generic. *)
+    hand, is completely generic. 
+*)
 
 Proof with eauto.
   intros Gamma x U t v T Ht Ht'.
@@ -478,20 +486,17 @@ Proof with eauto.
     + (* x=y *)
       subst.
       rewrite update_eq in H2.
-      inversion H2; subst. clear H2.
-                  eapply context_invariance... intros x Hcontra.
-      destruct (free_in_context _ _ T empty Hcontra) as [T' HT']...
-      inversion HT'.
+      inversion H2; subst. 
+      eapply context_invariance. eassumption.
+      apply typable_empty__closed in Ht'. unfold closed in Ht'.
+      intros.  apply (Ht' x0) in H0. inversion H0.
     + (* x<>y *)
       apply T_Var. rewrite update_neq in H2...
   - (* tabs *)
-    rename i into y. apply T_Abs.
+    rename i into y. rename t into T. apply T_Abs.
     destruct (beq_idP x y) as [Hxy | Hxy].
     + (* x=y *)
-      subst.
-      eapply context_invariance...
-      intros x Hafi. unfold update, t_update.
-      destruct (beq_id y x) eqn: Hyx...
+      subst. rewrite update_shadow in H5. apply H5.
     + (* x<>y *)
       apply IHt. eapply context_invariance...
       intros z Hafi. unfold update, t_update.
@@ -500,7 +505,7 @@ Proof with eauto.
       rewrite Hxy...
 Qed.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Main Theorem *)
 
 (** We now have the tools we need to prove preservation: if a closed
@@ -519,9 +524,9 @@ Theorem preservation : forall t t' T,
       [T_False] as the final rules in the derivation, since in each of
       these cases [t] cannot take a step.
 
-    - If the last rule in the derivation was [T_App], then [t = t1
+    - If the last rule in the derivation is [T_App], then [t = t1
       t2].  There are three cases to consider, one for each rule that
-      could have been used to show that [t1 t2] takes a step to [t'].
+      could be used to show that [t1 t2] takes a step to [t'].
 
         - If [t1 t2] takes a step by [ST_App1], with [t1] stepping to
           [t1'], then by the IH [t1'] has the same type as [t1], and
@@ -534,7 +539,7 @@ Theorem preservation : forall t t' T,
           desired result now follows from the fact that substitution
           preserves types.
 
-    - If the last rule in the derivation was [T_If], then [t = if t1
+    - If the last rule in the derivation is [T_If], then [t = if t1
       then t2 else t3], and there are again three cases depending on
       how [t] steps.
 
@@ -559,9 +564,9 @@ Proof with eauto.
       inversion HT1...
 Qed.
 
-(** **** Exercise: 2 stars, recommended (subject_expansion_stlc)  *)
-(** An exercise in the [Types] chapter asked about the subject
-    expansion property for the simple language of arithmetic and
+(** **** Exercise: 2 stars, recommendedM (subject_expansion_stlc)  *)
+(** An exercise in the [Types] chapter asked about the _subject
+    expansion_ property for the simple language of arithmetic and
     boolean expressions.  Does this property hold for STLC?  That is,
     is it always the case that, if [t ==> t'] and [has_type t' T],
     then [empty |- t \in T]?  If so, prove it.  If not, give a
@@ -571,7 +576,7 @@ Qed.
 []
 *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Type Soundness *)
 
 (** **** Exercise: 2 stars, optional (type_soundness)  *)
@@ -592,10 +597,10 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Uniqueness of Types *)
 
-(** **** Exercise: 3 stars (types_unique)  *)
+(** **** Exercise: 3 starsM (types_unique)  *)
 (** Another nice property of the STLC is that types are unique: a
     given term (in a given context) has at most one type. *)
 (** Formalize this statement and prove it. *)
@@ -603,15 +608,18 @@ Proof.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Additional Exercises *)
 
-(** **** Exercise: 1 star (progress_preservation_statement)  *)
+(** **** Exercise: 1 starM (progress_preservation_statement)  *)
 (** Without peeking at their statements above, write down the progress
-    and preservation theorems for the simply typed lambda-calculus. *)
+    and preservation theorems for the simply typed lambda-calculus (as 
+    Coq theorems). *) 
+
+(* FILL IN HERE *)
 (** [] *)
 
-(** **** Exercise: 2 stars (stlc_variation1)  *)
+(** **** Exercise: 2 starsM (stlc_variation1)  *)
 (** Suppose we add a new term [zap] with the following reduction rule
 
                          ---------                  (ST_Zap)
@@ -628,15 +636,15 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-
+(* FILL IN HERE *)
       - Progress
-
+(* FILL IN HERE *)
       - Preservation
-
+(* FILL IN HERE *)
 []
 *)
 
-(** **** Exercise: 2 stars (stlc_variation2)  *)
+(** **** Exercise: 2 starsM (stlc_variation2)  *)
 (** Suppose instead that we add a new term [foo] with the following 
     reduction rules:
 
@@ -652,15 +660,15 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-
+(* FILL IN HERE *)
       - Progress
-
+(* FILL IN HERE *)
       - Preservation
-
+(* FILL IN HERE *)
 []
 *)
 
-(** **** Exercise: 2 stars (stlc_variation3)  *)
+(** **** Exercise: 2 starsM (stlc_variation3)  *)
 (** Suppose instead that we remove the rule [ST_App1] from the [step]
     relation. Which of the following properties of the STLC remain
     true in the presence of this rule?  For each one, write either
@@ -668,11 +676,11 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-
+(* FILL IN HERE *)
       - Progress
-
+(* FILL IN HERE *)
       - Preservation
-
+(* FILL IN HERE *)
 []
 *)
 
@@ -689,11 +697,12 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-
+(* FILL IN HERE *)
       - Progress
-
+(* FILL IN HERE *)
       - Preservation
-
+(* FILL IN HERE *)
+[]
 *)
 
 (** **** Exercise: 2 stars, optional (stlc_variation5)  *)
@@ -711,11 +720,12 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-
+(* FILL IN HERE *)
       - Progress
-
+(* FILL IN HERE *)
       - Preservation
-
+(* FILL IN HERE *)
+[]
 *)
 
 (** **** Exercise: 2 stars, optional (stlc_variation6)  *)
@@ -733,11 +743,12 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-
+(* FILL IN HERE *)
       - Progress
-
+(* FILL IN HERE *)
       - Preservation
-
+(* FILL IN HERE *)
+[]
 *)
 
 (** **** Exercise: 2 stars, optional (stlc_variation7)  *)
@@ -753,18 +764,17 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-
+(* FILL IN HERE *)
       - Progress
-
+(* FILL IN HERE *)
       - Preservation
-
+(* FILL IN HERE *)
 []
 *)
 
 End STLCProp.
 
-(* ###################################################################### *)
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Exercise: STLC with Arithmetic *)
 
 (** To see how the STLC might function as the core of a real
@@ -773,6 +783,7 @@ End STLCProp.
     operators. *)
 
 Module STLCArith.
+Import STLC.
 
 (** To types, we add a base type of natural numbers (and remove
     booleans, for brevity). *)
@@ -794,19 +805,23 @@ Inductive tm : Type :=
   | tmult : tm -> tm -> tm
   | tif0  : tm -> tm -> tm -> tm.
 
-(** **** Exercise: 4 stars (stlc_arith)  *)
-(** Finish formalizing the definition and properties of the STLC extended
-    with arithmetic.  Specifically:
+(** **** Exercise: 4 starsM (stlc_arith)  *)
+(** Finish formalizing the definition and properties of the STLC
+    extended with arithmetic.  Specifically:
 
-    - Copy the whole development of STLC that we went through above (from
-      the definition of values through the Type Soundness theorem), and
-      paste it into the file at this point.
+    - Copy the core definitions and theorems for STLC that we went
+      through above (from the definition of values through the
+      Preservation theorem, inclusive), and paste it into the file at
+      this point.  Do not copy examples, exercises, etc.  (In
+      particular, make sure you don't copy any of the [] comments at
+      the end of exercises, to avoid confusing the autograder.)
 
     - Extend the definitions of the [subst] operation and the [step]
-      relation to include appropriate clauses for the arithmetic operators.
+      relation to include appropriate clauses for the arithmetic
+      operators.
 
-    - Extend the proofs of all the properties (up to [soundness]) of
-      the original STLC to deal with the new syntactic forms.  Make
+    - Extend the proofs of all the properties (up to [preservation])
+      of the original STLC to deal with the new syntactic forms.  Make
       sure Coq accepts the whole file. *)
 
 (* FILL IN HERE *)
@@ -814,5 +829,5 @@ Inductive tm : Type :=
 
 End STLCArith.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-12-20 12:03:19 -0500 (Tue, 20 Dec 2016) $ *)
 

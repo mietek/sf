@@ -1,16 +1,16 @@
 (** * Sub: Subtyping *)
 
-Require Import SfLib.
 Require Import Maps.
 Require Import Types.
+Require Import Smallstep.
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Concepts *)
 
 (** We now turn to the study of _subtyping_, a key feature
     needed to support the object-oriented programming style. *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** A Motivating Example *)
 
 (** Suppose we are writing a program involving two record types
@@ -18,7 +18,6 @@ Require Import Types.
 
       Person  = {name:String, age:Nat}
       Student = {name:String, age:Nat, gpa:Nat}
-
 *)
 
 (** In the simply typed lamdba-calculus with records, the term
@@ -53,6 +52,7 @@ Require Import Types.
    to all of the type constructors in the language -- functions,
    pairs, etc. *)
 
+(* ================================================================= *)
 (** ** Subtyping and Object-Oriented Languages *)
 
 (** Subtyping plays a fundamental role in many programming
@@ -100,6 +100,7 @@ Require Import Types.
     behind the subclass / subinterface relation in the simplified
     setting of the STLC. *)
 
+(* ================================================================= *)
 (** ** The Subsumption Rule *)
 
 (** Our goal for this chapter is to add subtyping to the simply typed
@@ -125,12 +126,14 @@ Require Import Types.
     one of the fields ([T = {y:B->B}]) so that we can pass [t] to a
     function that requires just a single-field record. *)
 
+(* ================================================================= *)
 (** ** The Subtype Relation *)
 
 (** The first step -- the definition of the relation [S <: T] -- is
     where all the action is.  Let's look at each of the clauses of its
     definition.  *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Structural Rules *)
 
 (** To start off, we impose two "structural rules" that are
@@ -148,9 +151,9 @@ Require Import Types.
 
                                    ------                              (S_Refl)
                                    T <: T
-
 *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Products *)
 
 (** Now we consider the individual type constructors, one by one,
@@ -160,9 +163,9 @@ Require Import Types.
                             S1 <: T1    S2 <: T2
                             --------------------                        (S_Prod)
                              S1 * S2 <: T1 * T2
-
 *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Arrows *)
 
 (** The subtyping rule for arrows is a little less intuitive.  
@@ -225,6 +228,7 @@ Require Import Types.
     [S2]. That is, any function [f] of type [S1->S2] can also be
     viewed as having type [T1->T2]. *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Records *)
 
 (** What about subtyping for record types? *)
@@ -236,8 +240,9 @@ Require Import Types.
     for it to receive a record with fields [x], [y], and [z]; the [z]
     field will simply be ignored.  For example,
 
-       {name:String, age:Nat, gpa:Nat} <: {name:String, age:Nat}
-       {name:String, age:Nat} <: {name:String} {name:String} <: {}
+    {name:String, age:Nat, gpa:Nat} <: {name:String, age:Nat}
+
+    {name:String, age:Nat} <: {name:String} {name:String} <: {}
 
     This is known as "width subtyping" for records. *)
 
@@ -247,14 +252,14 @@ Require Import Types.
     having a field [x] of type [S] as long as [S] is a subtype of
     [T]. For example,
 
-       {x:Student} <: {x:Person}
+    {x:Student} <: {x:Person}
 
     This is known as "depth subtyping". *)
 
 (** Finally, although the fields of a record type are written in a
     particular order, the order does not really matter. For example,
 
-       {name:String,age:Nat} <: {age:Nat,name:String}
+    {name:String,age:Nat} <: {age:Nat,name:String}
 
     This is known as "permutation subtyping". *)
 
@@ -301,10 +306,9 @@ Require Import Types.
     [S_RcdWidth] we can only drop fields from the _end_ of a record
     type.)  So we add:
 
-         {i1:S1...in:Sn} is a permutation of {i1:T1...in:Tn}
+         {i1:S1...in:Sn} is a permutation of {j1:T1...jn:Tn}
          ---------------------------------------------------        (S_RcdPerm)
-                  {i1:S1...in:Sn} <: {i1:T1...in:Tn}
-
+                  {i1:S1...in:Sn} <: {j1:T1...jn:Tn}
 *)
 
 (** It is worth noting that full-blown language designs may choose not
@@ -322,7 +326,7 @@ Require Import Types.
       inheritance" of interfaces (i.e., permutation is allowed for
       interfaces). *)
 
-(** **** Exercise: 2 stars, recommended (arrow_sub_wrong)  *)
+(** **** Exercise: 2 stars, recommendedM (arrow_sub_wrong)  *)
 (** Suppose we had incorrectly defined subtyping as covariant on both
     the right and the left of arrow types:
 
@@ -330,16 +334,19 @@ Require Import Types.
                             --------------------                (S_Arrow_wrong)
                             S1 -> S2 <: T1 -> T2
 
-    Give a concrete example of functions [f] and [g] with the following types...
+    Give a concrete example of functions [f] and [g] with the following
+    types...
 
        f : Student -> Nat
        g : (Person -> Nat) -> Nat
 
     ... such that the application [g f] will get stuck during
-    execution.
+    execution.  (Use informal syntax.  No need to prove formally that 
+    the application gets stuck.)
 
 [] *)
 
+(* ----------------------------------------------------------------- *)
 (** *** Top *)
 
 (** Finally, it is convenient to give the subtype relation a maximum
@@ -354,7 +361,7 @@ Require Import Types.
 
     The [Top] type is an analog of the [Object] type in Java and C[#]. *)
 
-(* ############################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Summary *)
 
 (** In summary, we form the STLC with subtyping by starting with the
@@ -398,20 +405,19 @@ Require Import Types.
                   ----------------------------------               (S_RcdDepth)
                   {i1:S1...in:Sn} <: {i1:T1...in:Tn}
 
-         {i1:S1...in:Sn} is a permutation of {i1:T1...in:Tn}
+         {i1:S1...in:Sn} is a permutation of {j1:T1...jn:Tn}
          ---------------------------------------------------        (S_RcdPerm)
-                  {i1:S1...in:Sn} <: {i1:T1...in:Tn}
-
+                  {i1:S1...in:Sn} <: {j1:T1...jn:Tn}
 *)
 
-(* ############################################### *)
+(* ================================================================= *)
 (** ** Exercises *)
 
 (** **** Exercise: 1 star, optional (subtype_instances_tf_1)  *)
 (** Suppose we have types [S], [T], [U], and [V] with [S <: T]
     and [U <: V].  Which of the following subtyping assertions
     are then true?  Write _true_ or _false_ after each one.
-    ([A], [B], and [C] here are base types.)
+    ([A], [B], and [C] here are base types like [Bool], [Nat], etc.)
 
     - [T->S <: T->S]
 
@@ -429,7 +435,7 @@ Require Import Types.
 
 [] *)
 
-(** **** Exercise: 2 stars (subtype_order)  *)
+(** **** Exercise: 2 starsM (subtype_order)  *)
 (** The following types happen to form a linear order with respect to subtyping:
     - [Top]
     - [Top -> Student]
@@ -443,7 +449,7 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(** **** Exercise: 1 star (subtype_instances_tf_2)  *)
+(** **** Exercise: 1 starM (subtype_instances_tf_2)  *)
 (** Which of the following statements are true?  Write _true_ or
     _false_ after each one.
 
@@ -474,7 +480,7 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(** **** Exercise: 1 star (subtype_concepts_tf)  *)
+(** **** Exercise: 1 starM (subtype_concepts_tf)  *)
 (** Which of the following statements are true, and which are false?
     - There exists a type that is a supertype of every other type.
 
@@ -504,19 +510,21 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(** **** Exercise: 2 stars (proper_subtypes)  *)
+(** **** Exercise: 2 starsM (proper_subtypes)  *)
 (** Is the following statement true or false?  Briefly explain your
-    answer.
+    answer.  (Here [TBase n] stands for a base type, where [n] is 
+    a string standing for the name of the base type.  See the 
+    Syntax section below.)
 
     forall T,
-         ~(exists n, T = TBase n) ->
+         ~(T = TBool \/ exists n, T = TBase n) ->
          exists S,
             S <: T  /\  S <> T
 
 [] *)
 
 
-(** **** Exercise: 2 stars (small_large_1)  *)
+(** **** Exercise: 2 starsM (small_large_1)  *)
 (**
    - What is the _smallest_ type [T] ("smallest" in the subtype
      relation) that makes the following assertion true?  (Assume we
@@ -530,7 +538,7 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(** **** Exercise: 2 stars (small_large_2)  *)
+(** **** Exercise: 2 starsM (small_large_2)  *)
 (**
    - What is the _smallest_ type [T] that makes the following
      assertion true?
@@ -554,7 +562,7 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(** **** Exercise: 2 stars (small_large_4)  *)
+(** **** Exercise: 2 starsM (small_large_4)  *)
 (**
    - What is the _smallest_ type [T] that makes the following
      assertion true?
@@ -568,7 +576,7 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(** **** Exercise: 2 stars (smallest_1)  *)
+(** **** Exercise: 2 starsM (smallest_1)  *)
 (** What is the _smallest_ type [T] that makes the following
     assertion true?
 
@@ -577,7 +585,7 @@ Where does the type [Top->Top->Student] fit into this order?
 ]] 
 [] *)
 
-(** **** Exercise: 2 stars (smallest_2)  *)
+(** **** Exercise: 2 starsM (smallest_2)  *)
 (** What is the _smallest_ type [T] that makes the following
     assertion true?
 
@@ -594,7 +602,7 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(** **** Exercise: 2 stars (pair_permutation)  *)
+(** **** Exercise: 2 starsM (pair_permutation)  *)
 (** The subtyping rule for product types
 
                             S1 <: T1    S2 <: T2
@@ -611,7 +619,7 @@ Where does the type [Top->Top->Student] fit into this order?
 
 [] *)
 
-(* ###################################################### *)
+(* ################################################################# *)
 (** * Formal Definitions *)
 
 (** Most of the definitions needed to formalize what we've discussed
@@ -621,10 +629,10 @@ Where does the type [Top->Top->Student] fit into this order?
     rule and add a new [Inductive] definition for the subtyping
     relation.  Let's first do the identical bits. *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Core Definitions *)
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Syntax *)
 
 (** In the rest of the chapter, we formalize just base types,
@@ -653,7 +661,7 @@ Inductive tm : Type :=
   | tunit : tm 
 .
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 (** The definition of substitution remains exactly the same as for the
@@ -679,7 +687,7 @@ Fixpoint subst (x:id) (s:tm)  (t:tm) : tm :=
 
 Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 
-(* ################################### *)
+(* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 (** Likewise the definitions of the [value] property and the [step]
@@ -722,7 +730,7 @@ where "t1 '==>' t2" := (step t1 t2).
 
 Hint Constructors step.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Subtyping *)
 
 (** Now we come to the interesting part.  We begin by defining
@@ -749,25 +757,25 @@ Inductive subtype : ty -> ty -> Prop :=
       (TArrow S1 S2) <: (TArrow T1 T2)
 where "T '<:' U" := (subtype T U).
 
-(** Note that we don't need any special rules for base types: they are
-    automatically subtypes of themselves (by [S_Refl]) and [Top] (by
-    [S_Top]), and that's all we want. *)
+(** Note that we don't need any special rules for base types ([TBool]
+    and [TBase]): they are automatically subtypes of themselves (by
+    [S_Refl]) and [Top] (by [S_Top]), and that's all we want. *)
 
 Hint Constructors subtype.
 
 Module Examples.
 
-Notation x := (Id 0).
-Notation y := (Id 1).
-Notation z := (Id 2).
+Notation x := (Id "x").
+Notation y := (Id "y").
+Notation z := (Id "z").
 
-Notation A := (TBase (Id 6)).
-Notation B := (TBase (Id 7)).
-Notation C := (TBase (Id 8)).
+Notation A := (TBase (Id "A")).
+Notation B := (TBase (Id "B")).
+Notation C := (TBase (Id "C")).
 
-Notation String := (TBase (Id 9)).
-Notation Float := (TBase (Id 10)).
-Notation Integer := (TBase (Id 11)).
+Notation String := (TBase (Id "String")).
+Notation Float := (TBase (Id "Float")).
+Notation Integer := (TBase (Id "Integer")).
 
 Example subtyping_example_0 :
   (TArrow C TBool) <: (TArrow C TTop).
@@ -789,14 +797,13 @@ Proof. auto. Qed.
                   gpa  : Float }
     Employee := { name : String ;
                   ssn  : Integer }
-
 *)
-Definition Person : ty :=
-(* FILL IN HERE *) admit.
-Definition Student : ty :=
-(* FILL IN HERE *) admit.
-Definition Employee : ty :=
-(* FILL IN HERE *) admit.
+Definition Person : ty 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition Student : ty 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition Employee : ty 
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 
 (** Now use the definition of the subtype relation to prove the following: *)
 
@@ -833,7 +840,7 @@ Proof with eauto.
 
 End Examples.
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Typing *)
 
 (** The only change to the typing relation is the addition of the rule
@@ -911,7 +918,7 @@ Import Examples.
 
 End Examples2.
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Properties *)
 
 (** The fundamental properties of the system that we want to
@@ -921,7 +928,7 @@ End Examples2.
     take subtyping into account.  However, their proofs do become a
     little bit more involved. *)
 
-(* ###################################################################### *)
+(* ================================================================= *)
 (** ** Inversion Lemmas for Subtyping *)
 
 (** Before we look at the properties of the typing relation, we need
@@ -959,7 +966,7 @@ Proof with eauto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* ########################################## *)
+(* ================================================================= *)
 (** ** Canonical Forms *)
 
 (** The proof of the progress theorem -- that a well-typed
@@ -1006,13 +1013,12 @@ Lemma canonical_forms_of_Bool : forall Gamma s,
 Proof with eauto.
   intros Gamma s Hty Hv.
   remember TBool as T.
-  induction Hty; try solve by inversion...
+  induction Hty; try solve_by_invert...
   - (* T_Sub *)
     subst. apply sub_inversion_Bool in H. subst...
 Qed.
 
-
-(* ########################################## *)
+(* ================================================================= *)
 (** ** Progress *)
 
 (** The proof of progress now proceeds just like the one for the
@@ -1045,8 +1051,8 @@ Qed.
         Then [t1 t2 ==> t1 t2'] by rule [ST_App2] because [t1] is a
         value.
 
-      - Finally, suppose [t1] and [t2] are both values.  By the lemma 
-        about canonical forms for arrow types, we know that [t1] has the
+      - Finally, suppose [t1] and [t2] are both values.  By the 
+        canonical forms lemma for arrow types, we know that [t1] has the
         form [\x:S1.s2] for some [x], [S1], and [s2].  But then
         [(\x:S1.s2) t2 ==> [x:=t2]s2] by [ST_AppAbs], since [t2] is a
         value.
@@ -1099,11 +1105,10 @@ Proof with eauto.
     + assert (t1 = ttrue \/ t1 = tfalse)
         by (eapply canonical_forms_of_Bool; eauto).
       inversion H0; subst...
-    + inversion H. rename x into t1'. eauto.
-
+    + inversion H. rename x into t1'. eauto. 
 Qed.
 
-(* ########################################## *)
+(* ================================================================= *)
 (** ** Inversion Lemmas for Typing *)
 
 (** The proof of the preservation theorem also becomes a little more
@@ -1151,7 +1156,7 @@ Proof with eauto.
   intros Gamma x S1 t2 T H.
   remember (tabs x S1 t2) as t.
   induction H;
-    inversion Heqt; subst; intros; try solve by inversion.
+    inversion Heqt; subst; intros; try solve_by_invert.
   - (* T_Abs *)
     exists T12...
   - (* T_Sub *)
@@ -1168,7 +1173,7 @@ Proof with eauto.
   intros Gamma x T Hty.
   remember (tvar x) as t.
   induction Hty; intros;
-    inversion Heqt; subst; try solve by inversion.
+    inversion Heqt; subst; try solve_by_invert.
   - (* T_Var *)
     exists T...
   - (* T_Sub *)
@@ -1183,7 +1188,7 @@ Proof with eauto.
   intros Gamma t1 t2 T2 Hty.
   remember (tapp t1 t2) as t.
   induction Hty; intros;
-    inversion Heqt; subst; try solve by inversion.
+    inversion Heqt; subst; try solve_by_invert.
   - (* T_App *)
     exists T1...
   - (* T_Sub *)
@@ -1217,7 +1222,7 @@ Proof with eauto.
   intros Gamma t1 t2 t3 T Hty.
   remember (tif t1 t2 t3) as t.
   induction Hty; intros;
-    inversion Heqt; subst; try solve by inversion.
+    inversion Heqt; subst; try solve_by_invert.
   - (* T_If *)
     auto.
   - (* T_Sub *)
@@ -1249,7 +1254,7 @@ Proof with eauto.
   inversion Hsub as [U1 [U2 [Heq [Hsub1 Hsub2]]]].
   inversion Heq; subst...  Qed.
 
-(* ########################################## *)
+(* ================================================================= *)
 (** ** Context Invariance *)
 
 (** The context invariance lemma follows the same pattern as in the
@@ -1293,8 +1298,7 @@ Proof with eauto.
     apply T_Abs... apply IHhas_type. intros x0 Hafi.
     unfold update, t_update. destruct (beq_idP x x0)...
   - (* T_If *)
-    apply T_If...
-
+    apply T_If... 
 Qed.
 
 Lemma free_in_context : forall x t T Gamma,
@@ -1311,7 +1315,7 @@ Proof with eauto.
     rewrite <- beq_id_false_iff in H2.
     rewrite H2 in Hctx... Qed.
 
-(* ########################################## *)
+(* ================================================================= *)
 (** ** Substitution *)
 
 (** The _substitution lemma_ is proved along the same lines as
@@ -1382,7 +1386,7 @@ Proof with eauto.
       by apply (typing_inversion_unit _ _  Htypt)... 
 Qed.
 
-(* ########################################## *)
+(* ================================================================= *)
 (** ** Preservation *)
 
 (** The proof of preservation now proceeds pretty much as in earlier
@@ -1458,6 +1462,7 @@ Proof with eauto.
       apply substitution_preserves_typing with T... 
 Qed.
 
+(* ================================================================= *)
 (** ** Records, via Products and Top *)
 
 (** This formalization of the STLC with subtyping omits record
@@ -1484,10 +1489,10 @@ Qed.
     easy (and instructive) to check that the subtyping rules above are
     validated by the encoding. *)
 
-(* ###################################################### *)
+(* ================================================================= *)
 (** ** Exercises *)
 
-(** **** Exercise: 2 stars (variations)  *)
+(** **** Exercise: 2 starsM (variations)  *)
 (** Each part of this problem suggests a different way of changing the
     definition of the STLC with Unit and subtyping.  (These changes
     are not cumulative: each part starts from the original language.)
@@ -1533,7 +1538,7 @@ Qed.
                              (unit t) ==> (t unit)
 
                            ------------------------      (T_Funny6) 
-                           empty |- Unit : Top->Top
+                           empty |- unit : Top->Top
 
 
     - Suppose we _change_ the arrow subtyping rule to:
@@ -1545,7 +1550,7 @@ Qed.
  
 [] *)
 
-(* ###################################################################### *)
+(* ################################################################# *)
 (** * Exercise: Adding Products *)
 
 (** **** Exercise: 4 stars (products)  *)
@@ -1553,30 +1558,70 @@ Qed.
     defined is a relatively straightforward matter.  Carry out this
     extension:
 
-    - Add constructors for pairs, first and second projections, and
-      product types to the definitions of [ty] and [tm].  (Don't
-      forget to add corresponding cases to [T_cases] and [t_cases].)
+    - Below, we've added constructors for pairs, first and second
+      projections, and product types to the definitions of [ty] and
+      [tm].
 
-    - Extend the substitution function and value relation as in
-      chapter [MoreSTLC].
+    - Copy the definitions of the substitution function and value
+      relation from above and extend them as in chapter
+      [MoreSTLC] to include products.
 
-    - Extend the operational semantics with the same reduction rules
-      as in chapter [MoreSTLC].
+    - Similarly, copy and extend the operational semantics with the
+      same reduction rules as in chapter [MoreSTLC].
 
-    - Extend the subtyping relation with this rule:
+    - (Copy and) extend the subtyping relation with this rule:
 
-                        S1 <: T1     S2 <: T2
-                        ---------------------                     (Sub_Prod)
-                          S1 * S2 <: T1 * T2
+                        S1 <: T1 S2 <: T2
+                        --------------------- (Sub_Prod) 
+                        S1 * S2 <: T1 * T2
 
     - Extend the typing relation with the same rules for pairs and
       projections as in chapter [MoreSTLC].
 
     - Extend the proofs of progress, preservation, and all their
       supporting lemmas to deal with the new constructs.  (You'll also
-      need to add some completely new lemmas.)
-[] *)
+      need to add a couple of completely new lemmas.) *)
 
+Module ProductExtension.
 
-(** $Date: 2016-05-26 17:51:14 -0400 (Thu, 26 May 2016) $ *)
+Inductive ty : Type :=
+  | TTop   : ty
+  | TBool  : ty
+  | TBase  : id -> ty
+  | TArrow : ty -> ty -> ty
+  | TUnit  : ty
+  | TProd : ty -> ty -> ty.
+
+Inductive tm : Type :=
+  | tvar : id -> tm
+  | tapp : tm -> tm -> tm
+  | tabs : id -> ty -> tm -> tm
+  | ttrue : tm
+  | tfalse : tm
+  | tif : tm -> tm -> tm -> tm
+  | tunit : tm
+  | tpair : tm -> tm -> tm
+  | tfst : tm -> tm
+  | tsnd : tm -> tm.
+
+(* Copy and extend and/or fill in required definitions and lemmas
+   here. *)
+
+Theorem progress : forall t T,
+     empty |- t \in T ->
+     value t \/ exists t', t ==> t'.
+Proof.
+  (* FILL IN HERE *) Admitted.
+
+Theorem preservation : forall t t' T,
+     empty |- t \in T  ->
+     t ==> t'  ->
+     empty |- t' \in T.
+Proof.
+  (* FILL IN HERE *) Admitted.
+
+End ProductExtension.  
+(** [] *)
+
+(** $Date: 2016-12-20 13:03:18 -0500 (Tue, 20 Dec 2016) $ *)
 

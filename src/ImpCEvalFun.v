@@ -7,14 +7,15 @@
     consider strategies for getting the functional approach to
     work. *)
 
-(* #################################### *)
+(* ################################################################# *)
 (** * A Broken Evaluator *)
 
+(* IMPORTS *)
 Require Import Coq.omega.Omega.
 Require Import Coq.Arith.Arith.
-Require Import SfLib.
 Require Import Imp.
 Require Import Maps.
+(* /IMPORTS *)
 
 (** Here was our first try at an evaluation function for commands,
     omitting [WHILE]. *)
@@ -63,7 +64,7 @@ Fixpoint ceval_step1 (st : state) (c : com) : state :=
     of [ceval_step1] cannot be written in Coq -- at least not without
     one additional trick... *)
 
-(* #################################### *)
+(* ################################################################# *)
 (** * A Step-Indexed Evaluator *)
 
 (** The trick we need is to pass an _additional_ parameter to the
@@ -106,7 +107,7 @@ Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
     rule for sequencing, the same [i] is passed to both recursive
     calls.  Understanding the exact way that [i] is treated will be
     important in the proof of [ceval__ceval_step], which is given as
-    an exercise below. 
+    an exercise below.
 
     One thing that is not so nice about this evaluator is that we
     can't tell, from its result, whether it stopped because the
@@ -201,8 +202,8 @@ Definition test_ceval (st:state) (c:com) :=
    [X] (inclusive: [1 + 2 + ... + X]) in the variable [Y].  Make sure
    your solution satisfies the test that follows. *)
 
-Definition pup_to_n : com :=
-  (* FILL IN HERE *) admit.
+Definition pup_to_n : com
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 
 (* 
 Example pup_to_n_1 :
@@ -220,7 +221,7 @@ Proof. reflexivity. Qed.
 (* FILL IN HERE *)
 (** [] *)
 
-(* ################################################################ *)
+(* ################################################################# *)
 (** * Relational vs. Step-Indexed Evaluation *)
 
 (** As for arithmetic and boolean expressions, we'd hope that
@@ -359,7 +360,7 @@ Proof.
   split. apply ceval__ceval_step. apply ceval_step__ceval.
 Qed.
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Determinism of Evaluation Again *)
 
 (** Using the fact that the relational and step-indexed definition of
@@ -381,4 +382,4 @@ Proof.
   rewrite E1 in E2. inversion E2. reflexivity.
   omega. omega.  Qed.
 
-(** $Date: 2016-05-26 16:17:19 -0400 (Thu, 26 May 2016) $ *)
+(** $Date: 2016-10-22 20:19:37 -0400 (Sat, 22 Oct 2016) $ *)

@@ -34,7 +34,6 @@
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.omega.Omega.html#"><span class="id" type="library">Coq.omega.Omega</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Lists.List.html#"><span class="id" type="library">Coq.Lists.List</span></a>.<br/>
 <span class="id" type="keyword">Import</span> <span class="id" type="var">ListNotations</span>.<br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" type="library">Maps</span></a>.<br/>
 <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="Imp.html#"><span class="id" type="library">Imp</span></a>.<br/>
 
@@ -121,7 +120,7 @@ The evaluators we have seen so far (for <span class="inlinecode"><span class="id
 </div>
 
 <div class="doc">
-<a name="lab484"></a><h1 class="section">A Toy Language</h1>
+<a name="lab489"></a><h1 class="section">A Toy Language</h1>
 
 <div class="paragraph"> </div>
 
@@ -340,7 +339,7 @@ Things to notice:
 </div>
 
 <div class="doc">
-<a name="lab485"></a><h4 class="section">Exercise: 1 star (test_step_2)</h4>
+<a name="lab490"></a><h4 class="section">Exercise: 1 star (test_step_2)</h4>
  Right-hand sides of sums can take a step only when the
     left-hand side is finished: if <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> can take a step to <span class="inlinecode"><span class="id" type="var">t<sub>2</sub>'</span></span>,
     then <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode">(<span class="id" type="var">C</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> steps to <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode">(<span class="id" type="var">C</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span>
@@ -377,7 +376,7 @@ Things to notice:
 </div>
 
 <div class="doc">
-<a name="lab486"></a><h1 class="section">Relations</h1>
+<a name="lab491"></a><h1 class="section">Relations</h1>
 
 <div class="paragraph"> </div>
 
@@ -485,18 +484,24 @@ Our main examples of such relations in this chapter will be
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_Plus1&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_Plus2&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;ST_Plus1&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>2</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_PlusConstConst&nbsp;*)</span> <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H<sub>0</sub></span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hy<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>1</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_PlusConstConst&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H<sub>0</sub></span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hy<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>1</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_Plus1&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> (<span class="id" type="var">IHHy1</span> <span class="id" type="var">t<sub>1</sub>'0</span>).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="tactic">assumption</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_Plus2&nbsp;*)</span> <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hy<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>1</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_Plus2&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hy<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>1</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;ST_Plus2&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>2</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_PlusConstConst&nbsp;*)</span> <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hy<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>1</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_PlusConstConst&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hy<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>1</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_Plus1&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;ST_Plus2&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> (<span class="id" type="var">IHHy1</span> <span class="id" type="var">t<sub>2</sub>'0</span>).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="tactic">assumption</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#SimpleArith2"><span class="id" type="module">SimpleArith2</span></a>.<br/>
 
 <br/>
 </div>
@@ -510,27 +515,67 @@ There is some annoying repetition in this proof.  Each use of
 
 <div class="paragraph"> </div>
 
-    The tactic <span class="inlinecode"><span class="id" type="var">solve</span></span> <span class="inlinecode"><span class="id" type="tactic">by</span></span> <span class="inlinecode"><span class="id" type="tactic">inversion</span></span>, which is defined in the small
-    accompanying file <span class="inlinecode"><span class="id" type="var">SfLib.v</span></span>, can be helpful in such cases.  It
-    will solve the goal if it can be solved by inverting some
-    hypothesis; otherwise, it fails.  (The variants <span class="inlinecode"><span class="id" type="var">solve</span></span> <span class="inlinecode"><span class="id" type="tactic">by</span></span>
-    <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode">2</span> and <span class="inlinecode"><span class="id" type="var">solve</span></span> <span class="inlinecode"><span class="id" type="tactic">by</span></span> <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode">3</span> that work if two or three
-    consecutive inversions will solve the goal.)
+    The following custom tactic, called <span class="inlinecode"><span class="id" type="var">solve_by_inverts</span></span>, can be
+    helpful in such cases.  It will solve the goal if it can be solved
+    by inverting some hypothesis; otherwise, it fails. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">solve_by_inverts</span> <span class="id" type="var">n</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">goal</span> <span class="id" type="keyword">with</span> | <span class="id" type="var">H</span> : ?<span class="id" type="var">T</span> <span style="font-family: arial;">&#8866;</span> <span class="id" type="var">_</span> ⇒ <br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">type</span> <span class="id" type="var">of</span> <span class="id" type="var">T</span> <span class="id" type="keyword">with</span> <span class="id" type="keyword">Prop</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">solve</span> [ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (?<span class="id" type="var">n'</span>)) ⇒ <span class="id" type="tactic">subst</span>; <span class="id" type="var">solve_by_inverts</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <span class="id" type="var">n'</span>) <span class="id" type="keyword">end</span> ]<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span> <span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The details of how this works are not important for now, but it
+    illustrates the power of Coq's <span class="inlinecode"><span class="id" type="keyword">Ltac</span></span> language for
+    programmatically defining special-purpose tactics.  It looks
+    through the current proof state for a hypothesis <span class="inlinecode"><span class="id" type="var">H</span></span> (the first
+    <span class="inlinecode"><span class="id" type="keyword">match</span></span>) of type <span class="inlinecode"><span class="id" type="keyword">Prop</span></span> (the second <span class="inlinecode"><span class="id" type="keyword">match</span></span>) such that performing
+    inversion on <span class="inlinecode"><span class="id" type="var">H</span></span> (followed by a recursive invocation of the same
+    tactic, if its argument <span class="inlinecode"><span class="id" type="var">n</span></span> is greater than one) completely solves
+    the current goal.  If no such hypothesis exists, it fails.
 
 <div class="paragraph"> </div>
 
-    Let's see how a proof of the previous theorem can be simplified
+    We will usually want to call <span class="inlinecode"><span class="id" type="var">solve_by_inverts</span></span> with argument
+    <span class="inlinecode">1</span> (especially as larger arguments can lead to very slow proof
+    checking), so we define <span class="inlinecode"><span class="id" type="var">solve_by_invert</span></span> as a shorthand for this
+    case. 
+</div>
+<div class="code code-tight">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">solve_by_invert</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">solve_by_inverts</span> 1.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Let's see how a proof of the previous theorem can be simplified
     using this tactic... 
 </div>
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <a name="SimpleArith2.step_deterministic_alt"><span class="id" type="lemma">step_deterministic_alt</span></a>: <a class="idref" href="Smallstep.html#SimpleArith2.deterministic"><span class="id" type="definition">deterministic</span></a> <a class="idref" href="Smallstep.html#SimpleArith1.step"><span class="id" type="inductive">step</span></a>.<br/>
+<span class="id" type="keyword">Module</span> <a name="SimpleArith3"><span class="id" type="module">SimpleArith3</span></a>.<br/>
+<span class="id" type="keyword">Import</span> <span class="id" type="var">SimpleArith1</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <a name="SimpleArith3.step_deterministic_alt"><span class="id" type="lemma">step_deterministic_alt</span></a>: <a class="idref" href="Smallstep.html#SimpleArith3.deterministic"><span class="id" type="definition">deterministic</span></a> <a class="idref" href="Smallstep.html#SimpleArith1.step"><span class="id" type="inductive">step</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y<sub>1</sub></span> <span class="id" type="var">y<sub>2</sub></span> <span class="id" type="var">Hy<sub>1</sub></span> <span class="id" type="var">Hy<sub>2</sub></span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">y<sub>2</sub></span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hy<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">y<sub>2</sub></span> <span class="id" type="var">Hy<sub>2</sub></span>;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>2</sub></span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> (<span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Hy<sub>2</sub></span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">solve_by_invert</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;ST_PlusConstConst&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br/>
 &nbsp;&nbsp;- <span class="comment">(*&nbsp;ST_Plus1&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHHy1</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">reflexivity</span>.<br/>
@@ -539,13 +584,13 @@ There is some annoying repetition in this proof.  Each use of
 <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#SimpleArith2"><span class="id" type="module">SimpleArith2</span></a>.<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#SimpleArith3"><span class="id" type="module">SimpleArith3</span></a>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab487"></a><h2 class="section">Values</h2>
+<a name="lab492"></a><h2 class="section">Values</h2>
 
 <div class="paragraph"> </div>
 
@@ -614,7 +659,7 @@ There is some annoying repetition in this proof.  Each use of
 
 <br/>
 <span class="id" type="keyword">Inductive</span> <a name="value"><span class="id" type="inductive">value</span></a> : <a class="idref" href="Smallstep.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">&rarr;</span> <span class="id" type="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<a name="v_const"><span class="id" type="constructor">v_const</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>, <a class="idref" href="Smallstep.html#value"><span class="id" type="inductive">value</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> <a class="idref" href="Smallstep.html#n"><span class="id" type="variable">n</span></a>).<br/>
+&nbsp;&nbsp;| <a name="v_const"><span class="id" type="constructor">v_const</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>, <a class="idref" href="Smallstep.html#value"><span class="id" type="inductive">value</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> <a class="idref" href="Smallstep.html#n"><span class="id" type="variable">n</span></a>).<br/>
 
 <br/>
 </div>
@@ -703,7 +748,7 @@ Having introduced the idea of values, we can use it in the
 </div>
 
 <div class="doc">
-<a name="lab488"></a><h4 class="section">Exercise: 3 stars, recommended (redo_determinism)</h4>
+<a name="lab493"></a><h4 class="section">Exercise: 3 stars, recommended (redo_determinism)</h4>
  As a sanity check on this change, let's re-verify determinism.
 
 <div class="paragraph"> </div>
@@ -769,7 +814,7 @@ Having introduced the idea of values, we can use it in the
 </div>
 
 <div class="doc">
-<a name="lab489"></a><h2 class="section">Strong Progress and Normal Forms</h2>
+<a name="lab494"></a><h2 class="section">Strong Progress and Normal Forms</h2>
 
 <div class="paragraph"> </div>
 
@@ -917,7 +962,7 @@ Note that this definition specifies what it is to be a normal form
 <span class="id" type="keyword">Proof</span>. <span class="comment">(*&nbsp;a&nbsp;corollary&nbsp;of&nbsp;<span class="inlinecode"><span class="id" type="var">strong_progress</span></span>...&nbsp;*)</span><br/>
 &nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Smallstep.html#normal_form"><span class="id" type="definition">normal_form</span></a>. <span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">H</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">G</span> : <a class="idref" href="Smallstep.html#value"><span class="id" type="inductive">value</span></a> <span class="id" type="var">t</span> <span style="font-family: arial;">&or;</span> <span style="font-family: arial;">&exist;</span><span class="id" type="var">t'</span>, <span class="id" type="var">t</span> <span style="font-family: arial;">&rArr;</span> <a class="idref" href="Smallstep.html#t'"><span class="id" type="variable">t'</span></a>).<br/>
-&nbsp;&nbsp;{ <span class="comment">(*&nbsp;Proof&nbsp;of&nbsp;assertion&nbsp;*)</span> <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#strong_progress"><span class="id" type="lemma">strong_progress</span></a>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#strong_progress"><span class="id" type="lemma">strong_progress</span></a>. }<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">G</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;l&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>0</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;r&nbsp;*)</span> <span class="id" type="var">exfalso</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">assumption</span>. <span class="id" type="keyword">Qed</span>.<br/>
@@ -947,11 +992,10 @@ Why is this interesting?
     written the definitions so that they would <i>not</i> coincide. 
 <div class="paragraph"> </div>
 
-<a name="lab490"></a><h4 class="section">Exercise: 3 stars, optional (value_not_same_as_normal_form)</h4>
+<a name="lab495"></a><h4 class="section">Exercise: 3 stars, optional (value_not_same_as_normal_form1)</h4>
  We might, for example, mistakenly define <span class="inlinecode"><span class="id" type="var">value</span></span> so that it
-    includes some terms that are not finished reducing.  (Even if you
-    don't work this exercise and the following ones in Coq, make sure
-    you can think of an example of such a term.) 
+    includes some terms that are not finished reducing.  (Even if you don't work this exercise and the following ones
+    in Coq, make sure you can think of an example of such a term.) 
 </div>
 <div class="code code-tight">
 
@@ -986,19 +1030,21 @@ Why is this interesting?
 &nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">v</span>, <a class="idref" href="Smallstep.html#Temp1.value"><span class="id" type="inductive">value</span></a> <a class="idref" href="Smallstep.html#v"><span class="id" type="variable">v</span></a> <span style="font-family: arial;">&and;</span> ¬ <a class="idref" href="Smallstep.html#Temp1.normal_form"><span class="id" type="definition">normal_form</span></a> <a class="idref" href="Smallstep.html#Temp1.step"><span class="id" type="inductive">step</span></a> <a class="idref" href="Smallstep.html#v"><span class="id" type="variable">v</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
-</div>
-
-<div class="doc">
-<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
-</div>
-<div class="code code-tight">
 <span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#Temp1"><span class="id" type="module">Temp1</span></a>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab491"></a><h4 class="section">Exercise: 2 stars, optional (value_not_same_as_normal_form)</h4>
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab496"></a><h4 class="section">Exercise: 2 stars, optional (value_not_same_as_normal_form2)</h4>
  Alternatively, we might mistakenly define <span class="inlinecode"><span class="id" type="var">step</span></span> so that it
     permits something designated as a value to reduce further. 
 </div>
@@ -1040,19 +1086,16 @@ Why is this interesting?
 
 <br/>
 </div>
-</div>
-
-<div class="doc">
-<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
-</div>
-<div class="code code-tight">
 <span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#Temp2"><span class="id" type="module">Temp2</span></a>.<br/>
 
 <br/>
 </div>
 
 <div class="doc">
-<a name="lab492"></a><h4 class="section">Exercise: 3 stars, optional (value_not_same_as_normal_form')</h4>
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+<div class="paragraph"> </div>
+
+<a name="lab497"></a><h4 class="section">Exercise: 3 stars, optional (value_not_same_as_normal_form3)</h4>
  Finally, we might define <span class="inlinecode"><span class="id" type="var">value</span></span> and <span class="inlinecode"><span class="id" type="var">step</span></span> so that there is some
     term that is not a value but that cannot take a step in the <span class="inlinecode"><span class="id" type="var">step</span></span>
     relation.  Such terms are said to be <i>stuck</i>. In this case this is
@@ -1095,12 +1138,6 @@ Why is this interesting?
 &nbsp;&nbsp;<span style="font-family: arial;">&exist;</span><span class="id" type="var">t</span>, ¬ <a class="idref" href="Smallstep.html#Temp3.value"><span class="id" type="inductive">value</span></a> <a class="idref" href="Smallstep.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">&and;</span> <a class="idref" href="Smallstep.html#Temp3.normal_form"><span class="id" type="definition">normal_form</span></a> <a class="idref" href="Smallstep.html#Temp3.step"><span class="id" type="inductive">step</span></a> <a class="idref" href="Smallstep.html#t"><span class="id" type="variable">t</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
-</div>
-
-<div class="doc">
-<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
-</div>
-<div class="code code-tight">
 
 <br/>
 <span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#Temp3"><span class="id" type="module">Temp3</span></a>.<br/>
@@ -1109,7 +1146,15 @@ Why is this interesting?
 </div>
 
 <div class="doc">
-<a name="lab493"></a><h3 class="section">Additional Exercises</h3>
+<font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
+</div>
+<div class="code code-tight">
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab498"></a><h3 class="section">Additional Exercises</h3>
 
 </div>
 <div class="code code-space">
@@ -1157,7 +1202,7 @@ Here is another very simple language whose terms, instead of being
 </div>
 
 <div class="doc">
-<a name="lab494"></a><h4 class="section">Exercise: 1 star (smallstep_bools)</h4>
+<a name="lab499"></a><h4 class="section">Exercise: 1 starM (smallstep_bools)</h4>
  Which of the following propositions are provable?  (This is just a
     thought exercise, but for an extra challenge feel free to prove
     your answers in Coq.) 
@@ -1203,7 +1248,7 @@ Here is another very simple language whose terms, instead of being
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab495"></a><h4 class="section">Exercise: 3 stars, optional (progress_bool)</h4>
+<a name="lab500"></a><h4 class="section">Exercise: 3 stars, optional (progress_bool)</h4>
  Just as we proved a progress theorem for plus expressions, we can
     do so for boolean expressions, as well. 
 </div>
@@ -1220,7 +1265,7 @@ Here is another very simple language whose terms, instead of being
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab496"></a><h4 class="section">Exercise: 2 stars, optional (step_deterministic)</h4>
+<a name="lab501"></a><h4 class="section">Exercise: 2 stars, optional (step_deterministic)</h4>
 
 </div>
 <div class="code code-space">
@@ -1242,7 +1287,7 @@ Here is another very simple language whose terms, instead of being
 </div>
 
 <div class="doc">
-<a name="lab497"></a><h4 class="section">Exercise: 2 stars (smallstep_bool_shortcut)</h4>
+<a name="lab502"></a><h4 class="section">Exercise: 2 stars (smallstep_bool_shortcut)</h4>
  Suppose we want to add a "short circuit" to the step relation for
     boolean expressions, so that it can recognize when the <span class="inlinecode"><span class="id" type="keyword">then</span></span> and
     <span class="inlinecode"><span class="id" type="keyword">else</span></span> branches of a conditional are the same value (either
@@ -1307,7 +1352,7 @@ Here is another very simple language whose terms, instead of being
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab498"></a><h4 class="section">Exercise: 3 stars, optional (properties_of_altered_step)</h4>
+<a name="lab503"></a><h4 class="section">Exercise: 3 stars, optional (properties_of_altered_step)</h4>
  It can be shown that the determinism and strong progress theorems
     for the step relation in the lecture notes also hold for the
     definition of step given above.  After we add the clause
@@ -1321,8 +1366,7 @@ Here is another very simple language whose terms, instead of being
 
 <div class="paragraph"> </div>
 
-      Optional: prove your answer correct in Coq.
-
+      Optional: prove your answer correct in Coq. 
 </li>
 </ul>
 
@@ -1383,7 +1427,7 @@ Here is another very simple language whose terms, instead of being
 </div>
 
 <div class="doc">
-<a name="lab499"></a><h1 class="section">Multi-Step Reduction</h1>
+<a name="lab504"></a><h1 class="section">Multi-Step Reduction</h1>
 
 <div class="paragraph"> </div>
 
@@ -1445,7 +1489,7 @@ Since we'll want to reuse the idea of multi-step reduction many
 </div>
 
 <div class="doc">
-(In the <a href="Rel.html"><font color="gray">Rel</font></a> chapter and the Coq standard library, this relation
+(In the <a href="Rel.html"><span class="inlineref">Rel</span></a> chapter and the Coq standard library, this relation
     is called <span class="inlinecode"><span class="id" type="var">clos_refl_trans_1n</span></span>.  We give it a shorter name here
     for the sake of readability.)
 
@@ -1560,7 +1604,7 @@ In particular, for the <span class="inlinecode"><span class="id" type="var">mult
 </div>
 
 <div class="doc">
-<a name="lab500"></a><h2 class="section">Examples</h2>
+<a name="lab505"></a><h2 class="section">Examples</h2>
 
 <div class="paragraph"> </div>
 
@@ -1577,14 +1621,12 @@ In particular, for the <span class="inlinecode"><span class="id" type="var">mult
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> ((0 + 3) + (2 + 4)).<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_step"><span class="id" type="constructor">multi_step</span></a> <span class="id" type="keyword">with</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> (0 + 3))<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> 2) (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> 4))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> (0 + 3))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> 2) (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> 4))).<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#ST_Plus1"><span class="id" type="constructor">ST_Plus1</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#ST_PlusConstConst"><span class="id" type="constructor">ST_PlusConstConst</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_step"><span class="id" type="constructor">multi_step</span></a> <span class="id" type="keyword">with</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> (0 + 3))<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> (2 + 4))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> (0 + 3))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> (2 + 4))).<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#ST_Plus2"><span class="id" type="constructor">ST_Plus2</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#v_const"><span class="id" type="constructor">v_const</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#ST_PlusConstConst"><span class="id" type="constructor">ST_PlusConstConst</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_R"><span class="id" type="lemma">multi_R</span></a>.<br/>
@@ -1617,7 +1659,7 @@ Here's an alternate proof of the same fact that uses <span class="inlinecode"><s
 </div>
 
 <div class="doc">
-<a name="lab501"></a><h4 class="section">Exercise: 1 star, optional (test_multistep_2)</h4>
+<a name="lab506"></a><h4 class="section">Exercise: 1 star, optional (test_multistep_2)</h4>
 
 </div>
 <div class="code code-space">
@@ -1631,7 +1673,7 @@ Here's an alternate proof of the same fact that uses <span class="inlinecode"><s
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab502"></a><h4 class="section">Exercise: 1 star, optional (test_multistep_3)</h4>
+<a name="lab507"></a><h4 class="section">Exercise: 1 star, optional (test_multistep_3)</h4>
 
 </div>
 <div class="code code-space">
@@ -1647,7 +1689,7 @@ Here's an alternate proof of the same fact that uses <span class="inlinecode"><s
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab503"></a><h4 class="section">Exercise: 2 stars (test_multistep_4)</h4>
+<a name="lab508"></a><h4 class="section">Exercise: 2 stars (test_multistep_4)</h4>
 
 </div>
 <div class="code code-space">
@@ -1674,7 +1716,7 @@ Here's an alternate proof of the same fact that uses <span class="inlinecode"><s
 </div>
 
 <div class="doc">
-<a name="lab504"></a><h2 class="section">Normal Forms Again</h2>
+<a name="lab509"></a><h2 class="section">Normal Forms Again</h2>
 
 <div class="paragraph"> </div>
 
@@ -1702,7 +1744,7 @@ We have already seen that, for our language, single-step reduction is
     normal form of <span class="inlinecode"><span class="id" type="var">t</span></span>." 
 <div class="paragraph"> </div>
 
-<a name="lab505"></a><h4 class="section">Exercise: 3 stars, optional (normal_forms_unique)</h4>
+<a name="lab510"></a><h4 class="section">Exercise: 3 stars, optional (normal_forms_unique)</h4>
 
 </div>
 <div class="code code-space">
@@ -1769,7 +1811,7 @@ To prove that <span class="inlinecode"><span class="id" type="var">step</span></
 </div>
 
 <div class="doc">
-<a name="lab506"></a><h4 class="section">Exercise: 2 stars (multistep_congr_2)</h4>
+<a name="lab511"></a><h4 class="section">Exercise: 2 stars (multistep_congr_2)</h4>
 
 </div>
 <div class="code code-space">
@@ -1817,7 +1859,7 @@ To prove that <span class="inlinecode"><span class="id" type="var">step</span></
       values (by <span class="inlinecode"><span class="id" type="var">nf_same_as_value</span></span>); we know that <span class="inlinecode"><span class="id" type="var">t<sub>1</sub>'</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">C</span></span> <span class="inlinecode"><span class="id" type="var">n<sub>1</sub></span></span> and
       <span class="inlinecode"><span class="id" type="var">t<sub>2</sub>'</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">C</span></span> <span class="inlinecode"><span class="id" type="var">n<sub>2</sub></span></span>, for some <span class="inlinecode"><span class="id" type="var">n<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">n<sub>2</sub></span></span>.  We can combine the <span class="inlinecode"><span style="font-family: arial;">&rArr;*</span></span>
       derivations for <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> using <span class="inlinecode"><span class="id" type="var">multi_congr_1</span></span> and
-      <span class="inlinecode"><span class="id" type="var">multi_congr_1</span></span> to prove that <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> reduces in many steps to
+      <span class="inlinecode"><span class="id" type="var">multi_congr_2</span></span> to prove that <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> reduces in many steps to
       <span class="inlinecode"><span class="id" type="var">C</span></span> <span class="inlinecode">(<span class="id" type="var">n<sub>1</sub></span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n<sub>2</sub></span>)</span>.
 
 <div class="paragraph"> </div>
@@ -1847,22 +1889,21 @@ To prove that <span class="inlinecode"><span class="id" type="var">step</span></
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;just&nbsp;equalities:&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="Smallstep.html#nf_same_as_value"><span class="id" type="lemma">nf_same_as_value</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#v_const"><span class="id" type="constructor">v_const</span></a>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;P&nbsp;*)</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">IHt1</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">H<sub>1</sub></span>]; <span class="id" type="tactic">clear</span> <span class="id" type="var">IHt1</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">IHt2</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>2</sub>'</span> <span class="id" type="var">H<sub>2</sub></span>]; <span class="id" type="tactic">clear</span> <span class="id" type="var">IHt2</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">H<sub>11</sub></span> <span class="id" type="var">H<sub>12</sub></span>]; <span class="id" type="tactic">clear</span> <span class="id" type="var">H<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">H<sub>21</sub></span> <span class="id" type="var">H<sub>22</sub></span>]; <span class="id" type="tactic">clear</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHt1</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> [<span class="id" type="var">H<sub>11</sub></span> <span class="id" type="var">H<sub>12</sub></span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHt2</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>2</sub>'</span> [<span class="id" type="var">H<sub>21</sub></span> <span class="id" type="var">H<sub>22</sub></span>]].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="Smallstep.html#nf_same_as_value"><span class="id" type="lemma">nf_same_as_value</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>12</sub></span>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Smallstep.html#nf_same_as_value"><span class="id" type="lemma">nf_same_as_value</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>22</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>12</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">n<sub>1</sub></span>]. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>22</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">n<sub>2</sub></span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>12</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">H</span>]. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>22</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">n<sub>2</sub></span> <span class="id" type="var">H'</span>].<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>11</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H<sub>0</sub></span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>21</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">&larr;</span> <span class="id" type="var">H'</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>21</sub></span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">&exist;</span>(<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> (<span class="id" type="var">n<sub>1</sub></span> + <span class="id" type="var">n<sub>2</sub></span>)).<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">split</span>.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;l&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_trans"><span class="id" type="lemma">multi_trans</span></a> <span class="id" type="keyword">with</span> (<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> <span class="id" type="var">n<sub>1</sub></span>) <span class="id" type="var">t<sub>2</sub></span>).<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multistep_congr_1"><span class="id" type="lemma">multistep_congr_1</span></a>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>11</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_trans"><span class="id" type="lemma">multi_trans</span></a> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multistep_congr_1"><span class="id" type="lemma">multistep_congr_1</span></a>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>11</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_trans"><span class="id" type="lemma">multi_trans</span></a> <span class="id" type="keyword">with</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Smallstep.html#P"><span class="id" type="constructor">P</span></a> (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> <span class="id" type="var">n<sub>1</sub></span>) (<a class="idref" href="Smallstep.html#C"><span class="id" type="constructor">C</span></a> <span class="id" type="var">n<sub>2</sub></span>)).<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multistep_congr_2"><span class="id" type="axiom">multistep_congr_2</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#v_const"><span class="id" type="constructor">v_const</span></a>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>21</sub></span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_R"><span class="id" type="lemma">multi_R</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#ST_PlusConstConst"><span class="id" type="constructor">ST_PlusConstConst</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multistep_congr_2"><span class="id" type="axiom">multistep_congr_2</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#v_const"><span class="id" type="constructor">v_const</span></a>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>21</sub></span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#multi_R"><span class="id" type="lemma">multi_R</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#ST_PlusConstConst"><span class="id" type="constructor">ST_PlusConstConst</span></a>. }<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;r&nbsp;*)</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="Smallstep.html#nf_same_as_value"><span class="id" type="lemma">nf_same_as_value</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="Smallstep.html#v_const"><span class="id" type="constructor">v_const</span></a>. <span class="id" type="keyword">Qed</span>.<br/>
 </div>
@@ -1871,7 +1912,7 @@ To prove that <span class="inlinecode"><span class="id" type="var">step</span></
 </div>
 
 <div class="doc">
-<a name="lab507"></a><h2 class="section">Equivalence of Big-Step Evaluation and Small-Step Reduction</h2>
+<a name="lab512"></a><h2 class="section">Equivalence of Big-Step and Small-Step</h2>
 
 <div class="paragraph"> </div>
 
@@ -1882,7 +1923,7 @@ To prove that <span class="inlinecode"><span class="id" type="var">step</span></
     details are left as an exercise. 
 <div class="paragraph"> </div>
 
-<a name="lab508"></a><h4 class="section">Exercise: 3 stars (eval__multistep)</h4>
+<a name="lab513"></a><h4 class="section">Exercise: 3 stars (eval__multistep)</h4>
 
 </div>
 <div class="code code-space">
@@ -1951,7 +1992,7 @@ The key ideas in the proof can be seen in the following picture:
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab509"></a><h4 class="section">Exercise: 3 stars, advanced (eval__multistep_inf)</h4>
+<a name="lab514"></a><h4 class="section">Exercise: 3 stars, advanced (eval__multistep_inf)</h4>
  Write a detailed informal version of the proof of <span class="inlinecode"><span class="id" type="var">eval__multistep</span></span>.
 
 <div class="paragraph"> </div>
@@ -1965,7 +2006,7 @@ The key ideas in the proof can be seen in the following picture:
     relation between single-step reduction and big-step evaluation. 
 <div class="paragraph"> </div>
 
-<a name="lab510"></a><h4 class="section">Exercise: 3 stars (step__eval)</h4>
+<a name="lab515"></a><h4 class="section">Exercise: 3 stars (step__eval)</h4>
 
 </div>
 <div class="code code-space">
@@ -1995,7 +2036,7 @@ The key ideas in the proof can be seen in the following picture:
     work on the proof.  
 <div class="paragraph"> </div>
 
-<a name="lab511"></a><h4 class="section">Exercise: 3 stars (multistep__eval)</h4>
+<a name="lab516"></a><h4 class="section">Exercise: 3 stars (multistep__eval)</h4>
 
 </div>
 <div class="code code-space">
@@ -2014,11 +2055,11 @@ The key ideas in the proof can be seen in the following picture:
 </div>
 
 <div class="doc">
-<a name="lab512"></a><h2 class="section">Additional Exercises</h2>
+<a name="lab517"></a><h2 class="section">Additional Exercises</h2>
 
 <div class="paragraph"> </div>
 
-<a name="lab513"></a><h4 class="section">Exercise: 3 stars, optional (interp_tm)</h4>
+<a name="lab518"></a><h4 class="section">Exercise: 3 stars, optional (interp_tm)</h4>
  Remember that we also defined big-step evaluation of terms as a
     function <span class="inlinecode"><span class="id" type="var">evalF</span></span>.  Prove that it is equivalent to the existing
     semantics.  (Hint: we just proved that <span class="inlinecode"><span class="id" type="var">eval</span></span> and <span class="inlinecode"><span class="id" type="var">multistep</span></span> are
@@ -2038,7 +2079,7 @@ The key ideas in the proof can be seen in the following picture:
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab514"></a><h4 class="section">Exercise: 4 stars (combined_properties)</h4>
+<a name="lab519"></a><h4 class="section">Exercise: 4 starsM (combined_properties)</h4>
  We've considered arithmetic and conditional expressions
     separately.  This exercise explores how the two interact. 
 </div>
@@ -2111,6 +2152,9 @@ Earlier, we separately proved for both plus- and if-expressions...
 
 <br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#Combined"><span class="id" type="module">Combined</span></a>.<br/>
 </div>
 
 <div class="doc">
@@ -2119,13 +2163,10 @@ Earlier, we separately proved for both plus- and if-expressions...
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">End</span> <a class="idref" href="Smallstep.html#Combined"><span class="id" type="module">Combined</span></a>.<br/>
-
-<br/>
 </div>
 
 <div class="doc">
-<a name="lab515"></a><h1 class="section">Small-Step Imp</h1>
+<a name="lab520"></a><h1 class="section">Small-Step Imp</h1>
 
 <div class="paragraph"> </div>
 
@@ -2143,7 +2184,7 @@ Earlier, we separately proved for both plus- and if-expressions...
 
 <br/>
 <span class="id" type="keyword">Inductive</span> <a name="aval"><span class="id" type="inductive">aval</span></a> : <a class="idref" href="Imp.html#aexp"><span class="id" type="inductive">aexp</span></a> <span style="font-family: arial;">&rarr;</span> <span class="id" type="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;<a name="av_num"><span class="id" type="constructor">av_num</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>, <a class="idref" href="Smallstep.html#aval"><span class="id" type="inductive">aval</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n"><span class="id" type="variable">n</span></a>).<br/>
+&nbsp;&nbsp;| <a name="av_num"><span class="id" type="constructor">av_num</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">n</span>, <a class="idref" href="Smallstep.html#aval"><span class="id" type="inductive">aval</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n"><span class="id" type="variable">n</span></a>).<br/>
 
 <br/>
 </div>
@@ -2157,7 +2198,8 @@ We are not actually going to bother to define boolean
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Reserved Notation</span> " t '/' st '<span style="font-family: arial;">&rArr;</span><sub>a</sub>' t' " (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40, <span class="id" type="var">st</span> <span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 39).<br/>
+<span class="id" type="keyword">Reserved Notation</span> " t '/' st '<span style="font-family: arial;">&rArr;</span><sub>a</sub>' t' "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40, <span class="id" type="var">st</span> <span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 39).<br/>
 
 <br/>
 <span class="id" type="keyword">Inductive</span> <a name="astep"><span class="id" type="inductive">astep</span></a> : <a class="idref" href="Imp.html#state"><span class="id" type="definition">state</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#aexp"><span class="id" type="inductive">aexp</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#aexp"><span class="id" type="inductive">aexp</span></a> <span style="font-family: arial;">&rarr;</span> <span class="id" type="keyword">Prop</span> :=<br/>
@@ -2173,7 +2215,7 @@ We are not actually going to bother to define boolean
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#APlus"><span class="id" type="constructor">APlus</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#APlus"><span class="id" type="constructor">APlus</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a>)<br/>
 &nbsp;&nbsp;| <a name="AS_Minus"><span class="id" type="constructor">AS_Minus</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#minus"><span class="id" type="definition">minus</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#minus"><span class="id" type="abbreviation">minus</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>))<br/>
 &nbsp;&nbsp;| <a name="AS_Minus1"><span class="id" type="constructor">AS_Minus1</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub></span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>)<br/>
@@ -2182,10 +2224,10 @@ We are not actually going to bother to define boolean
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a>)<br/>
 &nbsp;&nbsp;| <a name="AS_Mult"><span class="id" type="constructor">AS_Mult</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMult"><span class="id" type="constructor">AMult</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="definition">mult</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMult"><span class="id" type="constructor">AMult</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Peano.html#mult"><span class="id" type="abbreviation">mult</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>))<br/>
 &nbsp;&nbsp;| <a name="AS_Mult1"><span class="id" type="constructor">AS_Mult1</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub></span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMult"><span class="id" type="constructor">AMult</span></a> (<a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a>) (<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#AMult"><span class="id" type="constructor">AMult</span></a> (<a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a>) (<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#AMult"><span class="id" type="constructor">AMult</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> (<a class="idref" href="Imp.html#AMult"><span class="id" type="constructor">AMult</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>)<br/>
 &nbsp;&nbsp;| <a name="AS_Mult2"><span class="id" type="constructor">AS_Mult2</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">a<sub>2</sub></span> <span class="id" type="var">a<sub>2</sub>'</span>,<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#aval"><span class="id" type="inductive">aval</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
@@ -2194,51 +2236,52 @@ We are not actually going to bother to define boolean
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">where</span> " t '/' st '<span style="font-family: arial;">&rArr;</span><sub>a</sub>' t' " := (<a class="idref" href="Smallstep.html#astep"><span class="id" type="inductive">astep</span></a> <span class="id" type="var">st</span> <span class="id" type="var">t</span> <span class="id" type="var">t'</span>).<br/>
 
 <br/>
-&nbsp;&nbsp;<span class="id" type="keyword">Reserved Notation</span> " t '/' st '<span style="font-family: arial;">&rArr;</span><sub>b</sub>' t' " (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40, <span class="id" type="var">st</span> <span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 39).<br/>
+<span class="id" type="keyword">Reserved Notation</span> " t '/' st '<span style="font-family: arial;">&rArr;</span><sub>b</sub>' t' "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40, <span class="id" type="var">st</span> <span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 39).<br/>
 
 <br/>
-&nbsp;&nbsp;<span class="id" type="keyword">Inductive</span> <a name="bstep"><span class="id" type="inductive">bstep</span></a> : <a class="idref" href="Imp.html#state"><span class="id" type="definition">state</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#bexp"><span class="id" type="inductive">bexp</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#bexp"><span class="id" type="inductive">bexp</span></a> <span style="font-family: arial;">&rarr;</span> <span class="id" type="keyword">Prop</span> :=<br/>
-&nbsp;&nbsp;| <a name="BS_Eq"><span class="id" type="constructor">BS_Eq</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="keyword">if</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>) <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>)<br/>
-&nbsp;&nbsp;| <a name="BS_Eq<sub>1</sub>"><span class="id" type="constructor">BS_Eq<sub>1</sub></span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>)<br/>
-&nbsp;&nbsp;| <a name="BS_Eq<sub>2</sub>"><span class="id" type="constructor">BS_Eq<sub>2</sub></span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">a<sub>2</sub></span> <span class="id" type="var">a<sub>2</sub>'</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#aval"><span class="id" type="inductive">aval</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a>)<br/>
-&nbsp;&nbsp;| <a name="BS_LtEq"><span class="id" type="constructor">BS_LtEq</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="keyword">if</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="definition">leb</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>) <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>)<br/>
-&nbsp;&nbsp;| <a name="BS_LtEq1"><span class="id" type="constructor">BS_LtEq1</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>)<br/>
-&nbsp;&nbsp;| <a name="BS_LtEq2"><span class="id" type="constructor">BS_LtEq2</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">a<sub>2</sub></span> <span class="id" type="var">a<sub>2</sub>'</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#aval"><span class="id" type="inductive">aval</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> (<a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a>))<br/>
-&nbsp;&nbsp;| <a name="BS_NotTrue"><span class="id" type="constructor">BS_NotTrue</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
-&nbsp;&nbsp;| <a name="BS_NotFalse"><span class="id" type="constructor">BS_NotFalse</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a><br/>
-&nbsp;&nbsp;| <a name="BS_NotStep"><span class="id" type="constructor">BS_NotStep</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">b<sub>1</sub>'</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a>)<br/>
-&nbsp;&nbsp;| <a name="BS_AndTrueTrue"><span class="id" type="constructor">BS_AndTrueTrue</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a><br/>
-&nbsp;&nbsp;| <a name="BS_AndTrueFalse"><span class="id" type="constructor">BS_AndTrueFalse</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
-&nbsp;&nbsp;| <a name="BS_AndFalse"><span class="id" type="constructor">BS_AndFalse</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
-&nbsp;&nbsp;| <a name="BS_AndTrueStep"><span class="id" type="constructor">BS_AndTrueStep</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>2</sub></span> <span class="id" type="var">b<sub>2</sub>'</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Smallstep.html#b<sub>2</sub>'"><span class="id" type="variable">b<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>'"><span class="id" type="variable">b<sub>2</sub>'</span></a>)<br/>
-&nbsp;&nbsp;| <a name="BS_AndStep"><span class="id" type="constructor">BS_AndStep</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">b<sub>1</sub>'</span> <span class="id" type="var">b<sub>2</sub></span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>)<br/>
+<span class="id" type="keyword">Inductive</span> <a name="bstep"><span class="id" type="inductive">bstep</span></a> : <a class="idref" href="Imp.html#state"><span class="id" type="definition">state</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#bexp"><span class="id" type="inductive">bexp</span></a> <span style="font-family: arial;">&rarr;</span> <a class="idref" href="Imp.html#bexp"><span class="id" type="inductive">bexp</span></a> <span style="font-family: arial;">&rarr;</span> <span class="id" type="keyword">Prop</span> :=<br/>
+| <a name="BS_Eq"><span class="id" type="constructor">BS_Eq</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="keyword">if</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="abbreviation">beq_nat</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>) <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>)<br/>
+| <a name="BS_Eq<sub>1</sub>"><span class="id" type="constructor">BS_Eq<sub>1</sub></span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>)<br/>
+| <a name="BS_Eq<sub>2</sub>"><span class="id" type="constructor">BS_Eq<sub>2</sub></span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">a<sub>2</sub></span> <span class="id" type="var">a<sub>2</sub>'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#aval"><span class="id" type="inductive">aval</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a>)<br/>
+| <a name="BS_LtEq"><span class="id" type="constructor">BS_LtEq</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">n<sub>1</sub></span> <span class="id" type="var">n<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a>) (<a class="idref" href="Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>)) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="keyword">if</span> (<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Compare_dec.html#leb"><span class="id" type="abbreviation">leb</span></a> <a class="idref" href="Smallstep.html#n<sub>1</sub>"><span class="id" type="variable">n<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#n<sub>2</sub>"><span class="id" type="variable">n<sub>2</sub></span></a>) <span class="id" type="keyword">then</span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>)<br/>
+| <a name="BS_LtEq1"><span class="id" type="constructor">BS_LtEq1</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">a<sub>1</sub>'</span> <span class="id" type="var">a<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>"><span class="id" type="variable">a<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#a<sub>1</sub>'"><span class="id" type="variable">a<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>)<br/>
+| <a name="BS_LtEq2"><span class="id" type="constructor">BS_LtEq2</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">v<sub>1</sub></span> <span class="id" type="var">a<sub>2</sub></span> <span class="id" type="var">a<sub>2</sub>'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#aval"><span class="id" type="inductive">aval</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>a</sub></span> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>"><span class="id" type="variable">a<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> <a class="idref" href="Smallstep.html#v<sub>1</sub>"><span class="id" type="variable">v<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#a<sub>2</sub>'"><span class="id" type="variable">a<sub>2</sub>'</span></a>)<br/>
+| <a name="BS_NotTrue"><span class="id" type="constructor">BS_NotTrue</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
+| <a name="BS_NotFalse"><span class="id" type="constructor">BS_NotFalse</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a><br/>
+| <a name="BS_NotStep"><span class="id" type="constructor">BS_NotStep</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">b<sub>1</sub>'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a>)<br/>
+| <a name="BS_AndTrueTrue"><span class="id" type="constructor">BS_AndTrueTrue</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a><br/>
+| <a name="BS_AndTrueFalse"><span class="id" type="constructor">BS_AndTrueFalse</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
+| <a name="BS_AndFalse"><span class="id" type="constructor">BS_AndFalse</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Imp.html#BFalse"><span class="id" type="constructor">BFalse</span></a><br/>
+| <a name="BS_AndTrueStep"><span class="id" type="constructor">BS_AndTrueStep</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>2</sub></span> <span class="id" type="var">b<sub>2</sub>'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Smallstep.html#b<sub>2</sub>'"><span class="id" type="variable">b<sub>2</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Imp.html#BTrue"><span class="id" type="constructor">BTrue</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>'"><span class="id" type="variable">b<sub>2</sub>'</span></a>)<br/>
+| <a name="BS_AndStep"><span class="id" type="constructor">BS_AndStep</span></a> : <span style="font-family: arial;">&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">b<sub>1</sub>'</span> <span class="id" type="var">b<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a> <span style="font-family: arial;">&rarr;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>) / <a class="idref" href="Smallstep.html#st"><span class="id" type="variable">st</span></a> <span style="font-family: arial;">&rArr;</span><span class="id" type="var"><sub>b</sub></span> (<a class="idref" href="Imp.html#BAnd"><span class="id" type="constructor">BAnd</span></a> <a class="idref" href="Smallstep.html#b<sub>1</sub>'"><span class="id" type="variable">b<sub>1</sub>'</span></a> <a class="idref" href="Smallstep.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a>)<br/>
 <br/>
-&nbsp;&nbsp;<span class="id" type="keyword">where</span> " t '/' st '<span style="font-family: arial;">&rArr;</span><sub>b</sub>' t' " := (<a class="idref" href="Smallstep.html#bstep"><span class="id" type="inductive">bstep</span></a> <span class="id" type="var">st</span> <span class="id" type="var">t</span> <span class="id" type="var">t'</span>).<br/>
+<span class="id" type="keyword">where</span> " t '/' st '<span style="font-family: arial;">&rArr;</span><sub>b</sub>' t' " := (<a class="idref" href="Smallstep.html#bstep"><span class="id" type="inductive">bstep</span></a> <span class="id" type="var">st</span> <span class="id" type="var">t</span> <span class="id" type="var">t'</span>).<br/>
 
 <br/>
 </div>
@@ -2283,9 +2326,9 @@ The semantics of commands is the interesting part.  We need two
 <div class="paragraph"> </div>
 
  (There are other ways of achieving the effect of the latter
-   trick, but they all share the feature that the original <span class="inlinecode"><span class="id" type="var">WHILE</span></span>
-   command needs to be saved somewhere while a single copy of the loop
-   body is being reduced.) 
+    trick, but they all share the feature that the original <span class="inlinecode"><span class="id" type="var">WHILE</span></span>
+    command needs to be saved somewhere while a single copy of the loop
+    body is being reduced.) 
 </div>
 <div class="code code-tight">
 
@@ -2323,7 +2366,7 @@ The semantics of commands is the interesting part.  We need two
 </div>
 
 <div class="doc">
-<a name="lab516"></a><h1 class="section">Concurrent Imp</h1>
+<a name="lab521"></a><h1 class="section">Concurrent Imp</h1>
 
 <div class="paragraph"> </div>
 
@@ -2523,7 +2566,7 @@ It can also terminate with <span class="inlinecode"><span class="id" type="var">
 More generally... 
 <div class="paragraph"> </div>
 
-<a name="lab517"></a><h4 class="section">Exercise: 3 stars, optional</h4>
+<a name="lab522"></a><h4 class="section">Exercise: 3 stars, optional (par_body_n__Sn)</h4>
 
 </div>
 <div class="code code-space">
@@ -2538,7 +2581,7 @@ More generally...
 <font size=-2 color="rgb(80%,80%,100%)">&#9744;</font> 
 <div class="paragraph"> </div>
 
-<a name="lab518"></a><h4 class="section">Exercise: 3 stars, optional</h4>
+<a name="lab523"></a><h4 class="section">Exercise: 3 stars, optional (par_body_n)</h4>
 
 </div>
 <div class="code code-space">
@@ -2598,12 +2641,12 @@ More generally...
 </div>
 
 <div class="doc">
-<a name="lab519"></a><h1 class="section">A Small-Step Stack Machine</h1>
+<a name="lab524"></a><h1 class="section">A Small-Step Stack Machine</h1>
 
 <div class="paragraph"> </div>
 
  Our last example is a small-step semantics for the stack machine
-    example from the <a href="Imp.html"><font color="gray">Imp</font></a> chapter. 
+    example from the <a href="Imp.html"><span class="inlineref">Imp</span></a> chapter. 
 </div>
 <div class="code code-tight">
 
@@ -2642,9 +2685,9 @@ More generally...
 </div>
 
 <div class="doc">
-<a name="lab520"></a><h4 class="section">Exercise: 3 stars, advanced (compiler_is_correct)</h4>
+<a name="lab525"></a><h4 class="section">Exercise: 3 stars, advanced (compiler_is_correct)</h4>
  Remember the definition of <span class="inlinecode"><span class="id" type="var">compile</span></span> for <span class="inlinecode"><span class="id" type="var">aexp</span></span> given in the
-    <a href="Imp.html"><font color="gray">Imp</font></a> chapter. We want now to prove <span class="inlinecode"><span class="id" type="var">compile</span></span> correct with respect
+    <a href="Imp.html"><span class="inlineref">Imp</span></a> chapter. We want now to prove <span class="inlinecode"><span class="id" type="var">compile</span></span> correct with respect
     to the stack machine.
 
 <div class="paragraph"> </div>
@@ -2655,11 +2698,11 @@ More generally...
 <div class="code code-tight">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <a name="compiler_is_correct_statement"><span class="id" type="definition">compiler_is_correct_statement</span></a> : <span class="id" type="keyword">Prop</span> :=<br/>
-<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="SfLib.html#admit"><span class="id" type="axiom">admit</span></a>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="compiler_is_correct_statement"><span class="id" type="definition">compiler_is_correct_statement</span></a> : <span class="id" type="keyword">Prop</span> <br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <a name="compiler_is_correct"><span class="id" type="lemma">compiler_is_correct</span></a> : <a class="idref" href="Smallstep.html#compiler_is_correct_statement"><span class="id" type="definition">compiler_is_correct_statement</span></a>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="compiler_is_correct"><span class="id" type="lemma">compiler_is_correct</span></a> : <a class="idref" href="Smallstep.html#compiler_is_correct_statement"><span class="id" type="axiom">compiler_is_correct_statement</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
 </div>

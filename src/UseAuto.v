@@ -31,13 +31,13 @@ Require Import Coq.Arith.Arith.
 Require Import Coq.Lists.List.
 Import ListNotations.
 
-Require Import SfLib.
 Require Import Maps.
+Require Import Smallstep.
 Require Import Stlc.
 Require Import LibTactics.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Basic Features of Proof Search *)
 
 (** The idea of proof search is to replace a sequence of tactics
@@ -55,7 +55,7 @@ Require Import LibTactics.
     maintaining those proof scripts. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Strength of Proof Search *)
 
 (** We are going to study four proof-search tactics: [auto], [eauto],
@@ -90,7 +90,7 @@ Require Import LibTactics.
     overall structure of a proof. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Basics *)
 
 (** The tactic [auto] is able to solve a goal that can be proved
@@ -150,7 +150,7 @@ Proof. auto. eauto. Qed.
 
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Conjunctions *)
 
 (** So far, we've seen that [eauto] is stronger than [auto] in the
@@ -222,7 +222,7 @@ Lemma solved_by_jauto : forall (P Q : nat->Prop) (F : Prop),
 Proof. jauto. (* or [iauto] *) Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Disjunctions *)
 
 (** The tactics [auto] and [eauto] can handle disjunctions that
@@ -259,7 +259,7 @@ Proof. iauto. Qed.
     kind of case analyses. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Existentials *)
 
 (** The tactics [eauto], [iauto], and [jauto] can prove goals whose
@@ -293,7 +293,7 @@ Proof.
 Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Negation *)
 
 (** The tactics [auto] and [eauto] suffer from some limitations with
@@ -322,7 +322,7 @@ Proof. jauto. (* or [iauto] *) Qed.
     respect to the unfolding of definitions. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Equalities *)
 
 (** Coq's proof-search feature is not good at exploiting equalities.
@@ -340,10 +340,10 @@ Proof. auto. Qed.
     the end of this chapter in the "Decision Procedures" section. *)
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * How Proof Search Works *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Search Depth *)
 
 (** The tactic [auto] works as follows.  It first tries to call
@@ -451,7 +451,7 @@ Lemma search_depth_5 : forall (P : nat->Prop),
 Proof. auto. auto 6. Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Backtracking *)
 
 (** In the previous section, we have considered proofs where
@@ -567,7 +567,7 @@ Proof. intros P H1 H3 H2. (* debug *) eauto. Qed.
     proof term starting with an application of [H3]. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Adding Hints *)
 
 (** By default, [auto] (and [eauto]) only tries to apply the
@@ -602,7 +602,7 @@ Hint Resolve Le.le_refl.
     lemmas appear further on. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Integration of Automation in Tactics *)
 
 (** The library "LibTactics" introduces a convenient feature for
@@ -661,7 +661,7 @@ Ltac auto_tilde ::= auto.
 
 *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Examples of Use of Automation *)
 
 (** Let's see how to use proof search in practice on the main theorems
@@ -669,7 +669,7 @@ Ltac auto_tilde ::= auto.
     results such as determinism, preservation and progress. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Determinism *)
 
 Module DeterministicImp.
@@ -822,7 +822,7 @@ Qed.
 End DeterministicImp.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Preservation for STLC *)
 
 Module PreservationProgressStlc.
@@ -876,7 +876,7 @@ Proof.
 Admitted.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Progress for STLC *)
 
 (** Consider the proof of the progress theorem. *)
@@ -895,7 +895,7 @@ Proof with eauto.
     + (* t1 is a value *)
       destruct IHHt2...
       * (* t2 is a value *)
-        inversion H; subst; try solve by inversion.
+        inversion H; subst; try solve_by_invert.
         exists ([x0:=t2]t)...
       * (* t2 steps *)
        destruct H0 as [t2' Hstp]. exists (tapp t1 t2')...
@@ -903,7 +903,7 @@ Proof with eauto.
       destruct H as [t1' Hstp]. exists (tapp t1' t2)...
   - (* T_If *)
     right. destruct IHHt1...
-    destruct t1; try solve by inversion...
+    destruct t1; try solve_by_invert...
     inversion H. exists (tif x0 t2 t3)...
 Qed.
 
@@ -921,7 +921,7 @@ Admitted.
 End PreservationProgressStlc.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** BigStep and SmallStep *)
 
 Module Semantics.
@@ -998,7 +998,7 @@ Admitted.
 End Semantics.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Preservation for STLCRef *)
 
 Module PreservationProgressReferences.
@@ -1029,11 +1029,11 @@ Proof.
 
   remember (@empty ty) as Gamma. introv Ht. gen t'.
   (induction Ht); introv HST Hstep;
-    (* old: [subst; try (solve by inversion); inversion Hstep; subst;
+    (* old: [subst; try solve_by_invert; inversion Hstep; subst;
              try (eauto using store_weakening, extends_refl)]
        new: [subst Gamma; inverts Hstep; eauto.]
        We want to be more precise on what exactly we substitute,
-       and we do not want to call [try (solve by inversion)] which
+       and we do not want to call [try solve_by_invert] which
        is way to slow. *)
    subst Gamma; inverts Hstep; eauto.
 
@@ -1227,7 +1227,7 @@ Proof.
 Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Progress for STLCRef *)
 
 (** The proof of progress for [STLCRef] can be found in chapter
@@ -1267,7 +1267,7 @@ Qed.
 End PreservationProgressReferences.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Subtyping *)
 
 Module SubtypingInversion.
@@ -1320,10 +1320,10 @@ Admitted.
 End SubtypingInversion.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Advanced Topics in Proof Search *)
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Stating Lemmas in the Right Way *)
 
 (** Due to its depth-first strategy, [eauto] can get exponentially
@@ -1380,7 +1380,7 @@ Abort.
     of [m] that satisfy [m <> 0] but not [P m]. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Unfolding of Definitions During Proof-Search *)
 
 (** The use of intermediate definitions is generally encouraged in a
@@ -1452,7 +1452,7 @@ Lemma demo_hint_unfold_context_2 :
 Proof. auto. Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Automation for Proving Absurd Goals *)
 
 (** In this section, we'll see that lemmas concluding on a negation
@@ -1577,7 +1577,7 @@ Qed.
     call [false* (le_gt_false 3)]. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Automation for Transitivity Lemmas *)
 
 (** Some lemmas should never be added as hints, because they would
@@ -1714,7 +1714,7 @@ Proof.
 Abort.
 
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Decision Procedures *)
 
 (** A decision procedure is able to solve proof obligations whose
@@ -1728,7 +1728,7 @@ Abort.
     context. *)
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Omega *)
 
 (** The tactic [omega] supports natural numbers (type [nat]) as well as
@@ -1781,7 +1781,7 @@ Proof.
 Qed.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Ring *)
 
 (** Compared with [omega], the tactic [ring] adds support for
@@ -1803,7 +1803,7 @@ Proof. intros. ring. Qed.
 End RingDemo.
 
 
-(* ####################################################### *)
+(* ================================================================= *)
 (** ** Congruence *)
 
 (** The tactic [congruence] is able to exploit equalities from the
@@ -1855,7 +1855,7 @@ Proof. congruence. Qed.
     tactic. So, one should not hesitate to invoke it wherever it might
     help. *)
 
-(* ####################################################### *)
+(* ################################################################# *)
 (** * Summary *)
 
 (** Let us summarize the main automation tactics available.
@@ -1905,4 +1905,4 @@ Proof. congruence. Qed.
     some investment, however this investment will pay off very quickly.
 *)
 
-(** $Date: 2016-05-24 14:00:08 -0400 (Tue, 24 May 2016) $ *)
+(** $Date: 2016-07-13 12:41:41 -0400 (Wed, 13 Jul 2016) $ *)
