@@ -1,0 +1,534 @@
+\BOOKMARK [0][-]{chapter.1}{Library Top.Symbols}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Symbols: Special symbols}{chapter.1}% 2
+\BOOKMARK [0][-]{chapter.2}{Library Top.Preface}{}% 3
+\BOOKMARK [1][-]{section.2.1}{Preface}{chapter.2}% 4
+\BOOKMARK [1][-]{section.2.2}{Welcome}{chapter.2}% 5
+\BOOKMARK [1][-]{section.2.3}{Overview}{chapter.2}% 6
+\BOOKMARK [2][-]{subsection.2.3.1}{Logic}{section.2.3}% 7
+\BOOKMARK [2][-]{subsection.2.3.2}{Proof Assistants}{section.2.3}% 8
+\BOOKMARK [2][-]{subsection.2.3.3}{Functional Programming}{section.2.3}% 9
+\BOOKMARK [2][-]{subsection.2.3.4}{Program Verification}{section.2.3}% 10
+\BOOKMARK [2][-]{subsection.2.3.5}{Type Systems}{section.2.3}% 11
+\BOOKMARK [2][-]{subsection.2.3.6}{Further Reading}{section.2.3}% 12
+\BOOKMARK [1][-]{section.2.4}{Practicalities}{chapter.2}% 13
+\BOOKMARK [2][-]{subsection.2.4.1}{Chapter Dependencies}{section.2.4}% 14
+\BOOKMARK [2][-]{subsection.2.4.2}{System Requirements}{section.2.4}% 15
+\BOOKMARK [2][-]{subsection.2.4.3}{Exercises}{section.2.4}% 16
+\BOOKMARK [2][-]{subsection.2.4.4}{Downloading the Coq Files}{section.2.4}% 17
+\BOOKMARK [1][-]{section.2.5}{Note for Instructors}{chapter.2}% 18
+\BOOKMARK [1][-]{section.2.6}{Translations}{chapter.2}% 19
+\BOOKMARK [0][-]{chapter.3}{Library Top.Basics}{}% 20
+\BOOKMARK [1][-]{section.3.1}{Basics: Functional Programming in Coq}{chapter.3}% 21
+\BOOKMARK [1][-]{section.3.2}{Introduction}{chapter.3}% 22
+\BOOKMARK [1][-]{section.3.3}{Enumerated Types}{chapter.3}% 23
+\BOOKMARK [2][-]{subsection.3.3.1}{Days of the Week}{section.3.3}% 24
+\BOOKMARK [2][-]{subsection.3.3.2}{Homework Submission Guidelines}{section.3.3}% 25
+\BOOKMARK [2][-]{subsection.3.3.3}{Booleans}{section.3.3}% 26
+\BOOKMARK [2][-]{subsection.3.3.4}{Function Types}{section.3.3}% 27
+\BOOKMARK [2][-]{subsection.3.3.5}{Modules}{section.3.3}% 28
+\BOOKMARK [2][-]{subsection.3.3.6}{Numbers}{section.3.3}% 29
+\BOOKMARK [1][-]{section.3.4}{Proof by Simplification}{chapter.3}% 30
+\BOOKMARK [1][-]{section.3.5}{Proof by Rewriting}{chapter.3}% 31
+\BOOKMARK [1][-]{section.3.6}{Proof by Case Analysis}{chapter.3}% 32
+\BOOKMARK [2][-]{subsection.3.6.1}{More on Notation \(Optional\)}{section.3.6}% 33
+\BOOKMARK [2][-]{subsection.3.6.2}{Fixpoints and Structural Recursion \(Optional\)}{section.3.6}% 34
+\BOOKMARK [1][-]{section.3.7}{More Exercises}{chapter.3}% 35
+\BOOKMARK [0][-]{chapter.4}{Library Top.Induction}{}% 36
+\BOOKMARK [1][-]{section.4.1}{Induction: Proof by Induction}{chapter.4}% 37
+\BOOKMARK [1][-]{section.4.2}{Proof by Induction}{chapter.4}% 38
+\BOOKMARK [1][-]{section.4.3}{Proofs Within Proofs}{chapter.4}% 39
+\BOOKMARK [1][-]{section.4.4}{Formal vs. Informal Proof}{chapter.4}% 40
+\BOOKMARK [1][-]{section.4.5}{More Exercises}{chapter.4}% 41
+\BOOKMARK [0][-]{chapter.5}{Library Top.Lists}{}% 42
+\BOOKMARK [1][-]{section.5.1}{Lists: Working with Structured Data}{chapter.5}% 43
+\BOOKMARK [1][-]{section.5.2}{Pairs of Numbers}{chapter.5}% 44
+\BOOKMARK [1][-]{section.5.3}{Lists of Numbers}{chapter.5}% 45
+\BOOKMARK [1][-]{section.5.4}{Reasoning About Lists}{chapter.5}% 46
+\BOOKMARK [2][-]{subsection.5.4.1}{Induction on Lists}{section.5.4}% 47
+\BOOKMARK [2][-]{subsection.5.4.2}{Search}{section.5.4}% 48
+\BOOKMARK [2][-]{subsection.5.4.3}{List Exercises, Part 1}{section.5.4}% 49
+\BOOKMARK [2][-]{subsection.5.4.4}{List Exercises, Part 2}{section.5.4}% 50
+\BOOKMARK [1][-]{section.5.5}{Options}{chapter.5}% 51
+\BOOKMARK [1][-]{section.5.6}{Partial Maps}{chapter.5}% 52
+\BOOKMARK [0][-]{chapter.6}{Library Top.Poly}{}% 53
+\BOOKMARK [1][-]{section.6.1}{Poly: Polymorphism and Higher-Order Functions}{chapter.6}% 54
+\BOOKMARK [1][-]{section.6.2}{Polymorphism}{chapter.6}% 55
+\BOOKMARK [2][-]{subsection.6.2.1}{Polymorphic Lists}{section.6.2}% 56
+\BOOKMARK [2][-]{subsection.6.2.2}{Polymorphic Pairs}{section.6.2}% 57
+\BOOKMARK [2][-]{subsection.6.2.3}{Polymorphic Options}{section.6.2}% 58
+\BOOKMARK [1][-]{section.6.3}{Functions as Data}{chapter.6}% 59
+\BOOKMARK [2][-]{subsection.6.3.1}{Higher-Order Functions}{section.6.3}% 60
+\BOOKMARK [2][-]{subsection.6.3.2}{Filter}{section.6.3}% 61
+\BOOKMARK [2][-]{subsection.6.3.3}{Anonymous Functions}{section.6.3}% 62
+\BOOKMARK [2][-]{subsection.6.3.4}{Map}{section.6.3}% 63
+\BOOKMARK [2][-]{subsection.6.3.5}{Fold}{section.6.3}% 64
+\BOOKMARK [2][-]{subsection.6.3.6}{Functions That Construct Functions}{section.6.3}% 65
+\BOOKMARK [1][-]{section.6.4}{Additional Exercises}{chapter.6}% 66
+\BOOKMARK [0][-]{chapter.7}{Library Top.Tactics}{}% 67
+\BOOKMARK [1][-]{section.7.1}{Tactics: More Basic Tactics}{chapter.7}% 68
+\BOOKMARK [1][-]{section.7.2}{The apply Tactic}{chapter.7}% 69
+\BOOKMARK [1][-]{section.7.3}{The apply ... with ... Tactic}{chapter.7}% 70
+\BOOKMARK [1][-]{section.7.4}{The inversion Tactic}{chapter.7}% 71
+\BOOKMARK [1][-]{section.7.5}{Using Tactics on Hypotheses}{chapter.7}% 72
+\BOOKMARK [1][-]{section.7.6}{Varying the Induction Hypothesis}{chapter.7}% 73
+\BOOKMARK [1][-]{section.7.7}{Unfolding Definitions}{chapter.7}% 74
+\BOOKMARK [1][-]{section.7.8}{Using destruct on Compound Expressions}{chapter.7}% 75
+\BOOKMARK [1][-]{section.7.9}{Review}{chapter.7}% 76
+\BOOKMARK [1][-]{section.7.10}{Additional Exercises}{chapter.7}% 77
+\BOOKMARK [0][-]{chapter.8}{Library Top.Logic}{}% 78
+\BOOKMARK [1][-]{section.8.1}{Logic: Logic in Coq}{chapter.8}% 79
+\BOOKMARK [1][-]{section.8.2}{Logical Connectives}{chapter.8}% 80
+\BOOKMARK [2][-]{subsection.8.2.1}{Conjunction}{section.8.2}% 81
+\BOOKMARK [2][-]{subsection.8.2.2}{Disjunction}{section.8.2}% 82
+\BOOKMARK [2][-]{subsection.8.2.3}{Falsehood and Negation}{section.8.2}% 83
+\BOOKMARK [2][-]{subsection.8.2.4}{Truth}{section.8.2}% 84
+\BOOKMARK [2][-]{subsection.8.2.5}{Logical Equivalence}{section.8.2}% 85
+\BOOKMARK [2][-]{subsection.8.2.6}{Existential Quantification}{section.8.2}% 86
+\BOOKMARK [1][-]{section.8.3}{Programming with Propositions}{chapter.8}% 87
+\BOOKMARK [1][-]{section.8.4}{Applying Theorems to Arguments}{chapter.8}% 88
+\BOOKMARK [1][-]{section.8.5}{Coq vs. Set Theory}{chapter.8}% 89
+\BOOKMARK [2][-]{subsection.8.5.1}{Functional Extensionality}{section.8.5}% 90
+\BOOKMARK [2][-]{subsection.8.5.2}{Propositions and Booleans}{section.8.5}% 91
+\BOOKMARK [2][-]{subsection.8.5.3}{Classical vs. Constructive Logic}{section.8.5}% 92
+\BOOKMARK [0][-]{chapter.9}{Library Top.IndProp}{}% 93
+\BOOKMARK [1][-]{section.9.1}{IndProp: Inductively Defined Propositions}{chapter.9}% 94
+\BOOKMARK [1][-]{section.9.2}{Inductively Defined Propositions}{chapter.9}% 95
+\BOOKMARK [1][-]{section.9.3}{Using Evidence in Proofs}{chapter.9}% 96
+\BOOKMARK [2][-]{subsection.9.3.1}{Inversion on Evidence}{section.9.3}% 97
+\BOOKMARK [2][-]{subsection.9.3.2}{Induction on Evidence}{section.9.3}% 98
+\BOOKMARK [1][-]{section.9.4}{Inductive Relations}{chapter.9}% 99
+\BOOKMARK [1][-]{section.9.5}{Case Study: Regular Expressions}{chapter.9}% 100
+\BOOKMARK [2][-]{subsection.9.5.1}{The rememberremember Tactic}{section.9.5}% 101
+\BOOKMARK [1][-]{section.9.6}{Case Study: Improving Reflection}{chapter.9}% 102
+\BOOKMARK [1][-]{section.9.7}{Additional Exercises}{chapter.9}% 103
+\BOOKMARK [0][-]{chapter.10}{Library Top.Maps}{}% 104
+\BOOKMARK [1][-]{section.10.1}{Maps: Total and Partial Maps}{chapter.10}% 105
+\BOOKMARK [1][-]{section.10.2}{The Coq Standard Library}{chapter.10}% 106
+\BOOKMARK [1][-]{section.10.3}{Identifiers}{chapter.10}% 107
+\BOOKMARK [1][-]{section.10.4}{Total Maps}{chapter.10}% 108
+\BOOKMARK [1][-]{section.10.5}{Partial maps}{chapter.10}% 109
+\BOOKMARK [0][-]{chapter.11}{Library Top.ProofObjects}{}% 110
+\BOOKMARK [1][-]{section.11.1}{ProofObjects: The Curry-Howard Correspondence}{chapter.11}% 111
+\BOOKMARK [1][-]{section.11.2}{Proof Scripts}{chapter.11}% 112
+\BOOKMARK [1][-]{section.11.3}{Quantifiers, Implications, Functions}{chapter.11}% 113
+\BOOKMARK [1][-]{section.11.4}{Programming with Tactics}{chapter.11}% 114
+\BOOKMARK [1][-]{section.11.5}{Logical Connectives as Inductive Types}{chapter.11}% 115
+\BOOKMARK [2][-]{subsection.11.5.1}{Conjunction}{section.11.5}% 116
+\BOOKMARK [2][-]{subsection.11.5.2}{Disjunction}{section.11.5}% 117
+\BOOKMARK [2][-]{subsection.11.5.3}{Existential Quantification}{section.11.5}% 118
+\BOOKMARK [2][-]{subsection.11.5.4}{True and False}{section.11.5}% 119
+\BOOKMARK [1][-]{section.11.6}{Equality}{chapter.11}% 120
+\BOOKMARK [2][-]{subsection.11.6.1}{Inversion, Again}{section.11.6}% 121
+\BOOKMARK [0][-]{chapter.12}{Library Top.IndPrinciples}{}% 122
+\BOOKMARK [1][-]{section.12.1}{IndPrinciples: Induction Principles}{chapter.12}% 123
+\BOOKMARK [1][-]{section.12.2}{Basics}{chapter.12}% 124
+\BOOKMARK [1][-]{section.12.3}{Polymorphism}{chapter.12}% 125
+\BOOKMARK [1][-]{section.12.4}{Induction Hypotheses}{chapter.12}% 126
+\BOOKMARK [1][-]{section.12.5}{More on the induction Tactic}{chapter.12}% 127
+\BOOKMARK [1][-]{section.12.6}{Induction Principles in Prop}{chapter.12}% 128
+\BOOKMARK [1][-]{section.12.7}{Formal vs. Informal Proofs by Induction}{chapter.12}% 129
+\BOOKMARK [2][-]{subsection.12.7.1}{Induction Over an Inductively Defined Set}{section.12.7}% 130
+\BOOKMARK [2][-]{subsection.12.7.2}{Induction Over an Inductively Defined Proposition}{section.12.7}% 131
+\BOOKMARK [0][-]{chapter.13}{Library Top.Rel}{}% 132
+\BOOKMARK [1][-]{section.13.1}{Rel: Properties of Relations}{chapter.13}% 133
+\BOOKMARK [1][-]{section.13.2}{Basic Properties}{chapter.13}% 134
+\BOOKMARK [1][-]{section.13.3}{Reflexive, Transitive Closure}{chapter.13}% 135
+\BOOKMARK [0][-]{chapter.14}{Library Top.Imp}{}% 136
+\BOOKMARK [1][-]{section.14.1}{Imp: Simple Imperative Programs}{chapter.14}% 137
+\BOOKMARK [1][-]{section.14.2}{Arithmetic and Boolean Expressions}{chapter.14}% 138
+\BOOKMARK [2][-]{subsection.14.2.1}{Syntax}{section.14.2}% 139
+\BOOKMARK [2][-]{subsection.14.2.2}{Evaluation}{section.14.2}% 140
+\BOOKMARK [2][-]{subsection.14.2.3}{Optimization}{section.14.2}% 141
+\BOOKMARK [1][-]{section.14.3}{Coq Automation}{chapter.14}% 142
+\BOOKMARK [2][-]{subsection.14.3.1}{Tacticals}{section.14.3}% 143
+\BOOKMARK [2][-]{subsection.14.3.2}{Defining New Tactic Notations}{section.14.3}% 144
+\BOOKMARK [2][-]{subsection.14.3.3}{The omega Tactic}{section.14.3}% 145
+\BOOKMARK [2][-]{subsection.14.3.4}{A Few More Handy Tactics}{section.14.3}% 146
+\BOOKMARK [1][-]{section.14.4}{Evaluation as a Relation}{chapter.14}% 147
+\BOOKMARK [2][-]{subsection.14.4.1}{Inference Rule Notation}{section.14.4}% 148
+\BOOKMARK [2][-]{subsection.14.4.2}{Equivalence of the Definitions}{section.14.4}% 149
+\BOOKMARK [2][-]{subsection.14.4.3}{Computational vs. Relational Definitions}{section.14.4}% 150
+\BOOKMARK [1][-]{section.14.5}{Expressions With Variables}{chapter.14}% 151
+\BOOKMARK [2][-]{subsection.14.5.1}{States}{section.14.5}% 152
+\BOOKMARK [2][-]{subsection.14.5.2}{Syntax}{section.14.5}% 153
+\BOOKMARK [2][-]{subsection.14.5.3}{Evaluation}{section.14.5}% 154
+\BOOKMARK [1][-]{section.14.6}{Commands}{chapter.14}% 155
+\BOOKMARK [2][-]{subsection.14.6.1}{Syntax}{section.14.6}% 156
+\BOOKMARK [2][-]{subsection.14.6.2}{More Examples}{section.14.6}% 157
+\BOOKMARK [1][-]{section.14.7}{Evaluating Commands}{chapter.14}% 158
+\BOOKMARK [2][-]{subsection.14.7.1}{Evaluation as a Function \(Failed Attempt\)}{section.14.7}% 159
+\BOOKMARK [2][-]{subsection.14.7.2}{Evaluation as a Relation}{section.14.7}% 160
+\BOOKMARK [2][-]{subsection.14.7.3}{Determinism of Evaluation}{section.14.7}% 161
+\BOOKMARK [1][-]{section.14.8}{Reasoning About Imp Programs}{chapter.14}% 162
+\BOOKMARK [1][-]{section.14.9}{Additional Exercises}{chapter.14}% 163
+\BOOKMARK [0][-]{chapter.15}{Library Top.ImpParser}{}% 164
+\BOOKMARK [1][-]{section.15.1}{ImpParser: Lexing and Parsing in Coq}{chapter.15}% 165
+\BOOKMARK [1][-]{section.15.2}{Internals}{chapter.15}% 166
+\BOOKMARK [2][-]{subsection.15.2.1}{Lexical Analysis}{section.15.2}% 167
+\BOOKMARK [2][-]{subsection.15.2.2}{Parsing}{section.15.2}% 168
+\BOOKMARK [1][-]{section.15.3}{Examples}{chapter.15}% 169
+\BOOKMARK [0][-]{chapter.16}{Library Top.ImpCEvalFun}{}% 170
+\BOOKMARK [1][-]{section.16.1}{ImpCEvalFun: Evaluation Function for Imp}{chapter.16}% 171
+\BOOKMARK [1][-]{section.16.2}{A Broken Evaluator}{chapter.16}% 172
+\BOOKMARK [1][-]{section.16.3}{A Step-Indexed Evaluator}{chapter.16}% 173
+\BOOKMARK [1][-]{section.16.4}{Relational vs. Step-Indexed Evaluation}{chapter.16}% 174
+\BOOKMARK [1][-]{section.16.5}{Determinism of Evaluation Again}{chapter.16}% 175
+\BOOKMARK [0][-]{chapter.17}{Library Top.Extraction}{}% 176
+\BOOKMARK [1][-]{section.17.1}{Extraction: Extracting ML from Coq}{chapter.17}% 177
+\BOOKMARK [1][-]{section.17.2}{Basic Extraction}{chapter.17}% 178
+\BOOKMARK [1][-]{section.17.3}{Controlling Extraction of Specific Types}{chapter.17}% 179
+\BOOKMARK [1][-]{section.17.4}{A Complete Example}{chapter.17}% 180
+\BOOKMARK [1][-]{section.17.5}{Discussion}{chapter.17}% 181
+\BOOKMARK [0][-]{chapter.18}{Library Top.Equiv}{}% 182
+\BOOKMARK [1][-]{section.18.1}{Equiv: Program Equivalence}{chapter.18}% 183
+\BOOKMARK [1][-]{section.18.2}{Behavioral Equivalence}{chapter.18}% 184
+\BOOKMARK [2][-]{subsection.18.2.1}{Definitions}{section.18.2}% 185
+\BOOKMARK [2][-]{subsection.18.2.2}{Simple Examples}{section.18.2}% 186
+\BOOKMARK [1][-]{section.18.3}{Properties of Behavioral Equivalence}{chapter.18}% 187
+\BOOKMARK [2][-]{subsection.18.3.1}{Behavioral Equivalence Is an Equivalence}{section.18.3}% 188
+\BOOKMARK [2][-]{subsection.18.3.2}{Behavioral Equivalence Is a Congruence}{section.18.3}% 189
+\BOOKMARK [1][-]{section.18.4}{Program Transformations}{chapter.18}% 190
+\BOOKMARK [2][-]{subsection.18.4.1}{The Constant-Folding Transformation}{section.18.4}% 191
+\BOOKMARK [2][-]{subsection.18.4.2}{Soundness of Constant Folding}{section.18.4}% 192
+\BOOKMARK [1][-]{section.18.5}{Proving That Programs Are Not Equivalent}{chapter.18}% 193
+\BOOKMARK [1][-]{section.18.6}{Extended Exercise: Nondeterministic Imp}{chapter.18}% 194
+\BOOKMARK [1][-]{section.18.7}{Additional Exercises}{chapter.18}% 195
+\BOOKMARK [0][-]{chapter.19}{Library Top.Hoare}{}% 196
+\BOOKMARK [1][-]{section.19.1}{Hoare: Hoare Logic, Part I}{chapter.19}% 197
+\BOOKMARK [1][-]{section.19.2}{Assertions}{chapter.19}% 198
+\BOOKMARK [1][-]{section.19.3}{Hoare Triples}{chapter.19}% 199
+\BOOKMARK [1][-]{section.19.4}{Proof Rules}{chapter.19}% 200
+\BOOKMARK [2][-]{subsection.19.4.1}{Assignment}{section.19.4}% 201
+\BOOKMARK [2][-]{subsection.19.4.2}{Consequence}{section.19.4}% 202
+\BOOKMARK [2][-]{subsection.19.4.3}{Digression: The eapply Tactic}{section.19.4}% 203
+\BOOKMARK [2][-]{subsection.19.4.4}{Skip}{section.19.4}% 204
+\BOOKMARK [2][-]{subsection.19.4.5}{Sequencing}{section.19.4}% 205
+\BOOKMARK [2][-]{subsection.19.4.6}{Conditionals}{section.19.4}% 206
+\BOOKMARK [2][-]{subsection.19.4.7}{Loops}{section.19.4}% 207
+\BOOKMARK [1][-]{section.19.5}{Summary}{chapter.19}% 208
+\BOOKMARK [1][-]{section.19.6}{Additional Exercises}{chapter.19}% 209
+\BOOKMARK [0][-]{chapter.20}{Library Top.Hoare2}{}% 210
+\BOOKMARK [1][-]{section.20.1}{Hoare2: Hoare Logic, Part II}{chapter.20}% 211
+\BOOKMARK [1][-]{section.20.2}{Decorated Programs}{chapter.20}% 212
+\BOOKMARK [2][-]{subsection.20.2.1}{Example: Swapping Using Addition and Subtraction}{section.20.2}% 213
+\BOOKMARK [2][-]{subsection.20.2.2}{Example: Simple Conditionals}{section.20.2}% 214
+\BOOKMARK [2][-]{subsection.20.2.3}{Example: Reduce to Zero}{section.20.2}% 215
+\BOOKMARK [2][-]{subsection.20.2.4}{Example: Division}{section.20.2}% 216
+\BOOKMARK [1][-]{section.20.3}{Finding Loop Invariants}{chapter.20}% 217
+\BOOKMARK [2][-]{subsection.20.3.1}{Example: Slow Subtraction}{section.20.3}% 218
+\BOOKMARK [2][-]{subsection.20.3.2}{Exercise: Slow Assignment}{section.20.3}% 219
+\BOOKMARK [2][-]{subsection.20.3.3}{Exercise: Slow Addition}{section.20.3}% 220
+\BOOKMARK [2][-]{subsection.20.3.4}{Example: Parity}{section.20.3}% 221
+\BOOKMARK [2][-]{subsection.20.3.5}{Example: Finding Square Roots}{section.20.3}% 222
+\BOOKMARK [2][-]{subsection.20.3.6}{Example: Squaring}{section.20.3}% 223
+\BOOKMARK [2][-]{subsection.20.3.7}{Exercise: Factorial}{section.20.3}% 224
+\BOOKMARK [2][-]{subsection.20.3.8}{Exercise: Min}{section.20.3}% 225
+\BOOKMARK [2][-]{subsection.20.3.9}{Exercise: Power Series}{section.20.3}% 226
+\BOOKMARK [1][-]{section.20.4}{Weakest Preconditions \(Optional\)}{chapter.20}% 227
+\BOOKMARK [1][-]{section.20.5}{Formal Decorated Programs \(Optional\)}{chapter.20}% 228
+\BOOKMARK [2][-]{subsection.20.5.1}{Syntax}{section.20.5}% 229
+\BOOKMARK [2][-]{subsection.20.5.2}{Extracting Verification Conditions}{section.20.5}% 230
+\BOOKMARK [2][-]{subsection.20.5.3}{Automation}{section.20.5}% 231
+\BOOKMARK [2][-]{subsection.20.5.4}{Examples}{section.20.5}% 232
+\BOOKMARK [0][-]{chapter.21}{Library Top.HoareAsLogic}{}% 233
+\BOOKMARK [1][-]{section.21.1}{HoareAsLogic: Hoare Logic as a Logic}{chapter.21}% 234
+\BOOKMARK [1][-]{section.21.2}{Definitions}{chapter.21}% 235
+\BOOKMARK [1][-]{section.21.3}{Properties}{chapter.21}% 236
+\BOOKMARK [0][-]{chapter.22}{Library Top.Smallstep}{}% 237
+\BOOKMARK [1][-]{section.22.1}{Smallstep: Small-step Operational Semantics}{chapter.22}% 238
+\BOOKMARK [1][-]{section.22.2}{A Toy Language}{chapter.22}% 239
+\BOOKMARK [1][-]{section.22.3}{Relations}{chapter.22}% 240
+\BOOKMARK [2][-]{subsection.22.3.1}{Values}{section.22.3}% 241
+\BOOKMARK [2][-]{subsection.22.3.2}{Strong Progress and Normal Forms}{section.22.3}% 242
+\BOOKMARK [1][-]{section.22.4}{Multi-Step Reduction}{chapter.22}% 243
+\BOOKMARK [2][-]{subsection.22.4.1}{Examples}{section.22.4}% 244
+\BOOKMARK [2][-]{subsection.22.4.2}{Normal Forms Again}{section.22.4}% 245
+\BOOKMARK [2][-]{subsection.22.4.3}{Equivalence of Big-Step and Small-Step}{section.22.4}% 246
+\BOOKMARK [2][-]{subsection.22.4.4}{Additional Exercises}{section.22.4}% 247
+\BOOKMARK [1][-]{section.22.5}{Small-Step Imp}{chapter.22}% 248
+\BOOKMARK [1][-]{section.22.6}{Concurrent Imp}{chapter.22}% 249
+\BOOKMARK [1][-]{section.22.7}{A Small-Step Stack Machine}{chapter.22}% 250
+\BOOKMARK [0][-]{chapter.23}{Library Top.Auto}{}% 251
+\BOOKMARK [1][-]{section.23.1}{Auto: More Automation}{chapter.23}% 252
+\BOOKMARK [1][-]{section.23.2}{The auto Tactic}{chapter.23}% 253
+\BOOKMARK [1][-]{section.23.3}{Searching For Hypotheses}{chapter.23}% 254
+\BOOKMARK [0][-]{chapter.24}{Library Top.Types}{}% 255
+\BOOKMARK [1][-]{section.24.1}{Types: Type Systems}{chapter.24}% 256
+\BOOKMARK [1][-]{section.24.2}{Typed Arithmetic Expressions}{chapter.24}% 257
+\BOOKMARK [2][-]{subsection.24.2.1}{Syntax}{section.24.2}% 258
+\BOOKMARK [2][-]{subsection.24.2.2}{Operational Semantics}{section.24.2}% 259
+\BOOKMARK [2][-]{subsection.24.2.3}{Normal Forms and Values}{section.24.2}% 260
+\BOOKMARK [2][-]{subsection.24.2.4}{Typing}{section.24.2}% 261
+\BOOKMARK [2][-]{subsection.24.2.5}{Progress}{section.24.2}% 262
+\BOOKMARK [2][-]{subsection.24.2.6}{Type Preservation}{section.24.2}% 263
+\BOOKMARK [2][-]{subsection.24.2.7}{Type Soundness}{section.24.2}% 264
+\BOOKMARK [1][-]{section.24.3}{Aside: the normalizenormalize Tactic}{chapter.24}% 265
+\BOOKMARK [2][-]{subsection.24.3.1}{Additional Exercises}{section.24.3}% 266
+\BOOKMARK [0][-]{chapter.25}{Library Top.Stlc}{}% 267
+\BOOKMARK [1][-]{section.25.1}{Stlc: The Simply Typed Lambda-Calculus}{chapter.25}% 268
+\BOOKMARK [1][-]{section.25.2}{The Simply Typed Lambda-Calculus}{chapter.25}% 269
+\BOOKMARK [2][-]{subsection.25.2.1}{Overview}{section.25.2}% 270
+\BOOKMARK [2][-]{subsection.25.2.2}{Syntax}{section.25.2}% 271
+\BOOKMARK [2][-]{subsection.25.2.3}{Operational Semantics}{section.25.2}% 272
+\BOOKMARK [2][-]{subsection.25.2.4}{Typing}{section.25.2}% 273
+\BOOKMARK [0][-]{chapter.26}{Library Top.StlcProp}{}% 274
+\BOOKMARK [1][-]{section.26.1}{StlcProp: Properties of STLC}{chapter.26}% 275
+\BOOKMARK [1][-]{section.26.2}{Canonical Forms}{chapter.26}% 276
+\BOOKMARK [1][-]{section.26.3}{Progress}{chapter.26}% 277
+\BOOKMARK [1][-]{section.26.4}{Preservation}{chapter.26}% 278
+\BOOKMARK [2][-]{subsection.26.4.1}{Free Occurrences}{section.26.4}% 279
+\BOOKMARK [2][-]{subsection.26.4.2}{Substitution}{section.26.4}% 280
+\BOOKMARK [2][-]{subsection.26.4.3}{Main Theorem}{section.26.4}% 281
+\BOOKMARK [1][-]{section.26.5}{Type Soundness}{chapter.26}% 282
+\BOOKMARK [1][-]{section.26.6}{Uniqueness of Types}{chapter.26}% 283
+\BOOKMARK [1][-]{section.26.7}{Additional Exercises}{chapter.26}% 284
+\BOOKMARK [2][-]{subsection.26.7.1}{Exercise: STLC with Arithmetic}{section.26.7}% 285
+\BOOKMARK [0][-]{chapter.27}{Library Top.MoreStlc}{}% 286
+\BOOKMARK [1][-]{section.27.1}{MoreStlc: More on the Simply Typed Lambda-Calculus}{chapter.27}% 287
+\BOOKMARK [1][-]{section.27.2}{Simple Extensions to STLC}{chapter.27}% 288
+\BOOKMARK [2][-]{subsection.27.2.1}{Numbers}{section.27.2}% 289
+\BOOKMARK [2][-]{subsection.27.2.2}{Let Bindings}{section.27.2}% 290
+\BOOKMARK [2][-]{subsection.27.2.3}{Pairs}{section.27.2}% 291
+\BOOKMARK [2][-]{subsection.27.2.4}{Unit}{section.27.2}% 292
+\BOOKMARK [2][-]{subsection.27.2.5}{Sums}{section.27.2}% 293
+\BOOKMARK [2][-]{subsection.27.2.6}{Lists}{section.27.2}% 294
+\BOOKMARK [2][-]{subsection.27.2.7}{General Recursion}{section.27.2}% 295
+\BOOKMARK [2][-]{subsection.27.2.8}{Records}{section.27.2}% 296
+\BOOKMARK [1][-]{section.27.3}{Exercise: Formalizing the Extensions}{chapter.27}% 297
+\BOOKMARK [2][-]{subsection.27.3.1}{Examples}{section.27.3}% 298
+\BOOKMARK [2][-]{subsection.27.3.2}{Properties of Typing}{section.27.3}% 299
+\BOOKMARK [0][-]{chapter.28}{Library Top.Sub}{}% 300
+\BOOKMARK [1][-]{section.28.1}{Sub: Subtyping}{chapter.28}% 301
+\BOOKMARK [1][-]{section.28.2}{Concepts}{chapter.28}% 302
+\BOOKMARK [2][-]{subsection.28.2.1}{A Motivating Example}{section.28.2}% 303
+\BOOKMARK [2][-]{subsection.28.2.2}{Subtyping and Object-Oriented Languages}{section.28.2}% 304
+\BOOKMARK [2][-]{subsection.28.2.3}{The Subsumption Rule}{section.28.2}% 305
+\BOOKMARK [2][-]{subsection.28.2.4}{The Subtype Relation}{section.28.2}% 306
+\BOOKMARK [2][-]{subsection.28.2.5}{Exercises}{section.28.2}% 307
+\BOOKMARK [1][-]{section.28.3}{Formal Definitions}{chapter.28}% 308
+\BOOKMARK [2][-]{subsection.28.3.1}{Core Definitions}{section.28.3}% 309
+\BOOKMARK [2][-]{subsection.28.3.2}{Subtyping}{section.28.3}% 310
+\BOOKMARK [2][-]{subsection.28.3.3}{Typing}{section.28.3}% 311
+\BOOKMARK [1][-]{section.28.4}{Properties}{chapter.28}% 312
+\BOOKMARK [2][-]{subsection.28.4.1}{Inversion Lemmas for Subtyping}{section.28.4}% 313
+\BOOKMARK [2][-]{subsection.28.4.2}{Canonical Forms}{section.28.4}% 314
+\BOOKMARK [2][-]{subsection.28.4.3}{Progress}{section.28.4}% 315
+\BOOKMARK [2][-]{subsection.28.4.4}{Inversion Lemmas for Typing}{section.28.4}% 316
+\BOOKMARK [2][-]{subsection.28.4.5}{Context Invariance}{section.28.4}% 317
+\BOOKMARK [2][-]{subsection.28.4.6}{Substitution}{section.28.4}% 318
+\BOOKMARK [2][-]{subsection.28.4.7}{Preservation}{section.28.4}% 319
+\BOOKMARK [2][-]{subsection.28.4.8}{Records, via Products and Top}{section.28.4}% 320
+\BOOKMARK [2][-]{subsection.28.4.9}{Exercises}{section.28.4}% 321
+\BOOKMARK [1][-]{section.28.5}{Exercise: Adding Products}{chapter.28}% 322
+\BOOKMARK [0][-]{chapter.29}{Library Top.Typechecking}{}% 323
+\BOOKMARK [1][-]{section.29.1}{Typechecking: A Typechecker for STLC}{chapter.29}% 324
+\BOOKMARK [1][-]{section.29.2}{Comparing Types}{chapter.29}% 325
+\BOOKMARK [1][-]{section.29.3}{The Typechecker}{chapter.29}% 326
+\BOOKMARK [1][-]{section.29.4}{Properties}{chapter.29}% 327
+\BOOKMARK [1][-]{section.29.5}{Exercises}{chapter.29}% 328
+\BOOKMARK [0][-]{chapter.30}{Library Top.Records}{}% 329
+\BOOKMARK [1][-]{section.30.1}{Records: Adding Records to STLC}{chapter.30}% 330
+\BOOKMARK [1][-]{section.30.2}{Adding Records}{chapter.30}% 331
+\BOOKMARK [1][-]{section.30.3}{Formalizing Records}{chapter.30}% 332
+\BOOKMARK [2][-]{subsection.30.3.1}{Examples}{section.30.3}% 333
+\BOOKMARK [2][-]{subsection.30.3.2}{Properties of Typing}{section.30.3}% 334
+\BOOKMARK [0][-]{chapter.31}{Library Top.References}{}% 335
+\BOOKMARK [1][-]{section.31.1}{References: Typing Mutable References}{chapter.31}% 336
+\BOOKMARK [1][-]{section.31.2}{Definitions}{chapter.31}% 337
+\BOOKMARK [1][-]{section.31.3}{Syntax}{chapter.31}% 338
+\BOOKMARK [1][-]{section.31.4}{Pragmatics}{chapter.31}% 339
+\BOOKMARK [2][-]{subsection.31.4.1}{Side Effects and Sequencing}{section.31.4}% 340
+\BOOKMARK [2][-]{subsection.31.4.2}{References and Aliasing}{section.31.4}% 341
+\BOOKMARK [2][-]{subsection.31.4.3}{Shared State}{section.31.4}% 342
+\BOOKMARK [2][-]{subsection.31.4.4}{Objects}{section.31.4}% 343
+\BOOKMARK [2][-]{subsection.31.4.5}{References to Compound Types}{section.31.4}% 344
+\BOOKMARK [2][-]{subsection.31.4.6}{Null References}{section.31.4}% 345
+\BOOKMARK [2][-]{subsection.31.4.7}{Garbage Collection}{section.31.4}% 346
+\BOOKMARK [1][-]{section.31.5}{Operational Semantics}{chapter.31}% 347
+\BOOKMARK [2][-]{subsection.31.5.1}{Locations}{section.31.5}% 348
+\BOOKMARK [2][-]{subsection.31.5.2}{Stores}{section.31.5}% 349
+\BOOKMARK [2][-]{subsection.31.5.3}{Reduction}{section.31.5}% 350
+\BOOKMARK [1][-]{section.31.6}{Typing}{chapter.31}% 351
+\BOOKMARK [2][-]{subsection.31.6.1}{Store typings}{section.31.6}% 352
+\BOOKMARK [2][-]{subsection.31.6.2}{The Typing Relation}{section.31.6}% 353
+\BOOKMARK [1][-]{section.31.7}{Properties}{chapter.31}% 354
+\BOOKMARK [2][-]{subsection.31.7.1}{Well-Typed Stores}{section.31.7}% 355
+\BOOKMARK [2][-]{subsection.31.7.2}{Extending Store Typings}{section.31.7}% 356
+\BOOKMARK [2][-]{subsection.31.7.3}{Preservation, Finally}{section.31.7}% 357
+\BOOKMARK [2][-]{subsection.31.7.4}{Substitution Lemma}{section.31.7}% 358
+\BOOKMARK [2][-]{subsection.31.7.5}{Assignment Preserves Store Typing}{section.31.7}% 359
+\BOOKMARK [2][-]{subsection.31.7.6}{Weakening for Stores}{section.31.7}% 360
+\BOOKMARK [2][-]{subsection.31.7.7}{Preservation!}{section.31.7}% 361
+\BOOKMARK [2][-]{subsection.31.7.8}{Progress}{section.31.7}% 362
+\BOOKMARK [1][-]{section.31.8}{References and Nontermination}{chapter.31}% 363
+\BOOKMARK [1][-]{section.31.9}{Additional Exercises}{chapter.31}% 364
+\BOOKMARK [0][-]{chapter.32}{Library Top.RecordSub}{}% 365
+\BOOKMARK [1][-]{section.32.1}{RecordSub: Subtyping with Records}{chapter.32}% 366
+\BOOKMARK [1][-]{section.32.2}{Core Definitions}{chapter.32}% 367
+\BOOKMARK [1][-]{section.32.3}{Subtyping}{chapter.32}% 368
+\BOOKMARK [2][-]{subsection.32.3.1}{Definition}{section.32.3}% 369
+\BOOKMARK [2][-]{subsection.32.3.2}{Examples}{section.32.3}% 370
+\BOOKMARK [2][-]{subsection.32.3.3}{Properties of Subtyping}{section.32.3}% 371
+\BOOKMARK [1][-]{section.32.4}{Typing}{chapter.32}% 372
+\BOOKMARK [2][-]{subsection.32.4.1}{Typing Examples}{section.32.4}% 373
+\BOOKMARK [2][-]{subsection.32.4.2}{Properties of Typing}{section.32.4}% 374
+\BOOKMARK [0][-]{chapter.33}{Library Top.Norm}{}% 375
+\BOOKMARK [1][-]{section.33.1}{Norm: Normalization of STLC}{chapter.33}% 376
+\BOOKMARK [1][-]{section.33.2}{Language}{chapter.33}% 377
+\BOOKMARK [1][-]{section.33.3}{Normalization}{chapter.33}% 378
+\BOOKMARK [2][-]{subsection.33.3.1}{Membership in R\137TR\137T Is Invariant Under Reduction}{section.33.3}% 379
+\BOOKMARK [2][-]{subsection.33.3.2}{Closed Instances of Terms of Type t Belong to R\137TR\137T}{section.33.3}% 380
+\BOOKMARK [0][-]{chapter.34}{Library Top.LibTactics}{}% 381
+\BOOKMARK [1][-]{section.34.1}{LibTactics: A Collection of Handy General-Purpose Tactics}{chapter.34}% 382
+\BOOKMARK [1][-]{section.34.2}{Tools for Programming with Ltac}{chapter.34}% 383
+\BOOKMARK [2][-]{subsection.34.2.1}{Identity Continuation}{section.34.2}% 384
+\BOOKMARK [2][-]{subsection.34.2.2}{Untyped Arguments for Tactics}{section.34.2}% 385
+\BOOKMARK [2][-]{subsection.34.2.3}{Optional Arguments for Tactics}{section.34.2}% 386
+\BOOKMARK [2][-]{subsection.34.2.4}{Wildcard Arguments for Tactics}{section.34.2}% 387
+\BOOKMARK [2][-]{subsection.34.2.5}{Position Markers}{section.34.2}% 388
+\BOOKMARK [2][-]{subsection.34.2.6}{List of Arguments for Tactics}{section.34.2}% 389
+\BOOKMARK [2][-]{subsection.34.2.7}{Databases of Lemmas}{section.34.2}% 390
+\BOOKMARK [2][-]{subsection.34.2.8}{On-the-Fly Removal of Hypotheses}{section.34.2}% 391
+\BOOKMARK [2][-]{subsection.34.2.9}{Numbers as Arguments}{section.34.2}% 392
+\BOOKMARK [2][-]{subsection.34.2.10}{Testing Tactics}{section.34.2}% 393
+\BOOKMARK [2][-]{subsection.34.2.11}{Check No Evar in Goal}{section.34.2}% 394
+\BOOKMARK [2][-]{subsection.34.2.12}{Helper Function for Introducing Evars}{section.34.2}% 395
+\BOOKMARK [2][-]{subsection.34.2.13}{Tagging of Hypotheses}{section.34.2}% 396
+\BOOKMARK [2][-]{subsection.34.2.14}{More Tagging of Hypotheses}{section.34.2}% 397
+\BOOKMARK [2][-]{subsection.34.2.15}{Deconstructing Terms}{section.34.2}% 398
+\BOOKMARK [2][-]{subsection.34.2.16}{Action at Occurence and Action Not at Occurence}{section.34.2}% 399
+\BOOKMARK [2][-]{subsection.34.2.17}{An Alias for eq}{section.34.2}% 400
+\BOOKMARK [1][-]{section.34.3}{Common Tactics for Simplifying Goals Like intuition}{chapter.34}% 401
+\BOOKMARK [1][-]{section.34.4}{Backward and Forward Chaining}{chapter.34}% 402
+\BOOKMARK [2][-]{subsection.34.4.1}{Application}{section.34.4}% 403
+\BOOKMARK [2][-]{subsection.34.4.2}{Assertions}{section.34.4}% 404
+\BOOKMARK [2][-]{subsection.34.4.3}{Instantiation and Forward-Chaining}{section.34.4}% 405
+\BOOKMARK [2][-]{subsection.34.4.4}{Experimental Tactics for Application}{section.34.4}% 406
+\BOOKMARK [2][-]{subsection.34.4.5}{Adding Assumptions}{section.34.4}% 407
+\BOOKMARK [2][-]{subsection.34.4.6}{Application of Tautologies}{section.34.4}% 408
+\BOOKMARK [2][-]{subsection.34.4.7}{Application Modulo Equalities}{section.34.4}% 409
+\BOOKMARK [2][-]{subsection.34.4.8}{Absurd Goals}{section.34.4}% 410
+\BOOKMARK [1][-]{section.34.5}{Introduction and Generalization}{chapter.34}% 411
+\BOOKMARK [2][-]{subsection.34.5.1}{Introduction}{section.34.5}% 412
+\BOOKMARK [2][-]{subsection.34.5.2}{Generalization}{section.34.5}% 413
+\BOOKMARK [2][-]{subsection.34.5.3}{Naming}{section.34.5}% 414
+\BOOKMARK [1][-]{section.34.6}{Rewriting}{chapter.34}% 415
+\BOOKMARK [2][-]{subsection.34.6.1}{Replace}{section.34.6}% 416
+\BOOKMARK [2][-]{subsection.34.6.2}{Change}{section.34.6}% 417
+\BOOKMARK [2][-]{subsection.34.6.3}{Renaming}{section.34.6}% 418
+\BOOKMARK [2][-]{subsection.34.6.4}{Unfolding}{section.34.6}% 419
+\BOOKMARK [2][-]{subsection.34.6.5}{Simplification}{section.34.6}% 420
+\BOOKMARK [2][-]{subsection.34.6.6}{Reduction}{section.34.6}% 421
+\BOOKMARK [2][-]{subsection.34.6.7}{Substitution}{section.34.6}% 422
+\BOOKMARK [2][-]{subsection.34.6.8}{Tactics to Work with Proof Irrelevance}{section.34.6}% 423
+\BOOKMARK [2][-]{subsection.34.6.9}{Proving Equalities}{section.34.6}% 424
+\BOOKMARK [1][-]{section.34.7}{Inversion}{chapter.34}% 425
+\BOOKMARK [2][-]{subsection.34.7.1}{Basic Inversion}{section.34.7}% 426
+\BOOKMARK [2][-]{subsection.34.7.2}{Inversion with Substitution}{section.34.7}% 427
+\BOOKMARK [2][-]{subsection.34.7.3}{Injection with Substitution}{section.34.7}% 428
+\BOOKMARK [2][-]{subsection.34.7.4}{Inversion and Injection with Substitution \205rough implementation}{section.34.7}% 429
+\BOOKMARK [2][-]{subsection.34.7.5}{Case Analysis}{section.34.7}% 430
+\BOOKMARK [1][-]{section.34.8}{Induction}{chapter.34}% 431
+\BOOKMARK [1][-]{section.34.9}{Coinduction}{chapter.34}% 432
+\BOOKMARK [1][-]{section.34.10}{Decidable Equality}{chapter.34}% 433
+\BOOKMARK [1][-]{section.34.11}{Equivalence}{chapter.34}% 434
+\BOOKMARK [1][-]{section.34.12}{N-ary Conjunctions and Disjunctions}{chapter.34}% 435
+\BOOKMARK [1][-]{section.34.13}{Tactics to Prove Typeclass Instances}{chapter.34}% 436
+\BOOKMARK [1][-]{section.34.14}{Tactics to Invoke Automation}{chapter.34}% 437
+\BOOKMARK [2][-]{subsection.34.14.1}{Definitions for Parsing Compatibility}{section.34.14}% 438
+\BOOKMARK [2][-]{subsection.34.14.2}{hinthint to Add Hints Local to a Lemma}{section.34.14}% 439
+\BOOKMARK [2][-]{subsection.34.14.3}{jautojauto, a New Automation Tactic}{section.34.14}% 440
+\BOOKMARK [2][-]{subsection.34.14.4}{Definitions of Automation Tactics}{section.34.14}% 441
+\BOOKMARK [2][-]{subsection.34.14.5}{Parsing for Light Automation}{section.34.14}% 442
+\BOOKMARK [2][-]{subsection.34.14.6}{Parsing for Strong Automation}{section.34.14}% 443
+\BOOKMARK [1][-]{section.34.15}{Tactics to Sort Out the Proof Context}{chapter.34}% 444
+\BOOKMARK [2][-]{subsection.34.15.1}{Hiding Hypotheses}{section.34.15}% 445
+\BOOKMARK [2][-]{subsection.34.15.2}{Sorting Hypotheses}{section.34.15}% 446
+\BOOKMARK [2][-]{subsection.34.15.3}{Clearing Hypotheses}{section.34.15}% 447
+\BOOKMARK [1][-]{section.34.16}{Tactics for Development Purposes}{chapter.34}% 448
+\BOOKMARK [2][-]{subsection.34.16.1}{Skipping Subgoals}{section.34.16}% 449
+\BOOKMARK [1][-]{section.34.17}{Compatibility with Standard Library}{chapter.34}% 450
+\BOOKMARK [0][-]{chapter.35}{Library Top.UseTactics}{}% 451
+\BOOKMARK [1][-]{section.35.1}{UseTactics: Tactic Library for Coq: A Gentle Introduction}{chapter.35}% 452
+\BOOKMARK [1][-]{section.35.2}{Tactics for Introduction and Case Analysis}{chapter.35}% 453
+\BOOKMARK [2][-]{subsection.35.2.1}{The Tactic introvintrov}{section.35.2}% 454
+\BOOKMARK [2][-]{subsection.35.2.2}{The Tactic invertsinverts}{section.35.2}% 455
+\BOOKMARK [1][-]{section.35.3}{Tactics for N-ary Connectives}{chapter.35}% 456
+\BOOKMARK [2][-]{subsection.35.3.1}{The Tactic splitssplits}{section.35.3}% 457
+\BOOKMARK [2][-]{subsection.35.3.2}{The Tactic branchbranch}{section.35.3}% 458
+\BOOKMARK [2][-]{subsection.35.3.3}{The Tactic }{section.35.3}% 459
+\BOOKMARK [1][-]{section.35.4}{Tactics for Working with Equality}{chapter.35}% 460
+\BOOKMARK [2][-]{subsection.35.4.1}{The Tactics asserts\137rewriteasserts\137rewrite and cuts\137rewritecuts\137rewrite}{section.35.4}% 461
+\BOOKMARK [2][-]{subsection.35.4.2}{The Tactic substssubsts}{section.35.4}% 462
+\BOOKMARK [2][-]{subsection.35.4.3}{The Tactic fequalsfequals}{section.35.4}% 463
+\BOOKMARK [2][-]{subsection.35.4.4}{The Tactic applys\137eqapplys\137eq}{section.35.4}% 464
+\BOOKMARK [1][-]{section.35.5}{Some Convenient Shorthands}{chapter.35}% 465
+\BOOKMARK [2][-]{subsection.35.5.1}{The Tactic unfoldsunfolds}{section.35.5}% 466
+\BOOKMARK [2][-]{subsection.35.5.2}{The Tactics false and tryfalsetryfalse}{section.35.5}% 467
+\BOOKMARK [2][-]{subsection.35.5.3}{The Tactic gengen}{section.35.5}% 468
+\BOOKMARK [2][-]{subsection.35.5.4}{The Tactics skipskip, skip\137rewriteskip\137rewrite and skip\137goalskip\137goal}{section.35.5}% 469
+\BOOKMARK [2][-]{subsection.35.5.5}{The Tactic sortsort}{section.35.5}% 470
+\BOOKMARK [1][-]{section.35.6}{Tactics for Advanced Lemma Instantiation}{chapter.35}% 471
+\BOOKMARK [2][-]{subsection.35.6.1}{Working of letslets}{section.35.6}% 472
+\BOOKMARK [2][-]{subsection.35.6.2}{Working of applysapplys, forwardsforwards and specializesspecializes}{section.35.6}% 473
+\BOOKMARK [2][-]{subsection.35.6.3}{Example of Instantiations}{section.35.6}% 474
+\BOOKMARK [1][-]{section.35.7}{Summary}{chapter.35}% 475
+\BOOKMARK [0][-]{chapter.36}{Library Top.UseAuto}{}% 476
+\BOOKMARK [1][-]{section.36.1}{UseAuto: Theory and Practice of Automation in Coq Proofs}{chapter.36}% 477
+\BOOKMARK [1][-]{section.36.2}{Basic Features of Proof Search}{chapter.36}% 478
+\BOOKMARK [2][-]{subsection.36.2.1}{Strength of Proof Search}{section.36.2}% 479
+\BOOKMARK [2][-]{subsection.36.2.2}{Basics}{section.36.2}% 480
+\BOOKMARK [2][-]{subsection.36.2.3}{Conjunctions}{section.36.2}% 481
+\BOOKMARK [2][-]{subsection.36.2.4}{Disjunctions}{section.36.2}% 482
+\BOOKMARK [2][-]{subsection.36.2.5}{Existentials}{section.36.2}% 483
+\BOOKMARK [2][-]{subsection.36.2.6}{Negation}{section.36.2}% 484
+\BOOKMARK [2][-]{subsection.36.2.7}{Equalities}{section.36.2}% 485
+\BOOKMARK [1][-]{section.36.3}{How Proof Search Works}{chapter.36}% 486
+\BOOKMARK [2][-]{subsection.36.3.1}{Search Depth}{section.36.3}% 487
+\BOOKMARK [2][-]{subsection.36.3.2}{Backtracking}{section.36.3}% 488
+\BOOKMARK [2][-]{subsection.36.3.3}{Adding Hints}{section.36.3}% 489
+\BOOKMARK [2][-]{subsection.36.3.4}{Integration of Automation in Tactics}{section.36.3}% 490
+\BOOKMARK [1][-]{section.36.4}{Examples of Use of Automation}{chapter.36}% 491
+\BOOKMARK [2][-]{subsection.36.4.1}{Determinism}{section.36.4}% 492
+\BOOKMARK [2][-]{subsection.36.4.2}{Preservation for STLC}{section.36.4}% 493
+\BOOKMARK [2][-]{subsection.36.4.3}{Progress for STLC}{section.36.4}% 494
+\BOOKMARK [2][-]{subsection.36.4.4}{BigStep and SmallStep}{section.36.4}% 495
+\BOOKMARK [2][-]{subsection.36.4.5}{Preservation for STLCRef}{section.36.4}% 496
+\BOOKMARK [2][-]{subsection.36.4.6}{Progress for STLCRef}{section.36.4}% 497
+\BOOKMARK [2][-]{subsection.36.4.7}{Subtyping}{section.36.4}% 498
+\BOOKMARK [1][-]{section.36.5}{Advanced Topics in Proof Search}{chapter.36}% 499
+\BOOKMARK [2][-]{subsection.36.5.1}{Stating Lemmas in the Right Way}{section.36.5}% 500
+\BOOKMARK [2][-]{subsection.36.5.2}{Unfolding of Definitions During Proof-Search}{section.36.5}% 501
+\BOOKMARK [2][-]{subsection.36.5.3}{Automation for Proving Absurd Goals}{section.36.5}% 502
+\BOOKMARK [2][-]{subsection.36.5.4}{Automation for Transitivity Lemmas}{section.36.5}% 503
+\BOOKMARK [1][-]{section.36.6}{Decision Procedures}{chapter.36}% 504
+\BOOKMARK [2][-]{subsection.36.6.1}{Omega}{section.36.6}% 505
+\BOOKMARK [2][-]{subsection.36.6.2}{Ring}{section.36.6}% 506
+\BOOKMARK [2][-]{subsection.36.6.3}{Congruence}{section.36.6}% 507
+\BOOKMARK [1][-]{section.36.7}{Summary}{chapter.36}% 508
+\BOOKMARK [0][-]{chapter.37}{Library Top.PE}{}% 509
+\BOOKMARK [1][-]{section.37.1}{PE: Partial Evaluation}{chapter.37}% 510
+\BOOKMARK [1][-]{section.37.2}{Generalizing Constant Folding}{chapter.37}% 511
+\BOOKMARK [2][-]{subsection.37.2.1}{Partial States}{section.37.2}% 512
+\BOOKMARK [2][-]{subsection.37.2.2}{Arithmetic Expressions}{section.37.2}% 513
+\BOOKMARK [2][-]{subsection.37.2.3}{Boolean Expressions}{section.37.2}% 514
+\BOOKMARK [1][-]{section.37.3}{Partial Evaluation of Commands, Without Loops}{chapter.37}% 515
+\BOOKMARK [2][-]{subsection.37.3.1}{Assignment}{section.37.3}% 516
+\BOOKMARK [2][-]{subsection.37.3.2}{Conditional}{section.37.3}% 517
+\BOOKMARK [2][-]{subsection.37.3.3}{The Partial Evaluation Relation}{section.37.3}% 518
+\BOOKMARK [2][-]{subsection.37.3.4}{Examples}{section.37.3}% 519
+\BOOKMARK [2][-]{subsection.37.3.5}{Correctness of Partial Evaluation}{section.37.3}% 520
+\BOOKMARK [1][-]{section.37.4}{Partial Evaluation of Loops}{chapter.37}% 521
+\BOOKMARK [2][-]{subsection.37.4.1}{Examples}{section.37.4}% 522
+\BOOKMARK [2][-]{subsection.37.4.2}{Correctness}{section.37.4}% 523
+\BOOKMARK [1][-]{section.37.5}{Partial Evaluation of Flowchart Programs}{chapter.37}% 524
+\BOOKMARK [2][-]{subsection.37.5.1}{Basic blocks}{section.37.5}% 525
+\BOOKMARK [2][-]{subsection.37.5.2}{Flowchart programs}{section.37.5}% 526
+\BOOKMARK [2][-]{subsection.37.5.3}{Partial Evaluation of Basic Blocks and Flowchart Programs}{section.37.5}% 527
+\BOOKMARK [0][-]{chapter.38}{Library Top.Postscript}{}% 528
+\BOOKMARK [1][-]{section.38.1}{Postscript}{chapter.38}% 529
+\BOOKMARK [1][-]{section.38.2}{Looking Back}{chapter.38}% 530
+\BOOKMARK [1][-]{section.38.3}{Looking Around}{chapter.38}% 531
+\BOOKMARK [1][-]{section.38.4}{Looking Forward}{chapter.38}% 532
+\BOOKMARK [0][-]{chapter.39}{Library Top.Bib}{}% 533
+\BOOKMARK [1][-]{section.39.1}{Bib: Bibliography}{chapter.39}% 534

@@ -183,6 +183,9 @@ all-gal.ps: $(VFILES)
 all.pdf: $(VFILES)
 	$(COQDOC) -toc $(COQDOCFLAGS) -pdf $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $^`
 
+all.tex: $(VFILES)
+	$(COQDOC) -toc $(COQDOCFLAGS) -latex $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $^`
+
 all-gal.pdf: $(VFILES)
 	$(COQDOC) -toc $(COQDOCFLAGS) -pdf -g $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $^`
 
