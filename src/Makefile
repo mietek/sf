@@ -69,7 +69,7 @@ OPT?=
 COQDEP?="$(COQBIN)coqdep" -c
 COQFLAGS?=-q $(OPT) $(COQLIBS) $(OTHERFLAGS) $(COQ_XML)
 COQCHKFLAGS?=-silent -o
-COQDOCFLAGS?=-interpolate -utf8 -p '\usepackage{enumitem}\setlistdepth{9}\setlist[itemize,1]{label=$$\bullet$$}\setlist[itemize,2]{label=$$\bullet$$}\setlist[itemize,3]{label=$$\bullet$$}\setlist[itemize,4]{label=$$\bullet$$}\setlist[itemize,5]{label=$$\bullet$$}\setlist[itemize,6]{label=$$\bullet$$}\setlist[itemize,7]{label=$$\bullet$$}\setlist[itemize,8]{label=$$\bullet$$}\setlist[itemize,9]{label=$$\bullet$$}\renewlist{itemize}{itemize}{9}'
+COQDOCFLAGS?=-interpolate --parse-comments -utf8 -p '\usepackage{enumitem}\setlistdepth{9}\setlist[itemize,1]{label=$$\bullet$$}\setlist[itemize,2]{label=$$\bullet$$}\setlist[itemize,3]{label=$$\bullet$$}\setlist[itemize,4]{label=$$\bullet$$}\setlist[itemize,5]{label=$$\bullet$$}\setlist[itemize,6]{label=$$\bullet$$}\setlist[itemize,7]{label=$$\bullet$$}\setlist[itemize,8]{label=$$\bullet$$}\setlist[itemize,9]{label=$$\bullet$$}\renewlist{itemize}{itemize}{9}'
 COQC?=$(TIMER) "$(COQBIN)coqc"
 GALLINA?="$(COQBIN)gallina"
 COQDOC?="$(COQBIN)coqdoc"
