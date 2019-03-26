@@ -1,0 +1,218 @@
+--- QuickChickTool.v
++++ QuickChickTool.v
+@@ -34,7 +34,9 @@
+     To get started, let's try the tool out and see it's output! Go to
+     the [stack-compiler] subdirectory and run the following command:
+ 
++<<
+     quickChick -color -top Stack
++>>
+ *)
+ 
+ (** The [-color] flag colors certain lines in the output for easier reading.
+@@ -48,14 +50,19 @@
+ 
+     The output consists of four parts, delimited by (colored) headers such as 
+ 
++<<
+     Testing base...
++>>
+ 
+     or     
+ 
++<<
+     Testing mutant 2 (./Exp.v: line 20): Plus-copy-paste-error
++>>
+ 
+     Let's take a closer look at the first one.
+ 
++<<
+     Testing base...
+     make -f Makefile.coq 
+     make[1]: Entering directory '/home/lemonidas/sfdev/qc/_qc_stack-compiler.tmp'
+@@ -98,7 +105,9 @@
+ 
+     If all is well, the last line should be a reassuring success report:
+ 
++<<
+     All tests produced the expected results
++>>
+ *)
+ 
+ (* ################################################################# *)
+@@ -110,7 +119,9 @@
+     [Exp] module begins with a _section declaration_:
+ 
+ 
++<<
+     (*! Section arithmetic_expressions *)
++>>
+ 
+    
+    We will explain what quickChick sections are and how to use them
+@@ -168,12 +179,16 @@
+ 
+ (** 
+ 
++<<
+     (*! QuickChick optimize_correct_prop. *)
++>>
+ *)
+ (**
+ 
++<<
+     QuickChecking optimize_correct_prop
+     +++ Passed 10000 tests (0 discards)
++>>
+ *)
+ 
+ (* ################################################################# *)
+@@ -209,7 +224,9 @@
+     one below, the command-line tool requires a defined constant in
+     the test annotation.
+ 
++<<
+     QuickChick (fun e => eval (optimize e) = eval e?).
++>>
+ *)
+ (* ################################################################# *)
+ (** * Sections *)
+@@ -231,11 +248,15 @@
+     the start of a new block that can be identified by the name 
+     "arithmetic_expressions".
+ 
++<<
+       (*! Section arithmetic_expressions *)
++>>
+ 
+     The second also includes an [extends] clause. 
+ 
++<<
+       (*! Section optimizations *)(*! extends arithmetic_expressions *)
++>>
+ 
+    This signifies that this new block (until the end of the file, 
+    in this case, since there are no further section headers), also 
+@@ -246,6 +267,7 @@
+ (** To see sectioning in action, execute the following command from
+     the [stack-compiler] directory:
+ 
++<<
+        quickChick -color -top Stack -s optimizations
+ 
+ 
+@@ -261,6 +283,7 @@
+     Checking Exp.optimize_correct_prop...
+     +++ Passed 10000 tests (0 discards)
+     ... etc ...
++>>
+ 
+ 
+     In addition to the standard arguments ([-color], [-top Stack])
+@@ -286,10 +309,12 @@
+ 
+ (** Here is an excerpt of the [eval] function with a simple mutant annotation:
+ 
++<<
+        (*! *)                
+          | APlus e1 e2 => (eval e1) + (eval e2)
+        (*!! Plus-copy-paste-error *)                                 
+        (*! | APlus e1 e2 => (eval e1) + (eval e1) *)
++>>
+ 
+     Let's break it down into its parts.
+ *)
+@@ -297,7 +322,9 @@
+ (** QuickChick mutants come in three parts. First, an annotation
+     that signifies the beginning of a mutant. That is always the same:
+ 
++<<
+        (*! *)
++>>
+ 
+     This is followed by the correct code. In our example, by the evaluation
+     of [APlus e1 e2]. 
+@@ -305,8 +332,9 @@
+     Afterwards, we can include an optional (but recommended) name for 
+     the mutant, which begins with two exclamation marks to help the parser. 
+ 
++<<
+        (*!! Plus-copy-paste-error *)                                 
+-]]  
++>>  
+   
+     Finally, we include mutations of the original code, each in a QuickChick 
+     single-exclamation-mark annotation. The code of the mutation is meant to be 
+@@ -315,18 +343,21 @@
+ 
+ (** Similarly, in the [optimize] function we encounter the following mutant.
+ 
++<<
+        (*! *)
+          | AMinus e (ANum 0) => optimize e
+        (*!! Minus-Reverse *)
+        (*! 
+          | AMinus (ANum 0) e => optimize e 
+        *)
++>>
+ 
+     This bug allows the optimization of [0-e] to [e] instead of [e-0] to [e]. *)
+ 
+ (** To see these mutants in action, let's look at the rest of the output of the
+     last [quickChick] command we ran:
+ 
++<<
+     quickChick -color -top Stack -s optimizations
+ 
+ 
+@@ -354,6 +385,7 @@
+     Checking Exp.optimize_correct_prop...
+     *** Failed after 5 tests and 3 shrinks. (0 discards)
+     All tests produced the expected results
++>>
+ 
+ 
+     After running all the tests for [base] (the unmutated artifact), the
+@@ -430,10 +462,12 @@
+ 
+ (** 
+ 
++<<
+ ===>
+     QuickChecking compiles_correctly
+     AMinus (ANum 0) (ANum 1)
+     *** Failed after 3 tests and 2 shrinks. (0 discards)
++>>
+ 
+ 
+     The problem is that subtraction is not associative and we have compiled
+@@ -441,6 +475,7 @@
+     development as shown in the [Stack] module.
+ 
+ 
++<<
+     Fixpoint compile (e : exp) : list sinstr :=
+       match e with
+       | ANum n => [SPush n]
+@@ -455,11 +490,13 @@
+       | AMult  e1 e2 => compile e1 ++ compile e2 ++ [SMult]
+     *)
+       end.
++>>
+ 
+     
+     We can now run a different command to test [compiles_correctly], using 
+     [-s stack] to only check the [stack] section.
+ 
++<<
+     quickChick -color -top Stack -s stack
+ 
+ 
+@@ -497,6 +534,7 @@
+     Checking Stack.compiles_correctly...
+     *** Failed after 5 tests and 2 shrinks. (0 discards)
+     All tests produced the expected results
++>>
+ 
+     We can see that the main property succeeds, while the two mutants (the one 
+     in [arithmetic_expressions] that was included because of the extension
