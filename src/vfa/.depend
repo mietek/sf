@@ -1,0 +1,30 @@
+Maps.vo Maps.glob Maps.v.beautified: Maps.v
+Maps.vio: Maps.v
+Preface.vo Preface.glob Preface.v.beautified: Preface.v
+Preface.vio: Preface.v
+Perm.vo Perm.glob Perm.v.beautified: Perm.v
+Perm.vio: Perm.v
+Sort.vo Sort.glob Sort.v.beautified: Sort.v
+Sort.vio: Sort.v
+Multiset.vo Multiset.glob Multiset.v.beautified: Multiset.v
+Multiset.vio: Multiset.v
+Selection.vo Selection.glob Selection.v.beautified: Selection.v
+Selection.vio: Selection.v
+SearchTree.vo SearchTree.glob SearchTree.v.beautified: SearchTree.v
+SearchTree.vio: SearchTree.v
+ADT.vo ADT.glob ADT.v.beautified: ADT.v
+ADT.vio: ADT.v
+Extract.vo Extract.glob Extract.v.beautified: Extract.v
+Extract.vio: Extract.v
+Redblack.vo Redblack.glob Redblack.v.beautified: Redblack.v
+Redblack.vio: Redblack.v
+Trie.vo Trie.glob Trie.v.beautified: Trie.v
+Trie.vio: Trie.v
+Priqueue.vo Priqueue.glob Priqueue.v.beautified: Priqueue.v
+Priqueue.vio: Priqueue.v
+Binom.vo Binom.glob Binom.v.beautified: Binom.v
+Binom.vio: Binom.v
+Decide.vo Decide.glob Decide.v.beautified: Decide.v
+Decide.vio: Decide.v
+Color.vo Color.glob Color.v.beautified: Color.v
+Color.vio: Color.v
