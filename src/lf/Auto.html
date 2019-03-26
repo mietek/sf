@@ -1,0 +1,870 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<title>Auto: More Automation</title>
+</head>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
+<img src='common/media/image/sf_logo_sm.png'></a>
+</br><a href='index.html'>  <span class='booktitleinheader'>Volume 1: Logical Foundations</span><br></br>
+<ul id='menu'>
+   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
+   <a href='coqindex.html'><li class='section_name'>Index</li></a>
+   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+</ul>
+</a></div>
+
+<div id="main">
+
+<h1 class="libtitle">Auto<span class="subtitle">More Automation</span></h1>
+
+
+<div class="code code-tight">
+
+<span class="id" type="keyword">Set</span> <span class="id" type="var">Warnings</span> "-notation-overridden,-parsing".<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">Coq</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">omega.Omega</span>.<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">LF</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Maps</span>.<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">LF</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Imp</span>.<br/>
+</div>
+
+<div class="doc">
+Up to now, we've used the more manual part of Coq's tactic
+    facilities.  In this chapter, we'll learn more about some of Coq's
+    powerful automation features: proof search via the <span class="inlinecode"><span class="id" type="tactic">auto</span></span> tactic,
+    automated forward reasoning via the <span class="inlinecode"><span class="id" type="keyword">Ltac</span></span> hypothesis matching
+    machinery, and deferred instantiation of existential variables
+    using <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span>.  Using these features together with
+    Ltac's scripting facilities will enable us to make our proofs
+    startlingly short!  Used properly, they can also make proofs more
+    maintainable and robust to changes in underlying definitions.  A
+    deeper treatment of <span class="inlinecode"><span class="id" type="tactic">auto</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> can be found in the
+    <span class="inlinecode"><span class="id" type="var">UseAuto</span></span> chapter in <i>Programming Language Foundations</i>.
+
+<div class="paragraph"> </div>
+
+    There's another major category of automation we haven't discussed
+    much yet, namely built-in decision procedures for specific kinds
+    of problems: <span class="inlinecode"><span class="id" type="tactic">omega</span></span> is one example, but there are others.  This
+    topic will be deferred for a while longer.
+
+<div class="paragraph"> </div>
+
+    Our motivating example will be this proof, repeated with just a
+    few small changes from the <a href="Imp.html"><span class="inlineref">Imp</span></a> chapter.  We will simplify
+    this proof in several stages. 
+<div class="paragraph"> </div>
+
+ First, define a little Ltac macro to compress a common
+    pattern into a single command. 
+</div>
+<div class="code code-tight">
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">inv</span> <span class="id" type="var">H</span> := <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">clear</span> <span class="id" type="var">H</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Skip&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Ass&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="comment">(*&nbsp;Proof&nbsp;of&nbsp;assertion&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_1</span>; <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>1</sub></span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_2</span>. <span class="id" type="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1</span>. <span class="id" type="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1</span>. <span class="id" type="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>4</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="comment">(*&nbsp;Proof&nbsp;of&nbsp;assertion&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_1</span>; <span class="id" type="tactic">assumption</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHE1_2</span>. <span class="id" type="tactic">assumption</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab395"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">auto</span></span> Tactic</h1>
+
+<div class="paragraph"> </div>
+
+ Thus far, our proof scripts mostly apply relevant hypotheses or
+    lemmas by name, and one at a time. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_1</span> : <span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span>: <span class="id" type="keyword">Prop</span>),<br/>
+&nbsp;&nbsp;(<span class="id" type="var">P</span> → <span class="id" type="var">Q</span>) → (<span class="id" type="var">Q</span> → <span class="id" type="var">R</span>) → <span class="id" type="var">P</span> → <span class="id" type="var">R</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span> <span class="id" type="var">H<sub>3</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H<sub>1</sub></span>. <span class="id" type="tactic">assumption</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">auto</span></span> tactic frees us from this drudgery by <i>searching</i> for a
+    sequence of applications that will prove the goal: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_1'</span> : <span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span>: <span class="id" type="keyword">Prop</span>),<br/>
+&nbsp;&nbsp;(<span class="id" type="var">P</span> → <span class="id" type="var">Q</span>) → (<span class="id" type="var">Q</span> → <span class="id" type="var">R</span>) → <span class="id" type="var">P</span> → <span class="id" type="var">R</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">auto</span></span> tactic solves goals that are solvable by any combination of
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="tactic">intros</span></span> and
+
+</li>
+<li> <span class="inlinecode"><span class="id" type="tactic">apply</span></span> (of hypotheses from the local context, by default). 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ Using <span class="inlinecode"><span class="id" type="tactic">auto</span></span> is always "safe" in the sense that it will never fail
+    and will never change the proof state: either it completely solves
+    the current goal, or it does nothing. 
+<div class="paragraph"> </div>
+
+ Here is a more interesting example showing <span class="inlinecode"><span class="id" type="tactic">auto</span></span>'s power: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_2</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span> <span class="id" type="var">U</span> : <span class="id" type="keyword">Prop</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">P</span> → <span class="id" type="var">Q</span>) →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">P</span> → <span class="id" type="var">R</span>) →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">T</span> → <span class="id" type="var">R</span>) →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">S</span> → <span class="id" type="var">T</span> → <span class="id" type="var">U</span>) →<br/>
+&nbsp;&nbsp;((<span class="id" type="var">P</span>→<span class="id" type="var">Q</span>) → (<span class="id" type="var">P</span>→<span class="id" type="var">S</span>)) →<br/>
+&nbsp;&nbsp;<span class="id" type="var">T</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">P</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">U</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Proof search could, in principle, take an arbitrarily long time,
+    so there are limits to how far <span class="inlinecode"><span class="id" type="tactic">auto</span></span> will search by default. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_3</span> : <span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span> <span class="id" type="var">U</span>: <span class="id" type="keyword">Prop</span>),<br/>
+&nbsp;&nbsp;(<span class="id" type="var">P</span> → <span class="id" type="var">Q</span>) →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">Q</span> → <span class="id" type="var">R</span>) →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">R</span> → <span class="id" type="var">S</span>) →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">S</span> → <span class="id" type="var">T</span>) →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">T</span> → <span class="id" type="var">U</span>) →<br/>
+&nbsp;&nbsp;<span class="id" type="var">P</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">U</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;When&nbsp;it&nbsp;cannot&nbsp;solve&nbsp;the&nbsp;goal,&nbsp;<span class="inlinecode"><span class="id" type="tactic">auto</span></span>&nbsp;does&nbsp;nothing&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Optional&nbsp;argument&nbsp;says&nbsp;how&nbsp;deep&nbsp;to&nbsp;search&nbsp;(default&nbsp;is&nbsp;5)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span> 6.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+When searching for potential proofs of the current goal,
+    <span class="inlinecode"><span class="id" type="tactic">auto</span></span> considers the hypotheses in the current context together
+    with a <i>hint database</i> of other lemmas and constructors.  Some
+    common lemmas about equality and logical operators are installed
+    in this hint database by default. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_4</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">P</span> <span class="id" type="var">Q</span> <span class="id" type="var">R</span> : <span class="id" type="keyword">Prop</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">Q</span> →<br/>
+&nbsp;&nbsp;(<span class="id" type="var">Q</span> → <span class="id" type="var">R</span>) →<br/>
+&nbsp;&nbsp;<span class="id" type="var">P</span> ∨ (<span class="id" type="var">Q</span> ∧ <span class="id" type="var">R</span>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+We can extend the hint database just for the purposes of one
+    application of <span class="inlinecode"><span class="id" type="tactic">auto</span></span> by writing "<span class="inlinecode"><span class="id" type="tactic">auto</span></span> <span class="inlinecode"><span class="id" type="keyword">using</span></span> <span class="inlinecode">...</span>". 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">le_antisym</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>: <span class="id" type="var">nat</span>, (<span class="id" type="var">n</span> ≤ <span class="id" type="var">m</span> ∧ <span class="id" type="var">m</span> ≤ <span class="id" type="var">n</span>) → <span class="id" type="var">n</span> = <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span>. <span class="id" type="tactic">omega</span>. <span class="id" type="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_6</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> ≤ <span class="id" type="var">p</span> → (<span class="id" type="var">n</span> ≤ <span class="id" type="var">m</span> ∧ <span class="id" type="var">m</span> ≤ <span class="id" type="var">n</span>)) →<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> ≤ <span class="id" type="var">p</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> = <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">le_antisym</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Of course, in any given development there will probably be
+    some specific constructors and lemmas that are used very often in
+    proofs.  We can add these to the global hint database by writing
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Hint</span>&nbsp;<span class="id" type="keyword">Resolve</span>&nbsp;<span class="id" type="var">T</span>.
+<div class="paragraph"> </div>
+
+</div>
+    at the top level, where <span class="inlinecode"><span class="id" type="var">T</span></span> is a top-level theorem or a
+    constructor of an inductively defined proposition (i.e., anything
+    whose type is an implication).  As a shorthand, we can write
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Hint</span>&nbsp;<span class="id" type="var">Constructors</span>&nbsp;<span class="id" type="var">c</span>.
+<div class="paragraph"> </div>
+
+</div>
+    to tell Coq to do a <span class="inlinecode"><span class="id" type="keyword">Hint</span></span> <span class="inlinecode"><span class="id" type="keyword">Resolve</span></span> for <i>all</i> of the constructors
+    from the inductive definition of <span class="inlinecode"><span class="id" type="var">c</span></span>.
+
+<div class="paragraph"> </div>
+
+    It is also sometimes necessary to add
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Hint</span>&nbsp;<span class="id" type="keyword">Unfold</span>&nbsp;<span class="id" type="var">d</span>.
+<div class="paragraph"> </div>
+
+</div>
+    where <span class="inlinecode"><span class="id" type="var">d</span></span> is a defined symbol, so that <span class="inlinecode"><span class="id" type="tactic">auto</span></span> knows to expand uses
+    of <span class="inlinecode"><span class="id" type="var">d</span></span>, thus enabling further possibilities for applying lemmas that
+    it knows about. 
+<div class="paragraph"> </div>
+
+ It is also possible to define specialized hint databases that can
+    be activated only when needed.  See the Coq reference manual for
+    more. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Resolve</span> <span class="id" type="var">le_antisym</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_6'</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span>≤ <span class="id" type="var">p</span> → (<span class="id" type="var">n</span> ≤ <span class="id" type="var">m</span> ∧ <span class="id" type="var">m</span> ≤ <span class="id" type="var">n</span>)) →<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> ≤ <span class="id" type="var">p</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> = <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="comment">(*&nbsp;picks&nbsp;up&nbsp;hint&nbsp;from&nbsp;database&nbsp;*)</span><br/>
+<span class="id" type="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">is_fortytwo</span> <span class="id" type="var">x</span> := (<span class="id" type="var">x</span> = 42).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_7</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">x</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">x</span> ≤ 42 ∧ 42 ≤ <span class="id" type="var">x</span>) → <span class="id" type="var">is_fortytwo</span> <span class="id" type="var">x</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="comment">(*&nbsp;does&nbsp;nothing&nbsp;*)</span><br/>
+<span class="id" type="keyword">Abort</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Unfold</span> <span class="id" type="var">is_fortytwo</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">auto_example_7'</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">x</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">x</span> ≤ 42 ∧ 42 ≤ <span class="id" type="var">x</span>) → <span class="id" type="var">is_fortytwo</span> <span class="id" type="var">x</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Let's take a first pass over <span class="inlinecode"><span class="id" type="var">ceval_deterministic</span></span> to simplify the
+    proof script. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic'</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>4</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+When we are using a particular tactic many times in a proof, we
+    can use a variant of the <span class="inlinecode"><span class="id" type="keyword">Proof</span></span> command to make that tactic into
+    a default within the proof.  Saying <span class="inlinecode"><span class="id" type="keyword">Proof</span></span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode"><span class="id" type="var">t</span></span> (where <span class="inlinecode"><span class="id" type="var">t</span></span> is
+    an arbitrary tactic) allows us to use <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span>...</span> as a shorthand for
+    <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span>;<span class="id" type="var">t</span></span> within the proof.  As an illustration, here is an alternate
+    version of the previous proof, using <span class="inlinecode"><span class="id" type="keyword">Proof</span></span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode"><span class="id" type="tactic">auto</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic'_alt</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')">
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>...<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>...<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>5</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>4</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+<a name="lab396"></a><h1 class="section">Searching For Hypotheses</h1>
+
+<div class="paragraph"> </div>
+
+ The proof has become simpler, but there is still an annoying
+    amount of repetition. Let's start by tackling the contradiction
+    cases. Each of them occurs in a situation where we have both
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>1</sub></span>:&nbsp;<span class="id" type="var">beval</span>&nbsp;<span class="id" type="var">st</span>&nbsp;<span class="id" type="var">b</span>&nbsp;=&nbsp;<span class="id" type="var">false</span>
+<div class="paragraph"> </div>
+
+</div>
+    and
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>2</sub></span>:&nbsp;<span class="id" type="var">beval</span>&nbsp;<span class="id" type="var">st</span>&nbsp;<span class="id" type="var">b</span>&nbsp;=&nbsp;<span class="id" type="var">true</span>
+<div class="paragraph"> </div>
+
+</div>
+    as hypotheses.  The contradiction is evident, but demonstrating it
+    is a little complicated: we have to locate the two hypotheses <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span>
+    and <span class="inlinecode"><span class="id" type="var">H<sub>2</sub></span></span> and do a <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> following by an <span class="inlinecode"><span class="id" type="tactic">inversion</span></span>.  We'd
+    like to automate this process.
+
+<div class="paragraph"> </div>
+
+    (In fact, Coq has a built-in tactic <span class="inlinecode"><span class="id" type="tactic">congruence</span></span> that will do the
+    job in this case.  But we'll ignore the existence of this tactic
+    for now, in order to demonstrate how to build forward search
+    tactics by hand.)
+
+<div class="paragraph"> </div>
+
+    As a first step, we can abstract out the piece of script in
+    question by writing a little function in Ltac. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">rwinv</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span> := <span class="id" type="tactic">rewrite</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="keyword">in</span> <span class="id" type="var">H<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">H<sub>2</sub></span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic''</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_IfFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>5</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileFalse&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;E_WhileTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rwinv</span> <span class="id" type="var">H</span> <span class="id" type="var">H<sub>4</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+That was a bit better, but we really want Coq to discover the
+    relevant hypotheses for us.  We can do this by using the <span class="inlinecode"><span class="id" type="keyword">match</span></span>
+    <span class="inlinecode"><span class="id" type="var">goal</span></span> facility of Ltac. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">find_rwinv</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>1</sub></span>: ?<span class="id" type="var">E</span> = <span class="id" type="var">true</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>2</sub></span>: ?<span class="id" type="var">E</span> = <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&#x22A2; <span class="id" type="var">_</span> ⇒ <span class="id" type="var">rwinv</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+This <span class="inlinecode"><span class="id" type="keyword">match</span></span> <span class="inlinecode"><span class="id" type="var">goal</span></span> looks for two distinct hypotheses that
+    have the form of equalities, with the same arbitrary expression
+    <span class="inlinecode"><span class="id" type="var">E</span></span> on the left and with conflicting boolean values on the right.
+    If such hypotheses are found, it binds <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">H<sub>2</sub></span></span> to their
+    names and applies the <span class="inlinecode"><span class="id" type="var">rwinv</span></span> tactic to <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">H<sub>2</sub></span></span>.
+
+<div class="paragraph"> </div>
+
+    Adding this tactic to the ones that we invoke in each case of the
+    induction handles all of the contradictory cases. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic'''</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">st'</span> = <span class="id" type="var">st'0</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">EQ<sub>1</sub></span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">subst</span> <span class="id" type="var">st'0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Let's see about the remaining cases. Each of them involves
+    applying a conditional hypothesis to extract an equality.
+    Currently we have phrased these as assertions, so that we have to
+    predict what the resulting equality will be (although we can then
+    use <span class="inlinecode"><span class="id" type="tactic">auto</span></span> to prove it).  An alternative is to pick the relevant
+    hypotheses to use and then <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> with them, as follows: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic''''</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_Seq&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> (<span class="id" type="var">IHE1_1</span> <span class="id" type="var">st'0</span> <span class="id" type="var">H<sub>1</sub></span>) <span class="id" type="keyword">in</span> *. <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_WhileTrue&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> (<span class="id" type="var">IHE1_1</span> <span class="id" type="var">st'0</span> <span class="id" type="var">H<sub>3</sub></span>) <span class="id" type="keyword">in</span> *. <span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Now we can automate the task of finding the relevant hypotheses to
+    rewrite with. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">find_eqn</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>1</sub></span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">x</span>, ?<span class="id" type="var">P</span> <span class="id" type="var">x</span> → ?<span class="id" type="var">L</span> = ?<span class="id" type="var">R</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">H<sub>2</sub></span>: ?<span class="id" type="var">P</span> ?<span class="id" type="var">X</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&#x22A2; <span class="id" type="var">_</span> ⇒ <span class="id" type="tactic">rewrite</span> (<span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">X</span> <span class="id" type="var">H<sub>2</sub></span>) <span class="id" type="keyword">in</span> *<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+The pattern <span class="inlinecode"><span style='font-size:120%;'>&forall;</span></span> <span class="inlinecode"><span class="id" type="var">x</span>,</span> <span class="inlinecode">?<span class="id" type="var">P</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode">→</span> <span class="inlinecode">?<span class="id" type="var">L</span></span> <span class="inlinecode">=</span> <span class="inlinecode">?<span class="id" type="var">R</span></span> matches any hypothesis of
+    the form "for all <span class="inlinecode"><span class="id" type="var">x</span></span>, <i>some property of <span class="inlinecode"><span class="id" type="var">x</span></span></i> implies <i>some
+    equality</i>."  The property of <span class="inlinecode"><span class="id" type="var">x</span></span> is bound to the pattern variable
+    <span class="inlinecode"><span class="id" type="var">P</span></span>, and the left- and right-hand sides of the equality are bound
+    to <span class="inlinecode"><span class="id" type="var">L</span></span> and <span class="inlinecode"><span class="id" type="var">R</span></span>.  The name of this hypothesis is bound to <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span>.
+    Then the pattern <span class="inlinecode">?<span class="id" type="var">P</span></span> <span class="inlinecode">?<span class="id" type="var">X</span></span> matches any hypothesis that provides
+    evidence that <span class="inlinecode"><span class="id" type="var">P</span></span> holds for some concrete <span class="inlinecode"><span class="id" type="var">X</span></span>.  If both patterns
+    succeed, we apply the <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> tactic (instantiating the
+    quantified <span class="inlinecode"><span class="id" type="var">x</span></span> with <span class="inlinecode"><span class="id" type="var">X</span></span> and providing <span class="inlinecode"><span class="id" type="var">H<sub>2</sub></span></span> as the required
+    evidence for <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span>) in all hypotheses and the goal.
+
+<div class="paragraph"> </div>
+
+    One problem remains: in general, there may be several pairs of
+    hypotheses that have the right general form, and it seems tricky
+    to pick out the ones we actually need.  A key trick is to realize
+    that we can <i>try them all</i>!  Here's how this works:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> each execution of <span class="inlinecode"><span class="id" type="keyword">match</span></span> <span class="inlinecode"><span class="id" type="var">goal</span></span> will keep trying to find a valid
+      pair of hypotheses until the tactic on the RHS of the match
+      succeeds; if there are no such pairs, it fails;
+
+</li>
+<li> <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> will fail given a trivial equation of the form <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">X</span></span>;
+
+</li>
+<li> we can wrap the whole thing in a <span class="inlinecode"><span class="id" type="tactic">repeat</span></span>, which will keep doing
+      useful rewrites until only trivial ones are left. 
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic'''''</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="var">find_eqn</span>; <span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The big payoff in this approach is that our proof script should be
+    more robust in the face of modest changes to our language.  To
+    test this, let's try adding a <span class="inlinecode"><span class="id" type="var">REPEAT</span></span> command to the language. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Module</span> <span class="id" type="var">Repeat</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">com</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">CSkip</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">CAsgn</span> (<span class="id" type="var">x</span> : <span class="id" type="var">string</span>) (<span class="id" type="var">a</span> : <span class="id" type="var">aexp</span>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">CSeq</span> (<span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span> : <span class="id" type="var">com</span>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">CIf</span> (<span class="id" type="var">b</span> : <span class="id" type="var">bexp</span>) (<span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span> : <span class="id" type="var">com</span>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">CWhile</span> (<span class="id" type="var">b</span> : <span class="id" type="var">bexp</span>) (<span class="id" type="var">c</span> : <span class="id" type="var">com</span>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">CRepeat</span> (<span class="id" type="var">c</span> : <span class="id" type="var">com</span>) (<span class="id" type="var">b</span> : <span class="id" type="var">bexp</span>).<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" type="var">REPEAT</span></span> behaves like <span class="inlinecode"><span class="id" type="var">WHILE</span></span>, except that the loop guard is
+    checked <i>after</i> each execution of the body, with the loop
+    repeating as long as the guard stays <i>false</i>.  Because of this,
+    the body will always execute at least once. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Notation</span> "'SKIP'" :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">CSkip</span>.<br/>
+<span class="id" type="keyword">Notation</span> "c<sub>1</sub> ; c<sub>2</sub>" :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">CSeq</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/>
+<span class="id" type="keyword">Notation</span> "X '<span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span>' a" :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">CAsgn</span> <span class="id" type="var">X</span> <span class="id" type="var">a</span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 60).<br/>
+<span class="id" type="keyword">Notation</span> "'WHILE' b 'DO' c 'END'" :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">CWhile</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/>
+<span class="id" type="keyword">Notation</span> "'TEST' e<sub>1</sub> 'THEN' e<sub>2</sub> 'ELSE' e<sub>3</sub> 'FI'" :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">CIf</span> <span class="id" type="var">e<sub>1</sub></span> <span class="id" type="var">e<sub>2</sub></span> <span class="id" type="var">e<sub>3</sub></span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/>
+<span class="id" type="keyword">Notation</span> "'REPEAT' e<sub>1</sub> 'UNTIL' b<sub>2</sub> 'END'" :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">CRepeat</span> <span class="id" type="var">e<sub>1</sub></span> <span class="id" type="var">b<sub>2</sub></span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 80, <span class="id" type="var">right</span> <span class="id" type="var">associativity</span>).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">ceval</span> : <span class="id" type="var">state</span> → <span class="id" type="var">com</span> → <span class="id" type="var">state</span> → <span class="id" type="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_Skip</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">st</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">SKIP</span> <span class="id" type="var">st</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_Ass</span>  : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> <span class="id" type="var">n</span> <span class="id" type="var">X</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">aeval</span> <span class="id" type="var">st</span> <span class="id" type="var">a<sub>1</sub></span> = <span class="id" type="var">n</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">X</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> <span class="id" type="var">a<sub>1</sub></span>) (<span class="id" type="var">t_update</span> <span class="id" type="var">st</span> <span class="id" type="var">X</span> <span class="id" type="var">n</span>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_Seq</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span> <span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">st''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">st'</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st'</span> <span class="id" type="var">c<sub>2</sub></span> <span class="id" type="var">st''</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">c<sub>1</sub></span> ; <span class="id" type="var">c<sub>2</sub></span>) <span class="id" type="var">st''</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_IfTrue</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">beval</span> <span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> = <span class="id" type="var">true</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">st'</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">TEST</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">THEN</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">ELSE</span> <span class="id" type="var">c<sub>2</sub></span> <span class="id" type="var">FI</span>) <span class="id" type="var">st'</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_IfFalse</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">c<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">beval</span> <span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> = <span class="id" type="var">false</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>2</sub></span> <span class="id" type="var">st'</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">TEST</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">THEN</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">ELSE</span> <span class="id" type="var">c<sub>2</sub></span> <span class="id" type="var">FI</span>) <span class="id" type="var">st'</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_WhileFalse</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">beval</span> <span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> = <span class="id" type="var">false</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">WHILE</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">DO</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">END</span>) <span class="id" type="var">st</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_WhileTrue</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">st''</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">beval</span> <span class="id" type="var">st</span> <span class="id" type="var">b<sub>1</sub></span> = <span class="id" type="var">true</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">st'</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st'</span> (<span class="id" type="var">WHILE</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">DO</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">END</span>) <span class="id" type="var">st''</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">WHILE</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">DO</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">END</span>) <span class="id" type="var">st''</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_RepeatEnd</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">st'</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">beval</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> = <span class="id" type="var">true</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">CRepeat</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">b<sub>1</sub></span>) <span class="id" type="var">st'</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">E_RepeatLoop</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">st</span> <span class="id" type="var">st'</span> <span class="id" type="var">st''</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">c<sub>1</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">st'</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">beval</span> <span class="id" type="var">st'</span> <span class="id" type="var">b<sub>1</sub></span> = <span class="id" type="var">false</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st'</span> (<span class="id" type="var">CRepeat</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">b<sub>1</sub></span>) <span class="id" type="var">st''</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> (<span class="id" type="var">CRepeat</span> <span class="id" type="var">c<sub>1</sub></span> <span class="id" type="var">b<sub>1</sub></span>) <span class="id" type="var">st''</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Notation</span> "st '=[' c ']⇒' st'" := (<span class="id" type="var">ceval</span> <span class="id" type="var">st</span> <span class="id" type="var">c</span> <span class="id" type="var">st'</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40).<br/>
+</div>
+
+<div class="doc">
+Our first attempt at the determinacy proof does not quite succeed:
+    the <span class="inlinecode"><span class="id" type="var">E_RepeatEnd</span></span> and <span class="inlinecode"><span class="id" type="var">E_RepeatLoop</span></span> cases are not handled by our
+    previous automation. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">repeat</span> <span class="id" type="var">find_eqn</span>; <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_RepeatEnd&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;false&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">find_rwinv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;oops:&nbsp;why&nbsp;didn't&nbsp;<span class="inlinecode"><span class="id" type="var">find_rwinv</span></span>&nbsp;solve&nbsp;this&nbsp;for&nbsp;us&nbsp;already?<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;answer:&nbsp;we&nbsp;did&nbsp;things&nbsp;in&nbsp;the&nbsp;wrong&nbsp;order.&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;E_RepeatLoop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;b&nbsp;evaluates&nbsp;to&nbsp;true&nbsp;(contradiction)&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">find_rwinv</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Fortunately, to fix this, we just have to swap the invocations of
+    <span class="inlinecode"><span class="id" type="var">find_eqn</span></span> and <span class="inlinecode"><span class="id" type="var">find_rwinv</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">ceval_deterministic'</span>: <span style='font-size:120%;'>&forall;</span><span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>1</sub></span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span> =[ <span class="id" type="var">c</span> ]⇒ <span class="id" type="var">st<sub>2</sub></span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st<sub>1</sub></span> = <span class="id" type="var">st<sub>2</sub></span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">c</span> <span class="id" type="var">st</span> <span class="id" type="var">st<sub>1</sub></span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>1</sub></span> <span class="id" type="var">E<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">st<sub>2</sub></span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">E<sub>1</sub></span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st<sub>2</sub></span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="var">inv</span> <span class="id" type="var">E<sub>2</sub></span>; <span class="id" type="tactic">repeat</span> <span class="id" type="var">find_eqn</span>; <span class="id" type="tactic">try</span> <span class="id" type="var">find_rwinv</span>; <span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">End</span> <span class="id" type="var">Repeat</span>.<br/>
+</div>
+
+<div class="doc">
+These examples just give a flavor of what "hyper-automation"
+    can achieve in Coq.  The details of <span class="inlinecode"><span class="id" type="keyword">match</span></span> <span class="inlinecode"><span class="id" type="var">goal</span></span> are a bit
+    tricky (and debugging scripts using it is, frankly, not very
+    pleasant).  But it is well worth adding at least simple uses to
+    your proofs, both to avoid tedium and to "future proof" them. 
+<div class="paragraph"> </div>
+
+<a name="lab397"></a><h2 class="section">The <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> variants</h2>
+
+<div class="paragraph"> </div>
+
+ To close the chapter, we'll introduce one more convenient feature
+    of Coq: its ability to delay instantiation of quantifiers.  To
+    motivate this feature, recall this example from the <a href="Imp.html"><span class="inlineref">Imp</span></a>
+    chapter: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">ceval_example1</span>:<br/>
+&nbsp;&nbsp;<span class="id" type="var">empty_st</span> =[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> 2;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">TEST</span> <span class="id" type="var">X</span> ≤ 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">THEN</span> <span class="id" type="var">Y</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> 3<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ELSE</span> <span class="id" type="var">Z</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> 4<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">FI</span><br/>
+&nbsp;&nbsp;]⇒ (<span class="id" type="var">Z</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 4 ; <span class="id" type="var">X</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 2).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;supply&nbsp;the&nbsp;intermediate&nbsp;state&nbsp;<span class="inlinecode"><span class="id" type="var">st'</span></span>...&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">E_Seq</span> <span class="id" type="keyword">with</span> (<span class="id" type="var">X</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 2).<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <span class="id" type="var">E_Ass</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <span class="id" type="var">E_IfFalse</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">E_Ass</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+In the first step of the proof, we had to explicitly provide a
+    longish expression to help Coq instantiate a "hidden" argument to
+    the <span class="inlinecode"><span class="id" type="var">E_Seq</span></span> constructor.  This was needed because the definition
+    of <span class="inlinecode"><span class="id" type="var">E_Seq</span></span>...
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">E_Seq</span>&nbsp;:&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">c<sub>1</sub></span>&nbsp;<span class="id" type="var">c<sub>2</sub></span>&nbsp;<span class="id" type="var">st</span>&nbsp;<span class="id" type="var">st'</span>&nbsp;<span class="id" type="var">st''</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span>&nbsp;&nbsp;=[&nbsp;<span class="id" type="var">c<sub>1</sub></span>&nbsp;]⇒&nbsp;<span class="id" type="var">st'</span>&nbsp;&nbsp;→<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st'</span>&nbsp;=[&nbsp;<span class="id" type="var">c<sub>2</sub></span>&nbsp;]⇒&nbsp;<span class="id" type="var">st''</span>&nbsp;→<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">st</span>&nbsp;&nbsp;=[&nbsp;<span class="id" type="var">c<sub>1</sub></span>&nbsp;;;&nbsp;<span class="id" type="var">c<sub>2</sub></span>&nbsp;]⇒&nbsp;<span class="id" type="var">st''</span>
+<div class="paragraph"> </div>
+
+</div>
+   is quantified over a variable, <span class="inlinecode"><span class="id" type="var">st'</span></span>, that does not appear in its
+   conclusion, so unifying its conclusion with the goal state doesn't
+   help Coq find a suitable value for this variable.  If we leave
+   out the <span class="inlinecode"><span class="id" type="keyword">with</span></span>, this step fails ("Error: Unable to find an
+   instance for the variable <span class="inlinecode"><span class="id" type="var">st'</span></span>").
+
+<div class="paragraph"> </div>
+
+   What's silly about this error is that the appropriate value for <span class="inlinecode"><span class="id" type="var">st'</span></span>
+   will actually become obvious in the very next step, where we apply
+   <span class="inlinecode"><span class="id" type="var">E_Ass</span></span>.  If Coq could just wait until we get to this step, there
+   would be no need to give the value explicitly.  This is exactly what
+   the <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> tactic gives us: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">ceval'_example1</span>:<br/>
+&nbsp;&nbsp;<span class="id" type="var">empty_st</span> =[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> 2;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">TEST</span> <span class="id" type="var">X</span> ≤ 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">THEN</span> <span class="id" type="var">Y</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> 3<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ELSE</span> <span class="id" type="var">Z</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> 4<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">FI</span><br/>
+&nbsp;&nbsp;]⇒ (<span class="id" type="var">Z</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 4 ; <span class="id" type="var">X</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 2).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <span class="id" type="var">E_Seq</span>. <span class="comment">(*&nbsp;1&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <span class="id" type="var">E_Ass</span>. <span class="comment">(*&nbsp;2&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="comment">(*&nbsp;3&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;4&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">E_IfFalse</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">E_Ass</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> tactic behaves just like <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> except
+    that, after it finishes unifying the goal state with the
+    conclusion of <span class="inlinecode"><span class="id" type="var">H</span></span>, it does not bother to check whether all the
+    variables that were introduced in the process have been given
+    concrete values during unification.
+
+<div class="paragraph"> </div>
+
+    If you step through the proof above, you'll see that the goal
+    state at position <span class="inlinecode">1</span> mentions the <i>existential variable</i> <span class="inlinecode">?<span class="id" type="var">st'</span></span>
+    in both of the generated subgoals.  The next step (which gets us
+    to position <span class="inlinecode">2</span>) replaces <span class="inlinecode">?<span class="id" type="var">st'</span></span> with a concrete value.  This new
+    value contains a new existential variable <span class="inlinecode">?<span class="id" type="var">n</span></span>, which is
+    instantiated in its turn by the following <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> step,
+    position <span class="inlinecode">3</span>.  When we start working on the second
+    subgoal (position <span class="inlinecode">4</span>), we observe that the occurrence of <span class="inlinecode">?<span class="id" type="var">st'</span></span>
+    in this subgoal has been replaced by the value that it was given
+    during the first subgoal. 
+<div class="paragraph"> </div>
+
+ Several of the tactics that we've seen so far, including <span class="inlinecode"><span style='font-size:120%;'>&exist;</span></span>,
+    <span class="inlinecode"><span class="id" type="var">constructor</span></span>, and <span class="inlinecode"><span class="id" type="tactic">auto</span></span>, have similar variants.  For example,
+    here's a proof using <span class="inlinecode"><span class="id" type="tactic">eauto</span></span>: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <span class="id" type="var">ceval</span>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Transparent</span> <span class="id" type="var">state</span>.<br/>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Transparent</span> <span class="id" type="var">total_map</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">st<sub>12</sub></span> := (<span class="id" type="var">Y</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 2 ; <span class="id" type="var">X</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 1).<br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">st<sub>21</sub></span> := (<span class="id" type="var">Y</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 1 ; <span class="id" type="var">X</span> !<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> 2).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">eauto_example</span> : <span style='font-size:120%;'>&exist;</span><span class="id" type="var">s'</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">st<sub>21</sub></span> =[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">TEST</span> <span class="id" type="var">X</span> ≤ <span class="id" type="var">Y</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">THEN</span> <span class="id" type="var">Z</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> <span class="id" type="var">Y</span> - <span class="id" type="var">X</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ELSE</span> <span class="id" type="var">Y</span> <span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>:</span>:</span>=</span> <span class="id" type="var">X</span> + <span class="id" type="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">FI</span><br/>
+&nbsp;&nbsp;]⇒ <span class="id" type="var">s'</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">eauto</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> tactic works just like <span class="inlinecode"><span class="id" type="tactic">auto</span></span>, except that it uses
+    <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> instead of <span class="inlinecode"><span class="id" type="tactic">apply</span></span>.
+
+<div class="paragraph"> </div>
+
+    Pro tip: One might think that, since <span class="inlinecode"><span class="id" type="tactic">eapply</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> are more
+    powerful than <span class="inlinecode"><span class="id" type="tactic">apply</span></span> and <span class="inlinecode"><span class="id" type="tactic">auto</span></span>, it would be a good idea to use
+    them all the time.  Unfortunately, they are also significantly
+    slower &mdash; especially <span class="inlinecode"><span class="id" type="tactic">eauto</span></span>.  Coq experts tend to use <span class="inlinecode"><span class="id" type="tactic">apply</span></span> and
+    <span class="inlinecode"><span class="id" type="tactic">auto</span></span> most of the time, only switching to the <span class="inlinecode"><span class="id" type="var">e</span></span> variants when
+    the ordinary variants don't do the job. 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;Wed&nbsp;Jan&nbsp;9&nbsp;12:02:47&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+</div>
+</div>
+
+
+
+</div>
+
+</body>
+</html>

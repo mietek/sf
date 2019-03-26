@@ -1,0 +1,1906 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<title>Basics: Functional Programming in Coq</title>
+</head>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
+<img src='common/media/image/sf_logo_sm.png'></a>
+</br><a href='index.html'>  <span class='booktitleinheader'>Volume 1: Logical Foundations</span><br></br>
+<ul id='menu'>
+   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
+   <a href='coqindex.html'><li class='section_name'>Index</li></a>
+   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+</ul>
+</a></div>
+
+<div id="main">
+
+<h1 class="libtitle">Basics<span class="subtitle">Functional Programming in Coq</span></h1>
+
+
+
+<div class="doc">
+<a name="lab18"></a><h1 class="section">Introduction</h1>
+
+<div class="paragraph"> </div>
+
+ The functional programming style is founded on simple, everyday
+    mathematical intuition: If a procedure or method has no side
+    effects, then (ignoring efficiency) all we need to understand
+    about it is how it maps inputs to outputs &mdash; that is, we can think
+    of it as just a concrete method for computing a mathematical
+    function.  This is one sense of the word "functional" in
+    "functional programming."  The direct connection between programs
+    and simple mathematical objects supports both formal correctness
+    proofs and sound informal reasoning about program behavior.
+
+<div class="paragraph"> </div>
+
+    The other sense in which functional programming is "functional" is
+    that it emphasizes the use of functions (or methods) as
+    <i>first-class</i> values &mdash; i.e., values that can be passed as
+    arguments to other functions, returned as results, included in
+    data structures, etc.  The recognition that functions can be
+    treated as data gives rise to a host of useful and powerful
+    programming idioms.
+
+<div class="paragraph"> </div>
+
+    Other common features of functional languages include <i>algebraic
+    data types</i> and <i>pattern matching</i>, which make it easy to
+    construct and manipulate rich data structures, and sophisticated
+    <i>polymorphic type systems</i> supporting abstraction and code reuse.
+    Coq offers all of these features.
+
+<div class="paragraph"> </div>
+
+    The first half of this chapter introduces the most essential
+    elements of Coq's functional programming language, called
+    <i>Gallina</i>.  The second half introduces some basic <i>tactics</i> that
+    can be used to prove properties of Coq programs. 
+</div>
+
+<div class="doc">
+<a name="lab19"></a><h1 class="section">Data and Functions</h1>
+
+</div>
+<div class="code code-space">
+</div>
+
+<div class="doc">
+<a name="lab20"></a><h2 class="section">Enumerated Types</h2>
+
+<div class="paragraph"> </div>
+
+ One notable aspect of Coq is that its set of built-in
+    features is <i>extremely</i> small.  For example, instead of providing
+    the usual palette of atomic data types (booleans, integers,
+    strings, etc.), Coq offers a powerful mechanism for defining new
+    data types from scratch, with all these familiar types as
+    instances.
+
+<div class="paragraph"> </div>
+
+    Naturally, the Coq distribution comes preloaded with an extensive
+    standard library providing definitions of booleans, numbers, and
+    many common data structures like lists and hash tables.  But there
+    is nothing magic or primitive about these library definitions.  To
+    illustrate this, we will explicitly recapitulate all the
+    definitions we need in this course, rather than just getting them
+    implicitly from the library. 
+</div>
+
+<div class="doc">
+<a name="lab21"></a><h2 class="section">Days of the Week</h2>
+
+<div class="paragraph"> </div>
+
+ To see how this definition mechanism works, let's start with
+    a very simple example.  The following declaration tells Coq that
+    we are defining a new set of data values &mdash; a <i>type</i>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">day</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">monday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">tuesday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">wednesday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">thursday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">friday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">saturday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">sunday</span>.<br/>
+</div>
+
+<div class="doc">
+The type is called <span class="inlinecode"><span class="id" type="var">day</span></span>, and its members are <span class="inlinecode"><span class="id" type="var">monday</span></span>,
+    <span class="inlinecode"><span class="id" type="var">tuesday</span></span>, etc. 
+
+<div class="paragraph"> </div>
+
+    Having defined <span class="inlinecode"><span class="id" type="var">day</span></span>, we can write functions that operate on
+    days. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">next_weekday</span> (<span class="id" type="var">d</span>:<span class="id" type="var">day</span>) : <span class="id" type="var">day</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">d</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">monday</span>    ⇒ <span class="id" type="var">tuesday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">tuesday</span>   ⇒ <span class="id" type="var">wednesday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">wednesday</span> ⇒ <span class="id" type="var">thursday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">thursday</span>  ⇒ <span class="id" type="var">friday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">friday</span>    ⇒ <span class="id" type="var">monday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">saturday</span>  ⇒ <span class="id" type="var">monday</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">sunday</span>    ⇒ <span class="id" type="var">monday</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+One thing to note is that the argument and return types of
+    this function are explicitly declared.  Like most functional
+    programming languages, Coq can often figure out these types for
+    itself when they are not given explicitly &mdash; i.e., it can do <i>type
+    inference</i> &mdash; but we'll generally include them to make reading
+    easier. 
+<div class="paragraph"> </div>
+
+ Having defined a function, we should check that it works on
+    some examples.  There are actually three different ways to do this
+    in Coq.  First, we can use the command <span class="inlinecode"><span class="id" type="var">Compute</span></span> to evaluate a
+    compound expression involving <span class="inlinecode"><span class="id" type="var">next_weekday</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Compute</span> (<span class="id" type="var">next_weekday</span> <span class="id" type="var">friday</span>).<br/>
+<span class="comment">(*&nbsp;==&gt;&nbsp;monday&nbsp;:&nbsp;day&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" type="var">Compute</span> (<span class="id" type="var">next_weekday</span> (<span class="id" type="var">next_weekday</span> <span class="id" type="var">saturday</span>)).<br/>
+<span class="comment">(*&nbsp;==&gt;&nbsp;tuesday&nbsp;:&nbsp;day&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+(We show Coq's responses in comments, but, if you have a
+    computer handy, this would be an excellent moment to fire up the
+    Coq interpreter under your favorite IDE &mdash; either CoqIde or Proof
+    General &mdash; and try this for yourself.  Load this file, <span class="inlinecode"><span class="id" type="var">Basics.v</span></span>,
+    from the book's Coq sources, find the above example, submit it to
+    Coq, and observe the result.) 
+<div class="paragraph"> </div>
+
+ Second, we can record what we <i>expect</i> the result to be in the
+    form of a Coq example: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_next_weekday</span>:<br/>
+&nbsp;&nbsp;(<span class="id" type="var">next_weekday</span> (<span class="id" type="var">next_weekday</span> <span class="id" type="var">saturday</span>)) = <span class="id" type="var">tuesday</span>.<br/>
+</div>
+
+<div class="doc">
+This declaration does two things: it makes an
+    assertion (that the second weekday after <span class="inlinecode"><span class="id" type="var">saturday</span></span> is <span class="inlinecode"><span class="id" type="var">tuesday</span></span>),
+    and it gives the assertion a name that can be used to refer to it
+    later.  Having made the assertion, we can also ask Coq to verify
+    it, like this: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The details are not important for now (we'll come back to
+    them in a bit), but essentially this can be read as "The assertion
+    we've just made can be proved by observing that both sides of the
+    equality evaluate to the same thing, after some simplification."
+
+<div class="paragraph"> </div>
+
+    Third, we can ask Coq to <i>extract</i>, from our <span class="inlinecode"><span class="id" type="keyword">Definition</span></span>, a
+    program in some other, more conventional, programming
+    language (OCaml, Scheme, or Haskell) with a high-performance
+    compiler.  This facility is very interesting, since it gives us a
+    way to go from proved-correct algorithms written in Gallina to
+    efficient machine code.  (Of course, we are trusting the
+    correctness of the OCaml/Haskell/Scheme compiler, and of Coq's
+    extraction facility itself, but this is still a big step forward
+    from the way most software is developed today.) Indeed, this is
+    one of the main uses for which Coq was developed.  We'll come back
+    to this topic in later chapters. 
+</div>
+
+<div class="doc">
+<a name="lab22"></a><h2 class="section">Homework Submission Guidelines</h2>
+
+<div class="paragraph"> </div>
+
+ If you are using <i>Software Foundations</i> in a course, your
+    instructor may use automatic scripts to help grade your homework
+    assignments.  In order for these scripts to work correctly (so
+    that you get full credit for your work!), please be careful to
+    follow these rules:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> The grading scripts work by extracting marked regions of the
+        <span class="inlinecode">.<span class="id" type="var">v</span></span> files that you submit.  It is therefore important that
+        you do not alter the "markup" that delimits exercises: the
+        Exercise header, the name of the exercise, the "empty square
+        bracket" marker at the end, etc.  Please leave this markup
+        exactly as you find it.
+
+</li>
+<li> Do not delete exercises.  If you skip an exercise (e.g.,
+        because it is marked Optional, or because you can't solve it),
+        it is OK to leave a partial proof in your <span class="inlinecode">.<span class="id" type="var">v</span></span> file, but in
+        this case please make sure it ends with <span class="inlinecode"><span class="id" type="var">Admitted</span></span> (not, for
+        example <span class="inlinecode"><span class="id" type="keyword">Abort</span></span>).
+
+</li>
+<li> It is fine to use additional definitions (of helper functions,
+        useful lemmas, etc.) in your solutions.  You can put these
+        between the exercise header and the theorem you are asked to
+        prove.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    You will also notice that each chapter (like <span class="inlinecode"><span class="id" type="var">Basics.v</span></span>) is
+    accompanied by a <i>test script</i> (<span class="inlinecode"><span class="id" type="var">BasicsTest.v</span></span>) that automatically
+    calculates points for the finished homework problems in the
+    chapter.  These scripts are mostly for the auto-grading
+    infrastructure that your instructor may use to help process
+    assignments, but you may also like to use them to double-check
+    that your file is well formatted before handing it in.  In a
+    terminal window either type <span class="inlinecode"><span class="id" type="var">make</span></span> <span class="inlinecode"><span class="id" type="var">BasicsTest.vo</span></span> or do the
+    following:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">coqc</span>&nbsp;-<span class="id" type="var">Q</span>&nbsp;. <span class="id" type="var">LF</span>&nbsp;<span class="id" type="var">Basics.v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">coqc</span>&nbsp;-<span class="id" type="var">Q</span>&nbsp;. <span class="id" type="var">LF</span>&nbsp;<span class="id" type="var">BasicsTest.v</span>
+<div class="paragraph"> </div>
+
+</div>
+    There is no need to hand in <span class="inlinecode"><span class="id" type="var">BasicsTest.v</span></span> itself (or <span class="inlinecode"><span class="id" type="var">Preface.v</span></span>).
+
+<div class="paragraph"> </div>
+
+    <i>If your class is using the Canvas system to hand in assignments</i>:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> If you submit multiple versions of the assignment, you may
+        notice that they are given different names.  This is fine: The
+        most recent submission is the one that will be graded.
+
+</li>
+<li> To hand in multiple files at the same time (if more than one
+        chapter is assigned in the same week), you need to make a
+        single submission with all the files at once using the button
+        "Add another file" just above the comment box. 
+</li>
+</ul>
+
+</div>
+
+<div class="doc">
+<a name="lab23"></a><h2 class="section">Booleans</h2>
+
+<div class="paragraph"> </div>
+
+ In a similar way, we can define the standard type <span class="inlinecode"><span class="id" type="var">bool</span></span> of
+    booleans, with members <span class="inlinecode"><span class="id" type="var">true</span></span> and <span class="inlinecode"><span class="id" type="var">false</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">bool</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">false</span>.<br/>
+</div>
+
+<div class="doc">
+Although we are rolling our own booleans here for the sake
+    of building up everything from scratch, Coq does, of course,
+    provide a default implementation of the booleans, together with a
+    multitude of useful functions and lemmas.  (Take a look at
+    <span class="inlinecode"><span class="id" type="var">Coq.Init.Datatypes</span></span> in the Coq library documentation if you're
+    interested.)  Whenever possible, we'll name our own definitions
+    and theorems so that they exactly coincide with the ones in the
+    standard library.
+
+<div class="paragraph"> </div>
+
+    Functions over booleans can be defined in the same way as
+    above: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">negb</span> (<span class="id" type="var">b</span>:<span class="id" type="var">bool</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">b</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">true</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">false</span> ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">andb</span> (<span class="id" type="var">b<sub>1</sub></span>:<span class="id" type="var">bool</span>) (<span class="id" type="var">b<sub>2</sub></span>:<span class="id" type="var">bool</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">true</span> ⇒ <span class="id" type="var">b<sub>2</sub></span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">false</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">orb</span> (<span class="id" type="var">b<sub>1</sub></span>:<span class="id" type="var">bool</span>) (<span class="id" type="var">b<sub>2</sub></span>:<span class="id" type="var">bool</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">true</span> ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">false</span> ⇒ <span class="id" type="var">b<sub>2</sub></span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+The last two of these illustrate Coq's syntax for
+    multi-argument function definitions.  The corresponding
+    multi-argument application syntax is illustrated by the following
+    "unit tests," which constitute a complete specification &mdash; a truth
+    table &mdash; for the <span class="inlinecode"><span class="id" type="var">orb</span></span> function: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_orb1</span>:  (<span class="id" type="var">orb</span> <span class="id" type="var">true</span>  <span class="id" type="var">false</span>) = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_orb2</span>:  (<span class="id" type="var">orb</span> <span class="id" type="var">false</span> <span class="id" type="var">false</span>) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_orb3</span>:  (<span class="id" type="var">orb</span> <span class="id" type="var">false</span> <span class="id" type="var">true</span>)  = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_orb4</span>:  (<span class="id" type="var">orb</span> <span class="id" type="var">true</span>  <span class="id" type="var">true</span>)  = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+We can also introduce some familiar syntax for the boolean
+    operations we have just defined. The <span class="inlinecode"><span class="id" type="keyword">Notation</span></span> command defines a new
+    symbolic notation for an existing definition. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Notation</span> "x &amp;&amp; y" := (<span class="id" type="var">andb</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>).<br/>
+<span class="id" type="keyword">Notation</span> "x || y" := (<span class="id" type="var">orb</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_orb5</span>:  <span class="id" type="var">false</span> || <span class="id" type="var">false</span> || <span class="id" type="var">true</span> = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<i>A note on notation</i>: In <span class="inlinecode">.<span class="id" type="var">v</span></span> files, we use square brackets
+    to delimit fragments of Coq code within comments; this convention,
+    also used by the <span class="inlinecode"><span class="id" type="var">coqdoc</span></span> documentation tool, keeps them visually
+    separate from the surrounding text.  In the HTML version of the
+    files, these pieces of text appear in a <span class="inlinecode"><span class="id" type="var">different</span></span> <span class="inlinecode"><span class="id" type="var">font</span></span>.
+
+<div class="paragraph"> </div>
+
+    The command <span class="inlinecode"><span class="id" type="var">Admitted</span></span> can be used as a placeholder for an
+    incomplete proof.  We'll use it in exercises, to indicate the
+    parts that we're leaving for you &mdash; i.e., your job is to replace
+    <span class="inlinecode"><span class="id" type="var">Admitted</span></span>s with real proofs. 
+<div class="paragraph"> </div>
+
+<a name="lab24"></a><h4 class="section">Exercise: 1 star, standard (nandb)</h4>
+ Remove "<span class="inlinecode"><span class="id" type="var">Admitted</span>.</span>" and complete the definition of the following
+    function; then make sure that the <span class="inlinecode"><span class="id" type="keyword">Example</span></span> assertions below can
+    each be verified by Coq.  (I.e., fill in each proof, following the
+    model of the <span class="inlinecode"><span class="id" type="var">orb</span></span> tests above.) The function should return <span class="inlinecode"><span class="id" type="var">true</span></span>
+    if either or both of its inputs are <span class="inlinecode"><span class="id" type="var">false</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">nandb</span> (<span class="id" type="var">b<sub>1</sub></span>:<span class="id" type="var">bool</span>) (<span class="id" type="var">b<sub>2</sub></span>:<span class="id" type="var">bool</span>) : <span class="id" type="var">bool</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_nandb1</span>:               (<span class="id" type="var">nandb</span> <span class="id" type="var">true</span> <span class="id" type="var">false</span>) = <span class="id" type="var">true</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_nandb2</span>:               (<span class="id" type="var">nandb</span> <span class="id" type="var">false</span> <span class="id" type="var">false</span>) = <span class="id" type="var">true</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_nandb3</span>:               (<span class="id" type="var">nandb</span> <span class="id" type="var">false</span> <span class="id" type="var">true</span>) = <span class="id" type="var">true</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_nandb4</span>:               (<span class="id" type="var">nandb</span> <span class="id" type="var">true</span> <span class="id" type="var">true</span>) = <span class="id" type="var">false</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab25"></a><h4 class="section">Exercise: 1 star, standard (andb3)</h4>
+ Do the same for the <span class="inlinecode"><span class="id" type="var">andb3</span></span> function below. This function should
+    return <span class="inlinecode"><span class="id" type="var">true</span></span> when all of its inputs are <span class="inlinecode"><span class="id" type="var">true</span></span>, and <span class="inlinecode"><span class="id" type="var">false</span></span>
+    otherwise. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">andb3</span> (<span class="id" type="var">b<sub>1</sub></span>:<span class="id" type="var">bool</span>) (<span class="id" type="var">b<sub>2</sub></span>:<span class="id" type="var">bool</span>) (<span class="id" type="var">b<sub>3</sub></span>:<span class="id" type="var">bool</span>) : <span class="id" type="var">bool</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_andb31</span>:                 (<span class="id" type="var">andb3</span> <span class="id" type="var">true</span> <span class="id" type="var">true</span> <span class="id" type="var">true</span>) = <span class="id" type="var">true</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_andb32</span>:                 (<span class="id" type="var">andb3</span> <span class="id" type="var">false</span> <span class="id" type="var">true</span> <span class="id" type="var">true</span>) = <span class="id" type="var">false</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_andb33</span>:                 (<span class="id" type="var">andb3</span> <span class="id" type="var">true</span> <span class="id" type="var">false</span> <span class="id" type="var">true</span>) = <span class="id" type="var">false</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_andb34</span>:                 (<span class="id" type="var">andb3</span> <span class="id" type="var">true</span> <span class="id" type="var">true</span> <span class="id" type="var">false</span>) = <span class="id" type="var">false</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+
+<div class="doc">
+<a name="lab26"></a><h2 class="section">Types</h2>
+
+<div class="paragraph"> </div>
+
+ Every expression in Coq has a type, describing what sort of
+    thing it computes. The <span class="inlinecode"><span class="id" type="keyword">Check</span></span> command asks Coq to print the type
+    of an expression. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Check</span> <span class="id" type="var">true</span>.<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;true&nbsp;:&nbsp;bool&nbsp;*)</span><br/>
+<span class="id" type="keyword">Check</span> (<span class="id" type="var">negb</span> <span class="id" type="var">true</span>).<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;negb&nbsp;true&nbsp;:&nbsp;bool&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Functions like <span class="inlinecode"><span class="id" type="var">negb</span></span> itself are also data values, just like
+    <span class="inlinecode"><span class="id" type="var">true</span></span> and <span class="inlinecode"><span class="id" type="var">false</span></span>.  Their types are called <i>function types</i>, and
+    they are written with arrows. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Check</span> <span class="id" type="var">negb</span>.<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;negb&nbsp;:&nbsp;bool&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;bool&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The type of <span class="inlinecode"><span class="id" type="var">negb</span></span>, written <span class="inlinecode"><span class="id" type="var">bool</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" type="var">bool</span></span> and pronounced
+    "<span class="inlinecode"><span class="id" type="var">bool</span></span> arrow <span class="inlinecode"><span class="id" type="var">bool</span></span>," can be read, "Given an input of type
+    <span class="inlinecode"><span class="id" type="var">bool</span></span>, this function produces an output of type <span class="inlinecode"><span class="id" type="var">bool</span></span>."
+    Similarly, the type of <span class="inlinecode"><span class="id" type="var">andb</span></span>, written <span class="inlinecode"><span class="id" type="var">bool</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" type="var">bool</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" type="var">bool</span></span>, can
+    be read, "Given two inputs, both of type <span class="inlinecode"><span class="id" type="var">bool</span></span>, this function
+    produces an output of type <span class="inlinecode"><span class="id" type="var">bool</span></span>." 
+</div>
+
+<div class="doc">
+<a name="lab27"></a><h2 class="section">New Types from Old</h2>
+
+<div class="paragraph"> </div>
+
+ The types we have defined so far are examples of "enumerated
+    types": their definitions explicitly enumerate a finite set of
+    elements, each of which is just a bare constructor.  Here is a
+    more interesting type definition, where one of the constructors
+    takes an argument: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">rgb</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="tactic">red</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">green</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">blue</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">color</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">black</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">white</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">primary</span> (<span class="id" type="var">p</span> : <span class="id" type="var">rgb</span>).<br/>
+</div>
+
+<div class="doc">
+Let's look at this in a little more detail.
+
+<div class="paragraph"> </div>
+
+    Every inductively defined type (<span class="inlinecode"><span class="id" type="var">day</span></span>, <span class="inlinecode"><span class="id" type="var">bool</span></span>, <span class="inlinecode"><span class="id" type="var">rgb</span></span>, <span class="inlinecode"><span class="id" type="var">color</span></span>,
+    etc.) contains a set of <i>constructor expressions</i> built from
+    <i>constructors</i> like <span class="inlinecode"><span class="id" type="tactic">red</span></span>, <span class="inlinecode"><span class="id" type="var">primary</span></span>, <span class="inlinecode"><span class="id" type="var">true</span></span>, <span class="inlinecode"><span class="id" type="var">false</span></span>, <span class="inlinecode"><span class="id" type="var">monday</span></span>,
+    etc.  The definitions of <span class="inlinecode"><span class="id" type="var">rgb</span></span> and <span class="inlinecode"><span class="id" type="var">color</span></span> say how expressions in the
+    sets <span class="inlinecode"><span class="id" type="var">rgb</span></span> and <span class="inlinecode"><span class="id" type="var">color</span></span> can be built:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="tactic">red</span></span>, <span class="inlinecode"><span class="id" type="var">green</span></span>, and <span class="inlinecode"><span class="id" type="var">blue</span></span> are the constructors of <span class="inlinecode"><span class="id" type="var">rgb</span></span>;
+
+</li>
+<li> <span class="inlinecode"><span class="id" type="var">black</span></span>, <span class="inlinecode"><span class="id" type="var">white</span></span>, and <span class="inlinecode"><span class="id" type="var">primary</span></span> are the constructors of <span class="inlinecode"><span class="id" type="var">color</span></span>;
+
+</li>
+<li> the expression <span class="inlinecode"><span class="id" type="tactic">red</span></span> belongs to the set <span class="inlinecode"><span class="id" type="var">rgb</span></span>, as do the
+      expressions <span class="inlinecode"><span class="id" type="var">green</span></span> and <span class="inlinecode"><span class="id" type="var">blue</span></span>;
+
+</li>
+<li> the expressions <span class="inlinecode"><span class="id" type="var">black</span></span> and <span class="inlinecode"><span class="id" type="var">white</span></span> belong to the set <span class="inlinecode"><span class="id" type="var">color</span></span>;
+
+</li>
+<li> if <span class="inlinecode"><span class="id" type="var">p</span></span> is an expression belonging to the set <span class="inlinecode"><span class="id" type="var">rgb</span></span>, then
+      <span class="inlinecode"><span class="id" type="var">primary</span></span> <span class="inlinecode"><span class="id" type="var">p</span></span> (pronounced "the constructor <span class="inlinecode"><span class="id" type="var">primary</span></span> applied to
+      the argument <span class="inlinecode"><span class="id" type="var">p</span></span>") is an expression belonging to the set
+      <span class="inlinecode"><span class="id" type="var">color</span></span>; and
+
+</li>
+<li> expressions formed in these ways are the <i>only</i> ones belonging
+      to the sets <span class="inlinecode"><span class="id" type="var">rgb</span></span> and <span class="inlinecode"><span class="id" type="var">color</span></span>. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ We can define functions on colors using pattern matching just as
+    we have done for <span class="inlinecode"><span class="id" type="var">day</span></span> and <span class="inlinecode"><span class="id" type="var">bool</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">monochrome</span> (<span class="id" type="var">c</span> : <span class="id" type="var">color</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">c</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">black</span> ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">white</span> ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">primary</span> <span class="id" type="var">q</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+Since the <span class="inlinecode"><span class="id" type="var">primary</span></span> constructor takes an argument, a pattern
+    matching <span class="inlinecode"><span class="id" type="var">primary</span></span> should include either a variable (as above &mdash;
+    note that we can choose its name freely) or a constant of
+    appropriate type (as below). 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">isred</span> (<span class="id" type="var">c</span> : <span class="id" type="var">color</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">c</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">black</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">white</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">primary</span> <span class="id" type="tactic">red</span> ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">primary</span> <span class="id" type="var">_</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+The pattern <span class="inlinecode"><span class="id" type="var">primary</span></span> <span class="inlinecode"><span class="id" type="var">_</span></span> here is shorthand for "<span class="inlinecode"><span class="id" type="var">primary</span></span> applied
+    to any <span class="inlinecode"><span class="id" type="var">rgb</span></span> constructor except <span class="inlinecode"><span class="id" type="tactic">red</span></span>."  (The wildcard pattern <span class="inlinecode"><span class="id" type="var">_</span></span>
+    has the same effect as the dummy pattern variable <span class="inlinecode"><span class="id" type="var">p</span></span> in the
+    definition of <span class="inlinecode"><span class="id" type="var">monochrome</span></span>.) 
+</div>
+
+<div class="doc">
+<a name="lab28"></a><h2 class="section">Tuples</h2>
+
+<div class="paragraph"> </div>
+
+ A single constructor with multiple parameters can be used
+    to create a tuple type. As an example, consider representing
+    the four bits in a nybble (half a byte). We first define
+    a datatype <span class="inlinecode"><span class="id" type="var">bit</span></span> that resembles <span class="inlinecode"><span class="id" type="var">bool</span></span> (using the
+    constructors <span class="inlinecode"><span class="id" type="var">B<sub>0</sub></span></span> and <span class="inlinecode"><span class="id" type="var">B<sub>1</sub></span></span> for the two possible bit values),
+    and then define the datatype <span class="inlinecode"><span class="id" type="var">nybble</span></span>, which is essentially
+    a tuple of four bits. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">bit</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">B<sub>0</sub></span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">B<sub>1</sub></span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">nybble</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">bits</span> (<span class="id" type="var">b<sub>0</sub></span> <span class="id" type="var">b<sub>1</sub></span> <span class="id" type="var">b<sub>2</sub></span> <span class="id" type="var">b<sub>3</sub></span> : <span class="id" type="var">bit</span>).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Check</span> (<span class="id" type="var">bits</span> <span class="id" type="var">B<sub>1</sub></span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>1</sub></span> <span class="id" type="var">B<sub>0</sub></span>).<br/>
+<span class="comment">(*&nbsp;==&gt;&nbsp;bits&nbsp;B<sub>1</sub>&nbsp;B<sub>0</sub>&nbsp;B<sub>1</sub>&nbsp;B<sub>0</sub>&nbsp;:&nbsp;nybble&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="var">bits</span></span> constructor acts as a wrapper for its contents.
+    Unwrapping can be done by pattern-matching, as in the <span class="inlinecode"><span class="id" type="var">all_zero</span></span>
+    function which tests a nybble to see if all its bits are O.
+    Note that we are using underscore (_) as a <i>wildcard pattern</i> to
+    avoid inventing variable names that will not be used. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">all_zero</span> (<span class="id" type="var">nb</span> : <span class="id" type="var">nybble</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">nb</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id" type="var">bits</span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>0</sub></span>) ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id" type="var">bits</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span>) ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="var">Compute</span> (<span class="id" type="var">all_zero</span> (<span class="id" type="var">bits</span> <span class="id" type="var">B<sub>1</sub></span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>1</sub></span> <span class="id" type="var">B<sub>0</sub></span>)).<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;false&nbsp;:&nbsp;bool&nbsp;*)</span><br/>
+<span class="id" type="var">Compute</span> (<span class="id" type="var">all_zero</span> (<span class="id" type="var">bits</span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>0</sub></span> <span class="id" type="var">B<sub>0</sub></span>)).<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;true&nbsp;:&nbsp;bool&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<a name="lab29"></a><h2 class="section">Modules</h2>
+
+<div class="paragraph"> </div>
+
+ Coq provides a <i>module system</i>, to aid in organizing large
+    developments.  In this course we won't need most of its features,
+    but one is useful: If we enclose a collection of declarations
+    between <span class="inlinecode"><span class="id" type="keyword">Module</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> and <span class="inlinecode"><span class="id" type="keyword">End</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> markers, then, in the remainder of
+    the file after the <span class="inlinecode"><span class="id" type="keyword">End</span></span>, these definitions are referred to by
+    names like <span class="inlinecode"><span class="id" type="var">X.foo</span></span> instead of just <span class="inlinecode"><span class="id" type="var">foo</span></span>.  We will use this
+    feature to introduce the definition of the type <span class="inlinecode"><span class="id" type="var">nat</span></span> in an inner
+    module so that it does not interfere with the one from the
+    standard library (which we want to use in the rest because it
+    comes with a tiny bit of convenient special notation).  
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Module</span> <span class="id" type="var">NatPlayground</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab30"></a><h2 class="section">Numbers</h2>
+
+<div class="paragraph"> </div>
+
+ The types we have defined so far, "enumerated types" such as
+    <span class="inlinecode"><span class="id" type="var">day</span></span>, <span class="inlinecode"><span class="id" type="var">bool</span></span>, and <span class="inlinecode"><span class="id" type="var">bit</span></span>, and tuple types such as <span class="inlinecode"><span class="id" type="var">nybble</span></span> built
+    from them, share the property that each type has a finite set of
+    values. The natural numbers are an infinite set, and we need to
+    represent all of them in a datatype with a finite number of
+    constructors. There are many representations of numbers to choose
+    from. We are most familiar with decimal notation (base 10), using
+    the digits 0 through 9, for example, to form the number 123.  You
+    may have encountered hexadecimal notation (base 16), in which the
+    same number is represented as 7B, or octal (base 8), where it is
+    173, or binary (base 2), where it is 1111011. Using an enumerated
+    type to represent digits, we could use any of these to represent
+    natural numbers. There are circumstances where each of these
+    choices can be useful.
+
+<div class="paragraph"> </div>
+
+    Binary is valuable in computer hardware because it can in turn be
+    represented with two voltage levels, resulting in simple
+    circuitry. Analogously, we wish here to choose a representation
+    that makes <i>proofs</i> simpler.
+
+<div class="paragraph"> </div>
+
+    Indeed, there is a representation of numbers that is even simpler
+    than binary, namely unary (base 1), in which only a single digit
+    is used (as one might do while counting days in prison by scratching
+    on the walls). To represent unary with a Coq datatype, we use
+    two constructors. The capital-letter <span class="inlinecode"><span class="id" type="var">O</span></span> constructor represents zero.
+    When the <span class="inlinecode"><span class="id" type="var">S</span></span> constructor is applied to the representation of the
+    natural number <i>n</i>, the result is the representation of <i>n+1</i>.
+    (<span class="inlinecode"><span class="id" type="var">S</span></span> stands for "successor", or "scratch" if one is in prison.)
+    Here is the complete datatype definition. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">nat</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> (<span class="id" type="var">n</span> : <span class="id" type="var">nat</span>).<br/>
+</div>
+
+<div class="doc">
+With this definition, 0 is represented by <span class="inlinecode"><span class="id" type="var">O</span></span>, 1 by <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span></span>,
+    2 by <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>)</span>, and so on. 
+<div class="paragraph"> </div>
+
+ The clauses of this definition can be read:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">O</span></span> is a natural number (note that this is the letter "<span class="inlinecode"><span class="id" type="var">O</span></span>,"
+        not the numeral "<span class="inlinecode">0</span>").
+
+</li>
+<li> <span class="inlinecode"><span class="id" type="var">S</span></span> can be put in front of a natural number to yield another
+        one &mdash; if <span class="inlinecode"><span class="id" type="var">n</span></span> is a natural number, then <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> is too. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ Again, let's look at this in a little more detail.  The definition
+    of <span class="inlinecode"><span class="id" type="var">nat</span></span> says how expressions in the set <span class="inlinecode"><span class="id" type="var">nat</span></span> can be built:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">O</span></span> and <span class="inlinecode"><span class="id" type="var">S</span></span> are constructors;
+
+</li>
+<li> the expression <span class="inlinecode"><span class="id" type="var">O</span></span> belongs to the set <span class="inlinecode"><span class="id" type="var">nat</span></span>;
+
+</li>
+<li> if <span class="inlinecode"><span class="id" type="var">n</span></span> is an expression belonging to the set <span class="inlinecode"><span class="id" type="var">nat</span></span>, then <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span>
+      is also an expression belonging to the set <span class="inlinecode"><span class="id" type="var">nat</span></span>; and
+
+</li>
+<li> expressions formed in these two ways are the only ones belonging
+      to the set <span class="inlinecode"><span class="id" type="var">nat</span></span>. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ The same rules apply for our definitions of <span class="inlinecode"><span class="id" type="var">day</span></span>, <span class="inlinecode"><span class="id" type="var">bool</span></span>,
+    <span class="inlinecode"><span class="id" type="var">color</span></span>, etc.
+
+<div class="paragraph"> </div>
+
+    The above conditions are the precise force of the <span class="inlinecode"><span class="id" type="keyword">Inductive</span></span>
+    declaration.  They imply that the expression <span class="inlinecode"><span class="id" type="var">O</span></span>, the expression
+    <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span></span>, the expression <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>)</span>, the expression <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>))</span>, and
+    so on all belong to the set <span class="inlinecode"><span class="id" type="var">nat</span></span>, while other expressions built
+    from data constructors, like <span class="inlinecode"><span class="id" type="var">true</span></span>, <span class="inlinecode"><span class="id" type="var">andb</span></span> <span class="inlinecode"><span class="id" type="var">true</span></span> <span class="inlinecode"><span class="id" type="var">false</span></span>, <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span>
+    <span class="inlinecode"><span class="id" type="var">false</span>)</span>, and <span class="inlinecode"><span class="id" type="var">O</span></span> <span class="inlinecode">(<span class="id" type="var">O</span></span> <span class="inlinecode">(<span class="id" type="var">O</span></span> <span class="inlinecode"><span class="id" type="var">S</span>))</span> do not.
+
+<div class="paragraph"> </div>
+
+    A critical point here is that what we've done so far is just to
+    define a <i>representation</i> of numbers: a way of writing them down.
+    The names <span class="inlinecode"><span class="id" type="var">O</span></span> and <span class="inlinecode"><span class="id" type="var">S</span></span> are arbitrary, and at this point they have
+    no special meaning &mdash; they are just two different marks that we
+    can use to write down numbers (together with a rule that says any
+    <span class="inlinecode"><span class="id" type="var">nat</span></span> will be written as some string of <span class="inlinecode"><span class="id" type="var">S</span></span> marks followed by an
+    <span class="inlinecode"><span class="id" type="var">O</span></span>).  If we like, we can write essentially the same definition
+    this way: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">nat'</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">stop</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">tick</span> (<span class="id" type="var">foo</span> : <span class="id" type="var">nat'</span>).<br/>
+</div>
+
+<div class="doc">
+The <i>interpretation</i> of these marks comes from how we use them to
+    compute. 
+<div class="paragraph"> </div>
+
+ We can do this by writing functions that pattern match on
+    representations of natural numbers just as we did above with
+    booleans and days &mdash; for example, here is the predecessor
+    function: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">pred</span> (<span class="id" type="var">n</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span> ⇒ <span class="id" type="var">n'</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+The second branch can be read: "if <span class="inlinecode"><span class="id" type="var">n</span></span> has the form <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span>
+    for some <span class="inlinecode"><span class="id" type="var">n'</span></span>, then return <span class="inlinecode"><span class="id" type="var">n'</span></span>."  
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">End</span> <span class="id" type="var">NatPlayground</span>.<br/>
+</div>
+
+<div class="doc">
+Because natural numbers are such a pervasive form of data,
+    Coq provides a tiny bit of built-in magic for parsing and printing
+    them: ordinary decimal numerals can be used as an alternative to
+    the "unary" notation defined by the constructors <span class="inlinecode"><span class="id" type="var">S</span></span> and <span class="inlinecode"><span class="id" type="var">O</span></span>.  Coq
+    prints numbers in decimal form by default: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Check</span> (<span class="id" type="var">S</span> (<span class="id" type="var">S</span> (<span class="id" type="var">S</span> (<span class="id" type="var">S</span> <span class="id" type="var">O</span>)))).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;===&gt;&nbsp;4&nbsp;:&nbsp;nat&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">minustwo</span> (<span class="id" type="var">n</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">O</span> ⇒ <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> (<span class="id" type="var">S</span> <span class="id" type="var">n'</span>) ⇒ <span class="id" type="var">n'</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="var">Compute</span> (<span class="id" type="var">minustwo</span> 4).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;===&gt;&nbsp;2&nbsp;:&nbsp;nat&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The constructor <span class="inlinecode"><span class="id" type="var">S</span></span> has the type <span class="inlinecode"><span class="id" type="var">nat</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" type="var">nat</span></span>, just like
+    <span class="inlinecode"><span class="id" type="var">pred</span></span> and functions like <span class="inlinecode"><span class="id" type="var">minustwo</span></span>: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Check</span> <span class="id" type="var">S</span>.<br/>
+<span class="id" type="keyword">Check</span> <span class="id" type="var">pred</span>.<br/>
+<span class="id" type="keyword">Check</span> <span class="id" type="var">minustwo</span>.<br/>
+</div>
+
+<div class="doc">
+These are all things that can be applied to a number to yield a
+    number.  However, there is a fundamental difference between the
+    first one and the other two: functions like <span class="inlinecode"><span class="id" type="var">pred</span></span> and <span class="inlinecode"><span class="id" type="var">minustwo</span></span>
+    come with <i>computation rules</i> &mdash; e.g., the definition of <span class="inlinecode"><span class="id" type="var">pred</span></span>
+    says that <span class="inlinecode"><span class="id" type="var">pred</span></span> <span class="inlinecode">2</span> can be simplified to <span class="inlinecode">1</span> &mdash; while the
+    definition of <span class="inlinecode"><span class="id" type="var">S</span></span> has no such behavior attached.  Although it is
+    like a function in the sense that it can be applied to an
+    argument, it does not <i>do</i> anything at all!  It is just a way of
+    writing down numbers.  (Think about standard decimal numerals: the
+    numeral <span class="inlinecode">1</span> is not a computation; it's a piece of data.  When we
+    write <span class="inlinecode">111</span> to mean the number one hundred and eleven, we are
+    using <span class="inlinecode">1</span>, three times, to write down a concrete representation of
+    a number.)
+
+<div class="paragraph"> </div>
+
+    For most function definitions over numbers, just pattern matching
+    is not enough: we also need recursion.  For example, to check that
+    a number <span class="inlinecode"><span class="id" type="var">n</span></span> is even, we may need to recursively check whether
+    <span class="inlinecode"><span class="id" type="var">n</span>-2</span> is even.  To write such functions, we use the keyword
+    <span class="inlinecode"><span class="id" type="keyword">Fixpoint</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">evenb</span> (<span class="id" type="var">n</span>:<span class="id" type="var">nat</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">O</span>        ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">O</span>      ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> (<span class="id" type="var">S</span> <span class="id" type="var">n'</span>) ⇒ <span class="id" type="var">evenb</span> <span class="id" type="var">n'</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+We can define <span class="inlinecode"><span class="id" type="var">oddb</span></span> by a similar <span class="inlinecode"><span class="id" type="keyword">Fixpoint</span></span> declaration, but here
+    is a simpler definition: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">oddb</span> (<span class="id" type="var">n</span>:<span class="id" type="var">nat</span>) : <span class="id" type="var">bool</span>   :=   <span class="id" type="var">negb</span> (<span class="id" type="var">evenb</span> <span class="id" type="var">n</span>).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_oddb1</span>:    <span class="id" type="var">oddb</span> 1 = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_oddb2</span>:    <span class="id" type="var">oddb</span> 4 = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+(You will notice if you step through these proofs that
+    <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> actually has no effect on the goal &mdash; all of the work is
+    done by <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span>.  We'll see more about why that is shortly.)
+
+<div class="paragraph"> </div>
+
+    Naturally, we can also define multi-argument functions by
+    recursion.  
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Module</span> <span class="id" type="var">NatPlayground2</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">plus</span> (<span class="id" type="var">n</span> : <span class="id" type="var">nat</span>) (<span class="id" type="var">m</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">m</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span> ⇒ <span class="id" type="var">S</span> (<span class="id" type="var">plus</span> <span class="id" type="var">n'</span> <span class="id" type="var">m</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+Adding three to two now gives us five, as we'd expect. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Compute</span> (<span class="id" type="var">plus</span> 3 2).<br/>
+</div>
+
+<div class="doc">
+The simplification that Coq performs to reach this conclusion can
+    be visualized as follows: 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;&nbsp;<span class="inlinecode"><span class="id" type="var">plus</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>)))</span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>))</span><br/>
+==&gt;&nbsp;<span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">plus</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>))</span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>)))</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;the&nbsp;second&nbsp;clause&nbsp;of&nbsp;the&nbsp;<span class="inlinecode"><span class="id" type="keyword">match</span></span><br/>
+==&gt;&nbsp;<span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">plus</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>)</span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>))))</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;the&nbsp;second&nbsp;clause&nbsp;of&nbsp;the&nbsp;<span class="inlinecode"><span class="id" type="keyword">match</span></span><br/>
+==&gt;&nbsp;<span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">plus</span></span> <span class="inlinecode"><span class="id" type="var">O</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>)))))</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;the&nbsp;second&nbsp;clause&nbsp;of&nbsp;the&nbsp;<span class="inlinecode"><span class="id" type="keyword">match</span></span><br/>
+==&gt;&nbsp;<span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">O</span>))))</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;the&nbsp;first&nbsp;clause&nbsp;of&nbsp;the&nbsp;<span class="inlinecode"><span class="id" type="keyword">match</span></span><br/>
+*)</span><br/>
+</div>
+
+<div class="doc">
+As a notational convenience, if two or more arguments have
+    the same type, they can be written together.  In the following
+    definition, <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">nat</span>)</span> means just the same as if we had written
+    <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">nat</span>)</span> <span class="inlinecode">(<span class="id" type="var">m</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">nat</span>)</span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">mult</span> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span> ⇒ <span class="id" type="var">plus</span> <span class="id" type="var">m</span> (<span class="id" type="var">mult</span> <span class="id" type="var">n'</span> <span class="id" type="var">m</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_mult1</span>: (<span class="id" type="var">mult</span> 3 3) = 9.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+You can match two expressions at once by putting a comma
+    between them: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">minus</span> (<span class="id" type="var">n</span> <span class="id" type="var">m</span>:<span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span>, <span class="id" type="var">m</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">O</span>   , <span class="id" type="var">_</span>    ⇒ <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">_</span> , <span class="id" type="var">O</span>    ⇒ <span class="id" type="var">n</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span>, <span class="id" type="var">S</span> <span class="id" type="var">m'</span> ⇒ <span class="id" type="var">minus</span> <span class="id" type="var">n'</span> <span class="id" type="var">m'</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">End</span> <span class="id" type="var">NatPlayground2</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">exp</span> (<span class="id" type="var">base</span> <span class="id" type="var">power</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">power</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">S</span> <span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">p</span> ⇒ <span class="id" type="var">mult</span> <span class="id" type="var">base</span> (<span class="id" type="var">exp</span> <span class="id" type="var">base</span> <span class="id" type="var">p</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab31"></a><h4 class="section">Exercise: 1 star, standard (factorial)</h4>
+ Recall the standard mathematical factorial function:
+<pre>
+       factorial(0)  =  1
+       factorial(n)  =  n * factorial(n-1)     (if n&gt;0)
+</pre>
+    Translate this into Coq. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">factorial</span> (<span class="id" type="var">n</span>:<span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_factorial1</span>:          (<span class="id" type="var">factorial</span> 3) = 6.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_factorial2</span>:          (<span class="id" type="var">factorial</span> 5) = (<span class="id" type="var">mult</span> 10 12).<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+ Again, we can make numerical expressions easier to read and write
+    by introducing notations for addition, multiplication, and
+    subtraction. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Notation</span> "x + y" := (<span class="id" type="var">plus</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 50, <span class="id" type="var">left</span> <span class="id" type="var">associativity</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">nat_scope</span>.<br/>
+<span class="id" type="keyword">Notation</span> "x - y" := (<span class="id" type="var">minus</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 50, <span class="id" type="var">left</span> <span class="id" type="var">associativity</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">nat_scope</span>.<br/>
+<span class="id" type="keyword">Notation</span> "x * y" := (<span class="id" type="var">mult</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40, <span class="id" type="var">left</span> <span class="id" type="var">associativity</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">nat_scope</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Check</span> ((0 + 1) + 1).<br/>
+</div>
+
+<div class="doc">
+(The <span class="inlinecode"><span class="id" type="var">level</span></span>, <span class="inlinecode"><span class="id" type="var">associativity</span></span>, and <span class="inlinecode"><span class="id" type="var">nat_scope</span></span> annotations
+    control how these notations are treated by Coq's parser.  The
+    details are not important for our purposes, but interested readers
+    can refer to the "More on Notation" section at the end of this
+    chapter.)
+
+<div class="paragraph"> </div>
+
+    Note that these do not change the definitions we've already made:
+    they are simply instructions to the Coq parser to accept <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">y</span></span>
+    in place of <span class="inlinecode"><span class="id" type="var">plus</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y</span></span> and, conversely, to the Coq pretty-printer
+    to display <span class="inlinecode"><span class="id" type="var">plus</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y</span></span> as <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">y</span></span>. 
+<div class="paragraph"> </div>
+
+ When we say that Coq comes with almost nothing built-in, we really
+    mean it: even equality testing is a user-defined operation!
+
+<div class="paragraph"> </div>
+
+    Here is a function <span class="inlinecode"><span class="id" type="var">eqb</span></span>, which tests natural numbers for
+    <span class="inlinecode"><span class="id" type="var">eq</span></span>uality, yielding a <span class="inlinecode"><span class="id" type="var">b</span></span>oolean.  Note the use of nested
+    <span class="inlinecode"><span class="id" type="keyword">match</span></span>es (we could also have used a simultaneous match, as we did
+    in <span class="inlinecode"><span class="id" type="var">minus</span></span>.) 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">eqb</span> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="keyword">match</span> <span class="id" type="var">m</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">m'</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span> ⇒ <span class="id" type="keyword">match</span> <span class="id" type="var">m</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">m'</span> ⇒ <span class="id" type="var">eqb</span> <span class="id" type="var">n'</span> <span class="id" type="var">m'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+Similarly, the <span class="inlinecode"><span class="id" type="var">leb</span></span> function tests whether its first argument is
+    less than or equal to its second argument, yielding a boolean. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">leb</span> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">m</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">m'</span> ⇒ <span class="id" type="var">leb</span> <span class="id" type="var">n'</span> <span class="id" type="var">m'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_leb1</span>:             (<span class="id" type="var">leb</span> 2 2) = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_leb2</span>:             (<span class="id" type="var">leb</span> 2 4) = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_leb3</span>:             (<span class="id" type="var">leb</span> 4 2) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Since we'll be using these (especially <span class="inlinecode"><span class="id" type="var">eqb</span></span>) a lot, let's give
+    them infix notations. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Notation</span> "x =? y" := (<span class="id" type="var">eqb</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 70) : <span class="id" type="var">nat_scope</span>.<br/>
+<span class="id" type="keyword">Notation</span> "x &lt;=? y" := (<span class="id" type="var">leb</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 70) : <span class="id" type="var">nat_scope</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_leb3'</span>:             (4 &lt;=? 2) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab32"></a><h4 class="section">Exercise: 1 star, standard (ltb)</h4>
+ The <span class="inlinecode"><span class="id" type="var">ltb</span></span> function tests natural numbers for <span class="inlinecode"><span class="id" type="var">l</span></span>ess-<span class="inlinecode"><span class="id" type="var">t</span></span>han,
+    yielding a <span class="inlinecode"><span class="id" type="var">b</span></span>oolean.  Instead of making up a new <span class="inlinecode"><span class="id" type="keyword">Fixpoint</span></span> for
+    this one, define it in terms of a previously defined
+    function.  (It can be done with just one previously defined
+    function, but you can use two if you need to.) 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">ltb</span> (<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">bool</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Notation</span> "x &lt;? y" := (<span class="id" type="var">ltb</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>) (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 70) : <span class="id" type="var">nat_scope</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_ltb1</span>:             (<span class="id" type="var">ltb</span> 2 2) = <span class="id" type="var">false</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_ltb2</span>:             (<span class="id" type="var">ltb</span> 2 4) = <span class="id" type="var">true</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+<span class="id" type="keyword">Example</span> <span class="id" type="var">test_ltb3</span>:             (<span class="id" type="var">ltb</span> 4 2) = <span class="id" type="var">false</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+
+<div class="doc">
+<a name="lab33"></a><h1 class="section">Proof by Simplification</h1>
+
+<div class="paragraph"> </div>
+
+ Now that we've defined a few datatypes and functions, let's
+    turn to stating and proving properties of their behavior.
+    Actually, we've already started doing this: each <span class="inlinecode"><span class="id" type="keyword">Example</span></span> in the
+    previous sections makes a precise claim about the behavior of some
+    function on some particular inputs.  The proofs of these claims
+    were always the same: use <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> to simplify both sides of the
+    equation, then use <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> to check that both sides contain
+    identical values.
+
+<div class="paragraph"> </div>
+
+    The same sort of "proof by simplification" can be used to prove
+    more interesting properties as well.  For example, the fact that
+    <span class="inlinecode">0</span> is a "neutral element" for <span class="inlinecode">+</span> on the left can be proved just
+    by observing that <span class="inlinecode">0</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n</span></span> reduces to <span class="inlinecode"><span class="id" type="var">n</span></span> no matter what <span class="inlinecode"><span class="id" type="var">n</span></span> is, a
+    fact that can be read directly off the definition of <span class="inlinecode"><span class="id" type="var">plus</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_O_n</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>, 0 + <span class="id" type="var">n</span> = <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+(You may notice that the above statement looks different in
+    the <span class="inlinecode">.<span class="id" type="var">v</span></span> file in your IDE than it does in the HTML rendition in
+    your browser, if you are viewing both. In <span class="inlinecode">.<span class="id" type="var">v</span></span> files, we write the
+    <span class="inlinecode"><span style='font-size:120%;'>&forall;</span></span> universal quantifier using the reserved identifier
+    "forall."  When the <span class="inlinecode">.<span class="id" type="var">v</span></span> files are converted to HTML, this gets
+    transformed into an upside-down-A symbol.)
+
+<div class="paragraph"> </div>
+
+    This is a good place to mention that <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> is a bit
+    more powerful than we have admitted. In the examples we have seen,
+    the calls to <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> were actually not needed, because
+    <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> can perform some simplification automatically when
+    checking that two sides are equal; <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> was just added so that
+    we could see the intermediate state &mdash; after simplification but
+    before finishing the proof.  Here is a shorter proof of the
+    theorem: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_O_n'</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>, 0 + <span class="id" type="var">n</span> = <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Moreover, it will be useful later to know that <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span>
+    does somewhat <i>more</i> simplification than <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> does &mdash; for
+    example, it tries "unfolding" defined terms, replacing them with
+    their right-hand sides.  The reason for this difference is that,
+    if reflexivity succeeds, the whole goal is finished and we don't
+    need to look at whatever expanded expressions <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> has
+    created by all this simplification and unfolding; by contrast,
+    <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> is used in situations where we may have to read and
+    understand the new goal that it creates, so we would not want it
+    blindly expanding definitions and leaving the goal in a messy
+    state.
+
+<div class="paragraph"> </div>
+
+    The form of the theorem we just stated and its proof are almost
+    exactly the same as the simpler examples we saw earlier; there are
+    just a few differences.
+
+<div class="paragraph"> </div>
+
+    First, we've used the keyword <span class="inlinecode"><span class="id" type="keyword">Theorem</span></span> instead of <span class="inlinecode"><span class="id" type="keyword">Example</span></span>.
+    This difference is mostly a matter of style; the keywords
+    <span class="inlinecode"><span class="id" type="keyword">Example</span></span> and <span class="inlinecode"><span class="id" type="keyword">Theorem</span></span> (and a few others, including <span class="inlinecode"><span class="id" type="keyword">Lemma</span></span>,
+    <span class="inlinecode"><span class="id" type="keyword">Fact</span></span>, and <span class="inlinecode"><span class="id" type="keyword">Remark</span></span>) mean pretty much the same thing to Coq.
+
+<div class="paragraph"> </div>
+
+    Second, we've added the quantifier <span class="inlinecode"><span style='font-size:120%;'>&forall;</span></span> <span class="inlinecode"><span class="id" type="var">n</span>:<span class="id" type="var">nat</span></span>, so that our
+    theorem talks about <i>all</i> natural numbers <span class="inlinecode"><span class="id" type="var">n</span></span>.  Informally, to
+    prove theorems of this form, we generally start by saying "Suppose
+    <span class="inlinecode"><span class="id" type="var">n</span></span> is some number..."  Formally, this is achieved in the proof by
+    <span class="inlinecode"><span class="id" type="tactic">intros</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span>, which moves <span class="inlinecode"><span class="id" type="var">n</span></span> from the quantifier in the goal to a
+    <i>context</i> of current assumptions.
+
+<div class="paragraph"> </div>
+
+    The keywords <span class="inlinecode"><span class="id" type="tactic">intros</span></span>, <span class="inlinecode"><span class="id" type="tactic">simpl</span></span>, and <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> are examples of
+    <i>tactics</i>.  A tactic is a command that is used between <span class="inlinecode"><span class="id" type="keyword">Proof</span></span> and
+    <span class="inlinecode"><span class="id" type="keyword">Qed</span></span> to guide the process of checking some claim we are making.
+    We will see several more tactics in the rest of this chapter and
+    yet more in future chapters. 
+<div class="paragraph"> </div>
+
+ Other similar theorems can be proved with the same pattern. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_1_l</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>, 1 + <span class="id" type="var">n</span> = <span class="id" type="var">S</span> <span class="id" type="var">n</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_0_l</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span>:<span class="id" type="var">nat</span>, 0 * <span class="id" type="var">n</span> = 0.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="var">_l</span></span> suffix in the names of these theorems is
+    pronounced "on the left." 
+<div class="paragraph"> </div>
+
+ It is worth stepping through these proofs to observe how the
+    context and the goal change.  You may want to add calls to <span class="inlinecode"><span class="id" type="tactic">simpl</span></span>
+    before <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> to see the simplifications that Coq performs
+    on the terms before checking that they are equal. 
+</div>
+
+<div class="doc">
+<a name="lab34"></a><h1 class="section">Proof by Rewriting</h1>
+
+<div class="paragraph"> </div>
+
+ This theorem is a bit more interesting than the others we've
+    seen: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_id_example</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>:<span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> = <span class="id" type="var">m</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> + <span class="id" type="var">n</span> = <span class="id" type="var">m</span> + <span class="id" type="var">m</span>.<br/>
+</div>
+
+<div class="doc">
+Instead of making a universal claim about all numbers <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span>,
+    it talks about a more specialized property that only holds when <span class="inlinecode"><span class="id" type="var">n</span></span>
+    <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  The arrow symbol is pronounced "implies."
+
+<div class="paragraph"> </div>
+
+    As before, we need to be able to reason by assuming we are given such
+    numbers <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span>.  We also need to assume the hypothesis
+    <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>. The <span class="inlinecode"><span class="id" type="tactic">intros</span></span> tactic will serve to move all three of these
+    from the goal into assumptions in the current context.
+
+<div class="paragraph"> </div>
+
+    Since <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span> are arbitrary numbers, we can't just use
+    simplification to prove this theorem.  Instead, we prove it by
+    observing that, if we are assuming <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, then we can replace
+    <span class="inlinecode"><span class="id" type="var">n</span></span> with <span class="inlinecode"><span class="id" type="var">m</span></span> in the goal statement and obtain an equality with the
+    same expression on both sides.  The tactic that tells Coq to
+    perform this replacement is called <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;move&nbsp;both&nbsp;quantifiers&nbsp;into&nbsp;the&nbsp;context:&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;move&nbsp;the&nbsp;hypothesis&nbsp;into&nbsp;the&nbsp;context:&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;rewrite&nbsp;the&nbsp;goal&nbsp;using&nbsp;the&nbsp;hypothesis:&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> → <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The first line of the proof moves the universally quantified
+    variables <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span> into the context.  The second moves the
+    hypothesis <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> into the context and gives it the name <span class="inlinecode"><span class="id" type="var">H</span></span>.
+    The third tells Coq to rewrite the current goal (<span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">m</span></span>)
+    by replacing the left side of the equality hypothesis <span class="inlinecode"><span class="id" type="var">H</span></span> with the
+    right side.
+
+<div class="paragraph"> </div>
+
+    (The arrow symbol in the <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> has nothing to do with
+    implication: it tells Coq to apply the rewrite from left to right.
+    To rewrite from right to left, you can use <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> <span class="inlinecode">&lt;-</span>.  Try
+    making this change in the above proof and see what difference it
+    makes.) 
+<div class="paragraph"> </div>
+
+<a name="lab35"></a><h4 class="section">Exercise: 1 star, standard (plus_id_exercise)</h4>
+ Remove "<span class="inlinecode"><span class="id" type="var">Admitted</span>.</span>" and fill in the proof. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_id_exercise</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> = <span class="id" type="var">m</span> → <span class="id" type="var">m</span> = <span class="id" type="var">o</span> → <span class="id" type="var">n</span> + <span class="id" type="var">m</span> = <span class="id" type="var">m</span> + <span class="id" type="var">o</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+ The <span class="inlinecode"><span class="id" type="var">Admitted</span></span> command tells Coq that we want to skip trying
+    to prove this theorem and just accept it as a given.  This can be
+    useful for developing longer proofs, since we can state subsidiary
+    lemmas that we believe will be useful for making some larger
+    argument, use <span class="inlinecode"><span class="id" type="var">Admitted</span></span> to accept them on faith for the moment,
+    and continue working on the main argument until we are sure it
+    makes sense; then we can go back and fill in the proofs we
+    skipped.  Be careful, though: every time you say <span class="inlinecode"><span class="id" type="var">Admitted</span></span> you
+    are leaving a door open for total nonsense to enter Coq's nice,
+    rigorous, formally checked world! 
+<div class="paragraph"> </div>
+
+ We can also use the <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> tactic with a previously proved
+    theorem instead of a hypothesis from the context. If the statement
+    of the previously proved theorem involves quantified variables,
+    as in the example below, Coq tries to instantiate them
+    by matching with the current goal. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_0_plus</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(0 + <span class="id" type="var">n</span>) * <span class="id" type="var">m</span> = <span class="id" type="var">n</span> * <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> → <span class="id" type="var">plus_O_n</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab36"></a><h4 class="section">Exercise: 2 stars, standard (mult_S_1)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">mult_S_1</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">m</span> = <span class="id" type="var">S</span> <span class="id" type="var">n</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">m</span> * (1 + <span class="id" type="var">n</span>) = <span class="id" type="var">m</span> * <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;(N.b.&nbsp;This&nbsp;proof&nbsp;can&nbsp;actually&nbsp;be&nbsp;completed&nbsp;with&nbsp;tactics&nbsp;other&nbsp;than<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode"><span class="id" type="tactic">rewrite</span></span>,&nbsp;but&nbsp;please&nbsp;do&nbsp;use&nbsp;<span class="inlinecode"><span class="id" type="tactic">rewrite</span></span>&nbsp;for&nbsp;the&nbsp;sake&nbsp;of&nbsp;the&nbsp;exercise.)&nbsp;*)</span><br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+
+<div class="doc">
+<a name="lab37"></a><h1 class="section">Proof by Case Analysis</h1>
+
+<div class="paragraph"> </div>
+
+ Of course, not everything can be proved by simple
+    calculation and rewriting: In general, unknown, hypothetical
+    values (arbitrary numbers, booleans, lists, etc.) can block
+    simplification.  For example, if we try to prove the following
+    fact using the <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> tactic as above, we get stuck.  (We then
+    use the <span class="inlinecode"><span class="id" type="keyword">Abort</span></span> command to give up on it for the moment.)
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_1_neq_0_firsttry</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> + 1) =? 0 = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="comment">(*&nbsp;does&nbsp;nothing!&nbsp;*)</span><br/>
+<span class="id" type="keyword">Abort</span>.<br/>
+</div>
+
+<div class="doc">
+The reason for this is that the definitions of both
+    <span class="inlinecode"><span class="id" type="var">eqb</span></span> and <span class="inlinecode">+</span> begin by performing a <span class="inlinecode"><span class="id" type="keyword">match</span></span> on their first
+    argument.  But here, the first argument to <span class="inlinecode">+</span> is the unknown
+    number <span class="inlinecode"><span class="id" type="var">n</span></span> and the argument to <span class="inlinecode"><span class="id" type="var">eqb</span></span> is the compound
+    expression <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1</span>; neither can be simplified.
+
+<div class="paragraph"> </div>
+
+    To make progress, we need to consider the possible forms of <span class="inlinecode"><span class="id" type="var">n</span></span>
+    separately.  If <span class="inlinecode"><span class="id" type="var">n</span></span> is <span class="inlinecode"><span class="id" type="var">O</span></span>, then we can calculate the final result
+    of <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1)</span> <span class="inlinecode">=?</span> <span class="inlinecode">0</span> and check that it is, indeed, <span class="inlinecode"><span class="id" type="var">false</span></span>.  And
+    if <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> for some <span class="inlinecode"><span class="id" type="var">n'</span></span>, then, although we don't know exactly
+    what number <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1</span> yields, we can calculate that, at least, it
+    will begin with one <span class="inlinecode"><span class="id" type="var">S</span></span>, and this is enough to calculate that,
+    again, <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1)</span> <span class="inlinecode">=?</span> <span class="inlinecode">0</span> will yield <span class="inlinecode"><span class="id" type="var">false</span></span>.
+
+<div class="paragraph"> </div>
+
+    The tactic that tells Coq to consider, separately, the cases where
+    <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">O</span></span> and where <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> is called <span class="inlinecode"><span class="id" type="tactic">destruct</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_1_neq_0</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> + 1) =? 0 = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>] <span class="id" type="var">eqn</span>:<span class="id" type="var">E</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> generates <i>two</i> subgoals, which we must then
+    prove, separately, in order to get Coq to accept the theorem.
+
+<div class="paragraph"> </div>
+
+    The annotation "<span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode">[|</span> <span class="inlinecode"><span class="id" type="var">n'</span>]</span>" is called an <i>intro pattern</i>.  It
+    tells Coq what variable names to introduce in each subgoal.  In
+    general, what goes between the square brackets is a <i>list of
+    lists</i> of names, separated by <span class="inlinecode">|</span>.  In this case, the first
+    component is empty, since the <span class="inlinecode"><span class="id" type="var">O</span></span> constructor is nullary (it
+    doesn't have any arguments).  The second component gives a single
+    name, <span class="inlinecode"><span class="id" type="var">n'</span></span>, since <span class="inlinecode"><span class="id" type="var">S</span></span> is a unary constructor.
+
+<div class="paragraph"> </div>
+
+    In each subgoal, Coq remembers the assumption about <span class="inlinecode"><span class="id" type="var">n</span></span> that is
+    relevant for this subgoal &mdash; either <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span> or <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> for some
+    n'.  The <span class="inlinecode"><span class="id" type="var">eqn</span>:<span class="id" type="var">E</span></span> annotation tells <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> to give the name <span class="inlinecode"><span class="id" type="var">E</span></span> to
+    this equation.  (Leaving off the <span class="inlinecode"><span class="id" type="var">eqn</span>:<span class="id" type="var">E</span></span> annotation causes Coq to
+    elide these assumptions in the subgoals.  This slightly
+    streamlines proofs where the assumptions are not explicitly used,
+    but it is better practice to keep them for the sake of
+    documentation, as they can help keep you oriented when working
+    with the subgoals.)
+
+<div class="paragraph"> </div>
+
+    The <span class="inlinecode">-</span> signs on the second and third lines are called <i>bullets</i>,
+    and they mark the parts of the proof that correspond to each
+    generated subgoal.  The proof script that comes after a bullet is
+    the entire proof for a subgoal.  In this example, each of the
+    subgoals is easily proved by a single use of <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span>, which
+    itself performs some simplification &mdash; e.g., the second one
+    simplifies <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1)</span> <span class="inlinecode">=?</span> <span class="inlinecode">0</span> to <span class="inlinecode"><span class="id" type="var">false</span></span> by first rewriting <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span>
+    <span class="inlinecode">+</span> <span class="inlinecode">1)</span> to <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">n'</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1)</span>, then unfolding <span class="inlinecode"><span class="id" type="var">eqb</span></span>, and then simplifying
+    the <span class="inlinecode"><span class="id" type="keyword">match</span></span>.
+
+<div class="paragraph"> </div>
+
+    Marking cases with bullets is entirely optional: if bullets are
+    not present, Coq simply asks you to prove each subgoal in
+    sequence, one at a time. But it is a good idea to use bullets.
+    For one thing, they make the structure of a proof apparent, making
+    it more readable. Also, bullets instruct Coq to ensure that a
+    subgoal is complete before trying to verify the next one,
+    preventing proofs for different subgoals from getting mixed
+    up. These issues become especially important in large
+    developments, where fragile proofs lead to long debugging
+    sessions.
+
+<div class="paragraph"> </div>
+
+    There are no hard and fast rules for how proofs should be
+    formatted in Coq &mdash; in particular, where lines should be broken
+    and how sections of the proof should be indented to indicate their
+    nested structure.  However, if the places where multiple subgoals
+    are generated are marked with explicit bullets at the beginning of
+    lines, then the proof will be readable almost no matter what
+    choices are made about other aspects of layout.
+
+<div class="paragraph"> </div>
+
+    This is also a good place to mention one other piece of somewhat
+    obvious advice about line lengths.  Beginning Coq users sometimes
+    tend to the extremes, either writing each tactic on its own line
+    or writing entire proofs on one line.  Good style lies somewhere
+    in the middle.  One reasonable convention is to limit yourself to
+    80-character lines.
+
+<div class="paragraph"> </div>
+
+    The <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> tactic can be used with any inductively defined
+    datatype.  For example, we use it next to prove that boolean
+    negation is involutive &mdash; i.e., that negation is its own
+    inverse. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">negb_involutive</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">b</span> : <span class="id" type="var">bool</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">negb</span> (<span class="id" type="var">negb</span> <span class="id" type="var">b</span>) = <span class="id" type="var">b</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">b</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">b</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">E</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Note that the <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> here has no <span class="inlinecode"><span class="id" type="keyword">as</span></span> clause because
+    none of the subcases of the <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> need to bind any variables,
+    so there is no need to specify any names.  (We could also have
+    written <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode">[|]</span>, or <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode">[]</span>.)  In fact, we can omit the <span class="inlinecode"><span class="id" type="keyword">as</span></span>
+    clause from <i>any</i> <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> and Coq will fill in variable names
+    automatically.  This is generally considered bad style, since Coq
+    often makes confusing choices of names when left to its own
+    devices.
+
+<div class="paragraph"> </div>
+
+    It is sometimes useful to invoke <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> inside a subgoal,
+    generating yet more proof obligations. In this case, we use
+    different kinds of bullets to mark goals on different "levels."
+    For example: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_commutative</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span>, <span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> = <span class="id" type="var">andb</span> <span class="id" type="var">c</span> <span class="id" type="var">b</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">b</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Eb</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">destruct</span> <span class="id" type="var">c</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">destruct</span> <span class="id" type="var">c</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Each pair of calls to <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span> corresponds to the
+    subgoals that were generated after the execution of the <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> <span class="inlinecode"><span class="id" type="var">c</span></span>
+    line right above it. 
+<div class="paragraph"> </div>
+
+ Besides <span class="inlinecode">-</span> and <span class="inlinecode">+</span>, we can use <span class="inlinecode">*</span> (asterisk) as a third kind of
+    bullet.  We can also enclose sub-proofs in curly braces, which is
+    useful in case we ever encounter a proof that generates more than
+    three levels of subgoals: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_commutative'</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span>, <span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> = <span class="id" type="var">andb</span> <span class="id" type="var">c</span> <span class="id" type="var">b</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">b</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Eb</span>.<br/>
+&nbsp;&nbsp;{ <span class="id" type="tactic">destruct</span> <span class="id" type="var">c</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">reflexivity</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">reflexivity</span>. } }<br/>
+&nbsp;&nbsp;{ <span class="id" type="tactic">destruct</span> <span class="id" type="var">c</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">reflexivity</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">reflexivity</span>. } }<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Since curly braces mark both the beginning and the end of a
+    proof, they can be used for multiple subgoal levels, as this
+    example shows. Furthermore, curly braces allow us to reuse the
+    same bullet shapes at multiple levels in a proof: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb3_exchange</span> :<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span> <span class="id" type="var">d</span>, <span class="id" type="var">andb</span> (<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span>) <span class="id" type="var">d</span> = <span class="id" type="var">andb</span> (<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">d</span>) <span class="id" type="var">c</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> <span class="id" type="var">d</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">b</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Eb</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">destruct</span> <span class="id" type="var">c</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">destruct</span> <span class="id" type="var">d</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ed</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">destruct</span> <span class="id" type="var">d</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ed</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>. }<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">destruct</span> <span class="id" type="var">c</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">destruct</span> <span class="id" type="var">d</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ed</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" type="tactic">destruct</span> <span class="id" type="var">d</span> <span class="id" type="var">eqn</span>:<span class="id" type="var">Ed</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>. }<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Before closing the chapter, let's mention one final
+    convenience.  As you may have noticed, many proofs perform case
+    analysis on a variable right after introducing it:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span>&nbsp;<span class="id" type="var">x</span>&nbsp;<span class="id" type="var">y</span>. <span class="id" type="tactic">destruct</span>&nbsp;<span class="id" type="var">y</span>&nbsp;<span class="id" type="keyword">as</span>&nbsp;[|<span class="id" type="var">y</span>]&nbsp;<span class="id" type="var">eqn</span>:<span class="id" type="var">E</span>.
+<div class="paragraph"> </div>
+
+</div>
+    This pattern is so common that Coq provides a shorthand for it: we
+    can perform case analysis on a variable when introducing it by
+    using an intro pattern instead of a variable name. For instance,
+    here is a shorter proof of the <span class="inlinecode"><span class="id" type="var">plus_1_neq_0</span></span> theorem
+    above.  (You'll also note one downside of this shorthand: we lose
+    the equation recording the assumption we are making in each
+    subgoal, which we previously got from the <span class="inlinecode"><span class="id" type="var">eqn</span>:<span class="id" type="var">E</span></span> annotation.) 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">plus_1_neq_0'</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> + 1) =? 0 = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> [|<span class="id" type="var">n</span>].<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+If there are no arguments to name, we can just write <span class="inlinecode">[]</span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_commutative''</span> :<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span>, <span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> = <span class="id" type="var">andb</span> <span class="id" type="var">c</span> <span class="id" type="var">b</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> [] [].<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab38"></a><h4 class="section">Exercise: 2 stars, standard (andb_true_elim2)</h4>
+ Prove the following claim, marking cases (and subcases) with
+    bullets when you use <span class="inlinecode"><span class="id" type="tactic">destruct</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_true_elim2</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">b</span> <span class="id" type="var">c</span> : <span class="id" type="var">bool</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> = <span class="id" type="var">true</span> → <span class="id" type="var">c</span> = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab39"></a><h4 class="section">Exercise: 1 star, standard (zero_nbeq_plus_1)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">zero_nbeq_plus_1</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> : <span class="id" type="var">nat</span>,<br/>
+&nbsp;&nbsp;0 =? (<span class="id" type="var">n</span> + 1) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+
+<div class="doc">
+<a name="lab40"></a><h2 class="section">More on Notation (Optional)</h2>
+
+<div class="paragraph"> </div>
+
+ (In general, sections marked Optional are not needed to follow the
+    rest of the book, except possibly other Optional sections.  On a
+    first reading, you might want to skim these sections so that you
+    know what's there for future reference.)
+
+<div class="paragraph"> </div>
+
+    Recall the notation definitions for infix plus and times: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Notation</span> "x + y" := (<span class="id" type="var">plus</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 50, <span class="id" type="var">left</span> <span class="id" type="var">associativity</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">nat_scope</span>.<br/>
+<span class="id" type="keyword">Notation</span> "x * y" := (<span class="id" type="var">mult</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40, <span class="id" type="var">left</span> <span class="id" type="var">associativity</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">nat_scope</span>.<br/>
+</div>
+
+<div class="doc">
+For each notation symbol in Coq, we can specify its <i>precedence
+    level</i> and its <i>associativity</i>.  The precedence level <span class="inlinecode"><span class="id" type="var">n</span></span> is
+    specified by writing <span class="inlinecode"><span class="id" type="tactic">at</span></span> <span class="inlinecode"><span class="id" type="var">level</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span>; this helps Coq parse compound
+    expressions.  The associativity setting helps to disambiguate
+    expressions containing multiple occurrences of the same
+    symbol. For example, the parameters specified above for <span class="inlinecode">+</span> and
+    <span class="inlinecode">*</span> say that the expression <span class="inlinecode">1+2*3*4</span> is shorthand for
+    <span class="inlinecode">(1+((2*3)*4))</span>. Coq uses precedence levels from 0 to 100, and
+    <i>left</i>, <i>right</i>, or <i>no</i> associativity.  We will see more examples
+    of this later, e.g., in the <a href="Lists.html"><span class="inlinecode"><span class="id" type="var">Lists</span></span></a>
+    chapter.
+
+<div class="paragraph"> </div>
+
+    Each notation symbol is also associated with a <i>notation scope</i>.
+    Coq tries to guess what scope is meant from context, so when it
+    sees <span class="inlinecode"><span class="id" type="var">S</span>(<span class="id" type="var">O</span>*<span class="id" type="var">O</span>)</span> it guesses <span class="inlinecode"><span class="id" type="var">nat_scope</span></span>, but when it sees the
+    cartesian product (tuple) type <span class="inlinecode"><span class="id" type="var">bool</span>*<span class="id" type="var">bool</span></span> (which we'll see in
+    later chapters) it guesses <span class="inlinecode"><span class="id" type="var">type_scope</span></span>.  Occasionally, it is
+    necessary to help it out with percent-notation by writing
+    <span class="inlinecode">(<span class="id" type="var">x</span>*<span class="id" type="var">y</span>)%<span class="id" type="var">nat</span></span>, and sometimes in what Coq prints it will use <span class="inlinecode">%<span class="id" type="var">nat</span></span>
+    to indicate what scope a notation is in.
+
+<div class="paragraph"> </div>
+
+    Notation scopes also apply to numeral notation (<span class="inlinecode">3</span>, <span class="inlinecode">4</span>, <span class="inlinecode">5</span>,
+    etc.), so you may sometimes see <span class="inlinecode">0%<span class="id" type="var">nat</span></span>, which means <span class="inlinecode"><span class="id" type="var">O</span></span> (the
+    natural number <span class="inlinecode">0</span> that we're using in this chapter), or <span class="inlinecode">0%<span class="id" type="var">Z</span></span>,
+    which means the Integer zero (which comes from a different part of
+    the standard library).
+
+<div class="paragraph"> </div>
+
+    Pro tip: Coq's notation mechanism is not especially powerful.
+    Don't expect too much from it! 
+</div>
+
+<div class="doc">
+<a name="lab41"></a><h2 class="section">Fixpoints and Structural Recursion (Optional)</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a copy of the definition of addition: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">plus'</span> (<span class="id" type="var">n</span> : <span class="id" type="var">nat</span>) (<span class="id" type="var">m</span> : <span class="id" type="var">nat</span>) : <span class="id" type="var">nat</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">n</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">O</span> ⇒ <span class="id" type="var">m</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">S</span> <span class="id" type="var">n'</span> ⇒ <span class="id" type="var">S</span> (<span class="id" type="var">plus'</span> <span class="id" type="var">n'</span> <span class="id" type="var">m</span>)<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+When Coq checks this definition, it notes that <span class="inlinecode"><span class="id" type="var">plus'</span></span> is
+    "decreasing on 1st argument."  What this means is that we are
+    performing a <i>structural recursion</i> over the argument <span class="inlinecode"><span class="id" type="var">n</span></span> &mdash; i.e.,
+    that we make recursive calls only on strictly smaller values of
+    <span class="inlinecode"><span class="id" type="var">n</span></span>.  This implies that all calls to <span class="inlinecode"><span class="id" type="var">plus'</span></span> will eventually
+    terminate.  Coq demands that some argument of <i>every</i> <span class="inlinecode"><span class="id" type="keyword">Fixpoint</span></span>
+    definition is "decreasing."
+
+<div class="paragraph"> </div>
+
+    This requirement is a fundamental feature of Coq's design: In
+    particular, it guarantees that every function that can be defined
+    in Coq will terminate on all inputs.  However, because Coq's
+    "decreasing analysis" is not very sophisticated, it is sometimes
+    necessary to write functions in slightly unnatural ways. 
+<div class="paragraph"> </div>
+
+<a name="lab42"></a><h4 class="section">Exercise: 2 stars, standard, optional (decreasing)</h4>
+ To get a concrete sense of this, find a way to write a sensible
+    <span class="inlinecode"><span class="id" type="keyword">Fixpoint</span></span> definition (of a simple function on numbers, say) that
+    <i>does</i> terminate on all inputs, but that Coq will reject because
+    of this restriction.  (If you choose to turn in this optional
+    exercise as part of a homework assignment, make sure you comment
+    out your solution so that it doesn't cause Coq to reject the whole
+    file!) 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+
+<div class="doc">
+<a name="lab43"></a><h1 class="section">More Exercises</h1>
+
+<div class="paragraph"> </div>
+
+ Each SF chapter comes with a tester file (e.g.  <span class="inlinecode"><span class="id" type="var">BasicsTest.v</span></span>),
+    containing scripts that check most of the exercises. You can run
+    <span class="inlinecode"><span class="id" type="var">make</span></span> <span class="inlinecode"><span class="id" type="var">BasicsTest.vo</span></span> in a terminal and check its output to make
+    sure you didn't miss anything. 
+<div class="paragraph"> </div>
+
+<a name="lab44"></a><h4 class="section">Exercise: 1 star, standard (indentity_fn_applied_twice)</h4>
+ Use the tactics you have learned so far to prove the following
+    theorem about boolean functions. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">identity_fn_applied_twice</span> :<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">f</span> : <span class="id" type="var">bool</span> → <span class="id" type="var">bool</span>),<br/>
+&nbsp;&nbsp;(<span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">x</span> : <span class="id" type="var">bool</span>), <span class="id" type="var">f</span> <span class="id" type="var">x</span> = <span class="id" type="var">x</span>) →<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">b</span> : <span class="id" type="var">bool</span>), <span class="id" type="var">f</span> (<span class="id" type="var">f</span> <span class="id" type="var">b</span>) = <span class="id" type="var">b</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab45"></a><h4 class="section">Exercise: 1 star, standard (negation_fn_applied_twice)</h4>
+ Now state and prove a theorem <span class="inlinecode"><span class="id" type="var">negation_fn_applied_twice</span></span> similar
+    to the previous one but where the second hypothesis says that the
+    function <span class="inlinecode"><span class="id" type="var">f</span></span> has the property that <span class="inlinecode"><span class="id" type="var">f</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">negb</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;The&nbsp;<span class="inlinecode"><span class="id" type="keyword">Import</span></span>&nbsp;statement&nbsp;on&nbsp;the&nbsp;next&nbsp;line&nbsp;tells&nbsp;Coq&nbsp;to&nbsp;use&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;standard&nbsp;library&nbsp;String&nbsp;module.&nbsp;&nbsp;We'll&nbsp;use&nbsp;strings&nbsp;more&nbsp;in&nbsp;later<br/>
+&nbsp;&nbsp;&nbsp;chapters,&nbsp;but&nbsp;for&nbsp;the&nbsp;moment&nbsp;we&nbsp;just&nbsp;need&nbsp;syntax&nbsp;for&nbsp;literal<br/>
+&nbsp;&nbsp;&nbsp;strings&nbsp;for&nbsp;the&nbsp;grader&nbsp;comments.&nbsp;*)</span><br/>
+<span class="id" type="var">From</span> <span class="id" type="var">Coq</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Export</span> <span class="id" type="var">String</span>.<br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">manual_grade_for_negation_fn_applied_twice</span> : <span class="id" type="var">option</span> (<span class="id" type="var">nat</span>*<span class="id" type="var">string</span>) := <span class="id" type="var">None</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab46"></a><h4 class="section">Exercise: 3 stars, standard, optional (andb_eq_orb)</h4>
+ Prove the following theorem.  (Hint: This one can be a bit tricky,
+    depending on how you approach it.  You will probably need both
+    <span class="inlinecode"><span class="id" type="tactic">destruct</span></span> and <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span>, but destructing everything in sight is
+    not the best way.) 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">andb_eq_orb</span> :<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">b</span> <span class="id" type="var">c</span> : <span class="id" type="var">bool</span>),<br/>
+&nbsp;&nbsp;(<span class="id" type="var">andb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> = <span class="id" type="var">orb</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span>) →<br/>
+&nbsp;&nbsp;<span class="id" type="var">b</span> = <span class="id" type="var">c</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab47"></a><h4 class="section">Exercise: 3 stars, standard (binary)</h4>
+ We can generalize our unary representation of natural numbers to
+    the more efficient binary representation by treating a binary
+    number as a sequence of constructors <span class="inlinecode"><span class="id" type="var">A</span></span> and <span class="inlinecode"><span class="id" type="var">B</span></span> (representing 0s
+    and 1s), terminated by a <span class="inlinecode"><span class="id" type="var">Z</span></span>. For comparison, in the unary
+    representation, a number is a sequence of <span class="inlinecode"><span class="id" type="var">S</span></span>s terminated by an
+    <span class="inlinecode"><span class="id" type="var">O</span></span>.
+
+<div class="paragraph"> </div>
+
+    For example:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">decimal</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">binary</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">unary</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">B</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">B</span>&nbsp;(<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span>)))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">B</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span>))))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">A</span>&nbsp;(<span class="id" type="var">B</span>&nbsp;<span class="id" type="var">Z</span>)))&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;(<span class="id" type="var">S</span>&nbsp;<span class="id" type="var">O</span>)))))))
+<div class="paragraph"> </div>
+
+</div>
+    Note that the low-order bit is on the left and the high-order bit
+    is on the right &mdash; the opposite of the way binary numbers are
+    usually written.  This choice makes them easier to manipulate. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">bin</span> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">Z</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">A</span> (<span class="id" type="var">n</span> : <span class="id" type="var">bin</span>)<br/>
+&nbsp;&nbsp;| <span class="id" type="var">B</span> (<span class="id" type="var">n</span> : <span class="id" type="var">bin</span>).<br/>
+</div>
+
+<div class="doc">
+(a) Complete the definitions below of an increment function <span class="inlinecode"><span class="id" type="var">incr</span></span>
+        for binary numbers, and a function <span class="inlinecode"><span class="id" type="var">bin_to_nat</span></span> to convert
+        binary numbers to unary numbers. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">incr</span> (<span class="id" type="var">m</span>:<span class="id" type="var">bin</span>) : <span class="id" type="var">bin</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Fixpoint</span> <span class="id" type="var">bin_to_nat</span> (<span class="id" type="var">m</span>:<span class="id" type="var">bin</span>) : <span class="id" type="var">nat</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+   (b) Write five unit tests <span class="inlinecode"><span class="id" type="var">test_bin_incr1</span></span>, <span class="inlinecode"><span class="id" type="var">test_bin_incr2</span></span>, etc.
+        for your increment and binary-to-unary functions.  (A "unit
+        test" in Coq is a specific <span class="inlinecode"><span class="id" type="keyword">Example</span></span> that can be proved with
+        just <span class="inlinecode"><span class="id" type="tactic">reflexivity</span></span>, as we've done for several of our
+        definitions.)  Notice that incrementing a binary number and
+        then converting it to unary should yield the same result as
+        first converting it to unary and then incrementing. 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">manual_grade_for_binary</span> : <span class="id" type="var">option</span> (<span class="id" type="var">nat</span>*<span class="id" type="var">string</span>) := <span class="id" type="var">None</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;Wed&nbsp;Jan&nbsp;9&nbsp;12:02:44&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+</div>
+</div>
+
+
+
+</div>
+
+</body>
+</html>

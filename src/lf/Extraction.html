@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<title>Extraction: Extracting ML from Coq</title>
+</head>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
+<img src='common/media/image/sf_logo_sm.png'></a>
+</br><a href='index.html'>  <span class='booktitleinheader'>Volume 1: Logical Foundations</span><br></br>
+<ul id='menu'>
+   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
+   <a href='coqindex.html'><li class='section_name'>Index</li></a>
+   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+</ul>
+</a></div>
+
+<div id="main">
+
+<h1 class="libtitle">Extraction<span class="subtitle">Extracting ML from Coq</span></h1>
+
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+<a name="lab390"></a><h1 class="section">Basic Extraction</h1>
+
+<div class="paragraph"> </div>
+
+ In its simplest form, extracting an efficient program from one
+    written in Coq is completely straightforward.
+
+<div class="paragraph"> </div>
+
+    First we say what language we want to extract into.  Options are
+    OCaml (the most mature), Haskell (mostly works), and Scheme (a bit
+    out of date). 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Require</span> <span class="id" type="var">Coq.extraction.Extraction</span>.<br/>
+<span class="id" type="var">Extraction</span> <span class="id" type="var">Language</span> <span class="id" type="var">OCaml</span>.<br/>
+</div>
+
+<div class="doc">
+Now we load up the Coq environment with some definitions, either
+    directly or by importing them from other modules. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">From</span> <span class="id" type="var">Coq</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Arith.Arith</span>.<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">Coq</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Init.Nat</span>.<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">Coq</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Arith.EqNat</span>.<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">LF</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">ImpCEvalFun</span>.<br/>
+</div>
+
+<div class="doc">
+Finally, we tell Coq the name of a definition to extract and the
+    name of a file to put the extracted code into. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Extraction</span> "imp1.ml" <span class="id" type="var">ceval_step</span>.<br/>
+</div>
+
+<div class="doc">
+When Coq processes this command, it generates a file <span class="inlinecode"><span class="id" type="var">imp1.ml</span></span>
+    containing an extracted version of <span class="inlinecode"><span class="id" type="var">ceval_step</span></span>, together with
+    everything that it recursively depends on.  Compile the present
+    <span class="inlinecode">.<span class="id" type="var">v</span></span> file and have a look at <span class="inlinecode"><span class="id" type="var">imp1.ml</span></span> now. 
+</div>
+
+<div class="doc">
+<a name="lab391"></a><h1 class="section">Controlling Extraction of Specific Types</h1>
+
+<div class="paragraph"> </div>
+
+ We can tell Coq to extract certain <span class="inlinecode"><span class="id" type="keyword">Inductive</span></span> definitions to
+    specific OCaml types.  For each one, we must say
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> how the Coq type itself should be represented in OCaml, and
+
+</li>
+<li> how each constructor should be translated. 
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Extract</span> <span class="id" type="keyword">Inductive</span> <span class="id" type="var">bool</span> ⇒ "bool" [ "true" "false" ].<br/>
+</div>
+
+<div class="doc">
+Also, for non-enumeration types (where the constructors take
+    arguments), we give an OCaml expression that can be used as a
+    "recursor" over elements of the type.  (Think Church numerals.) 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Extract</span> <span class="id" type="keyword">Inductive</span> <span class="id" type="var">nat</span> ⇒ "int"<br/>
+&nbsp;&nbsp;[ "0" "(fun x → x + 1)" ]<br/>
+&nbsp;&nbsp;"(fun zero succ n →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if n=0 then zero () else succ (n-1))".<br/>
+</div>
+
+<div class="doc">
+We can also extract defined constants to specific OCaml terms or
+    operators. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Extract</span> <span class="id" type="var">Constant</span> <span class="id" type="var">plus</span> ⇒ "( + )".<br/>
+<span class="id" type="var">Extract</span> <span class="id" type="var">Constant</span> <span class="id" type="var">mult</span> ⇒ "( * )".<br/>
+<span class="id" type="var">Extract</span> <span class="id" type="var">Constant</span> <span class="id" type="var">eqb</span> ⇒ "( = )".<br/>
+</div>
+
+<div class="doc">
+Important: It is entirely <i>your responsibility</i> to make sure that
+    the translations you're proving make sense.  For example, it might
+    be tempting to include this one
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Extract</span>&nbsp;<span class="id" type="var">Constant</span>&nbsp;<span class="id" type="var">minus</span>&nbsp;⇒&nbsp;"( - )".
+<div class="paragraph"> </div>
+
+</div>
+    but doing so could lead to serious confusion!  (Why?)
+
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Extraction</span> "imp2.ml" <span class="id" type="var">ceval_step</span>.<br/>
+</div>
+
+<div class="doc">
+Have a look at the file <span class="inlinecode"><span class="id" type="var">imp2.ml</span></span>.  Notice how the fundamental
+    definitions have changed from <span class="inlinecode"><span class="id" type="var">imp1.ml</span></span>. 
+</div>
+
+<div class="doc">
+<a name="lab392"></a><h1 class="section">A Complete Example</h1>
+
+<div class="paragraph"> </div>
+
+ To use our extracted evaluator to run Imp programs, all we need to
+    add is a tiny driver program that calls the evaluator and prints
+    out the result.
+
+<div class="paragraph"> </div>
+
+    For simplicity, we'll print results by dumping out the first four
+    memory locations in the final state.
+
+<div class="paragraph"> </div>
+
+    Also, to make it easier to type in examples, let's extract a
+    parser from the <span class="inlinecode"><span class="id" type="var">ImpParser</span></span> Coq module.  To do this, we first need
+    to set up the right correspondence between Coq strings and lists
+    of OCaml characters. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">ExtrOcamlBasic</span>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">ExtrOcamlString</span>.<br/>
+</div>
+
+<div class="doc">
+We also need one more variant of booleans. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">Extract</span> <span class="id" type="keyword">Inductive</span> <span class="id" type="var">sumbool</span> ⇒ "bool" ["true" "false"].<br/>
+</div>
+
+<div class="doc">
+The extraction is the same as always. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="var">From</span> <span class="id" type="var">LF</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Imp</span>.<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">LF</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">ImpParser</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="var">From</span> <span class="id" type="var">LF</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Maps</span>.<br/>
+<span class="id" type="var">Extraction</span> "imp.ml" <span class="id" type="var">empty_st</span> <span class="id" type="var">ceval_step</span> <span class="id" type="var">parse</span>.<br/>
+</div>
+
+<div class="doc">
+Now let's run our generated Imp evaluator.  First, have a look at
+    <span class="inlinecode"><span class="id" type="var">impdriver.ml</span></span>.  (This was written by hand, not extracted.)
+
+<div class="paragraph"> </div>
+
+    Next, compile the driver together with the extracted code and
+    execute it, as follows.
+<pre>
+        ocamlc -w -20 -w -26 -o impdriver imp.mli imp.ml impdriver.ml
+        ./impdriver
+</pre>
+    (The <span class="inlinecode">-<span class="id" type="var">w</span></span> flags to <span class="inlinecode"><span class="id" type="var">ocamlc</span></span> are just there to suppress a few
+    spurious warnings.) 
+</div>
+
+<div class="doc">
+<a name="lab393"></a><h1 class="section">Discussion</h1>
+
+<div class="paragraph"> </div>
+
+ Since we've proved that the <span class="inlinecode"><span class="id" type="var">ceval_step</span></span> function behaves the same
+    as the <span class="inlinecode"><span class="id" type="var">ceval</span></span> relation in an appropriate sense, the extracted
+    program can be viewed as a <i>certified</i> Imp interpreter.  Of
+    course, the parser we're using is not certified, since we didn't
+    prove anything about it! 
+</div>
+
+<div class="doc">
+<a name="lab394"></a><h1 class="section">Going Further</h1>
+
+<div class="paragraph"> </div>
+
+ Further details about extraction can be found in the Extract
+    chapter in <i>Verified Functional Algorithms</i> (<i>Software
+    Foundations</i> volume 3). 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;Wed&nbsp;Jan&nbsp;9&nbsp;12:02:46&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+</div>
+</div>
+
+
+
+</div>
+
+</body>
+</html>

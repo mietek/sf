@@ -1,0 +1,637 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<title>Rel: Properties of Relations</title>
+</head>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
+<img src='common/media/image/sf_logo_sm.png'></a>
+</br><a href='index.html'>  <span class='booktitleinheader'>Volume 1: Logical Foundations</span><br></br>
+<ul id='menu'>
+   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
+   <a href='coqindex.html'><li class='section_name'>Index</li></a>
+   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+</ul>
+</a></div>
+
+<div id="main">
+
+<h1 class="libtitle">Rel<span class="subtitle">Properties of Relations</span></h1>
+
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ This short (and optional) chapter develops some basic definitions
+    and a few theorems about binary relations in Coq.  The key
+    definitions are repeated where they are actually used (in the
+    <a href="https://www.cis.upenn.edu/~bcpierce/sf/plf-current/Smallstep.html"><span class="inlineref">Smallstep</span></a> chapter of <i>Programming Language Foundations</i>),
+    so readers who are already comfortable with these ideas can safely
+    skim or skip this chapter.  However, relations are also a good
+    source of exercises for developing facility with Coq's basic
+    reasoning facilities, so it may be useful to look at this material
+    just after the <span class="inlinecode"><span class="id" type="var">IndProp</span></span> chapter. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Set</span> <span class="id" type="var">Warnings</span> "-notation-overridden,-parsing".<br/>
+<span class="id" type="var">From</span> <span class="id" type="var">LF</span> <span class="id" type="keyword">Require</span> <span class="id" type="keyword">Export</span> <span class="id" type="var">IndProp</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab299"></a><h1 class="section">Relations</h1>
+
+<div class="paragraph"> </div>
+
+ A binary <i>relation</i> on a set <span class="inlinecode"><span class="id" type="var">X</span></span> is a family of propositions
+    parameterized by two elements of <span class="inlinecode"><span class="id" type="var">X</span></span> &mdash; i.e., a proposition about
+    pairs of elements of <span class="inlinecode"><span class="id" type="var">X</span></span>.  
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">relation</span> (<span class="id" type="var">X</span>: <span class="id" type="keyword">Type</span>) := <span class="id" type="var">X</span> → <span class="id" type="var">X</span> → <span class="id" type="keyword">Prop</span>.<br/>
+</div>
+
+<div class="doc">
+Confusingly, the Coq standard library hijacks the generic term
+    "relation" for this specific instance of the idea. To maintain
+    consistency with the library, we will do the same.  So, henceforth
+    the Coq identifier <span class="inlinecode"><span class="id" type="var">relation</span></span> will always refer to a binary
+    relation between some set and itself, whereas the English word
+    "relation" can refer either to the specific Coq concept or the
+    more general concept of a relation between any number of possibly
+    different sets.  The context of the discussion should always make
+    clear which is meant. 
+<div class="paragraph"> </div>
+
+ An example relation on <span class="inlinecode"><span class="id" type="var">nat</span></span> is <span class="inlinecode"><span class="id" type="var">le</span></span>, the less-than-or-equal-to
+    relation, which we usually write <span class="inlinecode"><span class="id" type="var">n<sub>1</sub></span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" type="var">n<sub>2</sub></span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Print</span> <span class="id" type="var">le</span>.<br/>
+<span class="comment">(*&nbsp;====&gt;&nbsp;Inductive&nbsp;le&nbsp;(n&nbsp;:&nbsp;nat)&nbsp;:&nbsp;nat&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;Prop&nbsp;:=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;le_n&nbsp;:&nbsp;n&nbsp;&lt;=&nbsp;n<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;le_S&nbsp;:&nbsp;forall&nbsp;m&nbsp;:&nbsp;nat,&nbsp;n&nbsp;&lt;=&nbsp;m&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;n&nbsp;&lt;=&nbsp;S&nbsp;m&nbsp;*)</span><br/>
+<span class="id" type="keyword">Check</span> <span class="id" type="var">le</span> : <span class="id" type="var">nat</span> → <span class="id" type="var">nat</span> → <span class="id" type="keyword">Prop</span>.<br/>
+<span class="id" type="keyword">Check</span> <span class="id" type="var">le</span> : <span class="id" type="var">relation</span> <span class="id" type="var">nat</span>.<br/>
+</div>
+
+<div class="doc">
+(Why did we write it this way instead of starting with <span class="inlinecode"><span class="id" type="keyword">Inductive</span></span>
+    <span class="inlinecode"><span class="id" type="var">le</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">relation</span></span> <span class="inlinecode"><span class="id" type="var">nat</span>...</span>?  Because we wanted to put the first <span class="inlinecode"><span class="id" type="var">nat</span></span>
+    to the left of the <span class="inlinecode">:</span>, which makes Coq generate a somewhat nicer
+    induction principle for reasoning about <span class="inlinecode">≤</span>.) 
+</div>
+
+<div class="doc">
+<a name="lab300"></a><h1 class="section">Basic Properties</h1>
+
+<div class="paragraph"> </div>
+
+ As anyone knows who has taken an undergraduate discrete math
+    course, there is a lot to be said about relations in general,
+    including ways of classifying relations (as reflexive, transitive,
+    etc.), theorems that can be proved generically about certain sorts
+    of relations, constructions that build one relation from another,
+    etc.  For example... 
+<div class="paragraph"> </div>
+
+<a name="lab301"></a><h3 class="section">Partial Functions</h3>
+
+<div class="paragraph"> </div>
+
+ A relation <span class="inlinecode"><span class="id" type="var">R</span></span> on a set <span class="inlinecode"><span class="id" type="var">X</span></span> is a <i>partial function</i> if, for every
+    <span class="inlinecode"><span class="id" type="var">x</span></span>, there is at most one <span class="inlinecode"><span class="id" type="var">y</span></span> such that <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y</span></span> &mdash; i.e., <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y<sub>1</sub></span></span>
+    and <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y<sub>2</sub></span></span> together imply <span class="inlinecode"><span class="id" type="var">y<sub>1</sub></span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">y<sub>2</sub></span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">partial_function</span> {<span class="id" type="var">X</span>: <span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">x</span> <span class="id" type="var">y<sub>1</sub></span> <span class="id" type="var">y<sub>2</sub></span> : <span class="id" type="var">X</span>, <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y<sub>1</sub></span> → <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y<sub>2</sub></span> → <span class="id" type="var">y<sub>1</sub></span> = <span class="id" type="var">y<sub>2</sub></span>.<br/>
+</div>
+
+<div class="doc">
+For example, the <span class="inlinecode"><span class="id" type="var">next_nat</span></span> relation defined earlier is a partial
+    function. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Print</span> <span class="id" type="var">next_nat</span>.<br/>
+<span class="comment">(*&nbsp;====&gt;&nbsp;Inductive&nbsp;next_nat&nbsp;(n&nbsp;:&nbsp;nat)&nbsp;:&nbsp;nat&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;Prop&nbsp;:=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nn&nbsp;:&nbsp;next_nat&nbsp;n&nbsp;(S&nbsp;n)&nbsp;*)</span><br/>
+<span class="id" type="keyword">Check</span> <span class="id" type="var">next_nat</span> : <span class="id" type="var">relation</span> <span class="id" type="var">nat</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">next_nat_partial_function</span> :<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" type="var">partial_function</span> <span class="id" type="var">next_nat</span>.<br/>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">partial_function</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y<sub>1</sub></span> <span class="id" type="var">y<sub>2</sub></span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>1</sub></span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+However, the <span class="inlinecode">≤</span> relation on numbers is not a partial
+    function.  (Assume, for a contradiction, that <span class="inlinecode">≤</span> is a partial
+    function.  But then, since <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode">0</span> and <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode">1</span>, it follows that
+    <span class="inlinecode">0</span> <span class="inlinecode">=</span> <span class="inlinecode">1</span>.  This is nonsense, so our assumption was
+    contradictory.) 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_not_a_partial_function</span> :<br/>
+&nbsp;&nbsp;¬(<span class="id" type="var">partial_function</span> <span class="id" type="var">le</span>).<br/>
+<div class="togglescript" id="proofcontrol2" onclick="toggleDisplay('proof2');toggleDisplay('proofcontrol2')"><span class="show"></span></div>
+<div class="proofscript" id="proof2" onclick="toggleDisplay('proof2');toggleDisplay('proofcontrol2')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">not</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">partial_function</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">Hc</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (0 = 1) <span class="id" type="keyword">as</span> <span class="id" type="var">Nonsense</span>. {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">Hc</span> <span class="id" type="keyword">with</span> (<span class="id" type="var">x</span> := 0).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <span class="id" type="var">le_n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <span class="id" type="var">le_S</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">le_n</span>. }<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">discriminate</span> <span class="id" type="var">Nonsense</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+<a name="lab302"></a><h4 class="section">Exercise: 2 stars, standard, optional (total_relation_not_partial)</h4>
+ Show that the <span class="inlinecode"><span class="id" type="var">total_relation</span></span> defined in (an exercise in)
+    <a href="IndProp.html"><span class="inlineref">IndProp</span></a> is not a partial function. 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab303"></a><h4 class="section">Exercise: 2 stars, standard, optional (empty_relation_partial)</h4>
+ Show that the <span class="inlinecode"><span class="id" type="var">empty_relation</span></span> defined in (an exercise in)
+    <a href="IndProp.html"><span class="inlineref">IndProp</span></a> is a partial function. 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab304"></a><h3 class="section">Reflexive Relations</h3>
+
+<div class="paragraph"> </div>
+
+ A <i>reflexive</i> relation on a set <span class="inlinecode"><span class="id" type="var">X</span></span> is one for which every element
+    of <span class="inlinecode"><span class="id" type="var">X</span></span> is related to itself. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">reflexive</span> {<span class="id" type="var">X</span>: <span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">a</span> : <span class="id" type="var">X</span>, <span class="id" type="var">R</span> <span class="id" type="var">a</span> <span class="id" type="var">a</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_reflexive</span> :<br/>
+&nbsp;&nbsp;<span class="id" type="var">reflexive</span> <span class="id" type="var">le</span>.<br/>
+<div class="togglescript" id="proofcontrol3" onclick="toggleDisplay('proof3');toggleDisplay('proofcontrol3')"><span class="show"></span></div>
+<div class="proofscript" id="proof3" onclick="toggleDisplay('proof3');toggleDisplay('proofcontrol3')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">reflexive</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">le_n</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+<a name="lab305"></a><h3 class="section">Transitive Relations</h3>
+
+<div class="paragraph"> </div>
+
+ A relation <span class="inlinecode"><span class="id" type="var">R</span></span> is <i>transitive</i> if <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">a</span></span> <span class="inlinecode"><span class="id" type="var">c</span></span> holds whenever <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">a</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span>
+    and <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> <span class="inlinecode"><span class="id" type="var">c</span></span> do. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">transitive</span> {<span class="id" type="var">X</span>: <span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">a</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> : <span class="id" type="var">X</span>, (<span class="id" type="var">R</span> <span class="id" type="var">a</span> <span class="id" type="var">b</span>) → (<span class="id" type="var">R</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span>) → (<span class="id" type="var">R</span> <span class="id" type="var">a</span> <span class="id" type="var">c</span>).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_trans</span> :<br/>
+&nbsp;&nbsp;<span class="id" type="var">transitive</span> <span class="id" type="var">le</span>.<br/>
+<div class="togglescript" id="proofcontrol4" onclick="toggleDisplay('proof4');toggleDisplay('proofcontrol4')"><span class="show"></span></div>
+<div class="proofscript" id="proof4" onclick="toggleDisplay('proof4');toggleDisplay('proofcontrol4')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">Hnm</span> <span class="id" type="var">Hmo</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hmo</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;le_n&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">Hnm</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;le_S&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">le_S</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">IHHmo</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+
+<br/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">lt_trans</span>:<br/>
+&nbsp;&nbsp;<span class="id" type="var">transitive</span> <span class="id" type="var">lt</span>.<br/>
+<div class="togglescript" id="proofcontrol5" onclick="toggleDisplay('proof5');toggleDisplay('proofcontrol5')"><span class="show"></span></div>
+<div class="proofscript" id="proof5" onclick="toggleDisplay('proof5');toggleDisplay('proofcontrol5')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">lt</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">transitive</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">Hnm</span> <span class="id" type="var">Hmo</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">le_S</span> <span class="id" type="keyword">in</span> <span class="id" type="var">Hnm</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">le_trans</span> <span class="id" type="keyword">with</span> (<span class="id" type="var">a</span> := (<span class="id" type="var">S</span> <span class="id" type="var">n</span>)) (<span class="id" type="var">b</span> := (<span class="id" type="var">S</span> <span class="id" type="var">m</span>)) (<span class="id" type="var">c</span> := <span class="id" type="var">o</span>).<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">Hnm</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">Hmo</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+<a name="lab306"></a><h4 class="section">Exercise: 2 stars, standard, optional (le_trans_hard_way)</h4>
+ We can also prove <span class="inlinecode"><span class="id" type="var">lt_trans</span></span> more laboriously by induction,
+    without using <span class="inlinecode"><span class="id" type="var">le_trans</span></span>.  Do this. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">lt_trans'</span> :<br/>
+&nbsp;&nbsp;<span class="id" type="var">transitive</span> <span class="id" type="var">lt</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Prove&nbsp;this&nbsp;by&nbsp;induction&nbsp;on&nbsp;evidence&nbsp;that&nbsp;<span class="inlinecode"><span class="id" type="var">m</span></span>&nbsp;is&nbsp;less&nbsp;than&nbsp;<span class="inlinecode"><span class="id" type="var">o</span></span>.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">lt</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">transitive</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">Hnm</span> <span class="id" type="var">Hmo</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hmo</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span> <span class="id" type="var">Hm'o</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab307"></a><h4 class="section">Exercise: 2 stars, standard, optional (lt_trans'')</h4>
+ Prove the same thing again by induction on <span class="inlinecode"><span class="id" type="var">o</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">lt_trans''</span> :<br/>
+&nbsp;&nbsp;<span class="id" type="var">transitive</span> <span class="id" type="var">lt</span>.<br/>
+<div class="togglescript" id="proofcontrol6" onclick="toggleDisplay('proof6');toggleDisplay('proofcontrol6')"><span class="show"></span></div>
+<div class="proofscript" id="proof6" onclick="toggleDisplay('proof6');toggleDisplay('proofcontrol6')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">lt</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">transitive</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">Hnm</span> <span class="id" type="var">Hmo</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">o</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">o'</span>].<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+ The transitivity of <span class="inlinecode"><span class="id" type="var">le</span></span>, in turn, can be used to prove some facts
+    that will be useful later (e.g., for the proof of antisymmetry
+    below)... 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_Sn_le</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>, <span class="id" type="var">S</span> <span class="id" type="var">n</span> ≤ <span class="id" type="var">m</span> → <span class="id" type="var">n</span> ≤ <span class="id" type="var">m</span>.<br/>
+<div class="togglescript" id="proofcontrol7" onclick="toggleDisplay('proof7');toggleDisplay('proofcontrol7')"><span class="show"></span></div>
+<div class="proofscript" id="proof7" onclick="toggleDisplay('proof7');toggleDisplay('proofcontrol7')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">le_trans</span> <span class="id" type="keyword">with</span> (<span class="id" type="var">S</span> <span class="id" type="var">n</span>).<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <span class="id" type="var">le_S</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">le_n</span>.<br/>
+&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+<a name="lab308"></a><h4 class="section">Exercise: 1 star, standard, optional (le_S_n)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_S_n</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">S</span> <span class="id" type="var">n</span> ≤ <span class="id" type="var">S</span> <span class="id" type="var">m</span>) → (<span class="id" type="var">n</span> ≤ <span class="id" type="var">m</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab309"></a><h4 class="section">Exercise: 2 stars, standard, optional (le_Sn_n_inf)</h4>
+ Provide an informal proof of the following theorem:
+
+<div class="paragraph"> </div>
+
+    Theorem: For every <span class="inlinecode"><span class="id" type="var">n</span></span>, <span class="inlinecode">¬</span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" type="var">n</span>)</span>
+
+<div class="paragraph"> </div>
+
+    A formal proof of this is an optional exercise below, but try
+    writing an informal proof without doing the formal proof first.
+
+<div class="paragraph"> </div>
+
+    Proof: 
+</div>
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab310"></a><h4 class="section">Exercise: 1 star, standard, optional (le_Sn_n)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_Sn_n</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span>,<br/>
+&nbsp;&nbsp;¬(<span class="id" type="var">S</span> <span class="id" type="var">n</span> ≤ <span class="id" type="var">n</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+ Reflexivity and transitivity are the main concepts we'll need for
+    later chapters, but, for a bit of additional practice working with
+    relations in Coq, let's look at a few other common ones... 
+<div class="paragraph"> </div>
+
+<a name="lab311"></a><h3 class="section">Symmetric and Antisymmetric Relations</h3>
+
+<div class="paragraph"> </div>
+
+ A relation <span class="inlinecode"><span class="id" type="var">R</span></span> is <i>symmetric</i> if <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">a</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> implies <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> <span class="inlinecode"><span class="id" type="var">a</span></span>. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">symmetric</span> {<span class="id" type="var">X</span>: <span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">a</span> <span class="id" type="var">b</span> : <span class="id" type="var">X</span>, (<span class="id" type="var">R</span> <span class="id" type="var">a</span> <span class="id" type="var">b</span>) → (<span class="id" type="var">R</span> <span class="id" type="var">b</span> <span class="id" type="var">a</span>).<br/>
+</div>
+
+<div class="doc">
+<a name="lab312"></a><h4 class="section">Exercise: 2 stars, standard, optional (le_not_symmetric)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_not_symmetric</span> :<br/>
+&nbsp;&nbsp;¬(<span class="id" type="var">symmetric</span> <span class="id" type="var">le</span>).<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+ A relation <span class="inlinecode"><span class="id" type="var">R</span></span> is <i>antisymmetric</i> if <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">a</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> and <span class="inlinecode"><span class="id" type="var">R</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> <span class="inlinecode"><span class="id" type="var">a</span></span> together
+    imply <span class="inlinecode"><span class="id" type="var">a</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">b</span></span> &mdash; that is, if the only "cycles" in <span class="inlinecode"><span class="id" type="var">R</span></span> are trivial
+    ones. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">antisymmetric</span> {<span class="id" type="var">X</span>: <span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span><span class="id" type="var">a</span> <span class="id" type="var">b</span> : <span class="id" type="var">X</span>, (<span class="id" type="var">R</span> <span class="id" type="var">a</span> <span class="id" type="var">b</span>) → (<span class="id" type="var">R</span> <span class="id" type="var">b</span> <span class="id" type="var">a</span>) → <span class="id" type="var">a</span> = <span class="id" type="var">b</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab313"></a><h4 class="section">Exercise: 2 stars, standard, optional (le_antisymmetric)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_antisymmetric</span> :<br/>
+&nbsp;&nbsp;<span class="id" type="var">antisymmetric</span> <span class="id" type="var">le</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab314"></a><h4 class="section">Exercise: 2 stars, standard, optional (le_step)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_step</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">p</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> &lt; <span class="id" type="var">m</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">m</span> ≤ <span class="id" type="var">S</span> <span class="id" type="var">p</span> →<br/>
+&nbsp;&nbsp;<span class="id" type="var">n</span> ≤ <span class="id" type="var">p</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+<a name="lab315"></a><h3 class="section">Equivalence Relations</h3>
+
+<div class="paragraph"> </div>
+
+ A relation is an <i>equivalence</i> if it's reflexive, symmetric, and
+    transitive.  
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">equivalence</span> {<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">reflexive</span> <span class="id" type="var">R</span>) ∧ (<span class="id" type="var">symmetric</span> <span class="id" type="var">R</span>) ∧ (<span class="id" type="var">transitive</span> <span class="id" type="var">R</span>).<br/>
+</div>
+
+<div class="doc">
+<a name="lab316"></a><h3 class="section">Partial Orders and Preorders</h3>
+
+<div class="paragraph"> </div>
+
+ A relation is a <i>partial order</i> when it's reflexive,
+    <i>anti</i>-symmetric, and transitive.  In the Coq standard library
+    it's called just "order" for short. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">order</span> {<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">reflexive</span> <span class="id" type="var">R</span>) ∧ (<span class="id" type="var">antisymmetric</span> <span class="id" type="var">R</span>) ∧ (<span class="id" type="var">transitive</span> <span class="id" type="var">R</span>).<br/>
+</div>
+
+<div class="doc">
+A preorder is almost like a partial order, but doesn't have to be
+    antisymmetric. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Definition</span> <span class="id" type="var">preorder</span> {<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) :=<br/>
+&nbsp;&nbsp;(<span class="id" type="var">reflexive</span> <span class="id" type="var">R</span>) ∧ (<span class="id" type="var">transitive</span> <span class="id" type="var">R</span>).<br/><hr class='doublespaceincode'/>
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">le_order</span> :<br/>
+&nbsp;&nbsp;<span class="id" type="var">order</span> <span class="id" type="var">le</span>.<br/>
+<div class="togglescript" id="proofcontrol8" onclick="toggleDisplay('proof8');toggleDisplay('proofcontrol8')"><span class="show"></span></div>
+<div class="proofscript" id="proof8" onclick="toggleDisplay('proof8');toggleDisplay('proofcontrol8')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">order</span>. <span class="id" type="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="comment">(*&nbsp;refl&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">le_reflexive</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;antisym&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">le_antisymmetric</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;transitive.&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">le_trans</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+<a name="lab317"></a><h1 class="section">Reflexive, Transitive Closure</h1>
+
+<div class="paragraph"> </div>
+
+ The <i>reflexive, transitive closure</i> of a relation <span class="inlinecode"><span class="id" type="var">R</span></span> is the
+    smallest relation that contains <span class="inlinecode"><span class="id" type="var">R</span></span> and that is both reflexive and
+    transitive.  Formally, it is defined like this in the Relations
+    module of the Coq standard library: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">clos_refl_trans</span> {<span class="id" type="var">A</span>: <span class="id" type="keyword">Type</span>} (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">A</span>) : <span class="id" type="var">relation</span> <span class="id" type="var">A</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">rt_step</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> (<span class="id" type="var">H</span> : <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>) : <span class="id" type="var">clos_refl_trans</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">rt_refl</span> <span class="id" type="var">x</span> : <span class="id" type="var">clos_refl_trans</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">rt_trans</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">Hxy</span> : <span class="id" type="var">clos_refl_trans</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">Hyz</span> : <span class="id" type="var">clos_refl_trans</span> <span class="id" type="var">R</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">clos_refl_trans</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">z</span>.<br/>
+</div>
+
+<div class="doc">
+For example, the reflexive and transitive closure of the
+    <span class="inlinecode"><span class="id" type="var">next_nat</span></span> relation coincides with the <span class="inlinecode"><span class="id" type="var">le</span></span> relation. 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">next_nat_closure_is_le</span> : <span style='font-size:120%;'>&forall;</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br/>
+&nbsp;&nbsp;(<span class="id" type="var">n</span> ≤ <span class="id" type="var">m</span>) ↔ ((<span class="id" type="var">clos_refl_trans</span> <span class="id" type="var">next_nat</span>) <span class="id" type="var">n</span> <span class="id" type="var">m</span>).<br/>
+<div class="togglescript" id="proofcontrol9" onclick="toggleDisplay('proof9');toggleDisplay('proofcontrol9')"><span class="show"></span></div>
+<div class="proofscript" id="proof9" onclick="toggleDisplay('proof9');toggleDisplay('proofcontrol9')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span>. <span class="id" type="tactic">split</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intro</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;le_n&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">rt_refl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;le_S&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">rt_trans</span> <span class="id" type="keyword">with</span> <span class="id" type="var">m</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">IHle</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">rt_step</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">nn</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;&lt;-&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intro</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;rt_step&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">le_S</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">le_n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;rt_refl&nbsp;*)</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">le_n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;rt_trans&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">le_trans</span> <span class="id" type="keyword">with</span> <span class="id" type="var">y</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHclos_refl_trans1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHclos_refl_trans2</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+The above definition of reflexive, transitive closure is natural:
+    it says, explicitly, that the reflexive and transitive closure of
+    <span class="inlinecode"><span class="id" type="var">R</span></span> is the least relation that includes <span class="inlinecode"><span class="id" type="var">R</span></span> and that is closed
+    under rules of reflexivity and transitivity.  But it turns out
+    that this definition is not very convenient for doing proofs,
+    since the "nondeterminism" of the <span class="inlinecode"><span class="id" type="var">rt_trans</span></span> rule can sometimes
+    lead to tricky inductions.  Here is a more useful definition: 
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Inductive</span> <span class="id" type="var">clos_refl_trans_1n</span> {<span class="id" type="var">A</span> : <span class="id" type="keyword">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">R</span> : <span class="id" type="var">relation</span> <span class="id" type="var">A</span>) (<span class="id" type="var">x</span> : <span class="id" type="var">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" type="var">A</span> → <span class="id" type="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" type="var">rt1n_refl</span> : <span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">x</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">rt1n_trans</span> (<span class="id" type="var">y</span> <span class="id" type="var">z</span> : <span class="id" type="var">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">Hxy</span> : <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>) (<span class="id" type="var">Hrest</span> : <span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">z</span>.<br/>
+</div>
+
+<div class="doc">
+Our new definition of reflexive, transitive closure "bundles"
+    the <span class="inlinecode"><span class="id" type="var">rt_step</span></span> and <span class="inlinecode"><span class="id" type="var">rt_trans</span></span> rules into the single rule step.
+    The left-hand premise of this step is a single use of <span class="inlinecode"><span class="id" type="var">R</span></span>,
+    leading to a much simpler induction principle.
+
+<div class="paragraph"> </div>
+
+    Before we go on, we should check that the two definitions do
+    indeed define the same relation...
+
+<div class="paragraph"> </div>
+
+    First, we prove two lemmas showing that <span class="inlinecode"><span class="id" type="var">clos_refl_trans_1n</span></span> mimics
+    the behavior of the two "missing" <span class="inlinecode"><span class="id" type="var">clos_refl_trans</span></span>
+    constructors.  
+</div>
+<div class="code code-tight">
+
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">rsc_R</span> : <span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) (<span class="id" type="var">R</span>:<span class="id" type="var">relation</span> <span class="id" type="var">X</span>) (<span class="id" type="var">x</span> <span class="id" type="var">y</span> : <span class="id" type="var">X</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> → <span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>.<br/>
+<div class="togglescript" id="proofcontrol10" onclick="toggleDisplay('proof10');toggleDisplay('proofcontrol10')"><span class="show"></span></div>
+<div class="proofscript" id="proof10" onclick="toggleDisplay('proof10');toggleDisplay('proofcontrol10')">
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">rt1n_trans</span> <span class="id" type="keyword">with</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">rt1n_refl</span>. <span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+<a name="lab318"></a><h4 class="section">Exercise: 2 stars, standard, optional (rsc_trans)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">rsc_trans</span> :<br/>
+&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) (<span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span> : <span class="id" type="var">X</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>  →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span> →<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">z</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="doc less-space">
+<div class="paragraph"> </div>
+
+ Then we use these facts to prove that the two definitions of
+    reflexive, transitive closure do indeed define the same
+    relation. 
+<div class="paragraph"> </div>
+
+<a name="lab319"></a><h4 class="section">Exercise: 3 stars, standard, optional (rtc_rsc_coincide)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <span class="id" type="var">rtc_rsc_coincide</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-size:120%;'>&forall;</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) (<span class="id" type="var">R</span>: <span class="id" type="var">relation</span> <span class="id" type="var">X</span>) (<span class="id" type="var">x</span> <span class="id" type="var">y</span> : <span class="id" type="var">X</span>),<br/>
+&nbsp;&nbsp;<span class="id" type="var">clos_refl_trans</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> ↔ <span class="id" type="var">clos_refl_trans_1n</span> <span class="id" type="var">R</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br/>
+</div>
+
+<span class="proofbox">&#9744;</span> 
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;Wed&nbsp;Jan&nbsp;9&nbsp;12:02:46&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+</div>
+</div>
+
+
+
+</div>
+
+</body>
+</html>

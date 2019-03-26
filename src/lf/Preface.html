@@ -1,0 +1,629 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<title>Preface</title>
+</head>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
+<img src='common/media/image/sf_logo_sm.png'></a>
+</br><a href='index.html'>  <span class='booktitleinheader'>Volume 1: Logical Foundations</span><br></br>
+<ul id='menu'>
+   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
+   <a href='coqindex.html'><li class='section_name'>Index</li></a>
+   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+</ul>
+</a></div>
+
+<div id="main">
+
+<h1 class="libtitle">Preface</h1>
+
+
+
+<div class="doc">
+<a name="lab1"></a><h1 class="section">Welcome</h1>
+
+<div class="paragraph"> </div>
+
+ This is the entry point in a series of electronic textbooks on
+    various aspects of <i>Software Foundations</i> &mdash; the mathematical
+    underpinnings of reliable software.  Topics in the series include
+    basic concepts of logic, computer-assisted theorem proving, the
+    Coq proof assistant, functional programming, operational
+    semantics, logics for reasoning about programs, and static type
+    systems.  The exposition is intended for a broad range of readers,
+    from advanced undergraduates to PhD students and researchers.  No
+    specific background in logic or programming languages is assumed,
+    though a degree of mathematical maturity will be helpful.
+
+<div class="paragraph"> </div>
+
+    The principal novelty of the series is that it is one hundred
+    percent formalized and machine-checked: each text is literally a
+    script for Coq.  The books are intended to be read alongside (or
+    inside) an interactive session with Coq.  All the details in the
+    text are fully formalized in Coq, and most of the exercises are
+    designed to be worked using Coq.
+
+<div class="paragraph"> </div>
+
+    The files in each book are organized into a sequence of core
+    chapters, covering about one semester's worth of material and
+    organized into a coherent linear narrative, plus a number of
+    "offshoot" chapters covering additional topics.  All the core
+    chapters are suitable for both upper-level undergraduate and
+    graduate students.
+
+<div class="paragraph"> </div>
+
+    This book, <i>Logical Foundations</i>, lays groundwork for the others,
+    introducing the reader to the basic ideas of functional
+    programming, constructive logic, and the Coq proof assistant. 
+</div>
+
+<div class="doc">
+<a name="lab2"></a><h1 class="section">Overview</h1>
+
+<div class="paragraph"> </div>
+
+ Building reliable software is really hard.  The scale and
+    complexity of modern systems, the number of people involved, and
+    the range of demands placed on them make it extremely difficult to
+    build software that is even more-or-less correct, much less 100%
+    correct.  At the same time, the increasing degree to which
+    information processing is woven into every aspect of society
+    greatly amplifies the cost of bugs and insecurities.
+
+<div class="paragraph"> </div>
+
+    Computer scientists and software engineers have responded to these
+    challenges by developing a whole host of techniques for improving
+    software reliability, ranging from recommendations about managing
+    software projects teams (e.g., extreme programming) to design
+    philosophies for libraries (e.g., model-view-controller,
+    publish-subscribe, etc.) and programming languages (e.g.,
+    object-oriented programming, aspect-oriented programming,
+    functional programming, ...) to mathematical techniques for
+    specifying and reasoning about properties of software and tools
+    for helping validate these properties.  The <i>Software Foundations</i>
+    series is focused on this last set of techniques.
+
+<div class="paragraph"> </div>
+
+    The text is constructed around three conceptual threads:
+
+<div class="paragraph"> </div>
+
+    (1) basic tools from <i>logic</i> for making and justifying precise
+        claims about programs;
+
+<div class="paragraph"> </div>
+
+    (2) the use of <i>proof assistants</i> to construct rigorous logical
+        arguments;
+
+<div class="paragraph"> </div>
+
+    (3) <i>functional programming</i>, both as a method of programming that
+        simplifies reasoning about programs and as a bridge between
+        programming and logic.
+
+<div class="paragraph"> </div>
+
+    Some suggestions for further reading can be found in the
+    <a href="Postscript.html"><span class="inlineref">Postscript</span></a> chapter.  Bibliographic information for all
+    cited works can be found in the file <a href="Bib.html"><span class="inlineref">Bib</span></a>. 
+<div class="paragraph"> </div>
+
+<a name="lab3"></a><h2 class="section">Logic</h2>
+
+<div class="paragraph"> </div>
+
+ Logic is the field of study whose subject matter is <i>proofs</i> &mdash;
+    unassailable arguments for the truth of particular propositions.
+    Volumes have been written about the central role of logic in
+    computer science.  Manna and Waldinger called it "the calculus of
+    computer science," while Halpern et al.'s paper <i>On the Unusual
+    Effectiveness of Logic in Computer Science</i> catalogs scores of
+    ways in which logic offers critical tools and insights.  Indeed,
+    they observe that, "As a matter of fact, logic has turned out to
+    be significantly more effective in computer science than it has
+    been in mathematics.  This is quite remarkable, especially since
+    much of the impetus for the development of logic during the past
+    one hundred years came from mathematics."
+
+<div class="paragraph"> </div>
+
+    In particular, the fundamental tools of <i>inductive proof</i> are
+    ubiquitous in all of computer science.  You have surely seen them
+    before, perhaps in a course on discrete math or analysis of
+    algorithms, but in this course we will examine them more deeply
+    than you have probably done so far. 
+<div class="paragraph"> </div>
+
+<a name="lab4"></a><h2 class="section">Proof Assistants</h2>
+
+<div class="paragraph"> </div>
+
+ The flow of ideas between logic and computer science has not been
+    unidirectional: CS has also made important contributions to logic.
+    One of these has been the development of software tools for
+    helping construct proofs of logical propositions.  These tools
+    fall into two broad categories:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <i>Automated theorem provers</i> provide "push-button" operation:
+         you give them a proposition and they return either <i>true</i> or
+         <i>false</i> (or, sometimes, <i>don't know: ran out of time</i>).
+         Although their capabilities are still limited to specific
+         domains, they have matured tremendously in recent years and
+         are used now in a multitude of settings.  Examples of such
+         tools include SAT solvers, SMT solvers, and model checkers.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> <i>Proof assistants</i> are hybrid tools that automate the more
+         routine aspects of building proofs while depending on human
+         guidance for more difficult aspects.  Widely used proof
+         assistants include Isabelle, Agda, Twelf, ACL2, PVS, and Coq,
+         among many others.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    This course is based around Coq, a proof assistant that has been
+    under development since 1983 and that in recent years has
+    attracted a large community of users in both research and
+    industry.  Coq provides a rich environment for interactive
+    development of machine-checked formal reasoning.  The kernel of
+    the Coq system is a simple proof-checker, which guarantees that
+    only correct deduction steps are ever performed.  On top of this
+    kernel, the Coq environment provides high-level facilities for
+    proof development, including a large library of common definitions
+    and lemmas, powerful tactics for constructing complex proofs
+    semi-automatically, and a special-purpose programming language for
+    defining new proof-automation tactics for specific situations.
+
+<div class="paragraph"> </div>
+
+    Coq has been a critical enabler for a huge variety of work across
+    computer science and mathematics:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> As a <i>platform for modeling programming languages</i>, it has
+      become a standard tool for researchers who need to describe and
+      reason about complex language definitions.  It has been used,
+      for example, to check the security of the JavaCard platform,
+      obtaining the highest level of common criteria certification,
+      and for formal specifications of the x<sub>86</sub> and LLVM instruction
+      sets and programming languages such as C.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> As an <i>environment for developing formally certified software
+      and hardware</i>, Coq has been used, for example, to build
+      CompCert, a fully-verified optimizing compiler for C, and
+      CertiKos, a fully verified hypervisor, for proving the
+      correctness of subtle algorithms involving floating point
+      numbers, and as the basis for CertiCrypt, an environment for
+      reasoning about the security of cryptographic algorithms.  It is
+      also being used to build verified implementations of the
+      open-source RISC-V processor.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> As a <i>realistic environment for functional programming with
+      dependent types</i>, it has inspired numerous innovations.  For
+      example, the Ynot system embeds "relational Hoare reasoning" (an
+      extension of the <i>Hoare Logic</i> we will see later in this course)
+      in Coq.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> As a <i>proof assistant for higher-order logic</i>, it has been used
+      to validate a number of important results in mathematics.  For
+      example, its ability to include complex computations inside
+      proofs made it possible to develop the first formally verified
+      proof of the 4-color theorem.  This proof had previously been
+      controversial among mathematicians because part of it included
+      checking a large number of configurations using a program. In
+      the Coq formalization, everything is checked, including the
+      correctness of the computational part.  More recently, an even
+      more massive effort led to a Coq formalization of the
+      Feit-Thompson Theorem &mdash; the first major step in the
+      classification of finite simple groups.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+   By the way, in case you're wondering about the name, here's what
+   the official Coq web site at INRIA (the French national research
+   lab where Coq has mostly been developed) says about it: "Some
+   French computer scientists have a tradition of naming their
+   software as animal species: Caml, Elan, Foc or Phox are examples of
+   this tacit convention. In French, 'coq' means rooster, and it
+   sounds like the initials of the Calculus of Constructions (CoC) on
+   which it is based."  The rooster is also the national symbol of
+   France, and C-o-q are the first three letters of the name of
+   Thierry Coquand, one of Coq's early developers. 
+<div class="paragraph"> </div>
+
+<a name="lab5"></a><h2 class="section">Functional Programming</h2>
+
+<div class="paragraph"> </div>
+
+ The term <i>functional programming</i> refers both to a collection of
+    programming idioms that can be used in almost any programming
+    language and to a family of programming languages designed to
+    emphasize these idioms, including Haskell, OCaml, Standard ML,
+    F#, Scala, Scheme, Racket, Common Lisp, Clojure, Erlang, and Coq.
+
+<div class="paragraph"> </div>
+
+    Functional programming has been developed over many decades &mdash;
+    indeed, its roots go back to Church's lambda-calculus, which was
+    invented in the 1930s, well before the first computers (at least
+    the first electronic ones)!  But since the early '90s it has
+    enjoyed a surge of interest among industrial engineers and
+    language designers, playing a key role in high-value systems at
+    companies like Jane St. Capital, Microsoft, Facebook, and
+    Ericsson.
+
+<div class="paragraph"> </div>
+
+    The most basic tenet of functional programming is that, as much as
+    possible, computation should be <i>pure</i>, in the sense that the only
+    effect of execution should be to produce a result: it should be
+    free from <i>side effects</i> such as I/O, assignments to mutable
+    variables, redirecting pointers, etc.  For example, whereas an
+    <i>imperative</i> sorting function might take a list of numbers and
+    rearrange its pointers to put the list in order, a pure sorting
+    function would take the original list and return a <i>new</i> list
+    containing the same numbers in sorted order.
+
+<div class="paragraph"> </div>
+
+    A significant benefit of this style of programming is that it
+    makes programs easier to understand and reason about.  If every
+    operation on a data structure yields a new data structure, leaving
+    the old one intact, then there is no need to worry about how that
+    structure is being shared and whether a change by one part of the
+    program might break an invariant that another part of the program
+    relies on.  These considerations are particularly critical in
+    concurrent systems, where every piece of mutable state that is
+    shared between threads is a potential source of pernicious bugs.
+    Indeed, a large part of the recent interest in functional
+    programming in industry is due to its simpler behavior in the
+    presence of concurrency.
+
+<div class="paragraph"> </div>
+
+    Another reason for the current excitement about functional
+    programming is related to the first: functional programs are often
+    much easier to parallelize than their imperative counterparts.  If
+    running a computation has no effect other than producing a result,
+    then it does not matter <i>where</i> it is run.  Similarly, if a data
+    structure is never modified destructively, then it can be copied
+    freely, across cores or across the network.  Indeed, the
+    "Map-Reduce" idiom, which lies at the heart of massively
+    distributed query processors like Hadoop and is used by Google to
+    index the entire web is a classic example of functional
+    programming.
+
+<div class="paragraph"> </div>
+
+    For purposes of this course, functional programming has yet
+    another significant attraction: it serves as a bridge between
+    logic and computer science.  Indeed, Coq itself can be viewed as a
+    combination of a small but extremely expressive functional
+    programming language plus a set of tools for stating and proving
+    logical assertions.  Moreover, when we come to look more closely,
+    we find that these two sides of Coq are actually aspects of the
+    very same underlying machinery &mdash; i.e., <i>proofs are programs</i>.  
+</div>
+
+<div class="doc">
+<a name="lab6"></a><h2 class="section">Further Reading</h2>
+
+<div class="paragraph"> </div>
+
+ This text is intended to be self contained, but readers looking
+    for a deeper treatment of particular topics will find some
+    suggestions for further reading in the <a href="Postscript.html"><span class="inlineref">Postscript</span></a>
+    chapter. 
+</div>
+
+<div class="doc">
+<a name="lab7"></a><h1 class="section">Practicalities</h1>
+
+<div class="paragraph"> </div>
+
+<a name="lab8"></a><h2 class="section">Chapter Dependencies</h2>
+
+<div class="paragraph"> </div>
+
+ A diagram of the dependencies between chapters and some suggested
+    paths through the material can be found in the file <a href="deps.html"><span class="inlineref"><span class="inlinecode"><span class="id" type="var">deps.html</span></span></span></a>. 
+<div class="paragraph"> </div>
+
+<a name="lab9"></a><h2 class="section">System Requirements</h2>
+
+<div class="paragraph"> </div>
+
+ Coq runs on Windows, Linux, and macOS.  You will need:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> A current installation of Coq, available from the Coq home page.
+      These files have been tested with Coq 8.8.1.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> An IDE for interacting with Coq.  Currently, there are two
+      choices:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Proof General is an Emacs-based IDE.  It tends to be
+          preferred by users who are already comfortable with Emacs.
+          It requires a separate installation (google "Proof
+          General").
+
+<div class="paragraph"> </div>
+
+          Adventurous users of Coq within Emacs may also want to check
+          out extensions such as <span class="inlinecode"><span class="id" type="var">company</span>-<span class="id" type="var">coq</span></span> and <span class="inlinecode"><span class="id" type="var">control</span>-<span class="id" type="var">lock</span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> CoqIDE is a simpler stand-alone IDE.  It is distributed with
+          Coq, so it should be available once you have Coq installed.
+          It can also be compiled from scratch, but on some platforms
+          this may involve installing additional packages for GUI
+          libraries and such.
+
+<div class="paragraph"> </div>
+
+          Users who like CoqIDE should consider running it with the
+          "asynchronous" and "error resilience" modes disabled:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+<span class="id" type="var">coqide</span>&nbsp;-<span class="id" type="var">async</span>-<span class="id" type="var">proofs</span>&nbsp;<span class="id" type="var">off</span>&nbsp;-<span class="id" type="var">async</span>-<span class="id" type="var">proofs</span>-<span class="id" type="var">command</span>-<span class="id" type="var">error</span>-<span class="id" type="var">resilience</span>&nbsp;<span class="id" type="var">off</span>&nbsp;<span class="id" type="var">Foo.v</span>&nbsp;&amp;
+<div class="paragraph"> </div>
+
+</div>
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+<a name="lab10"></a><h2 class="section">Exercises</h2>
+
+<div class="paragraph"> </div>
+
+ Each chapter includes numerous exercises.  Each is marked with a
+    "star rating," which can be interpreted as follows:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> One star: easy exercises that underscore points in the text
+         and that, for most readers, should take only a minute or two.
+         Get in the habit of working these as you reach them.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Two stars: straightforward exercises (five or ten minutes).
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Three stars: exercises requiring a bit of thought (ten
+         minutes to half an hour).
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Four and five stars: more difficult exercises (half an hour
+         and up).
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    Also, some exercises are marked "advanced," and some are marked
+    "optional."  Doing just the non-optional, non-advanced exercises
+    should provide good coverage of the core material.  Optional
+    exercises provide a bit of extra practice with key concepts and
+    introduce secondary themes that may be of interest to some
+    readers.  Advanced exercises are for readers who want an extra
+    challenge and a deeper cut at the material.
+
+<div class="paragraph"> </div>
+
+   <span class="loud"> <i>Please do not post solutions to the exercises in a public place</i>. </span>
+    Software Foundations is widely used both for self-study and for
+    university courses.  Having solutions easily available makes it
+    much less useful for courses, which typically have graded homework
+    assignments.  We especially request that readers not post
+    solutions to the exercises anyplace where they can be found by
+    search engines. 
+<div class="paragraph"> </div>
+
+<a name="lab11"></a><h2 class="section">Downloading the Coq Files</h2>
+
+<div class="paragraph"> </div>
+
+ A tar file containing the full sources for the "release version"
+    of this book (as a collection of Coq scripts and HTML files) is
+    available at <a href="http://softwarefoundations.cis.upenn.edu"><span class="inlineref">http://softwarefoundations.cis.upenn.edu</span></a>.
+
+<div class="paragraph"> </div>
+
+    If you are using the book as part of a class, your professor may
+    give you access to a locally modified version of the files; you
+    should use this one instead of the public release version, so that
+    you get any local updates during the semester. 
+</div>
+
+<div class="doc">
+<a name="lab12"></a><h1 class="section">Resources</h1>
+
+<div class="paragraph"> </div>
+
+<a name="lab13"></a><h2 class="section">Sample Exams</h2>
+
+<div class="paragraph"> </div>
+
+ A large compendium of exams from many offerings of
+    CIS500 ("Software Foundations") at the University of Pennsylvania
+    can be found at
+    <a href="https://www.seas.upenn.edu/~cis500/current/exams/index.html"><span class="inlineref">https://www.seas.upenn.edu/~cis500/current/exams/index.html</span></a>.
+    There has been some drift of notations over the years, but most of
+    the problems are still relevant to the current text. 
+<div class="paragraph"> </div>
+
+<a name="lab14"></a><h2 class="section">Lecture Videos</h2>
+
+<div class="paragraph"> </div>
+
+ Lectures for two intensive summer courses based on <i>Logical
+    Foundations</i> (part of the DeepSpec summer school series) can be
+    found at <a href="https://deepspec.org/event/dsss17"><span class="inlineref">https://deepspec.org/event/dsss17</span></a> and
+    <a href="https://deepspec.org/event/dsss18/"><span class="inlineref">https://deepspec.org/event/dsss18/</span></a>.  The video quality in the
+    2017 lectures is poor at the beginning but gets better in the
+    later lectures. 
+</div>
+
+<div class="doc">
+<a name="lab15"></a><h1 class="section">Note for Instructors</h1>
+
+<div class="paragraph"> </div>
+
+ If you plan to use these materials in your own course, you will
+    undoubtedly find things you'd like to change, improve, or add.
+    Your contributions are welcome!
+
+<div class="paragraph"> </div>
+
+    In order to keep the legalities simple and to have a single point
+    of responsibility in case the need should ever arise to adjust the
+    license terms, sublicense, etc., we ask all contributors (i.e.,
+    everyone with access to the developers' repository) to assign
+    copyright in their contributions to the appropriate "author of
+    record," as follows:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> I hereby assign copyright in my past and future contributions
+        to the Software Foundations project to the Author of Record of
+        each volume or component, to be licensed under the same terms
+        as the rest of Software Foundations.  I understand that, at
+        present, the Authors of Record are as follows: For Volumes 1
+        and 2, known until 2016 as "Software Foundations" and from
+        2016 as (respectively) "Logical Foundations" and "Programming
+        Foundations," and for Volume 4, "QuickChick: Property-Based
+        Testing in Coq," the Author of Record is Benjamin C. Pierce.
+        For Volume 3, "Verified Functional Algorithms", the Author of
+        Record is Andrew W. Appel. For components outside of
+        designated volumes (e.g., typesetting and grading tools and
+        other software infrastructure), the Author of Record is
+        Benjamin Pierce.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    To get started, please send an email to Benjamin Pierce,
+    describing yourself and how you plan to use the materials and
+    including (1) the above copyright transfer text and (2) your
+    github username.
+
+<div class="paragraph"> </div>
+
+    We'll set you up with access to the git repository and developers'
+    mailing lists.  In the repository you'll find a file <span class="inlinecode"><span class="id" type="var">INSTRUCTORS</span></span>
+    with further instructions. 
+</div>
+
+<div class="doc">
+<a name="lab16"></a><h1 class="section">Translations</h1>
+
+<div class="paragraph"> </div>
+
+ Thanks to the efforts of a team of volunteer translators,
+    <i>Software Foundations</i> can be enjoyed in Japanese at
+    <a href="http://proofcafe.org/sf"><span class="inlineref">http://proofcafe.org/sf</span></a>.  A Chinese translation is also underway;
+    you can preview it at <a href="https://coq-zh.github.io/SF-zh/"><span class="inlineref">https://coq-zh.github.io/SF-zh/</span></a>. 
+</div>
+
+<div class="doc">
+<a name="lab17"></a><h1 class="section">Thanks</h1>
+
+<div class="paragraph"> </div>
+
+ Development of the <i>Software Foundations</i> series has been
+    supported, in part, by the National Science Foundation under the
+    NSF Expeditions grant 1521523, <i>The Science of Deep
+    Specification</i>. 
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;Wed&nbsp;Jan&nbsp;9&nbsp;12:02:43&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+</div>
+</div>
+
+
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<title>Postscript</title>
+</head>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
+<img src='common/media/image/sf_logo_sm.png'></a>
+</br><a href='index.html'>  <span class='booktitleinheader'>Volume 1: Logical Foundations</span><br></br>
+<ul id='menu'>
+   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
+   <a href='coqindex.html'><li class='section_name'>Index</li></a>
+   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+</ul>
+</a></div>
+
+<div id="main">
+
+<h1 class="libtitle">Postscript</h1>
+
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ Congratulations: We've made it to the end! 
+<div class="paragraph"> </div>
+
+<a name="lab398"></a><h1 class="section">Looking Back</h1>
+
+<div class="paragraph"> </div>
+
+ We've covered quite a bit of ground so far.  Here's a quick review...
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <i>Functional programming</i>:
+<ul class="doclist">
+<li> "declarative" programming style (recursion over immutable
+            data structures, rather than looping over mutable arrays
+            or pointer structures)
+
+</li>
+<li> higher-order functions
+
+</li>
+<li> polymorphism 
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <i>Logic</i>, the mathematical basis for software engineering:
+<pre>
+               logic                        calculus
+        --------------------   ~   ----------------------------
+        software engineering       mechanical/civil engineering
+</pre>
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> inductively defined sets and relations
+
+</li>
+<li> inductive proofs
+
+</li>
+<li> proof objects 
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <i>Coq</i>, an industrial-strength proof assistant
+<ul class="doclist">
+<li> functional core language
+
+</li>
+<li> core tactics
+
+</li>
+<li> automation
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+</div>
+
+<div class="doc">
+<a name="lab399"></a><h1 class="section">Looking Forward</h1>
+
+<div class="paragraph"> </div>
+
+ If what you've seen so far has whetted your interest, you have two
+    choices for further reading in the <i>Software Foundations</i> series:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <i>Programming Language Foundations</i> (volume 2, by a set of
+             authors similar to this book's) covers material that
+             might be found in a graduate course on the theory of
+             programming languages, including Hoare logic, operational
+             semantics, and type systems.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> <i>Verified Functional Algorithms</i> (volume 3, by Andrew
+             Appel) builds on the themes of functional programming and
+             program verification in Coq, addressing a range of topics
+             that might be found in a standard data structures course,
+             with an eye to formal verification. 
+</li>
+</ul>
+
+</div>
+
+<div class="doc">
+<a name="lab400"></a><h1 class="section">Other sources</h1>
+
+<div class="paragraph"> </div>
+
+ Here are some other good places to learn more...
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> This book includes some optional chapters covering topics
+         that you may find useful.  Take a look at the <a
+         href="toc.html">table of contents</a> and the <a
+         href="deps.html">chapter dependency diagram</a> to find
+         them.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> For questions about Coq, the <span class="inlinecode">#<span class="id" type="var">coq</span></span> area of Stack
+         Overflow (<a href="https://stackoverflow.com/questions/tagged/coq"><span class="inlineref">https://stackoverflow.com/questions/tagged/coq</span></a>)
+         is an excellent community resource.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Here are some great books on functional programming
+<ul class="doclist">
+<li> Learn You a Haskell for Great Good, by Miran Lipovaca
+              <a href="Bib.html#Lipovaca 2011"><span class="inlineref">[Lipovaca 2011]</span></a>.
+
+</li>
+<li> Real World Haskell, by Bryan O'Sullivan, John Goerzen,
+              and Don Stewart <a href="Bib.html#O'Sullivan 2008"><span class="inlineref">[O'Sullivan 2008]</span></a>
+
+</li>
+<li> ...and many other excellent books on Haskell, OCaml,
+              Scheme, Racket, Scala, F sharp, etc., etc.
+
+<div class="paragraph"> </div>
+
+
+</li>
+</ul>
+
+</li>
+<li> And some further resources for Coq:
+<ul class="doclist">
+<li> Certified Programming with Dependent Types, by Adam
+             Chlipala <a href="Bib.html#Chlipala 2013"><span class="inlineref">[Chlipala 2013]</span></a>.
+
+</li>
+<li> Interactive Theorem Proving and Program Development:
+             Coq'Art: The Calculus of Inductive Constructions, by Yves
+             Bertot and Pierre Casteran <a href="Bib.html#Bertot 2004"><span class="inlineref">[Bertot 2004]</span></a>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+</ul>
+
+</li>
+<li> If you're interested in real-world applications of formal
+         verification to critical software, see the Postscript chapter
+         of <i>Programming Language Foundations</i>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> For applications of Coq in building verified systems, the
+         lectures and course materials for the 2017 DeepSpec Summer
+         School are a great resource.
+         <a href="https://deepspec.org/event/dsss17/index.html"><span class="inlineref">https://deepspec.org/event/dsss17/index.html</span></a>
+
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<span class="comment">(*&nbsp;Wed&nbsp;Jan&nbsp;9&nbsp;12:02:47&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+</div>
+</div>
+
+
+
+</div>
+
+</body>
+</html>
