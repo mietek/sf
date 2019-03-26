@@ -1,15 +1,25 @@
-_software-foundations_
-======================
+_sf_
+====
 
-Mirror of [“Software Foundations”](http://www.cis.upenn.edu/~bcpierce/sf/), by Benjamin Pierce et al., version 4.0 (May 2016).
+Mirror of the [Software Foundations](http://softwarefoundations.cis.upenn.edu/) series of books.  Includes generated PDFs.
 
-Includes a [PDF version](doc/pdf/pierce-2016.pdf) of the book.
+- B. Pierce, et al. (2019) [“Logical Foundations”](doc/pdf/lf.pdf)  
+  _Version 5.6 (09 Jan 2019, Coq 8.8.2)_
+
+- B. Pierce, et al. (2019) [“Programming Language Foundations”](doc/pdf/plf.pdf)  
+  _Version 5.7 (08 Feb 2019, Coq 8.8.2)_
+
+- A. Appel (2018) [“Verified Functional Algorithms”](doc/pdf/vfa.pdf)  
+  _Version 1.4 (25 Aug 2018, Coq 8.8.2)_
+
+- L. Lampropoulos and B. Pierce (2018) [“QuickChick: Property-Based Testing in Coq”](doc/pdf/qc.pdf)  
+  _Version 1.0 (09 Oct 2018, Coq 8.8.2)_
 
 
 Usage
 -----
 
-To rebuild the PDF, ensure Coq and LaTeX are installed, then:
+To regenerate the PDFs, ensure Coq, QuickChick, and LaTeX are installed, then:
 
 ```
 $ make
@@ -17,56 +27,9 @@ $ make
 
 ### Notes
 
-The original [`Makefile`](src/Makefile) has been modified to work around the LaTeX nesting limit, and to generate chapters in the right order.  A syntax error has also been fixed in [`MoreStlc.v`](src/MoreStlc.v).
+The [Makefiles](src/Makefile.patch) are patched during the build process, so that chapters are generated in the right order, and the LaTeX nesting limit is not reached.
 
-```diff
-diff --git a/src/Makefile b/src/Makefile
-index 18ddc1e..9faec71 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -53,7 +53,7 @@ OPT?=
- COQDEP?="$(COQBIN)coqdep" -c
- COQFLAGS?=-q $(OPT) $(COQLIBS) $(OTHERFLAGS) $(COQ_XML)
- COQCHKFLAGS?=-silent -o
--COQDOCFLAGS?=-interpolate -utf8
-+COQDOCFLAGS?=-interpolate -utf8 -p '\usepackage{enumitem}\setlistdepth{9}\setlist[itemize,1]{label=$$\bullet$$}\setlist[itemize,2]{label=$$\bullet$$}\setlist[itemize,3]{label=$$\bullet$$}\setlist[itemize,4]{label=$$\bullet$$}\setlist[itemize,5]{label=$$\bullet$$}\setlist[itemize,6]{label=$$\bullet$$}\setlist[itemize,7]{label=$$\bullet$$}\setlist[itemize,8]{label=$$\bullet$$}\setlist[itemize,9]{label=$$\bullet$$}\renewlist{itemize}{itemize}{9}'
- COQC?="$(COQBIN)coqc"
- GALLINA?="$(COQBIN)gallina"
- COQDOC?="$(COQBIN)coqdoc"
-@@ -65,7 +65,7 @@ COQCHK?="$(COQBIN)coqchk"
- #                    #
- ######################
- 
--VFILES:=Symbols.v\
-+RVFILES:=Symbols.v\
-   Preface.v\
-   Basics.v\
-   Induction.v\
-@@ -106,6 +106,9 @@ VFILES:=Symbols.v\
-   Postscript.v\
-   Bib.v
- 
-+reverse=$(if $1,$(call reverse,$(wordlist 2,$(words $1),$1))) $(firstword $1)
-+VFILES:=$(call reverse,$(RVFILES))
-+
- -include $(addsuffix .d,$(VFILES))
- .SECONDARY: $(addsuffix .d,$(VFILES))
- 
-diff --git a/src/MoreStlc.v b/src/MoreStlc.v
-index a310fb0..b59a5a1 100644
---- a/src/MoreStlc.v
-+++ b/src/MoreStlc.v
-@@ -281,7 +281,8 @@ Require Import Stlc.
-     construct (a very simplified form of Coq's [match]) to destruct
-     them. For example, the following procedure converts a [Nat+Bool]
-     into a [Nat]: *)
--(** <<
-+(**
-+
-     getNat =
-       \x:Nat+Bool.
-         case x of
-```
+Similarly, the [Typeclasses](src/Typeclasses.v.patch) and [QuickChickTool](src/QuickChickTool.v.patch) chapters of the QuickChick book are patched, so that a diacritic does not confuse LaTeX, and code listings appear in the output as intended.
 
 
 About

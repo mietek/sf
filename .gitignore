@@ -1,8 +1,9 @@
+*.aux
 *.d
 *.glob
 *.ml
 *.mli
+*.rej
 *.toc
 *.vo
-src/all.pdf
-src/html
+Makefile.conf
