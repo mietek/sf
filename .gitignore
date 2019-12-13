@@ -6,4 +6,9 @@
 *.rej
 *.toc
 *.vo
+*.tex
+*.sty
+.*.swp
+tmp
 Makefile.conf
+src/*/Makefile.local

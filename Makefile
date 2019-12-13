@@ -7,31 +7,23 @@ plf: doc/pdf/plf.pdf
 vfa: doc/pdf/vfa.pdf
 qc: doc/pdf/qc.pdf
 
-doc/pdf/lf.pdf: src/lf/all.pdf
-	mkdir -p doc/pdf
-	mv src/lf/all.pdf doc/pdf/lf.pdf
+doc/pdf/%.pdf: src/%/all.tex
+	mkdir -p tmp doc/pdf
+	gawk -f src/hack-latex.gawk $< > tmp/all.tex
+	cp src/$*/coqdoc.sty tmp
+	( cd tmp ; pdflatex all.tex && pdflatex all.tex )
+	mv tmp/all.pdf $@
+	@rm -rf tmp
 
-doc/pdf/plf.pdf: src/plf/all.pdf
-	mkdir -p doc/pdf
-	mv src/plf/all.pdf doc/pdf/plf.pdf
-	
-doc/pdf/vfa.pdf: src/vfa/all.pdf
-	mkdir -p doc/pdf
-	mv src/vfa/all.pdf doc/pdf/vfa.pdf
-	
-doc/pdf/qc.pdf: src/qc/all.pdf
-	mkdir -p doc/pdf
-	mv src/qc/all.pdf doc/pdf/qc.pdf
-
-src/lf/all.pdf:
-	make -C src/lf all
-	-patch -N -d src/lf < src/Makefile.patch
-	make -C src/lf all.pdf
-	
-src/plf/all.pdf:
-	make -C src/plf all
-	-patch -N -d src/plf < src/Makefile.patch
-	make -C src/plf all.pdf
+src/lf/all.tex:
+	cp src/Makefile.local src/lf/
+	$(MAKE) -C src/lf all
+	$(MAKE) -C src/lf all.tex
+		
+src/plf/all.tex:
+	cp src/Makefile.local src/plf
+	$(MAKE) -C src/plf all
+	$(MAKE) -C src/plf all.tex
 	
 src/vfa/all.pdf:
 	make -C src/vfa all
