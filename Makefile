@@ -23,7 +23,7 @@ src/lf/all.tex:
 src/plf/all.tex:
 	cp src/Makefile.local src/plf
 	$(MAKE) -C src/plf all
-	$(MAKE) -C src/plf all.tex
+	$(MAKE) -C src/plf all.tex SKIP="Maps.v Imp.v"
 	
 src/vfa/all.pdf:
 	make -C src/vfa all
