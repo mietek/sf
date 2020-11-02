@@ -1,0 +1,1145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>ProofObjects: The Curry-Howard Correspondence</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 1: Logical Foundations</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">ProofObjects<span class="subtitle">The Curry-Howard Correspondence</span></h1>
+
+<div class="code">
+</div>
+
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Warnings</span> "-notation-overridden,-parsing".<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LF</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <a class="idref" href="IndProp.html#"><span class="id" title="library">IndProp</span></a>.<br/>
+</div>
+
+<div class="doc">
+<div class="quote">"_Algorithms are the computational content of proofs."
+Robert Harper</div> 
+<div class="paragraph"> </div>
+
+ We have seen that Coq has mechanisms both for <i>programming</i>,
+    using inductive data types like <span class="inlinecode"><span class="id" title="var">nat</span></span> or <span class="inlinecode"><span class="id" title="var">list</span></span> and functions over
+    these types, and for <i>proving</i> properties of these programs, using
+    inductive propositions (like <span class="inlinecode"><span class="id" title="var">ev</span></span>), implication, universal
+    quantification, and the like.  So far, we have mostly treated
+    these mechanisms as if they were quite separate, and for many
+    purposes this is a good way to think.  But we have also seen hints
+    that Coq's programming and proving facilities are closely related.
+    For example, the keyword <span class="inlinecode"><span class="id" title="keyword">Inductive</span></span> is used to declare both data
+    types and propositions, and <span class="inlinecode">→</span> is used both to describe the type
+    of functions on data and logical implication.  This is not just a
+    syntactic accident!  In fact, programs and proofs in Coq are
+    almost the same thing.  In this chapter we will study how this
+    works.
+
+<div class="paragraph"> </div>
+
+    We have already seen the fundamental idea: provability in Coq is
+    represented by concrete <i>evidence</i>.  When we construct the proof
+    of a basic proposition, we are actually building a tree of
+    evidence, which can be thought of as a data structure.
+
+<div class="paragraph"> </div>
+
+    If the proposition is an implication like <span class="inlinecode"><span class="id" title="var">A</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">B</span></span>, then its proof
+    will be an evidence <i>transformer</i>: a recipe for converting
+    evidence for A into evidence for B.  So at a fundamental level,
+    proofs are simply programs that manipulate evidence. 
+<div class="paragraph"> </div>
+
+ Question: If evidence is data, what are propositions themselves?
+
+<div class="paragraph"> </div>
+
+    Answer: They are types! 
+<div class="paragraph"> </div>
+
+ Look again at the formal definition of the <span class="inlinecode"><span class="id" title="var">ev</span></span> property.  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a>.<br/>
+<span class="comment">(*&nbsp;==&gt;<br/>
+&nbsp;&nbsp;Inductive&nbsp;ev&nbsp;:&nbsp;nat&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;Prop&nbsp;:=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;ev_0&nbsp;:&nbsp;ev&nbsp;0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;ev_SS&nbsp;:&nbsp;forall&nbsp;n,&nbsp;ev&nbsp;n&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;ev&nbsp;(S&nbsp;(S&nbsp;n)).<br/>
+*)</span><br/>
+</div>
+
+<div class="doc">
+Suppose we introduce an alternative pronunciation of "<span class="inlinecode">:</span>".
+    Instead of "has type," we can say "is a proof of."  For example,
+    the second line in the definition of <span class="inlinecode"><span class="id" title="var">ev</span></span> declares that <span class="inlinecode"><span class="id" title="var">ev_0</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" title="var">ev</span></span>
+    <span class="inlinecode">0</span>.  Instead of "<span class="inlinecode"><span class="id" title="var">ev_0</span></span> has type <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode">0</span>," we can say that "<span class="inlinecode"><span class="id" title="var">ev_0</span></span>
+    is a proof of <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode">0</span>." 
+<div class="paragraph"> </div>
+
+ This pun between types and propositions -- between <span class="inlinecode">:</span> as "has type"
+    and <span class="inlinecode">:</span> as "is a proof of" or "is evidence for" -- is called the
+    <i>Curry-Howard correspondence</i>.  It proposes a deep connection
+    between the world of logic and the world of computation:
+<pre>
+                 propositions  ~  types
+                 proofs        ~  data values
+</pre>
+    See <a href="Bib.html#Wadler-2015"><span class="inlineref">[Wadler 2015]</span></a> for a brief history and up-to-date
+    exposition. 
+<div class="paragraph"> </div>
+
+ Many useful insights follow from this connection.  To begin with,
+    it gives us a natural interpretation of the type of the <span class="inlinecode"><span class="id" title="var">ev_SS</span></span>
+    constructor: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> <a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a><br/>
+&nbsp;&nbsp;: <span class="id" title="keyword">∀</span> <a id="n:1" class="idref" href="#n:1"><span class="id" title="binder">n</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:1"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="ProofObjects.html#n:1"><span class="id" title="variable">n</span></a>)).<br/>
+</div>
+
+<div class="doc">
+This can be read "<span class="inlinecode"><span class="id" title="var">ev_SS</span></span> is a constructor that takes two
+    arguments -- a number <span class="inlinecode"><span class="id" title="var">n</span></span> and evidence for the proposition <span class="inlinecode"><span class="id" title="var">ev</span></span>
+    <span class="inlinecode"><span class="id" title="var">n</span></span> -- and yields evidence for the proposition <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode">(<span class="id" title="var">S</span></span> <span class="inlinecode">(<span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n</span>))</span>." 
+<div class="paragraph"> </div>
+
+ Now let's look again at a previous proof involving <span class="inlinecode"><span class="id" title="var">ev</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="ev_4" class="idref" href="#ev_4"><span class="id" title="lemma">ev_4</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 4.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a>. <span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a>. <span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_0"><span class="id" title="constructor">ev_0</span></a>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+As with ordinary data values and functions, we can use the <span class="inlinecode"><span class="id" title="keyword">Print</span></span>
+    command to see the <i>proof object</i> that results from this proof
+    script. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4"><span class="id" title="lemma">ev_4</span></a>.<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;ev_4&nbsp;=&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;ev&nbsp;4&nbsp;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Indeed, we can also write down this proof object <i>directly</i>,
+    without the need for a separate proof script: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 2 (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 0 <a class="idref" href="IndProp.html#ev_0"><span class="id" title="constructor">ev_0</span></a>))<br/>
+&nbsp;&nbsp;: <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 4.<br/>
+</div>
+
+<div class="doc">
+The expression <span class="inlinecode"><span class="id" title="var">ev_SS</span></span> <span class="inlinecode">2</span> <span class="inlinecode">(<span class="id" title="var">ev_SS</span></span> <span class="inlinecode">0</span> <span class="inlinecode"><span class="id" title="var">ev_0</span>)</span> can be thought of as
+    instantiating the parameterized constructor <span class="inlinecode"><span class="id" title="var">ev_SS</span></span> with the
+    specific arguments <span class="inlinecode">2</span> and <span class="inlinecode">0</span> plus the corresponding proof
+    objects for its premises <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode">2</span> and <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode">0</span>.  Alternatively, we can
+    think of <span class="inlinecode"><span class="id" title="var">ev_SS</span></span> as a primitive "evidence constructor" that, when
+    applied to a particular number, wants to be further applied to
+    evidence that this number is even; its type,
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <span class="id" title="var">n</span>, <span class="id" title="var">ev</span> <span class="id" title="var">n</span> → <span class="id" title="var">ev</span> (<span class="id" title="var">S</span> (<span class="id" title="var">S</span> <span class="id" title="var">n</span>)),
+<div class="paragraph"> </div>
+
+</span>    expresses this functionality, in the same way that the polymorphic
+    type <span class="inlinecode"><span class="id" title="keyword">∀</span></span> <span class="inlinecode"><span class="id" title="var">X</span>,</span> <span class="inlinecode"><span class="id" title="var">list</span></span> <span class="inlinecode"><span class="id" title="var">X</span></span> expresses the fact that the constructor
+    <span class="inlinecode"><span class="id" title="var">nil</span></span> can be thought of as a function from types to empty lists
+    with elements of that type. 
+<div class="paragraph"> </div>
+
+ We saw in the <a href="Logic.html"><span class="inlineref">Logic</span></a> chapter that we can use function
+    application syntax to instantiate universally quantified variables
+    in lemmas, as well as to supply evidence for assumptions that
+    these lemmas impose.  For instance: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="ev_4'" class="idref" href="#ev_4'"><span class="id" title="lemma">ev_4'</span></a>: <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 4.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 2 (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 0 <a class="idref" href="IndProp.html#ev_0"><span class="id" title="constructor">ev_0</span></a>)).<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab268"></a><h1 class="section">Proof Scripts</h1>
+
+<div class="paragraph"> </div>
+
+ The <i>proof objects</i> we've been discussing lie at the core of how
+    Coq operates.  When Coq is following a proof script, what is
+    happening internally is that it is gradually constructing a proof
+    object -- a term whose type is the proposition being proved.  The
+    tactics between <span class="inlinecode"><span class="id" title="keyword">Proof</span></span> and <span class="inlinecode"><span class="id" title="keyword">Qed</span></span> tell it how to build up a term
+    of the required type.  To see this process in action, let's use
+    the <span class="inlinecode"><span class="id" title="keyword">Show</span></span> <span class="inlinecode"><span class="id" title="keyword">Proof</span></span> command to display the current state of the proof
+    tree at various points in the following tactic proof. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="ev_4''" class="idref" href="#ev_4''"><span class="id" title="lemma">ev_4''</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 4.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Show</span> <span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Show</span> <span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Show</span> <span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_0"><span class="id" title="constructor">ev_0</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Show</span> <span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+At any given moment, Coq has constructed a term with a
+    "hole" (indicated by <span class="inlinecode">?<span class="id" title="keyword">Goal</span></span> here, and so on), and it knows what
+    type of evidence is needed to fill this hole.
+
+<div class="paragraph"> </div>
+
+    Each hole corresponds to a subgoal, and the proof is
+    finished when there are no more subgoals.  At this point, the
+    evidence we've built is stored in the global context under the name
+    given in the <span class="inlinecode"><span class="id" title="keyword">Theorem</span></span> command. 
+<div class="paragraph"> </div>
+
+ Tactic proofs are useful and convenient, but they are not
+    essential: in principle, we can always construct the required
+    evidence by hand, as shown above. Then we can use <span class="inlinecode"><span class="id" title="keyword">Definition</span></span>
+    (rather than <span class="inlinecode"><span class="id" title="keyword">Theorem</span></span>) to give a global name directly to this
+    evidence. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="ev_4'''" class="idref" href="#ev_4'''"><span class="id" title="definition">ev_4'''</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 4 :=<br/>
+&nbsp;&nbsp;<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 2 (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 0 <a class="idref" href="IndProp.html#ev_0"><span class="id" title="constructor">ev_0</span></a>).<br/>
+</div>
+
+<div class="doc">
+All these different ways of building the proof lead to exactly the
+    same evidence being saved in the global environment. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4"><span class="id" title="lemma">ev_4</span></a>.<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;ev_4&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4'"><span class="id" title="lemma">ev_4'</span></a>.<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;ev_4'&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4''"><span class="id" title="lemma">ev_4''</span></a>.<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;ev_4''&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="ProofObjects.html#ev_4'''"><span class="id" title="definition">ev_4'''</span></a>.<br/>
+<span class="comment">(*&nbsp;===&gt;&nbsp;ev_4'''&nbsp;=&nbsp;&nbsp;&nbsp;ev_SS&nbsp;2&nbsp;(ev_SS&nbsp;0&nbsp;ev_0)&nbsp;:&nbsp;ev&nbsp;4&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<a id="lab269"></a><h4 class="section">Exercise: 2 stars, standard (eight_is_even)</h4>
+ Give a tactic proof and a proof object showing that <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode">8</span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="ev_8" class="idref" href="#ev_8"><span class="id" title="lemma">ev_8</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 8.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="ev_8'" class="idref" href="#ev_8'"><span class="id" title="definition">ev_8'</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 8<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+
+<div class="doc">
+<a id="lab270"></a><h1 class="section">Quantifiers, Implications, Functions</h1>
+
+<div class="paragraph"> </div>
+
+ In Coq's computational universe (where data structures and
+    programs live), there are two sorts of values that have arrows in
+    their types: <i>constructors</i> introduced by <span class="inlinecode"><span class="id" title="keyword">Inductive</span></span>ly defined
+    data types, and <i>functions</i>.
+
+<div class="paragraph"> </div>
+
+    Similarly, in Coq's logical universe (where we carry out proofs),
+    there are two ways of giving evidence for an implication:
+    constructors introduced by <span class="inlinecode"><span class="id" title="keyword">Inductive</span></span>ly defined propositions,
+    and... functions! 
+<div class="paragraph"> </div>
+
+ For example, consider this statement: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="ev_plus4" class="idref" href="#ev_plus4"><span class="id" title="lemma">ev_plus4</span></a> : <span class="id" title="keyword">∀</span> <a id="n:2" class="idref" href="#n:2"><span class="id" title="binder">n</span></a>, <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:2"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (4 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="ProofObjects.html#n:2"><span class="id" title="variable">n</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+What is the proof object corresponding to <span class="inlinecode"><span class="id" title="var">ev_plus4</span></span>?
+
+<div class="paragraph"> </div>
+
+    We're looking for an expression whose <i>type</i> is <span class="inlinecode"><span class="id" title="keyword">∀</span></span> <span class="inlinecode"><span class="id" title="var">n</span>,</span> <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">→</span>
+    <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode">(4</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">n</span>)</span> -- that is, a <i>function</i> that takes two arguments (one
+    number and a piece of evidence) and returns a piece of evidence!
+
+<div class="paragraph"> </div>
+
+    Here it is: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="ev_plus4'" class="idref" href="#ev_plus4'"><span class="id" title="definition">ev_plus4'</span></a> : <span class="id" title="keyword">∀</span> <a id="n:3" class="idref" href="#n:3"><span class="id" title="binder">n</span></a>, <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:3"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (4 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="ProofObjects.html#n:3"><span class="id" title="variable">n</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> (<a id="n:4" class="idref" href="#n:4"><span class="id" title="binder">n</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) ⇒ <span class="id" title="keyword">fun</span> (<a id="H:5" class="idref" href="#H:5"><span class="id" title="binder">H</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:4"><span class="id" title="variable">n</span></a>) ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="ProofObjects.html#n:4"><span class="id" title="variable">n</span></a>)) (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> <a class="idref" href="ProofObjects.html#n:4"><span class="id" title="variable">n</span></a> <a class="idref" href="ProofObjects.html#H:5"><span class="id" title="variable">H</span></a>).<br/>
+</div>
+
+<div class="doc">
+Recall that <span class="inlinecode"><span class="id" title="keyword">fun</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">⇒</span> <span class="inlinecode"><span class="id" title="var">blah</span></span> means "the function that, given <span class="inlinecode"><span class="id" title="var">n</span></span>,
+    yields <span class="inlinecode"><span class="id" title="var">blah</span></span>," and that Coq treats <span class="inlinecode">4</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">n</span></span> and <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode">(<span class="id" title="var">S</span></span> <span class="inlinecode">(<span class="id" title="var">S</span></span> <span class="inlinecode">(<span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n</span>)))</span>
+    as synonyms. Another equivalent way to write this definition is: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="ev_plus4''" class="idref" href="#ev_plus4''"><span class="id" title="definition">ev_plus4''</span></a> (<a id="n:6" class="idref" href="#n:6"><span class="id" title="binder">n</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<a id="H:7" class="idref" href="#H:7"><span class="id" title="binder">H</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:6"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (4 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="ProofObjects.html#n:6"><span class="id" title="variable">n</span></a>) :=<br/>
+&nbsp;&nbsp;<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="ProofObjects.html#n:6"><span class="id" title="variable">n</span></a>)) (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> <a class="idref" href="ProofObjects.html#n:6"><span class="id" title="variable">n</span></a> <a class="idref" href="ProofObjects.html#H:7"><span class="id" title="variable">H</span></a>).<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Check</span> <a class="idref" href="ProofObjects.html#ev_plus4''"><span class="id" title="definition">ev_plus4''</span></a><br/>
+&nbsp;&nbsp;: <span class="id" title="keyword">∀</span> <a id="n:8" class="idref" href="#n:8"><span class="id" title="binder">n</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:8"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (4 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="ProofObjects.html#n:8"><span class="id" title="variable">n</span></a>).<br/>
+</div>
+
+<div class="doc">
+When we view the proposition being proved by <span class="inlinecode"><span class="id" title="var">ev_plus4</span></span> as a
+    function type, one interesting point becomes apparent: The second
+    argument's type, <span class="inlinecode"><span class="id" title="var">ev</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span>, mentions the <i>value</i> of the first
+    argument, <span class="inlinecode"><span class="id" title="var">n</span></span>.
+
+<div class="paragraph"> </div>
+
+    While such <i>dependent types</i> are not found in conventional
+    programming languages, they can be useful in programming too, as
+    the recent flurry of activity in the functional programming
+    community demonstrates. 
+<div class="paragraph"> </div>
+
+ Notice that both implication (<span class="inlinecode">→</span>) and quantification (<span class="inlinecode"><span class="id" title="keyword">∀</span></span>)
+    correspond to functions on evidence.  In fact, they are really the
+    same thing: <span class="inlinecode">→</span> is just a shorthand for a degenerate use of
+    <span class="inlinecode"><span class="id" title="keyword">∀</span></span> where there is no dependency, i.e., no need to give a
+    name to the type on the left-hand side of the arrow:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">∀</span> (<span class="id" title="var">x</span>:<span class="id" title="var">nat</span>), <span class="id" title="var">nat</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=  <span class="id" title="keyword">∀</span> (<span class="id" title="var">_</span>:<span class="id" title="var">nat</span>), <span class="id" title="var">nat</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=  <span class="id" title="var">nat</span> → <span class="id" title="var">nat</span>
+<div class="paragraph"> </div>
+
+</span>
+<div class="paragraph"> </div>
+
+ For example, consider this proposition: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="ev_plus2" class="idref" href="#ev_plus2"><span class="id" title="definition">ev_plus2</span></a> : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="n:9" class="idref" href="#n:9"><span class="id" title="binder">n</span></a>, <span class="id" title="keyword">∀</span> (<a id="E:10" class="idref" href="#E:10"><span class="id" title="binder">E</span></a> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:9"><span class="id" title="variable">n</span></a>), <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (<a class="idref" href="ProofObjects.html#n:9"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 2).<br/>
+</div>
+
+<div class="doc">
+A proof term inhabiting this proposition would be a function
+    with two arguments: a number <span class="inlinecode"><span class="id" title="var">n</span></span> and some evidence <span class="inlinecode"><span class="id" title="var">E</span></span> that <span class="inlinecode"><span class="id" title="var">n</span></span> is
+    even.  But the name <span class="inlinecode"><span class="id" title="var">E</span></span> for this evidence is not used in the rest
+    of the statement of <span class="inlinecode"><span class="id" title="var">ev_plus2</span></span>, so it's a bit silly to bother
+    making up a name for it.  We could write it like this instead,
+    using the dummy identifier <span class="inlinecode"><span class="id" title="var">_</span></span> in place of a real name: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="ev_plus2'" class="idref" href="#ev_plus2'"><span class="id" title="definition">ev_plus2'</span></a> : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="n:11" class="idref" href="#n:11"><span class="id" title="binder">n</span></a>, <span class="id" title="keyword">∀</span> (<span class="id" title="var">_</span> : <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:11"><span class="id" title="variable">n</span></a>), <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (<a class="idref" href="ProofObjects.html#n:11"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 2).<br/>
+</div>
+
+<div class="doc">
+Or, equivalently, we can write it in a more familiar way: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="ev_plus2''" class="idref" href="#ev_plus2''"><span class="id" title="definition">ev_plus2''</span></a> : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="n:12" class="idref" href="#n:12"><span class="id" title="binder">n</span></a>, <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:12"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (<a class="idref" href="ProofObjects.html#n:12"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 2).<br/>
+</div>
+
+<div class="doc">
+In general, "<span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">Q</span></span>" is just syntactic sugar for
+    "<span class="inlinecode"><span class="id" title="keyword">∀</span></span> <span class="inlinecode">(<span class="id" title="var">_</span>:<span class="id" title="var">P</span>),</span> <span class="inlinecode"><span class="id" title="var">Q</span></span>". 
+</div>
+
+<div class="doc">
+<a id="lab271"></a><h1 class="section">Programming with Tactics</h1>
+
+<div class="paragraph"> </div>
+
+ If we can build proofs by giving explicit terms rather than
+    executing tactic scripts, you may be wondering whether we can
+    build <i>programs</i> using <i>tactics</i> rather than explicit terms.
+    Naturally, the answer is yes! 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="add1" class="idref" href="#add1"><span class="id" title="definition">add1</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+<span class="id" title="tactic">intro</span> <span class="id" title="var">n</span>.<br/>
+<span class="id" title="keyword">Show</span> <span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a>.<br/>
+<span class="id" title="keyword">Show</span> <span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">apply</span> <span class="id" title="var">n</span>. <span class="id" title="keyword">Defined</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="ProofObjects.html#add1"><span class="id" title="definition">add1</span></a>.<br/>
+<span class="comment">(*&nbsp;==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;add1&nbsp;=&nbsp;fun&nbsp;n&nbsp;:&nbsp;nat&nbsp;=&gt;&nbsp;S&nbsp;n<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;nat&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;nat<br/>
+*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Compute</span> <a class="idref" href="ProofObjects.html#add1"><span class="id" title="definition">add1</span></a> 2.<br/>
+<span class="comment">(*&nbsp;==&gt;&nbsp;3&nbsp;:&nbsp;nat&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Notice that we terminate the <span class="inlinecode"><span class="id" title="keyword">Definition</span></span> with a <span class="inlinecode">.</span> rather than
+    with <span class="inlinecode">:=</span> followed by a term.  This tells Coq to enter <i>proof
+    scripting mode</i> to build an object of type <span class="inlinecode"><span class="id" title="var">nat</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">nat</span></span>.  Also, we
+    terminate the proof with <span class="inlinecode"><span class="id" title="keyword">Defined</span></span> rather than <span class="inlinecode"><span class="id" title="keyword">Qed</span></span>; this makes
+    the definition <i>transparent</i> so that it can be used in computation
+    like a normally-defined function.  (<span class="inlinecode"><span class="id" title="keyword">Qed</span></span>-defined objects are
+    opaque during computation.)
+
+<div class="paragraph"> </div>
+
+    This feature is mainly useful for writing functions with dependent
+    types, which we won't explore much further in this book.  But it
+    does illustrate the uniformity and orthogonality of the basic
+    ideas in Coq. 
+</div>
+
+<div class="doc">
+<a id="lab272"></a><h1 class="section">Logical Connectives as Inductive Types</h1>
+
+<div class="paragraph"> </div>
+
+ Inductive definitions are powerful enough to express most of the
+    connectives we have seen so far.  Indeed, only universal
+    quantification (with implication as a special case) is built into
+    Coq; all the others are defined inductively.  We'll see these
+    definitions in this section. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <a id="Props" class="idref" href="#Props"><span class="id" title="module">Props</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab273"></a><h2 class="section">Conjunction</h2>
+
+<div class="paragraph"> </div>
+
+ To prove that <span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode">∧</span> <span class="inlinecode"><span class="id" title="var">Q</span></span> holds, we must present evidence for both
+    <span class="inlinecode"><span class="id" title="var">P</span></span> and <span class="inlinecode"><span class="id" title="var">Q</span></span>.  Thus, it makes sense to define a proof object for <span class="inlinecode"><span class="id" title="var">P</span></span>
+    <span class="inlinecode">∧</span> <span class="inlinecode"><span class="id" title="var">Q</span></span> as consisting of a pair of two proofs: one for <span class="inlinecode"><span class="id" title="var">P</span></span> and
+    another one for <span class="inlinecode"><span class="id" title="var">Q</span></span>. This leads to the following definition. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <a id="Props.And" class="idref" href="#Props.And"><span class="id" title="module">And</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Inductive</span> <a id="Props.And.and" class="idref" href="#Props.And.and"><span class="id" title="inductive">and</span></a> (<a id="P:13" class="idref" href="#P:13"><span class="id" title="binder">P</span></a> <a id="Q:14" class="idref" href="#Q:14"><span class="id" title="binder">Q</span></a> : <span class="id" title="keyword">Prop</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+| <a id="Props.And.conj" class="idref" href="#Props.And.conj"><span class="id" title="constructor">conj</span></a> : <a class="idref" href="ProofObjects.html#P:13"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#Q:14"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#and:15"><span class="id" title="inductive">and</span></a> <a class="idref" href="ProofObjects.html#P:13"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#Q:14"><span class="id" title="variable">Q</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="ProofObjects.html#Props.And.conj"><span class="id" title="constructor">conj</span></a> [<span class="id" title="var">P</span>] [<span class="id" title="var">Q</span>].<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Notation</span> <a id="6ab856ff40ad580509907a32018670d<sub>8</sub>" class="idref" href="#6ab856ff40ad580509907a32018670d<sub>8</sub>"><span class="id" title="notation">&quot;</span></a>P /\ Q" := (<a class="idref" href="ProofObjects.html#Props.And.and"><span class="id" title="inductive">and</span></a> <span class="id" title="var">P</span> <span class="id" title="var">Q</span>) : <span class="id" title="var">type_scope</span>.<br/>
+</div>
+
+<div class="doc">
+Notice the similarity with the definition of the <span class="inlinecode"><span class="id" title="var">prod</span></span> type,
+    given in chapter <a href="Poly.html"><span class="inlineref">Poly</span></a>; the only difference is that <span class="inlinecode"><span class="id" title="var">prod</span></span> takes
+    <span class="inlinecode"><span class="id" title="keyword">Type</span></span> arguments, whereas <span class="inlinecode"><span class="id" title="var">and</span></span> takes <span class="inlinecode"><span class="id" title="keyword">Prop</span></span> arguments. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="Poly.html#prod"><span class="id" title="inductive">prod</span></a>.<br/>
+<span class="comment">(*&nbsp;===&gt;<br/>
+&nbsp;&nbsp;&nbsp;Inductive&nbsp;prod&nbsp;(X&nbsp;Y&nbsp;:&nbsp;Type)&nbsp;:&nbsp;Type&nbsp;:=<br/>
+&nbsp;&nbsp;&nbsp;|&nbsp;pair&nbsp;:&nbsp;X&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;Y&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;X&nbsp;*&nbsp;Y.&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+This similarity should clarify why <span class="inlinecode"><span class="id" title="tactic">destruct</span></span> and <span class="inlinecode"><span class="id" title="tactic">intros</span></span>
+    patterns can be used on a conjunctive hypothesis.  Case analysis
+    allows us to consider all possible ways in which <span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode">∧</span> <span class="inlinecode"><span class="id" title="var">Q</span></span> was
+    proved -- here just one (the <span class="inlinecode"><span class="id" title="var">conj</span></span> constructor). 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="Props.And.proj1'" class="idref" href="#Props.And.proj1'"><span class="id" title="lemma">proj1'</span></a> : <span class="id" title="keyword">∀</span> <a id="P:17" class="idref" href="#P:17"><span class="id" title="binder">P</span></a> <a id="Q:18" class="idref" href="#Q:18"><span class="id" title="binder">Q</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ProofObjects.html#P:17"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#6ab856ff40ad580509907a32018670d<sub>8</sub>"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#Q:18"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:17"><span class="id" title="variable">P</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">P</span> <span class="id" title="var">Q</span> <span class="id" title="var">HPQ</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">HPQ</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">HP</span> <span class="id" title="var">HQ</span>]. <span class="id" title="tactic">apply</span> <span class="id" title="var">HP</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Show</span> <span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Similarly, the <span class="inlinecode"><span class="id" title="tactic">split</span></span> tactic actually works for any inductively
+    defined proposition with exactly one constructor.  In particular,
+    it works for <span class="inlinecode"><span class="id" title="var">and</span></span>: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="Props.And.and_comm" class="idref" href="#Props.And.and_comm"><span class="id" title="lemma">and_comm</span></a> : <span class="id" title="keyword">∀</span> <a id="P:19" class="idref" href="#P:19"><span class="id" title="binder">P</span></a> <a id="Q:20" class="idref" href="#Q:20"><span class="id" title="binder">Q</span></a> : <span class="id" title="keyword">Prop</span>, <a class="idref" href="ProofObjects.html#P:19"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#6ab856ff40ad580509907a32018670d<sub>8</sub>"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#Q:20"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;-&gt;'_x"><span class="id" title="notation">↔</span></a> <a class="idref" href="ProofObjects.html#Q:20"><span class="id" title="variable">Q</span></a> <a class="idref" href="ProofObjects.html#6ab856ff40ad580509907a32018670d<sub>8</sub>"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#P:19"><span class="id" title="variable">P</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">P</span> <span class="id" title="var">Q</span>. <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> [<span class="id" title="var">HP</span> <span class="id" title="var">HQ</span>]. <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">HQ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">HP</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> [<span class="id" title="var">HQ</span> <span class="id" title="var">HP</span>]. <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">HP</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">HQ</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ProofObjects.html#Props.And"><span class="id" title="module">And</span></a>.<br/>
+</div>
+
+<div class="doc">
+This shows why the inductive definition of <span class="inlinecode"><span class="id" title="var">and</span></span> can be
+    manipulated by tactics as we've been doing.  We can also use it to
+    build proofs directly, using pattern-matching.  For instance: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.and_comm'_aux" class="idref" href="#Props.and_comm'_aux"><span class="id" title="definition">and_comm'_aux</span></a> <a id="P:21" class="idref" href="#P:21"><span class="id" title="binder">P</span></a> <a id="Q:22" class="idref" href="#Q:22"><span class="id" title="binder">Q</span></a> (<a id="H:23" class="idref" href="#H:23"><span class="id" title="binder">H</span></a> : <a class="idref" href="ProofObjects.html#P:21"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#Q:22"><span class="id" title="variable">Q</span></a>) : <a class="idref" href="ProofObjects.html#Q:22"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#P:21"><span class="id" title="variable">P</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ProofObjects.html#H:23"><span class="id" title="variable">H</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#conj"><span class="id" title="constructor">conj</span></a> <span class="id" title="var">HP</span> <span class="id" title="var">HQ</span> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#conj"><span class="id" title="constructor">conj</span></a> <span class="id" title="var">HQ</span> <span class="id" title="var">HP</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="Props.and_comm'" class="idref" href="#Props.and_comm'"><span class="id" title="definition">and_comm'</span></a> <a id="P:25" class="idref" href="#P:25"><span class="id" title="binder">P</span></a> <a id="Q:26" class="idref" href="#Q:26"><span class="id" title="binder">Q</span></a> : <a class="idref" href="ProofObjects.html#P:25"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#Q:26"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;-&gt;'_x"><span class="id" title="notation">↔</span></a> <a class="idref" href="ProofObjects.html#Q:26"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#P:25"><span class="id" title="variable">P</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#conj"><span class="id" title="constructor">conj</span></a> (<a class="idref" href="ProofObjects.html#Props.and_comm'_aux"><span class="id" title="definition">and_comm'_aux</span></a> <a class="idref" href="ProofObjects.html#P:25"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#Q:26"><span class="id" title="variable">Q</span></a>) (<a class="idref" href="ProofObjects.html#Props.and_comm'_aux"><span class="id" title="definition">and_comm'_aux</span></a> <a class="idref" href="ProofObjects.html#Q:26"><span class="id" title="variable">Q</span></a> <a class="idref" href="ProofObjects.html#P:25"><span class="id" title="variable">P</span></a>).<br/>
+</div>
+
+<div class="doc">
+<a id="lab274"></a><h4 class="section">Exercise: 2 stars, standard (conj_fact)</h4>
+ Construct a proof object for the following proposition. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.conj_fact" class="idref" href="#Props.conj_fact"><span class="id" title="definition">conj_fact</span></a> : <span class="id" title="keyword">∀</span> <a id="P:27" class="idref" href="#P:27"><span class="id" title="binder">P</span></a> <a id="Q:28" class="idref" href="#Q:28"><span class="id" title="binder">Q</span></a> <a id="R:29" class="idref" href="#R:29"><span class="id" title="binder">R</span></a>, <a class="idref" href="ProofObjects.html#P:27"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#Q:28"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#Q:28"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#R:29"><span class="id" title="variable">R</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:27"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="ProofObjects.html#R:29"><span class="id" title="variable">R</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab275"></a><h2 class="section">Disjunction</h2>
+
+<div class="paragraph"> </div>
+
+ The inductive definition of disjunction uses two constructors, one
+    for each side of the disjunct: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <a id="Props.Or" class="idref" href="#Props.Or"><span class="id" title="module">Or</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Inductive</span> <a id="Props.Or.or" class="idref" href="#Props.Or.or"><span class="id" title="inductive">or</span></a> (<a id="P:30" class="idref" href="#P:30"><span class="id" title="binder">P</span></a> <a id="Q:31" class="idref" href="#Q:31"><span class="id" title="binder">Q</span></a> : <span class="id" title="keyword">Prop</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+| <a id="Props.Or.or_introl" class="idref" href="#Props.Or.or_introl"><span class="id" title="constructor">or_introl</span></a> : <a class="idref" href="ProofObjects.html#P:30"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#or:32"><span class="id" title="inductive">or</span></a> <a class="idref" href="ProofObjects.html#P:30"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#Q:31"><span class="id" title="variable">Q</span></a><br/>
+| <a id="Props.Or.or_intror" class="idref" href="#Props.Or.or_intror"><span class="id" title="constructor">or_intror</span></a> : <a class="idref" href="ProofObjects.html#Q:31"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#or:32"><span class="id" title="inductive">or</span></a> <a class="idref" href="ProofObjects.html#P:30"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#Q:31"><span class="id" title="variable">Q</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="ProofObjects.html#Props.Or.or_introl"><span class="id" title="constructor">or_introl</span></a> [<span class="id" title="var">P</span>] [<span class="id" title="var">Q</span>].<br/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="ProofObjects.html#Props.Or.or_intror"><span class="id" title="constructor">or_intror</span></a> [<span class="id" title="var">P</span>] [<span class="id" title="var">Q</span>].<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Notation</span> <a id="74311468d5b9a788b8073b6cfc8e0ac<sub>4</sub>" class="idref" href="#74311468d5b9a788b8073b6cfc8e0ac<sub>4</sub>"><span class="id" title="notation">&quot;</span></a>P \/ Q" := (<a class="idref" href="ProofObjects.html#Props.Or.or"><span class="id" title="inductive">or</span></a> <span class="id" title="var">P</span> <span class="id" title="var">Q</span>) : <span class="id" title="var">type_scope</span>.<br/>
+</div>
+
+<div class="doc">
+This declaration explains the behavior of the <span class="inlinecode"><span class="id" title="tactic">destruct</span></span> tactic on
+    a disjunctive hypothesis, since the generated subgoals match the
+    shape of the <span class="inlinecode"><span class="id" title="var">or_introl</span></span> and <span class="inlinecode"><span class="id" title="var">or_intror</span></span> constructors.
+
+<div class="paragraph"> </div>
+
+    Once again, we can also directly write proof objects for theorems
+    involving <span class="inlinecode"><span class="id" title="var">or</span></span>, without resorting to tactics. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.Or.inj_l" class="idref" href="#Props.Or.inj_l"><span class="id" title="definition">inj_l</span></a> : <span class="id" title="keyword">∀</span> (<a id="P:34" class="idref" href="#P:34"><span class="id" title="binder">P</span></a> <a id="Q:35" class="idref" href="#Q:35"><span class="id" title="binder">Q</span></a> : <span class="id" title="keyword">Prop</span>), <a class="idref" href="ProofObjects.html#P:34"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:34"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#74311468d5b9a788b8073b6cfc8e0ac<sub>4</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#Q:35"><span class="id" title="variable">Q</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <a id="P:36" class="idref" href="#P:36"><span class="id" title="binder">P</span></a> <a id="Q:37" class="idref" href="#Q:37"><span class="id" title="binder">Q</span></a> <a id="HP:38" class="idref" href="#HP:38"><span class="id" title="binder">HP</span></a> ⇒ <a class="idref" href="ProofObjects.html#Props.Or.or_introl"><span class="id" title="constructor">or_introl</span></a> <a class="idref" href="ProofObjects.html#HP:38"><span class="id" title="variable">HP</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="Props.Or.inj_l'" class="idref" href="#Props.Or.inj_l'"><span class="id" title="lemma">inj_l'</span></a> : <span class="id" title="keyword">∀</span> (<a id="P:39" class="idref" href="#P:39"><span class="id" title="binder">P</span></a> <a id="Q:40" class="idref" href="#Q:40"><span class="id" title="binder">Q</span></a> : <span class="id" title="keyword">Prop</span>), <a class="idref" href="ProofObjects.html#P:39"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:39"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#74311468d5b9a788b8073b6cfc8e0ac<sub>4</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#Q:40"><span class="id" title="variable">Q</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">P</span> <span class="id" title="var">Q</span> <span class="id" title="var">HP</span>. <span class="id" title="tactic">left</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">HP</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="Props.Or.or_elim" class="idref" href="#Props.Or.or_elim"><span class="id" title="definition">or_elim</span></a> : <span class="id" title="keyword">∀</span> (<a id="P:41" class="idref" href="#P:41"><span class="id" title="binder">P</span></a> <a id="Q:42" class="idref" href="#Q:42"><span class="id" title="binder">Q</span></a> <a id="R:43" class="idref" href="#R:43"><span class="id" title="binder">R</span></a> : <span class="id" title="keyword">Prop</span>), <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><a class="idref" href="ProofObjects.html#P:41"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#74311468d5b9a788b8073b6cfc8e0ac<sub>4</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#Q:42"><span class="id" title="variable">Q</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><a class="idref" href="ProofObjects.html#P:41"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#R:43"><span class="id" title="variable">R</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><a class="idref" href="ProofObjects.html#Q:42"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#R:43"><span class="id" title="variable">R</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#R:43"><span class="id" title="variable">R</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <a id="P:44" class="idref" href="#P:44"><span class="id" title="binder">P</span></a> <a id="Q:45" class="idref" href="#Q:45"><span class="id" title="binder">Q</span></a> <a id="R:46" class="idref" href="#R:46"><span class="id" title="binder">R</span></a> <a id="HPQ:47" class="idref" href="#HPQ:47"><span class="id" title="binder">HPQ</span></a> <a id="HPR:48" class="idref" href="#HPR:48"><span class="id" title="binder">HPR</span></a> <a id="HQR:49" class="idref" href="#HQR:49"><span class="id" title="binder">HQR</span></a> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ProofObjects.html#HPQ:47"><span class="id" title="variable">HPQ</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ProofObjects.html#Props.Or.or_introl"><span class="id" title="constructor">or_introl</span></a> <span class="id" title="var">HP</span> ⇒ <a class="idref" href="ProofObjects.html#HPR:48"><span class="id" title="variable">HPR</span></a> <span class="id" title="var">HP</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ProofObjects.html#Props.Or.or_intror"><span class="id" title="constructor">or_intror</span></a> <span class="id" title="var">HQ</span> ⇒ <a class="idref" href="ProofObjects.html#HQR:49"><span class="id" title="variable">HQR</span></a> <span class="id" title="var">HQ</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="Props.Or.or_elim'" class="idref" href="#Props.Or.or_elim'"><span class="id" title="lemma">or_elim'</span></a> : <span class="id" title="keyword">∀</span> (<a id="P:51" class="idref" href="#P:51"><span class="id" title="binder">P</span></a> <a id="Q:52" class="idref" href="#Q:52"><span class="id" title="binder">Q</span></a> <a id="R:53" class="idref" href="#R:53"><span class="id" title="binder">R</span></a> : <span class="id" title="keyword">Prop</span>), <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><a class="idref" href="ProofObjects.html#P:51"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#74311468d5b9a788b8073b6cfc8e0ac<sub>4</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#Q:52"><span class="id" title="variable">Q</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><a class="idref" href="ProofObjects.html#P:51"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#R:53"><span class="id" title="variable">R</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><a class="idref" href="ProofObjects.html#Q:52"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#R:53"><span class="id" title="variable">R</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#R:53"><span class="id" title="variable">R</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">P</span> <span class="id" title="var">Q</span> <span class="id" title="var">R</span> <span class="id" title="var">HPQ</span> <span class="id" title="var">HPR</span> <span class="id" title="var">HQR</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">HPQ</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">HP</span> | <span class="id" title="var">HQ</span>].<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">HPR</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">HP</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">HQR</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">HQ</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ProofObjects.html#Props.Or"><span class="id" title="module">Or</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab276"></a><h4 class="section">Exercise: 2 stars, standard (or_commut')</h4>
+ Construct a proof object for the following proposition. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.or_commut'" class="idref" href="#Props.or_commut'"><span class="id" title="definition">or_commut'</span></a> : <span class="id" title="keyword">∀</span> <a id="P:54" class="idref" href="#P:54"><span class="id" title="binder">P</span></a> <a id="Q:55" class="idref" href="#Q:55"><span class="id" title="binder">Q</span></a>, <a class="idref" href="ProofObjects.html#P:54"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e<sub>25</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#Q:55"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#Q:55"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e<sub>25</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#P:54"><span class="id" title="variable">P</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab277"></a><h2 class="section">Existential Quantification</h2>
+
+<div class="paragraph"> </div>
+
+ To give evidence for an existential quantifier, we package a
+    witness <span class="inlinecode"><span class="id" title="var">x</span></span> together with a proof that <span class="inlinecode"><span class="id" title="var">x</span></span> satisfies the property
+    <span class="inlinecode"><span class="id" title="var">P</span></span>: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <a id="Props.Ex" class="idref" href="#Props.Ex"><span class="id" title="module">Ex</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Inductive</span> <a id="Props.Ex.ex" class="idref" href="#Props.Ex.ex"><span class="id" title="inductive">ex</span></a> {<a id="A:56" class="idref" href="#A:56"><span class="id" title="binder">A</span></a> : <span class="id" title="keyword">Type</span>} (<a id="P:57" class="idref" href="#P:57"><span class="id" title="binder">P</span></a> : <a class="idref" href="ProofObjects.html#A:56"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <span class="id" title="keyword">Prop</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+| <a id="Props.Ex.ex_intro" class="idref" href="#Props.Ex.ex_intro"><span class="id" title="constructor">ex_intro</span></a> : <span class="id" title="keyword">∀</span> <a id="x:60" class="idref" href="#x:60"><span class="id" title="binder">x</span></a> : <a class="idref" href="ProofObjects.html#A:56"><span class="id" title="variable">A</span></a>, <a class="idref" href="ProofObjects.html#P:57"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#x:60"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#ex:58"><span class="id" title="inductive">ex</span></a> <a class="idref" href="ProofObjects.html#P:57"><span class="id" title="variable">P</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Notation</span> <a id="ea9d7df266f3dd6dbf5f6c0e65bc25af" class="idref" href="#ea9d7df266f3dd6dbf5f6c0e65bc25af"><span class="id" title="notation">&quot;</span></a>'exists' x , p" :=<br/>
+&nbsp;&nbsp;(<a class="idref" href="ProofObjects.html#Props.Ex.ex"><span class="id" title="inductive">ex</span></a> (<span class="id" title="keyword">fun</span> <a id="x:61" class="idref" href="#x:61"><span class="id" title="binder">x</span></a> ⇒ <span class="id" title="var">p</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 200, <span class="id" title="tactic">right</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">type_scope</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ProofObjects.html#Props.Ex"><span class="id" title="module">Ex</span></a>.<br/>
+</div>
+
+<div class="doc">
+This may benefit from a little unpacking.  The core definition is
+    for a type former <span class="inlinecode"><span class="id" title="var">ex</span></span> that can be used to build propositions of
+    the form <span class="inlinecode"><span class="id" title="var">ex</span></span> <span class="inlinecode"><span class="id" title="var">P</span></span>, where <span class="inlinecode"><span class="id" title="var">P</span></span> itself is a <i>function</i> from witness
+    values in the type <span class="inlinecode"><span class="id" title="var">A</span></span> to propositions.  The <span class="inlinecode"><span class="id" title="var">ex_intro</span></span>
+    constructor then offers a way of constructing evidence for <span class="inlinecode"><span class="id" title="var">ex</span></span> <span class="inlinecode"><span class="id" title="var">P</span></span>,
+    given a witness <span class="inlinecode"><span class="id" title="var">x</span></span> and a proof of <span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span>.
+
+<div class="paragraph"> </div>
+
+    The notation in the standard library is a slight variant of
+    the above, enabling syntactic forms such as <span class="inlinecode"><span class="id" title="tactic">∃</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">y</span>,</span> <span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">y</span></span>. 
+<div class="paragraph"> </div>
+
+ The more familiar form <span class="inlinecode"><span class="id" title="tactic">∃</span></span> <span class="inlinecode"><span class="id" title="var">x</span>,</span> <span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> desugars to an expression
+    involving <span class="inlinecode"><span class="id" title="var">ex</span></span>: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ex"><span class="id" title="inductive">ex</span></a> (<span class="id" title="keyword">fun</span> <a id="n:62" class="idref" href="#n:62"><span class="id" title="binder">n</span></a> ⇒ <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:62"><span class="id" title="variable">n</span></a>) : <span class="id" title="keyword">Prop</span>.<br/>
+</div>
+
+<div class="doc">
+Here's how to define an explicit proof object involving <span class="inlinecode"><span class="id" title="var">ex</span></span>: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.some_nat_is_even" class="idref" href="#Props.some_nat_is_even"><span class="id" title="definition">some_nat_is_even</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"><span class="id" title="notation">∃</span></a> <a id="n:63" class="idref" href="#n:63"><span class="id" title="binder">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"><span class="id" title="notation">,</span></a> <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> <a class="idref" href="ProofObjects.html#n:63"><span class="id" title="variable">n</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ex_intro"><span class="id" title="constructor">ex_intro</span></a> <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> 4 (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 2 (<a class="idref" href="IndProp.html#ev_SS"><span class="id" title="constructor">ev_SS</span></a> 0 <a class="idref" href="IndProp.html#ev_0"><span class="id" title="constructor">ev_0</span></a>)).<br/>
+</div>
+
+<div class="doc">
+<a id="lab278"></a><h4 class="section">Exercise: 2 stars, standard (ex_ev_Sn)</h4>
+ Construct a proof object for the following proposition. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.ex_ev_Sn" class="idref" href="#Props.ex_ev_Sn"><span class="id" title="definition">ex_ev_Sn</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ex"><span class="id" title="inductive">ex</span></a> (<span class="id" title="keyword">fun</span> <a id="n:64" class="idref" href="#n:64"><span class="id" title="binder">n</span></a> ⇒ <a class="idref" href="IndProp.html#ev"><span class="id" title="inductive">ev</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="ProofObjects.html#n:64"><span class="id" title="variable">n</span></a>))<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab279"></a><h2 class="section"><span class="inlinecode"><span class="id" title="var">True</span></span> and <span class="inlinecode"><span class="id" title="var">False</span></span></h2>
+
+<div class="paragraph"> </div>
+
+ The inductive definition of the <span class="inlinecode"><span class="id" title="var">True</span></span> proposition is simple: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <a id="Props.True" class="idref" href="#Props.True"><span class="id" title="inductive">True</span></a> : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;| <a id="Props.I" class="idref" href="#Props.I"><span class="id" title="constructor">I</span></a> : <a class="idref" href="ProofObjects.html#True:65"><span class="id" title="inductive">True</span></a>.<br/>
+</div>
+
+<div class="doc">
+It has one constructor (so every proof of <span class="inlinecode"><span class="id" title="var">True</span></span> is the same, so
+    being given a proof of <span class="inlinecode"><span class="id" title="var">True</span></span> is not informative.) 
+<div class="paragraph"> </div>
+
+<a id="lab280"></a><h4 class="section">Exercise: 1 star, standard (p_implies_true)</h4>
+ Construct a proof object for the following proposition. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.p_implies_true" class="idref" href="#Props.p_implies_true"><span class="id" title="definition">p_implies_true</span></a> : <span class="id" title="keyword">∀</span> <a id="P:67" class="idref" href="#P:67"><span class="id" title="binder">P</span></a>, <a class="idref" href="ProofObjects.html#P:67"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#Props.True"><span class="id" title="inductive">True</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+ <span class="inlinecode"><span class="id" title="var">False</span></span> is equally simple -- indeed, so simple it may look
+    syntactically wrong at first glance! 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <a id="Props.False" class="idref" href="#Props.False"><span class="id" title="inductive">False</span></a> : <span class="id" title="keyword">Prop</span> := .<br/>
+</div>
+
+<div class="doc">
+That is, <span class="inlinecode"><span class="id" title="var">False</span></span> is an inductive type with <i>no</i> constructors --
+    i.e., no way to build evidence for it. For example, there is
+    no way to complete the following definition such that it
+    succeeds (rather than fails). 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Fail</span> <span class="id" title="keyword">Definition</span> <a id="Props.contra" class="idref" href="#Props.contra"><span class="id" title="definition">contra</span></a> : <a class="idref" href="ProofObjects.html#Props.False"><span class="id" title="inductive">False</span></a> :=<br/>
+&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 1.<br/>
+</div>
+
+<div class="doc">
+But it is possible to destruct <span class="inlinecode"><span class="id" title="var">False</span></span> by pattern matching. There can
+    be no patterns that match it, since it has no constructors.  So
+    the pattern match also is so simple it may look syntactically
+    wrong at first glance. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.false_implies_zero_eq_one" class="idref" href="#Props.false_implies_zero_eq_one"><span class="id" title="definition">false_implies_zero_eq_one</span></a> : <a class="idref" href="ProofObjects.html#Props.False"><span class="id" title="inductive">False</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> 0 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 1 :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <a id="contra:70" class="idref" href="#contra:70"><span class="id" title="binder">contra</span></a> ⇒ <span class="id" title="keyword">match</span> <a class="idref" href="ProofObjects.html#contra:70"><span class="id" title="variable">contra</span></a> <span class="id" title="keyword">with</span> <span class="id" title="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+Since there are no branches to evaluate, the <span class="inlinecode"><span class="id" title="keyword">match</span></span> expression
+    can be considered to have any type we want, including <span class="inlinecode">0</span> <span class="inlinecode">=</span> <span class="inlinecode">1</span>.
+    Indeed, it's impossible to ever cause the <span class="inlinecode"><span class="id" title="keyword">match</span></span> to be evaluated,
+    because we can never construct a value of type <span class="inlinecode"><span class="id" title="var">False</span></span> to pass to
+    the function. 
+<div class="paragraph"> </div>
+
+<a id="lab281"></a><h4 class="section">Exercise: 1 star, standard (ex_falso_quodlibet')</h4>
+ Construct a proof object for the following proposition. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="Props.ex_falso_quodlibet'" class="idref" href="#Props.ex_falso_quodlibet'"><span class="id" title="definition">ex_falso_quodlibet'</span></a> : <span class="id" title="keyword">∀</span> <a id="P:72" class="idref" href="#P:72"><span class="id" title="binder">P</span></a>, <a class="idref" href="ProofObjects.html#Props.False"><span class="id" title="inductive">False</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:72"><span class="id" title="variable">P</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ProofObjects.html#Props"><span class="id" title="module">Props</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab282"></a><h1 class="section">Equality</h1>
+
+<div class="paragraph"> </div>
+
+ Even Coq's equality relation is not built in.  We can define
+    it ourselves: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <a id="MyEquality" class="idref" href="#MyEquality"><span class="id" title="module">MyEquality</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Inductive</span> <a id="MyEquality.eq" class="idref" href="#MyEquality.eq"><span class="id" title="inductive">eq</span></a> {<a id="X:73" class="idref" href="#X:73"><span class="id" title="binder">X</span></a>:<span class="id" title="keyword">Type</span>} : <span class="id" title="var">X</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <span class="id" title="var">X</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <span class="id" title="keyword">Prop</span> :=<br/>
+| <a id="MyEquality.eq_refl" class="idref" href="#MyEquality.eq_refl"><span class="id" title="constructor">eq_refl</span></a> : <span class="id" title="keyword">∀</span> <a id="x:76" class="idref" href="#x:76"><span class="id" title="binder">x</span></a>, <a class="idref" href="ProofObjects.html#eq:74"><span class="id" title="inductive">eq</span></a> <a class="idref" href="ProofObjects.html#x:76"><span class="id" title="variable">x</span></a> <a class="idref" href="ProofObjects.html#x:76"><span class="id" title="variable">x</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Notation</span> <a id="545ae595f44d9abe8ba29e46afbe4187" class="idref" href="#545ae595f44d9abe8ba29e46afbe4187"><span class="id" title="notation">&quot;</span></a>x == y" := (<a class="idref" href="ProofObjects.html#MyEquality.eq"><span class="id" title="inductive">eq</span></a> <span class="id" title="var">x</span> <span class="id" title="var">y</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 70, <span class="id" title="keyword">no</span> <span class="id" title="keyword">associativity</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">type_scope</span>.<br/>
+</div>
+
+<div class="doc">
+The way to think about this definition (which is just a slight
+    variant of the standard library's) is that, given a set <span class="inlinecode"><span class="id" title="var">X</span></span>, it
+    defines a <i>family</i> of propositions "<span class="inlinecode"><span class="id" title="var">x</span></span> is equal to <span class="inlinecode"><span class="id" title="var">y</span></span>," indexed
+    by pairs of values (<span class="inlinecode"><span class="id" title="var">x</span></span> and <span class="inlinecode"><span class="id" title="var">y</span></span>) from <span class="inlinecode"><span class="id" title="var">X</span></span>.  There is just one way
+    of constructing evidence for members of this family: applying the
+    constructor <span class="inlinecode"><span class="id" title="var">eq_refl</span></span> to a type <span class="inlinecode"><span class="id" title="var">X</span></span> and a single value <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" title="var">X</span></span>,
+    which yields evidence that <span class="inlinecode"><span class="id" title="var">x</span></span> is equal to <span class="inlinecode"><span class="id" title="var">x</span></span>.
+
+<div class="paragraph"> </div>
+
+    Other types of the form <span class="inlinecode"><span class="id" title="var">eq</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">y</span></span> where <span class="inlinecode"><span class="id" title="var">x</span></span> and <span class="inlinecode"><span class="id" title="var">y</span></span> are not the
+    same are thus uninhabited. 
+<div class="paragraph"> </div>
+
+ We can use <span class="inlinecode"><span class="id" title="var">eq_refl</span></span> to construct evidence that, for example, <span class="inlinecode">2</span> <span class="inlinecode">=</span>
+    <span class="inlinecode">2</span>.  Can we also use it to construct evidence that <span class="inlinecode">1</span> <span class="inlinecode">+</span> <span class="inlinecode">1</span> <span class="inlinecode">=</span> <span class="inlinecode">2</span>?
+    Yes, we can.  Indeed, it is the very same piece of evidence!
+
+<div class="paragraph"> </div>
+
+    The reason is that Coq treats as "the same" any two terms that are
+    <i>convertible</i> according to a simple set of computation rules.
+
+<div class="paragraph"> </div>
+
+    These rules, which are similar to those used by <span class="inlinecode"><span class="id" title="keyword">Compute</span></span>, include
+    evaluation of function application, inlining of definitions, and
+    simplification of <span class="inlinecode"><span class="id" title="keyword">match</span></span>es.  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="MyEquality.four" class="idref" href="#MyEquality.four"><span class="id" title="lemma">four</span></a>: 2 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 2 <a class="idref" href="ProofObjects.html#545ae595f44d9abe8ba29e46afbe4187"><span class="id" title="notation">==</span></a> 1 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 3.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="ProofObjects.html#MyEquality.eq_refl"><span class="id" title="constructor">eq_refl</span></a>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" title="tactic">reflexivity</span></span> tactic that we have used to prove
+    equalities up to now is essentially just shorthand for <span class="inlinecode"><span class="id" title="tactic">apply</span></span>
+    <span class="inlinecode"><span class="id" title="var">eq_refl</span></span>.
+
+<div class="paragraph"> </div>
+
+    In tactic-based proofs of equality, the conversion rules are
+    normally hidden in uses of <span class="inlinecode"><span class="id" title="tactic">simpl</span></span> (either explicit or implicit in
+    other tactics such as <span class="inlinecode"><span class="id" title="tactic">reflexivity</span></span>).
+
+<div class="paragraph"> </div>
+
+    But you can see them directly at work in the following explicit
+    proof objects: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="MyEquality.four'" class="idref" href="#MyEquality.four'"><span class="id" title="definition">four'</span></a> : 2 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 2 <a class="idref" href="ProofObjects.html#545ae595f44d9abe8ba29e46afbe4187"><span class="id" title="notation">==</span></a> 1 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 3 :=<br/>
+&nbsp;&nbsp;<a class="idref" href="ProofObjects.html#MyEquality.eq_refl"><span class="id" title="constructor">eq_refl</span></a> 4.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="MyEquality.singleton" class="idref" href="#MyEquality.singleton"><span class="id" title="definition">singleton</span></a> : <span class="id" title="keyword">∀</span> (<a id="X:77" class="idref" href="#X:77"><span class="id" title="binder">X</span></a>:<span class="id" title="keyword">Type</span>) (<a id="x:78" class="idref" href="#x:78"><span class="id" title="binder">x</span></a>:<a class="idref" href="ProofObjects.html#X:77"><span class="id" title="variable">X</span></a>), <a class="idref" href="Poly.html#2c60282cbb04e070c60ae01e76f3865a"><span class="id" title="notation">[]</span></a><a class="idref" href="Poly.html#f03f7a04ef75ff3ac66ca5c23554e52e"><span class="id" title="notation">++</span></a><a class="idref" href="Poly.html#fa57d319973f6d58544a8887d0d48ea<sub>6</sub>"><span class="id" title="notation">[</span></a><a class="idref" href="ProofObjects.html#x:78"><span class="id" title="variable">x</span></a><a class="idref" href="Poly.html#fa57d319973f6d58544a8887d0d48ea<sub>6</sub>"><span class="id" title="notation">]</span></a> <a class="idref" href="ProofObjects.html#545ae595f44d9abe8ba29e46afbe4187"><span class="id" title="notation">==</span></a> <a class="idref" href="ProofObjects.html#x:78"><span class="id" title="variable">x</span></a><a class="idref" href="Poly.html#:::x_'::'_x"><span class="id" title="notation">::</span></a><a class="idref" href="Poly.html#2c60282cbb04e070c60ae01e76f3865a"><span class="id" title="notation">[]</span></a>  :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> (<a id="X:79" class="idref" href="#X:79"><span class="id" title="binder">X</span></a>:<span class="id" title="keyword">Type</span>) (<a id="x:80" class="idref" href="#x:80"><span class="id" title="binder">x</span></a>:<a class="idref" href="ProofObjects.html#X:79"><span class="id" title="variable">X</span></a>) ⇒ <a class="idref" href="ProofObjects.html#MyEquality.eq_refl"><span class="id" title="constructor">eq_refl</span></a> <a class="idref" href="Poly.html#fa57d319973f6d58544a8887d0d48ea<sub>6</sub>"><span class="id" title="notation">[</span></a><a class="idref" href="ProofObjects.html#x:80"><span class="id" title="variable">x</span></a><a class="idref" href="Poly.html#fa57d319973f6d58544a8887d0d48ea<sub>6</sub>"><span class="id" title="notation">]</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab283"></a><h4 class="section">Exercise: 2 stars, standard (equality__leibniz_equality)</h4>
+ The inductive definition of equality implies <i>Leibniz equality</i>:
+    what we mean when we say "<span class="inlinecode"><span class="id" title="var">x</span></span> and <span class="inlinecode"><span class="id" title="var">y</span></span> are equal" is that every
+    property on <span class="inlinecode"><span class="id" title="var">P</span></span> that is true of <span class="inlinecode"><span class="id" title="var">x</span></span> is also true of <span class="inlinecode"><span class="id" title="var">y</span></span>.  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="MyEquality.equality__leibniz_equality" class="idref" href="#MyEquality.equality__leibniz_equality"><span class="id" title="lemma">equality__leibniz_equality</span></a> : <span class="id" title="keyword">∀</span> (<a id="X:81" class="idref" href="#X:81"><span class="id" title="binder">X</span></a> : <span class="id" title="keyword">Type</span>) (<a id="x:82" class="idref" href="#x:82"><span class="id" title="binder">x</span></a> <a id="y:83" class="idref" href="#y:83"><span class="id" title="binder">y</span></a>: <a class="idref" href="ProofObjects.html#X:81"><span class="id" title="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="ProofObjects.html#x:82"><span class="id" title="variable">x</span></a> <a class="idref" href="ProofObjects.html#545ae595f44d9abe8ba29e46afbe4187"><span class="id" title="notation">==</span></a> <a class="idref" href="ProofObjects.html#y:83"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <span class="id" title="keyword">∀</span> <a id="P:84" class="idref" href="#P:84"><span class="id" title="binder">P</span></a>:<a class="idref" href="ProofObjects.html#X:81"><span class="id" title="variable">X</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><span class="id" title="keyword">Prop</span>, <a class="idref" href="ProofObjects.html#P:84"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#x:82"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:84"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#y:83"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab284"></a><h4 class="section">Exercise: 3 stars, standard, optional (leibniz_equality__equality)</h4>
+ Show that, in fact, the inductive definition of equality is
+    <i>equivalent</i> to Leibniz equality.  Hint: the proof is quite short;
+    about all you need to do is to invent a clever property <span class="inlinecode"><span class="id" title="var">P</span></span> to
+    instantiate the antecedent.
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="MyEquality.leibniz_equality__equality" class="idref" href="#MyEquality.leibniz_equality__equality"><span class="id" title="lemma">leibniz_equality__equality</span></a> : <span class="id" title="keyword">∀</span> (<a id="X:85" class="idref" href="#X:85"><span class="id" title="binder">X</span></a> : <span class="id" title="keyword">Type</span>) (<a id="x:86" class="idref" href="#x:86"><span class="id" title="binder">x</span></a> <a id="y:87" class="idref" href="#y:87"><span class="id" title="binder">y</span></a>: <a class="idref" href="ProofObjects.html#X:85"><span class="id" title="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><span class="id" title="keyword">∀</span> <a id="P:88" class="idref" href="#P:88"><span class="id" title="binder">P</span></a>:<a class="idref" href="ProofObjects.html#X:85"><span class="id" title="variable">X</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><span class="id" title="keyword">Prop</span>, <a class="idref" href="ProofObjects.html#P:88"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#x:86"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:88"><span class="id" title="variable">P</span></a> <a class="idref" href="ProofObjects.html#y:87"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#x:86"><span class="id" title="variable">x</span></a> <a class="idref" href="ProofObjects.html#545ae595f44d9abe8ba29e46afbe4187"><span class="id" title="notation">==</span></a> <a class="idref" href="ProofObjects.html#y:87"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ProofObjects.html#MyEquality"><span class="id" title="module">MyEquality</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab285"></a><h2 class="section">Inversion, Again</h2>
+
+<div class="paragraph"> </div>
+
+ We've seen <span class="inlinecode"><span class="id" title="tactic">inversion</span></span> used with both equality hypotheses and
+    hypotheses about inductively defined propositions.  Now that we've
+    seen that these are actually the same thing, we're in a position
+    to take a closer look at how <span class="inlinecode"><span class="id" title="tactic">inversion</span></span> behaves.
+
+<div class="paragraph"> </div>
+
+    In general, the <span class="inlinecode"><span class="id" title="tactic">inversion</span></span> tactic...
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> takes a hypothesis <span class="inlinecode"><span class="id" title="var">H</span></span> whose type <span class="inlinecode"><span class="id" title="var">P</span></span> is inductively defined,
+      and
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> for each constructor <span class="inlinecode"><span class="id" title="var">C</span></span> in <span class="inlinecode"><span class="id" title="var">P</span></span>'s definition,
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> generates a new subgoal in which we assume <span class="inlinecode"><span class="id" title="var">H</span></span> was
+        built with <span class="inlinecode"><span class="id" title="var">C</span></span>,
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> adds the arguments (premises) of <span class="inlinecode"><span class="id" title="var">C</span></span> to the context of
+        the subgoal as extra hypotheses,
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> matches the conclusion (result type) of <span class="inlinecode"><span class="id" title="var">C</span></span> against the
+        current goal and calculates a set of equalities that must
+        hold in order for <span class="inlinecode"><span class="id" title="var">C</span></span> to be applicable,
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> adds these equalities to the context (and, for convenience,
+        rewrites them in the goal), and
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> if the equalities are not satisfiable (e.g., they involve
+        things like <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">O</span></span>), immediately solves the subgoal. 
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ <i>Example</i>: If we invert a hypothesis built with <span class="inlinecode"><span class="id" title="var">or</span></span>, there are
+    two constructors, so two subgoals get generated.  The
+    conclusion (result type) of the constructor (<span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode">∨</span> <span class="inlinecode"><span class="id" title="var">Q</span></span>) doesn't
+    place any restrictions on the form of <span class="inlinecode"><span class="id" title="var">P</span></span> or <span class="inlinecode"><span class="id" title="var">Q</span></span>, so we don't get
+    any extra equalities in the context of the subgoal. 
+<div class="paragraph"> </div>
+
+ <i>Example</i>: If we invert a hypothesis built with <span class="inlinecode"><span class="id" title="var">and</span></span>, there is
+    only one constructor, so only one subgoal gets generated.  Again,
+    the conclusion (result type) of the constructor (<span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode">∧</span> <span class="inlinecode"><span class="id" title="var">Q</span></span>) doesn't
+    place any restrictions on the form of <span class="inlinecode"><span class="id" title="var">P</span></span> or <span class="inlinecode"><span class="id" title="var">Q</span></span>, so we don't get
+    any extra equalities in the context of the subgoal.  The
+    constructor does have two arguments, though, and these can be seen
+    in the context in the subgoal. 
+<div class="paragraph"> </div>
+
+ <i>Example</i>: If we invert a hypothesis built with <span class="inlinecode"><span class="id" title="var">eq</span></span>, there is
+    again only one constructor, so only one subgoal gets generated.
+    Now, though, the form of the <span class="inlinecode"><span class="id" title="var">eq_refl</span></span> constructor does give us
+    some extra information: it tells us that the two arguments to <span class="inlinecode"><span class="id" title="var">eq</span></span>
+    must be the same!  The <span class="inlinecode"><span class="id" title="tactic">inversion</span></span> tactic adds this fact to the
+    context. 
+</div>
+
+<div class="doc">
+<a id="lab286"></a><h1 class="section">The Coq Trusted Computing Base</h1>
+
+<div class="paragraph"> </div>
+
+ One issue that arises with any automated proof assistant is
+    "why trust it?": what if there is a bug in the implementation that
+    renders all its reasoning suspect?
+
+<div class="paragraph"> </div>
+
+    While it is impossible to allay such concerns completely, the fact
+    that Coq is based on the Curry-Howard correspondence gives it a
+    strong foundation. Because propositions are just types and proofs
+    are just terms, checking that an alleged proof of a proposition is
+    valid just amounts to <i>type-checking</i> the term.  Type checkers are
+    relatively small and straightforward programs, so the "trusted
+    computing base" for Coq -- the part of the code that we have to
+    believe is operating correctly -- is small too.
+
+<div class="paragraph"> </div>
+
+    What must a typechecker do?  Its primary job is to make sure that
+    in each function application the expected and actual argument
+    types match, that the arms of a <span class="inlinecode"><span class="id" title="keyword">match</span></span> expression are constructor
+    patterns belonging to the inductive type being matched over and
+    all arms of the <span class="inlinecode"><span class="id" title="keyword">match</span></span> return the same type, and so on. 
+<div class="paragraph"> </div>
+
+ There are a few additional wrinkles:
+
+<div class="paragraph"> </div>
+
+    First, since Coq types can themselves be expressions, the checker
+    must normalize these (by using the computation rules) before
+    comparing them.
+
+<div class="paragraph"> </div>
+
+    Second, the checker must make sure that <span class="inlinecode"><span class="id" title="keyword">match</span></span> expressions are
+    <i>exhaustive</i>.  That is, there must be an arm for every possible
+    constructor.  To see why, consider the following alleged proof
+    object: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Fail</span> <span class="id" title="keyword">Definition</span> <a id="or_bogus" class="idref" href="#or_bogus"><span class="id" title="definition">or_bogus</span></a> : <span class="id" title="keyword">∀</span> <a id="P:89" class="idref" href="#P:89"><span class="id" title="binder">P</span></a> <a id="Q:90" class="idref" href="#Q:90"><span class="id" title="binder">Q</span></a>, <a class="idref" href="ProofObjects.html#P:89"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e<sub>25</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#Q:90"><span class="id" title="variable">Q</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="ProofObjects.html#P:89"><span class="id" title="variable">P</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> (<a id="P:91" class="idref" href="#P:91"><span class="id" title="binder">P</span></a> <a id="Q:92" class="idref" href="#Q:92"><span class="id" title="binder">Q</span></a> : <span class="id" title="keyword">Prop</span>) (<a id="A:93" class="idref" href="#A:93"><span class="id" title="binder">A</span></a> : <a class="idref" href="ProofObjects.html#P:91"><span class="id" title="variable">P</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e<sub>25</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="ProofObjects.html#Q:92"><span class="id" title="variable">Q</span></a>) ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ProofObjects.html#A:93"><span class="id" title="variable">A</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#or_introl"><span class="id" title="constructor">or_introl</span></a> <span class="id" title="var">H</span> ⇒ <span class="id" title="var">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+All the types here match correctly, but the <span class="inlinecode"><span class="id" title="keyword">match</span></span> only
+    considers one of the possible constructors for <span class="inlinecode"><span class="id" title="var">or</span></span>.  Coq's
+    exhaustiveness check will reject this definition.
+
+<div class="paragraph"> </div>
+
+    Third, the checker must make sure that each recursive function
+    terminates.  It does this using a syntactic check to make sure
+    that each recursive call is on a subexpression of the original
+    argument.  To see why this is essential, consider this alleged
+    proof: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Fail</span> <span class="id" title="keyword">Fixpoint</span> <a id="infinite_loop" class="idref" href="#infinite_loop"><span class="id" title="definition">infinite_loop</span></a> {<a id="X:95" class="idref" href="#X:95"><span class="id" title="binder">X</span></a> : <span class="id" title="keyword">Type</span>} (<a id="n:96" class="idref" href="#n:96"><span class="id" title="binder">n</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) {<span class="id" title="keyword">struct</span> <span class="id" title="var">n</span>} : <a class="idref" href="ProofObjects.html#X:95"><span class="id" title="variable">X</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="ProofObjects.html#infinite_loop:97"><span class="id" title="definition">infinite_loop</span></a> <a class="idref" href="ProofObjects.html#n:96"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="var">Fail</span> <span class="id" title="keyword">Definition</span> <a id="falso" class="idref" href="#falso"><span class="id" title="definition">falso</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#False"><span class="id" title="inductive">False</span></a> := <span class="id" title="var">infinite_loop</span> 0.<br/>
+</div>
+
+<div class="doc">
+Recursive function <span class="inlinecode"><span class="id" title="var">infinite_loop</span></span> purports to return a
+    value of any type <span class="inlinecode"><span class="id" title="var">X</span></span> that you would like.  (The <span class="inlinecode"><span class="id" title="keyword">struct</span></span>
+    annotation on the function tells Coq that it recurses on argument
+    <span class="inlinecode"><span class="id" title="var">n</span></span>, not <span class="inlinecode"><span class="id" title="var">X</span></span>.)  Were Coq to allow <span class="inlinecode"><span class="id" title="var">infinite_loop</span></span>, then <span class="inlinecode"><span class="id" title="var">falso</span></span>
+    would be definable, thus giving evidence for <span class="inlinecode"><span class="id" title="var">False</span></span>.  So Coq rejects
+    <span class="inlinecode"><span class="id" title="var">infinite_loop</span></span>. 
+<div class="paragraph"> </div>
+
+ Note that the soundness of Coq depends only on the
+    correctness of this typechecking engine, not on the tactic
+    machinery.  If there is a bug in a tactic implementation (and this
+    certainly does happen!), that tactic might construct an invalid
+    proof term.  But when you type <span class="inlinecode"><span class="id" title="keyword">Qed</span></span>, Coq checks the term for
+    validity from scratch.  Only theorems whose proofs pass the
+    type-checker can be used in further proof developments.  
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-09-09&nbsp;20:51&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

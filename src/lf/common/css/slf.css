@@ -1,0 +1,21 @@
+/*   Styles for SF: V6: Separation Logic Foundations    */
+
+/*   Background   */
+body {  background-image: url('../media/image/slf-bg.jpg');   }
+/* #header { background-color: rgba(199, 149, 88, 0.33); } */
+#header { background-color: rgba(75, 95, 77, 0.53);
+/*   or maybe rgba(95, 70, 20, 0.53); */
+
+/*   This volume's color   */
+.section, ul#menu li.section_name, div.button  {
+    background-color: #dbb27f;
+}
+
+h2.section, h3.section {
+    color: #6e4d25;
+}
+
+.slide img {
+   border: 2px solid gray;
+   margin: 1em;
+}

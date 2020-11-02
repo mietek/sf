@@ -1,0 +1,984 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Induction: Proof by Induction</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 1: Logical Foundations</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Induction<span class="subtitle">Proof by Induction</span></h1>
+
+<div class="code">
+</div>
+
+
+<div class="doc">
+<a id="lab50"></a><h1 class="section">Separate Compilation</h1>
+
+<div class="paragraph"> </div>
+
+ Before getting started on this chapter, we need to import
+    all of our definitions from the previous chapter: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LF</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Export</span> <a class="idref" href="Basics.html#"><span class="id" title="library">Basics</span></a>.<br/>
+</div>
+
+<div class="doc">
+For this <span class="inlinecode"><span class="id" title="keyword">Require</span></span> <span class="inlinecode"><span class="id" title="keyword">Export</span></span> command to work, Coq needs to be
+    able to find a compiled version of <span class="inlinecode"><span class="id" title="var">Basics.v</span></span>, called <span class="inlinecode"><span class="id" title="var">Basics.vo</span></span>,
+    in a directory associated with the prefix <span class="inlinecode"><span class="id" title="var">LF</span></span>.  This file is
+    analogous to the <span class="inlinecode">.<span class="id" title="var">class</span></span> files compiled from <span class="inlinecode">.<span class="id" title="var">java</span></span> source files
+    and the <span class="inlinecode">.<span class="id" title="var">o</span></span> files compiled from <span class="inlinecode">.<span class="id" title="var">c</span></span> files.
+
+<div class="paragraph"> </div>
+
+    First create a file named <span class="inlinecode"><span class="id" title="var">_CoqProject</span></span> containing the following
+    line (if you obtained the whole volume "Logical Foundations" as a
+    single archive, a <span class="inlinecode"><span class="id" title="var">_CoqProject</span></span> should already exist and you can
+    skip this step):
+
+<div class="paragraph"> </div>
+
+      <span class="inlinecode">-<span class="id" title="var">Q</span></span> <span class="inlinecode">.</span> <span class="inlinecode"><span class="id" title="var">LF</span></span>
+
+<div class="paragraph"> </div>
+
+    This maps the current directory ("<span class="inlinecode">.</span>", which contains <span class="inlinecode"><span class="id" title="var">Basics.v</span></span>,
+    <span class="inlinecode"><span class="id" title="var">Induction.v</span></span>, etc.) to the prefix (or "logical directory")
+    "<span class="inlinecode"><span class="id" title="var">LF</span></span>".  PG and CoqIDE read <span class="inlinecode"><span class="id" title="var">_CoqProject</span></span> automatically, so they
+    know to where to look for the file <span class="inlinecode"><span class="id" title="var">Basics.vo</span></span> corresponding to
+    the library <span class="inlinecode"><span class="id" title="var">LF.Basics</span></span>.
+
+<div class="paragraph"> </div>
+
+    Once <span class="inlinecode"><span class="id" title="var">_CoqProject</span></span> is thus created, there are various ways to
+    build <span class="inlinecode"><span class="id" title="var">Basics.vo</span></span>:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> In Proof General: The compilation can be made to happen
+       automatically when you submit the <span class="inlinecode"><span class="id" title="keyword">Require</span></span> line above to PG,
+       by setting the emacs variable <span class="inlinecode"><span class="id" title="var">coq</span>-<span class="id" title="var">compile</span>-<span class="id" title="keyword">before</span>-<span class="id" title="var">require</span></span> to
+       <span class="inlinecode"><span class="id" title="var">t</span></span>. You can also use the menu option "Coq <span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> Auto
+       Compilation <span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> Compile Before Require".
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> In CoqIDE: Open <span class="inlinecode"><span class="id" title="var">Basics.v</span></span>; then, in the "Compile" menu, click
+       on "Compile Buffer".
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> From the command line: Generate a <span class="inlinecode"><span class="id" title="var">Makefile</span></span> using the
+       <span class="inlinecode"><span class="id" title="var">coq_makefile</span></span> utility, that comes installed with Coq (if you
+       obtained the whole volume as a single archive, a <span class="inlinecode"><span class="id" title="var">Makefile</span></span>
+       should already exist and you can skip this step):
+
+<div class="paragraph"> </div>
+
+         <span class="inlinecode"><span class="id" title="var">coq_makefile</span></span> <span class="inlinecode">-<span class="id" title="var">f</span></span> <span class="inlinecode"><span class="id" title="var">_CoqProject</span></span> <span class="inlinecode">*.<span class="id" title="var">v</span></span> <span class="inlinecode">-<span class="id" title="var">o</span></span> <span class="inlinecode"><span class="id" title="var">Makefile</span></span>
+
+<div class="paragraph"> </div>
+
+       Note: You should rerun that command whenever you add or remove
+       Coq files to the directory.
+
+<div class="paragraph"> </div>
+
+       Now you can compile <span class="inlinecode"><span class="id" title="var">Basics.v</span></span> by running <span class="inlinecode"><span class="id" title="var">make</span></span> with the
+       corresponding <span class="inlinecode">.<span class="id" title="var">vo</span></span> file as a target:
+
+<div class="paragraph"> </div>
+
+         <span class="inlinecode"><span class="id" title="var">make</span></span> <span class="inlinecode"><span class="id" title="var">Basics.vo</span></span>
+
+<div class="paragraph"> </div>
+
+       All files in the directory can be compiled by giving no
+       arguments:
+
+<div class="paragraph"> </div>
+
+         <span class="inlinecode"><span class="id" title="var">make</span></span>
+
+<div class="paragraph"> </div>
+
+       Under the hood, <span class="inlinecode"><span class="id" title="var">make</span></span> uses the Coq compiler, <span class="inlinecode"><span class="id" title="var">coqc</span></span>.  You can
+       also run <span class="inlinecode"><span class="id" title="var">coqc</span></span> directly:
+
+<div class="paragraph"> </div>
+
+         <span class="inlinecode"><span class="id" title="var">coqc</span></span> <span class="inlinecode">-<span class="id" title="var">Q</span></span> <span class="inlinecode">.</span> <span class="inlinecode"><span class="id" title="var">LF</span></span> <span class="inlinecode"><span class="id" title="var">Basics.v</span></span>
+
+<div class="paragraph"> </div>
+
+       But <span class="inlinecode"><span class="id" title="var">make</span></span> also calculates dependencies between source files to
+       compile them in the right order, so <span class="inlinecode"><span class="id" title="var">make</span></span> should generally be
+       prefered over explicit <span class="inlinecode"><span class="id" title="var">coqc</span></span>.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    If you have trouble (e.g., if you get complaints about missing
+    identifiers later in the file), it may be because the "load path"
+    for Coq is not set up correctly.  The <span class="inlinecode"><span class="id" title="keyword">Print</span></span> <span class="inlinecode"><span class="id" title="var">LoadPath</span>.</span> command
+    may be helpful in sorting out such issues.
+
+<div class="paragraph"> </div>
+
+    In particular, if you see a message like
+
+<div class="paragraph"> </div>
+
+        <span class="inlinecode"><span class="id" title="var">Compiled</span></span> <span class="inlinecode"><span class="id" title="var">library</span></span> <span class="inlinecode"><span class="id" title="var">Foo</span></span> <span class="inlinecode"><span class="id" title="var">makes</span></span> <span class="inlinecode"><span class="id" title="var">inconsistent</span></span> <span class="inlinecode"><span class="id" title="var">assumptions</span></span> <span class="inlinecode"><span class="id" title="var">over</span></span>
+        <span class="inlinecode"><span class="id" title="var">library</span></span> <span class="inlinecode"><span class="id" title="var">Bar</span></span>
+
+<div class="paragraph"> </div>
+
+    check whether you have multiple installations of Coq on your
+    machine.  It may be that commands (like <span class="inlinecode"><span class="id" title="var">coqc</span></span>) that you execute
+    in a terminal window are getting a different version of Coq than
+    commands executed by Proof General or CoqIDE.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Another common reason is that the library <span class="inlinecode"><span class="id" title="var">Bar</span></span> was modified and
+      recompiled without also recompiling <span class="inlinecode"><span class="id" title="var">Foo</span></span> which depends on it.
+      Recompile <span class="inlinecode"><span class="id" title="var">Foo</span></span>, or everything if too many files are
+      affected.  (Using the third solution above: <span class="inlinecode"><span class="id" title="var">make</span></span> <span class="inlinecode"><span class="id" title="var">clean</span>;</span> <span class="inlinecode"><span class="id" title="var">make</span></span>.)
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    One more tip for CoqIDE users: If you see messages like <span class="inlinecode"><span class="id" title="var">Error</span>:</span>
+    <span class="inlinecode"><span class="id" title="var">Unable</span></span> <span class="inlinecode"><span class="id" title="var">to</span></span> <span class="inlinecode"><span class="id" title="var">locate</span></span> <span class="inlinecode"><span class="id" title="var">library</span></span> <span class="inlinecode"><span class="id" title="var">Basics</span></span>, a likely reason is
+    inconsistencies between compiling things <i>within CoqIDE</i> vs <i>using
+    <span class="inlinecode"><span class="id" title="var">coqc</span></span> from the command line</i>.  This typically happens when there
+    are two incompatible versions of <span class="inlinecode"><span class="id" title="var">coqc</span></span> installed on your
+    system (one associated with CoqIDE, and one associated with <span class="inlinecode"><span class="id" title="var">coqc</span></span>
+    from the terminal).  The workaround for this situation is
+    compiling using CoqIDE only (i.e. choosing "make" from the menu),
+    and avoiding using <span class="inlinecode"><span class="id" title="var">coqc</span></span> directly at all. 
+</div>
+
+<div class="doc">
+<a id="lab51"></a><h1 class="section">Proof by Induction</h1>
+
+<div class="paragraph"> </div>
+
+ We can prove that <span class="inlinecode">0</span> is a neutral element for <span class="inlinecode">+</span> on the left
+    using just <span class="inlinecode"><span class="id" title="tactic">reflexivity</span></span>.  But the proof that it is also a neutral
+    element on the <i>right</i> ... 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_n_O_firsttry" class="idref" href="#plus_n_O_firsttry"><span class="id" title="lemma">plus_n_O_firsttry</span></a> : <span class="id" title="keyword">∀</span> <a id="n:1" class="idref" href="#n:1"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:1"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:1"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 0.<br/>
+</div>
+
+<div class="doc">
+... can't be done in the same simple way.  Just applying
+  <span class="inlinecode"><span class="id" title="tactic">reflexivity</span></span> doesn't work, since the <span class="inlinecode"><span class="id" title="var">n</span></span> in <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode">0</span> is an arbitrary
+  unknown number, so the <span class="inlinecode"><span class="id" title="keyword">match</span></span> in the definition of <span class="inlinecode">+</span> can't be
+  simplified.  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="comment">(*&nbsp;Does&nbsp;nothing!&nbsp;*)</span><br/>
+<span class="id" title="keyword">Abort</span>.<br/>
+</div>
+
+<div class="doc">
+And reasoning by cases using <span class="inlinecode"><span class="id" title="tactic">destruct</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span> doesn't get us much
+    further: the branch of the case analysis where we assume <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>
+    goes through fine, but in the branch where <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span></span> for some <span class="inlinecode"><span class="id" title="var">n'</span></span> we
+    get stuck in exactly the same way. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_n_O_secondtry" class="idref" href="#plus_n_O_secondtry"><span class="id" title="lemma">plus_n_O_secondtry</span></a> : <span class="id" title="keyword">∀</span> <a id="n:2" class="idref" href="#n:2"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:2"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:2"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 0.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [| <span class="id" title="var">n'</span>] <span class="id" title="var">eqn</span>:<span class="id" title="var">E</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">reflexivity</span>. <span class="comment">(*&nbsp;so&nbsp;far&nbsp;so&nbsp;good...&nbsp;*)</span><br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="comment">(*&nbsp;...but&nbsp;here&nbsp;we&nbsp;are&nbsp;stuck&nbsp;again&nbsp;*)</span><br/>
+<span class="id" title="keyword">Abort</span>.<br/>
+</div>
+
+<div class="doc">
+We could use <span class="inlinecode"><span class="id" title="tactic">destruct</span></span> <span class="inlinecode"><span class="id" title="var">n'</span></span> to get one step further, but,
+    since <span class="inlinecode"><span class="id" title="var">n</span></span> can be arbitrarily large, we'll never get all the there
+    if we just go on like this. 
+<div class="paragraph"> </div>
+
+ To prove interesting facts about numbers, lists, and other
+    inductively defined sets, we often need a more powerful reasoning
+    principle: <i>induction</i>.
+
+<div class="paragraph"> </div>
+
+    Recall (from high school, a discrete math course, etc.) the
+    <i>principle of induction over natural numbers</i>: If <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">n</span>)</span> is some
+    proposition involving a natural number <span class="inlinecode"><span class="id" title="var">n</span></span> and we want to show
+    that <span class="inlinecode"><span class="id" title="var">P</span></span> holds for all numbers <span class="inlinecode"><span class="id" title="var">n</span></span>, we can reason like this:
+<ul class="doclist">
+<li> show that <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">O</span>)</span> holds;
+
+</li>
+<li> show that, for any <span class="inlinecode"><span class="id" title="var">n'</span></span>, if <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">n'</span>)</span> holds, then so does
+           <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span>)</span>;
+
+</li>
+<li> conclude that <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">n</span>)</span> holds for all <span class="inlinecode"><span class="id" title="var">n</span></span>.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    In Coq, the steps are the same: we begin with the goal of proving
+    <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">n</span>)</span> for all <span class="inlinecode"><span class="id" title="var">n</span></span> and break it down (by applying the <span class="inlinecode"><span class="id" title="tactic">induction</span></span>
+    tactic) into two separate subgoals: one where we must show <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">O</span>)</span>
+    and another where we must show <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">n'</span>)</span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">P</span>(<span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span>)</span>.  Here's how
+    this works for the theorem at hand: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_n_O" class="idref" href="#plus_n_O"><span class="id" title="lemma">plus_n_O</span></a> : <span class="id" title="keyword">∀</span> <a id="n:3" class="idref" href="#n:3"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>, <a class="idref" href="Induction.html#n:3"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:3"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 0.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [| <span class="id" title="var">n'</span> <span class="id" title="var">IHn'</span>].<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;0&nbsp;*)</span>    <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">IHn'</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Like <span class="inlinecode"><span class="id" title="tactic">destruct</span></span>, the <span class="inlinecode"><span class="id" title="tactic">induction</span></span> tactic takes an <span class="inlinecode"><span class="id" title="keyword">as</span>...</span>
+    clause that specifies the names of the variables to be introduced
+    in the subgoals.  Since there are two subgoals, the <span class="inlinecode"><span class="id" title="keyword">as</span>...</span> clause
+    has two parts, separated by <span class="inlinecode">|</span>.  (Strictly speaking, we can omit
+    the <span class="inlinecode"><span class="id" title="keyword">as</span>...</span> clause and Coq will choose names for us.  In practice,
+    this is a bad idea, as Coq's automatic choices tend to be
+    confusing.)
+
+<div class="paragraph"> </div>
+
+    In the first subgoal, <span class="inlinecode"><span class="id" title="var">n</span></span> is replaced by <span class="inlinecode">0</span>.  No new variables
+    are introduced (so the first part of the <span class="inlinecode"><span class="id" title="keyword">as</span>...</span> is empty), and
+    the goal becomes <span class="inlinecode">0</span> <span class="inlinecode">=</span> <span class="inlinecode">0</span> <span class="inlinecode">+</span> <span class="inlinecode">0</span>, which follows by simplification.
+
+<div class="paragraph"> </div>
+
+    In the second subgoal, <span class="inlinecode"><span class="id" title="var">n</span></span> is replaced by <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span></span>, and the
+    assumption <span class="inlinecode"><span class="id" title="var">n'</span></span> <span class="inlinecode">+</span> <span class="inlinecode">0</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">n'</span></span> is added to the context with the name
+    <span class="inlinecode"><span class="id" title="var">IHn'</span></span> (i.e., the Induction Hypothesis for <span class="inlinecode"><span class="id" title="var">n'</span></span>).  These two names
+    are specified in the second part of the <span class="inlinecode"><span class="id" title="keyword">as</span>...</span> clause.  The goal
+    in this case becomes <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span></span> <span class="inlinecode">=</span> <span class="inlinecode">(<span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span>)</span> <span class="inlinecode">+</span> <span class="inlinecode">0</span>, which simplifies to
+    <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode">(<span class="id" title="var">n'</span></span> <span class="inlinecode">+</span> <span class="inlinecode">0)</span>, which in turn follows from <span class="inlinecode"><span class="id" title="var">IHn'</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="minus_n_n" class="idref" href="#minus_n_n"><span class="id" title="lemma">minus_n_n</span></a> : <span class="id" title="keyword">∀</span> <a id="n:4" class="idref" href="#n:4"><span class="id" title="binder">n</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#minus"><span class="id" title="abbreviation">minus</span></a> <a class="idref" href="Induction.html#n:4"><span class="id" title="variable">n</span></a> <a class="idref" href="Induction.html#n:4"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 0.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;WORKED&nbsp;IN&nbsp;CLASS&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [| <span class="id" title="var">n'</span> <span class="id" title="var">IHn'</span>].<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> → <span class="id" title="var">IHn'</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+(The use of the <span class="inlinecode"><span class="id" title="tactic">intros</span></span> tactic in these proofs is actually
+    redundant.  When applied to a goal that contains quantified
+    variables, the <span class="inlinecode"><span class="id" title="tactic">induction</span></span> tactic will automatically move them
+    into the context as needed.) 
+<div class="paragraph"> </div>
+
+<a id="lab52"></a><h4 class="section">Exercise: 2 stars, standard, especially useful (basic_induction)</h4>
+ Prove the following using induction. You might need previously
+    proven results. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="mult_0_r" class="idref" href="#mult_0_r"><span class="id" title="lemma">mult_0_r</span></a> : <span class="id" title="keyword">∀</span> <a id="n:5" class="idref" href="#n:5"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:5"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> 0 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 0.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_n_Sm" class="idref" href="#plus_n_Sm"><span class="id" title="lemma">plus_n_Sm</span></a> : <span class="id" title="keyword">∀</span> <a id="n:6" class="idref" href="#n:6"><span class="id" title="binder">n</span></a> <a id="m:7" class="idref" href="#m:7"><span class="id" title="binder">m</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="Induction.html#n:6"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:7"><span class="id" title="variable">m</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:6"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="Induction.html#m:7"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_comm" class="idref" href="#plus_comm"><span class="id" title="lemma">plus_comm</span></a> : <span class="id" title="keyword">∀</span> <a id="n:8" class="idref" href="#n:8"><span class="id" title="binder">n</span></a> <a id="m:9" class="idref" href="#m:9"><span class="id" title="binder">m</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:8"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:9"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#m:9"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#n:8"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_assoc" class="idref" href="#plus_assoc"><span class="id" title="lemma">plus_assoc</span></a> : <span class="id" title="keyword">∀</span> <a id="n:10" class="idref" href="#n:10"><span class="id" title="binder">n</span></a> <a id="m:11" class="idref" href="#m:11"><span class="id" title="binder">m</span></a> <a id="p:12" class="idref" href="#p:12"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:10"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:11"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:12"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:10"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:11"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:12"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab53"></a><h4 class="section">Exercise: 2 stars, standard (double_plus)</h4>
+ Consider the following function, which doubles its argument: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="double" class="idref" href="#double"><span class="id" title="definition">double</span></a> (<a id="n:13" class="idref" href="#n:13"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Induction.html#n:13"><span class="id" title="variable">n</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#O"><span class="id" title="constructor">O</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#O"><span class="id" title="constructor">O</span></a><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">n'</span> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="Induction.html#double:14"><span class="id" title="definition">double</span></a> <span class="id" title="var">n'</span>))<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+Use induction to prove this simple fact about <span class="inlinecode"><span class="id" title="var">double</span></span>: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="double_plus" class="idref" href="#double_plus"><span class="id" title="lemma">double_plus</span></a> : <span class="id" title="keyword">∀</span> <a id="n:16" class="idref" href="#n:16"><span class="id" title="binder">n</span></a>, <a class="idref" href="Induction.html#double"><span class="id" title="definition">double</span></a> <a class="idref" href="Induction.html#n:16"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:16"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#n:16"><span class="id" title="variable">n</span></a> .<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab54"></a><h4 class="section">Exercise: 2 stars, standard, optional (evenb_S)</h4>
+ One inconvenient aspect of our definition of <span class="inlinecode"><span class="id" title="var">evenb</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span> is the
+    recursive call on <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode">2</span>. This makes proofs about <span class="inlinecode"><span class="id" title="var">evenb</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span>
+    harder when done by induction on <span class="inlinecode"><span class="id" title="var">n</span></span>, since we may need an
+    induction hypothesis about <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode">2</span>. The following lemma gives an
+    alternative characterization of <span class="inlinecode"><span class="id" title="var">evenb</span></span> <span class="inlinecode">(<span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n</span>)</span> that works better
+    with induction: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="evenb_S" class="idref" href="#evenb_S"><span class="id" title="lemma">evenb_S</span></a> : <span class="id" title="keyword">∀</span> <a id="n:17" class="idref" href="#n:17"><span class="id" title="binder">n</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Basics.html#evenb"><span class="id" title="definition">evenb</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="Induction.html#n:17"><span class="id" title="variable">n</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Basics.html#negb"><span class="id" title="definition">negb</span></a> (<a class="idref" href="Basics.html#evenb"><span class="id" title="definition">evenb</span></a> <a class="idref" href="Induction.html#n:17"><span class="id" title="variable">n</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab55"></a><h4 class="section">Exercise: 1 star, standard, optional (destruct_induction)</h4>
+ Briefly explain the difference between the tactics <span class="inlinecode"><span class="id" title="tactic">destruct</span></span>
+    and <span class="inlinecode"><span class="id" title="tactic">induction</span></span>.
+
+<div class="paragraph"> </div>
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="manual_grade_for_destruct_induction" class="idref" href="#manual_grade_for_destruct_induction"><span class="id" title="definition">manual_grade_for_destruct_induction</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+
+<div class="doc">
+<a id="lab56"></a><h1 class="section">Proofs Within Proofs</h1>
+
+<div class="paragraph"> </div>
+
+ In Coq, as in informal mathematics, large proofs are often
+    broken into a sequence of theorems, with later proofs referring to
+    earlier theorems.  But sometimes a proof will require some
+    miscellaneous fact that is too trivial and of too little general
+    interest to bother giving it its own top-level name.  In such
+    cases, it is convenient to be able to simply state and prove the
+    needed "sub-theorem" right at the point where it is used.  The
+    <span class="inlinecode"><span class="id" title="tactic">assert</span></span> tactic allows us to do this. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="mult_0_plus'" class="idref" href="#mult_0_plus'"><span class="id" title="lemma">mult_0_plus'</span></a> : <span class="id" title="keyword">∀</span> <a id="n:18" class="idref" href="#n:18"><span class="id" title="binder">n</span></a> <a id="m:19" class="idref" href="#m:19"><span class="id" title="binder">m</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">(</span></a>0 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#n:18"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#m:19"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:18"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#m:19"><span class="id" title="variable">m</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">H</span>: 0 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">n</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="var">n</span>). { <span class="id" title="tactic">reflexivity</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> → <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" title="tactic">assert</span></span> tactic introduces two sub-goals.  The first is
+    the assertion itself; by prefixing it with <span class="inlinecode"><span class="id" title="var">H</span>:</span> we name the
+    assertion <span class="inlinecode"><span class="id" title="var">H</span></span>.  (We can also name the assertion with <span class="inlinecode"><span class="id" title="keyword">as</span></span> just as
+    we did above with <span class="inlinecode"><span class="id" title="tactic">destruct</span></span> and <span class="inlinecode"><span class="id" title="tactic">induction</span></span>, i.e., <span class="inlinecode"><span class="id" title="tactic">assert</span></span> <span class="inlinecode">(0</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">n</span></span>
+    <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">n</span>)</span> <span class="inlinecode"><span class="id" title="keyword">as</span></span> <span class="inlinecode"><span class="id" title="var">H</span></span>.)  Note that we surround the proof of this assertion
+    with curly braces <span class="inlinecode">{</span> <span class="inlinecode">...</span> <span class="inlinecode">}</span>, both for readability and so that,
+    when using Coq interactively, we can see more easily when we have
+    finished this sub-proof.  The second goal is the same as the one
+    at the point where we invoke <span class="inlinecode"><span class="id" title="tactic">assert</span></span> except that, in the context,
+    we now have the assumption <span class="inlinecode"><span class="id" title="var">H</span></span> that <span class="inlinecode">0</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">n</span></span>.  That is,
+    <span class="inlinecode"><span class="id" title="tactic">assert</span></span> generates one subgoal where we must prove the asserted
+    fact and a second subgoal where we can use the asserted fact to
+    make progress on whatever we were trying to prove in the first
+    place. 
+<div class="paragraph"> </div>
+
+ For example, suppose we want to prove that <span class="inlinecode">(<span class="id" title="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">m</span>)</span> <span class="inlinecode">+</span> <span class="inlinecode">(<span class="id" title="var">p</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">q</span>)</span>
+    <span class="inlinecode">=</span> <span class="inlinecode">(<span class="id" title="var">m</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">n</span>)</span> <span class="inlinecode">+</span> <span class="inlinecode">(<span class="id" title="var">p</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">q</span>)</span>. The only difference between the two sides of
+    the <span class="inlinecode">=</span> is that the arguments <span class="inlinecode"><span class="id" title="var">m</span></span> and <span class="inlinecode"><span class="id" title="var">n</span></span> to the first inner <span class="inlinecode">+</span>
+    are swapped, so it seems we should be able to use the
+    commutativity of addition (<span class="inlinecode"><span class="id" title="var">plus_comm</span></span>) to rewrite one into the
+    other.  However, the <span class="inlinecode"><span class="id" title="tactic">rewrite</span></span> tactic is not very smart about
+    <i>where</i> it applies the rewrite.  There are three uses of <span class="inlinecode">+</span> here,
+    and it turns out that doing <span class="inlinecode"><span class="id" title="tactic">rewrite</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">plus_comm</span></span> will affect
+    only the <i>outer</i> one... 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_rearrange_firsttry" class="idref" href="#plus_rearrange_firsttry"><span class="id" title="lemma">plus_rearrange_firsttry</span></a> : <span class="id" title="keyword">∀</span> <a id="n:20" class="idref" href="#n:20"><span class="id" title="binder">n</span></a> <a id="m:21" class="idref" href="#m:21"><span class="id" title="binder">m</span></a> <a id="p:22" class="idref" href="#p:22"><span class="id" title="binder">p</span></a> <a id="q:23" class="idref" href="#q:23"><span class="id" title="binder">q</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:20"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:21"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#p:22"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#q:23"><span class="id" title="variable">q</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:21"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#n:20"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#p:22"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#q:23"><span class="id" title="variable">q</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span> <span class="id" title="var">q</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;just&nbsp;need&nbsp;to&nbsp;swap&nbsp;(n&nbsp;+&nbsp;m)&nbsp;for&nbsp;(m&nbsp;+&nbsp;n)...&nbsp;seems<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;plus_comm&nbsp;should&nbsp;do&nbsp;the&nbsp;trick!&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> → <a class="idref" href="Induction.html#plus_comm"><span class="id" title="axiom">plus_comm</span></a>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Doesn't&nbsp;work...&nbsp;Coq&nbsp;rewrites&nbsp;the&nbsp;wrong&nbsp;plus!&nbsp;:-(&nbsp;*)</span><br/>
+<span class="id" title="keyword">Abort</span>.<br/>
+</div>
+
+<div class="doc">
+To use <span class="inlinecode"><span class="id" title="var">plus_comm</span></span> at the point where we need it, we can introduce
+    a local lemma stating that <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">m</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">n</span></span> (for the <i>particular</i> <span class="inlinecode"><span class="id" title="var">m</span></span>
+    and <span class="inlinecode"><span class="id" title="var">n</span></span> that we are talking about here), prove this lemma using
+    <span class="inlinecode"><span class="id" title="var">plus_comm</span></span>, and then use it to do the desired rewrite. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_rearrange" class="idref" href="#plus_rearrange"><span class="id" title="lemma">plus_rearrange</span></a> : <span class="id" title="keyword">∀</span> <a id="n:24" class="idref" href="#n:24"><span class="id" title="binder">n</span></a> <a id="m:25" class="idref" href="#m:25"><span class="id" title="binder">m</span></a> <a id="p:26" class="idref" href="#p:26"><span class="id" title="binder">p</span></a> <a id="q:27" class="idref" href="#q:27"><span class="id" title="binder">q</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:24"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:25"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#p:26"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#q:27"><span class="id" title="variable">q</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:25"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#n:24"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#p:26"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#q:27"><span class="id" title="variable">q</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span> <span class="id" title="var">q</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">H</span>: <span class="id" title="var">n</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">m</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="var">m</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">n</span>).<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">rewrite</span> → <a class="idref" href="Induction.html#plus_comm"><span class="id" title="axiom">plus_comm</span></a>. <span class="id" title="tactic">reflexivity</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> → <span class="id" title="var">H</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab57"></a><h1 class="section">Formal vs. Informal Proof</h1>
+
+<div class="paragraph"> </div>
+
+ <div class="quote">"_Informal proofs are algorithms; formal proofs are code."</div> 
+<div class="paragraph"> </div>
+
+ What constitutes a successful proof of a mathematical claim?
+    The question has challenged philosophers for millennia, but a
+    rough and ready definition could be this: A proof of a
+    mathematical proposition <span class="inlinecode"><span class="id" title="var">P</span></span> is a written (or spoken) text that
+    instills in the reader or hearer the certainty that <span class="inlinecode"><span class="id" title="var">P</span></span> is true --
+    an unassailable argument for the truth of <span class="inlinecode"><span class="id" title="var">P</span></span>.  That is, a proof
+    is an act of communication.
+
+<div class="paragraph"> </div>
+
+    Acts of communication may involve different sorts of readers.  On
+    one hand, the "reader" can be a program like Coq, in which case
+    the "belief" that is instilled is that <span class="inlinecode"><span class="id" title="var">P</span></span> can be mechanically
+    derived from a certain set of formal logical rules, and the proof
+    is a recipe that guides the program in checking this fact.  Such
+    recipes are <i>formal</i> proofs.
+
+<div class="paragraph"> </div>
+
+    Alternatively, the reader can be a human being, in which case the
+    proof will be written in English or some other natural language,
+    and will thus necessarily be <i>informal</i>.  Here, the criteria for
+    success are less clearly specified.  A "valid" proof is one that
+    makes the reader believe <span class="inlinecode"><span class="id" title="var">P</span></span>.  But the same proof may be read by
+    many different readers, some of whom may be convinced by a
+    particular way of phrasing the argument, while others may not be.
+    Some readers may be particularly pedantic, inexperienced, or just
+    plain thick-headed; the only way to convince them will be to make
+    the argument in painstaking detail.  But other readers, more
+    familiar in the area, may find all this detail so overwhelming
+    that they lose the overall thread; all they want is to be told the
+    main ideas, since it is easier for them to fill in the details for
+    themselves than to wade through a written presentation of them.
+    Ultimately, there is no universal standard, because there is no
+    single way of writing an informal proof that is guaranteed to
+    convince every conceivable reader.
+
+<div class="paragraph"> </div>
+
+    In practice, however, mathematicians have developed a rich set of
+    conventions and idioms for writing about complex mathematical
+    objects that -- at least within a certain community -- make
+    communication fairly reliable.  The conventions of this stylized
+    form of communication give a fairly clear standard for judging
+    proofs good or bad.
+
+<div class="paragraph"> </div>
+
+    Because we are using Coq in this course, we will be working
+    heavily with formal proofs.  But this doesn't mean we can
+    completely forget about informal ones!  Formal proofs are useful
+    in many ways, but they are <i>not</i> very efficient ways of
+    communicating ideas between human beings. 
+<div class="paragraph"> </div>
+
+ For example, here is a proof that addition is associative: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_assoc'" class="idref" href="#plus_assoc'"><span class="id" title="lemma">plus_assoc'</span></a> : <span class="id" title="keyword">∀</span> <a id="n:28" class="idref" href="#n:28"><span class="id" title="binder">n</span></a> <a id="m:29" class="idref" href="#m:29"><span class="id" title="binder">m</span></a> <a id="p:30" class="idref" href="#p:30"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:28"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:29"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:30"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:28"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:29"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:30"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [| <span class="id" title="var">n'</span> <span class="id" title="var">IHn'</span>]. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> → <span class="id" title="var">IHn'</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Coq is perfectly happy with this.  For a human, however, it
+    is difficult to make much sense of it.  We can use comments and
+    bullets to show the structure a little more clearly... 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_assoc''" class="idref" href="#plus_assoc''"><span class="id" title="lemma">plus_assoc''</span></a> : <span class="id" title="keyword">∀</span> <a id="n:31" class="idref" href="#n:31"><span class="id" title="binder">n</span></a> <a id="m:32" class="idref" href="#m:32"><span class="id" title="binder">m</span></a> <a id="p:33" class="idref" href="#p:33"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:31"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:32"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:33"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:31"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:32"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:33"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> [| <span class="id" title="var">n'</span> <span class="id" title="var">IHn'</span>].<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> → <span class="id" title="var">IHn'</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+... and if you're used to Coq you may be able to step
+    through the tactics one after the other in your mind and imagine
+    the state of the context and goal stack at each point, but if the
+    proof were even a little bit more complicated this would be next
+    to impossible.
+
+<div class="paragraph"> </div>
+
+    A (pedantic) mathematician might write the proof something like
+    this: 
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <i>Theorem</i>: For any <span class="inlinecode"><span class="id" title="var">n</span></span>, <span class="inlinecode"><span class="id" title="var">m</span></span> and <span class="inlinecode"><span class="id" title="var">p</span></span>,
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">n</span> + (<span class="id" title="var">m</span> + <span class="id" title="var">p</span>) = (<span class="id" title="var">n</span> + <span class="id" title="var">m</span>) + <span class="id" title="var">p</span>.
+<div class="paragraph"> </div>
+
+</span>    <i>Proof</i>: By induction on <span class="inlinecode"><span class="id" title="var">n</span></span>.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> First, suppose <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>.  We must show that
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 + (<span class="id" title="var">m</span> + <span class="id" title="var">p</span>) = (0 + <span class="id" title="var">m</span>) + <span class="id" title="var">p</span>.
+<div class="paragraph"> </div>
+
+</span>      This follows directly from the definition of <span class="inlinecode">+</span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Next, suppose <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">S</span></span> <span class="inlinecode"><span class="id" title="var">n'</span></span>, where
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">n'</span> + (<span class="id" title="var">m</span> + <span class="id" title="var">p</span>) = (<span class="id" title="var">n'</span> + <span class="id" title="var">m</span>) + <span class="id" title="var">p</span>.
+<div class="paragraph"> </div>
+
+</span>      We must now show that
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">S</span> <span class="id" title="var">n'</span>) + (<span class="id" title="var">m</span> + <span class="id" title="var">p</span>) = ((<span class="id" title="var">S</span> <span class="id" title="var">n'</span>) + <span class="id" title="var">m</span>) + <span class="id" title="var">p</span>.
+<div class="paragraph"> </div>
+
+</span>      By the definition of <span class="inlinecode">+</span>, this follows from
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">S</span> (<span class="id" title="var">n'</span> + (<span class="id" title="var">m</span> + <span class="id" title="var">p</span>)) = <span class="id" title="var">S</span> ((<span class="id" title="var">n'</span> + <span class="id" title="var">m</span>) + <span class="id" title="var">p</span>),
+<div class="paragraph"> </div>
+
+</span>      which is immediate from the induction hypothesis.  <i>Qed</i>. 
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ The overall form of the proof is basically similar, and of
+    course this is no accident: Coq has been designed so that its
+    <span class="inlinecode"><span class="id" title="tactic">induction</span></span> tactic generates the same sub-goals, in the same
+    order, as the bullet points that a mathematician would write.  But
+    there are significant differences of detail: the formal proof is
+    much more explicit in some ways (e.g., the use of <span class="inlinecode"><span class="id" title="tactic">reflexivity</span></span>)
+    but much less explicit in others (in particular, the "proof state"
+    at any given point in the Coq proof is completely implicit,
+    whereas the informal proof reminds the reader several times where
+    things stand). 
+<div class="paragraph"> </div>
+
+<a id="lab58"></a><h4 class="section">Exercise: 2 stars, advanced, especially useful (plus_comm_informal)</h4>
+ Translate your solution for <span class="inlinecode"><span class="id" title="var">plus_comm</span></span> into an informal proof:
+
+<div class="paragraph"> </div>
+
+    Theorem: Addition is commutative.
+
+<div class="paragraph"> </div>
+
+    Proof: <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="manual_grade_for_plus_comm_informal" class="idref" href="#manual_grade_for_plus_comm_informal"><span class="id" title="definition">manual_grade_for_plus_comm_informal</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab59"></a><h4 class="section">Exercise: 2 stars, standard, optional (eqb_refl_informal)</h4>
+ Write an informal proof of the following theorem, using the
+    informal proof of <span class="inlinecode"><span class="id" title="var">plus_assoc</span></span> as a model.  Don't just
+    paraphrase the Coq tactics into English!
+
+<div class="paragraph"> </div>
+
+    Theorem: <span class="inlinecode"><span class="id" title="var">true</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">=?</span> <span class="inlinecode"><span class="id" title="var">n</span></span> for any <span class="inlinecode"><span class="id" title="var">n</span></span>.
+
+<div class="paragraph"> </div>
+
+    Proof: <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+ <font size=-2>&#9744;</font> 
+</div>
+
+<div class="doc">
+<a id="lab60"></a><h1 class="section">More Exercises</h1>
+
+<div class="paragraph"> </div>
+
+<a id="lab61"></a><h4 class="section">Exercise: 3 stars, standard, especially useful (mult_comm)</h4>
+ Use <span class="inlinecode"><span class="id" title="tactic">assert</span></span> to help prove <span class="inlinecode"><span class="id" title="var">plus_swap</span></span>.  You don't need to
+    use induction yet. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_swap" class="idref" href="#plus_swap"><span class="id" title="lemma">plus_swap</span></a> : <span class="id" title="keyword">∀</span> <a id="n:34" class="idref" href="#n:34"><span class="id" title="binder">n</span></a> <a id="m:35" class="idref" href="#m:35"><span class="id" title="binder">m</span></a> <a id="p:36" class="idref" href="#p:36"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:34"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:35"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:36"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#m:35"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:34"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:36"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+Now prove commutativity of multiplication.  You will probably
+    want to define and prove a "helper" theorem to be used
+    in the proof of this one. Hint: what is <span class="inlinecode"><span class="id" title="var">n</span></span> <span class="inlinecode">×</span> <span class="inlinecode">(1</span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">k</span>)</span>? 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="mult_comm" class="idref" href="#mult_comm"><span class="id" title="lemma">mult_comm</span></a> : <span class="id" title="keyword">∀</span> <a id="m:37" class="idref" href="#m:37"><span class="id" title="binder">m</span></a> <a id="n:38" class="idref" href="#n:38"><span class="id" title="binder">n</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#m:37"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#n:38"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:38"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#m:37"><span class="id" title="variable">m</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab62"></a><h4 class="section">Exercise: 3 stars, standard, optional (more_exercises)</h4>
+ Take a piece of paper.  For each of the following theorems, first
+    <i>think</i> about whether (a) it can be proved using only
+    simplification and rewriting, (b) it also requires case
+    analysis (<span class="inlinecode"><span class="id" title="tactic">destruct</span></span>), or (c) it also requires induction.  Write
+    down your prediction.  Then fill in the proof.  (There is no need
+    to turn in your piece of paper; this is just to encourage you to
+    reflect before you hack!) 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> <a class="idref" href="Basics.html#leb"><span class="id" title="definition">leb</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="leb_refl" class="idref" href="#leb_refl"><span class="id" title="lemma">leb_refl</span></a> : <span class="id" title="keyword">∀</span> <a id="n:39" class="idref" href="#n:39"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Basics.html#true"><span class="id" title="constructor">true</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:39"><span class="id" title="variable">n</span></a> <a class="idref" href="Basics.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">&lt;=?</span></a> <a class="idref" href="Induction.html#n:39"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="zero_nbeq_S" class="idref" href="#zero_nbeq_S"><span class="id" title="lemma">zero_nbeq_S</span></a> : <span class="id" title="keyword">∀</span> <a id="n:40" class="idref" href="#n:40"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;0 <a class="idref" href="Basics.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">=?</span></a> <a class="idref" href="Basics.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="Induction.html#n:40"><span class="id" title="variable">n</span></a><a class="idref" href="Basics.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Basics.html#false"><span class="id" title="constructor">false</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="andb_false_r" class="idref" href="#andb_false_r"><span class="id" title="lemma">andb_false_r</span></a> : <span class="id" title="keyword">∀</span> <a id="b:41" class="idref" href="#b:41"><span class="id" title="binder">b</span></a> : <a class="idref" href="Basics.html#bool"><span class="id" title="inductive">bool</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Basics.html#andb"><span class="id" title="definition">andb</span></a> <a class="idref" href="Induction.html#b:41"><span class="id" title="variable">b</span></a> <a class="idref" href="Basics.html#false"><span class="id" title="constructor">false</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Basics.html#false"><span class="id" title="constructor">false</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_ble_compat_l" class="idref" href="#plus_ble_compat_l"><span class="id" title="lemma">plus_ble_compat_l</span></a> : <span class="id" title="keyword">∀</span> <a id="n:42" class="idref" href="#n:42"><span class="id" title="binder">n</span></a> <a id="m:43" class="idref" href="#m:43"><span class="id" title="binder">m</span></a> <a id="p:44" class="idref" href="#p:44"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:42"><span class="id" title="variable">n</span></a> <a class="idref" href="Basics.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">&lt;=?</span></a> <a class="idref" href="Induction.html#m:43"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Basics.html#true"><span class="id" title="constructor">true</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Basics.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#p:44"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#n:42"><span class="id" title="variable">n</span></a><a class="idref" href="Basics.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="Basics.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">&lt;=?</span></a> <a class="idref" href="Basics.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#p:44"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:43"><span class="id" title="variable">m</span></a><a class="idref" href="Basics.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Basics.html#true"><span class="id" title="constructor">true</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="S_nbeq_0" class="idref" href="#S_nbeq_0"><span class="id" title="lemma">S_nbeq_0</span></a> : <span class="id" title="keyword">∀</span> <a id="n:45" class="idref" href="#n:45"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Basics.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="Induction.html#n:45"><span class="id" title="variable">n</span></a><a class="idref" href="Basics.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="Basics.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">=?</span></a> 0 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Basics.html#false"><span class="id" title="constructor">false</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="mult_1_l" class="idref" href="#mult_1_l"><span class="id" title="lemma">mult_1_l</span></a> : <span class="id" title="keyword">∀</span> <a id="n:46" class="idref" href="#n:46"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>, 1 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#n:46"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:46"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="all3_spec" class="idref" href="#all3_spec"><span class="id" title="lemma">all3_spec</span></a> : <span class="id" title="keyword">∀</span> <a id="b:47" class="idref" href="#b:47"><span class="id" title="binder">b</span></a> <a id="c:48" class="idref" href="#c:48"><span class="id" title="binder">c</span></a> : <a class="idref" href="Basics.html#bool"><span class="id" title="inductive">bool</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Basics.html#orb"><span class="id" title="definition">orb</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Basics.html#andb"><span class="id" title="definition">andb</span></a> <a class="idref" href="Induction.html#b:47"><span class="id" title="variable">b</span></a> <a class="idref" href="Induction.html#c:48"><span class="id" title="variable">c</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Basics.html#orb"><span class="id" title="definition">orb</span></a> (<a class="idref" href="Basics.html#negb"><span class="id" title="definition">negb</span></a> <a class="idref" href="Induction.html#b:47"><span class="id" title="variable">b</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Basics.html#negb"><span class="id" title="definition">negb</span></a> <a class="idref" href="Induction.html#c:48"><span class="id" title="variable">c</span></a>))<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Basics.html#true"><span class="id" title="constructor">true</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="mult_plus_distr_r" class="idref" href="#mult_plus_distr_r"><span class="id" title="lemma">mult_plus_distr_r</span></a> : <span class="id" title="keyword">∀</span> <a id="n:49" class="idref" href="#n:49"><span class="id" title="binder">n</span></a> <a id="m:50" class="idref" href="#m:50"><span class="id" title="binder">m</span></a> <a id="p:51" class="idref" href="#p:51"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:49"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#m:50"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#p:51"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:49"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#p:51"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:50"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#p:51"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Theorem</span> <a id="mult_assoc" class="idref" href="#mult_assoc"><span class="id" title="lemma">mult_assoc</span></a> : <span class="id" title="keyword">∀</span> <a id="n:52" class="idref" href="#n:52"><span class="id" title="binder">n</span></a> <a id="m:53" class="idref" href="#m:53"><span class="id" title="binder">m</span></a> <a id="p:54" class="idref" href="#p:54"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:52"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:53"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#p:54"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:52"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#m:53"><span class="id" title="variable">m</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc<sub>54</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="Induction.html#p:54"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab63"></a><h4 class="section">Exercise: 2 stars, standard, optional (eqb_refl)</h4>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="eqb_refl" class="idref" href="#eqb_refl"><span class="id" title="lemma">eqb_refl</span></a> : <span class="id" title="keyword">∀</span> <a id="n:55" class="idref" href="#n:55"><span class="id" title="binder">n</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Basics.html#true"><span class="id" title="constructor">true</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:55"><span class="id" title="variable">n</span></a> <a class="idref" href="Basics.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">=?</span></a> <a class="idref" href="Induction.html#n:55"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab64"></a><h4 class="section">Exercise: 2 stars, standard, optional (plus_swap')</h4>
+ The <span class="inlinecode"><span class="id" title="tactic">replace</span></span> tactic allows you to specify a particular subterm to
+   rewrite and what you want it rewritten to: <span class="inlinecode"><span class="id" title="tactic">replace</span></span> <span class="inlinecode">(<span class="id" title="var">t</span>)</span> <span class="inlinecode"><span class="id" title="keyword">with</span></span> <span class="inlinecode">(<span class="id" title="var">u</span>)</span>
+   replaces (all copies of) expression <span class="inlinecode"><span class="id" title="var">t</span></span> in the goal by expression
+   <span class="inlinecode"><span class="id" title="var">u</span></span>, and generates <span class="inlinecode"><span class="id" title="var">t</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">u</span></span> as an additional subgoal. This is often
+   useful when a plain <span class="inlinecode"><span class="id" title="tactic">rewrite</span></span> acts on the wrong part of the goal.
+
+<div class="paragraph"> </div>
+
+   Use the <span class="inlinecode"><span class="id" title="tactic">replace</span></span> tactic to do a proof of <span class="inlinecode"><span class="id" title="var">plus_swap'</span></span>, just like
+   <span class="inlinecode"><span class="id" title="var">plus_swap</span></span> but without needing <span class="inlinecode"><span class="id" title="tactic">assert</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="plus_swap'" class="idref" href="#plus_swap'"><span class="id" title="lemma">plus_swap'</span></a> : <span class="id" title="keyword">∀</span> <a id="n:56" class="idref" href="#n:56"><span class="id" title="binder">n</span></a> <a id="m:57" class="idref" href="#m:57"><span class="id" title="binder">m</span></a> <a id="p:58" class="idref" href="#p:58"><span class="id" title="binder">p</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Induction.html#n:56"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#m:57"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:58"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#m:57"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">(</span></a><a class="idref" href="Induction.html#n:56"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="Induction.html#p:58"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab65"></a><h4 class="section">Exercise: 3 stars, standard, especially useful (binary_commute)</h4>
+ Recall the <span class="inlinecode"><span class="id" title="var">incr</span></span> and <span class="inlinecode"><span class="id" title="var">bin_to_nat</span></span> functions that you
+    wrote for the <span class="inlinecode"><span class="id" title="var">binary</span></span> exercise in the <a href="Basics.html"><span class="inlineref">Basics</span></a> chapter.  Prove
+    that the following diagram commutes:
+<pre>
+                            incr
+              bin --------------------<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:6%;'><span style='letter-spacing:-.2em;'>-</span><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> bin
+               |                           |
+    bin_to_nat |                           |  bin_to_nat
+               |                           |
+               v                           v
+              nat --------------------<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:6%;'><span style='letter-spacing:-.2em;'>-</span><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> nat
+                             S
+</pre>
+    That is, incrementing a binary number and then converting it to
+    a (unary) natural number yields the same result as first converting
+    it to a natural number and then incrementing.
+    Name your theorem <span class="inlinecode"><span class="id" title="var">bin_to_nat_pres_incr</span></span> ("pres" for "preserves").
+
+<div class="paragraph"> </div>
+
+    Before you start working on this exercise, copy the definitions of
+    <span class="inlinecode"><span class="id" title="var">incr</span></span> and <span class="inlinecode"><span class="id" title="var">bin_to_nat</span></span> from your solution to the <span class="inlinecode"><span class="id" title="var">binary</span></span>
+    exercise here so that this file can be graded on its own.  If you
+    want to change your original definitions to make the property
+    easier to prove, feel free to do so! 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="manual_grade_for_binary_commute" class="idref" href="#manual_grade_for_binary_commute"><span class="id" title="definition">manual_grade_for_binary_commute</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab66"></a><h4 class="section">Exercise: 5 stars, advanced (binary_inverse)</h4>
+ This is a further continuation of the previous exercises about
+    binary numbers.  You may find you need to go back and change your
+    earlier definitions to get things to work here.
+
+<div class="paragraph"> </div>
+
+    (a) First, write a function to convert natural numbers to binary
+        numbers. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="nat_to_bin" class="idref" href="#nat_to_bin"><span class="id" title="definition">nat_to_bin</span></a> (<a id="n:59" class="idref" href="#n:59"><span class="id" title="binder">n</span></a>:<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) : <a class="idref" href="Basics.html#bin"><span class="id" title="inductive">bin</span></a><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;REPLACE&nbsp;THIS&nbsp;LINE&nbsp;WITH&nbsp;":=&nbsp;_your_definition_&nbsp;."&nbsp;*)</span>. <span class="id" title="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+Prove that, if we start with any <span class="inlinecode"><span class="id" title="var">nat</span></span>, convert it to binary, and
+    convert it back, we get the same <span class="inlinecode"><span class="id" title="var">nat</span></span> we started with.  (Hint: If
+    your definition of <span class="inlinecode"><span class="id" title="var">nat_to_bin</span></span> involved any extra functions, you
+    may need to prove a subsidiary lemma showing how such functions
+    relate to <span class="inlinecode"><span class="id" title="var">nat_to_bin</span></span>.) 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="nat_bin_nat" class="idref" href="#nat_bin_nat"><span class="id" title="lemma">nat_bin_nat</span></a> : <span class="id" title="keyword">∀</span> <a id="n:61" class="idref" href="#n:61"><span class="id" title="binder">n</span></a>, <a class="idref" href="Basics.html#bin_to_nat"><span class="id" title="axiom">bin_to_nat</span></a> (<a class="idref" href="Induction.html#nat_to_bin"><span class="id" title="axiom">nat_to_bin</span></a> <a class="idref" href="Induction.html#n:61"><span class="id" title="variable">n</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Induction.html#n:61"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="manual_grade_for_binary_inverse_a" class="idref" href="#manual_grade_for_binary_inverse_a"><span class="id" title="definition">manual_grade_for_binary_inverse_a</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>.<br/>
+</div>
+
+<div class="doc">
+(b) One might naturally expect that we should also prove the
+        opposite direction -- that starting with a binary number,
+        converting to a natural, and then back to binary should yield
+        the same number we started with.  However, this is not the
+        case!  Explain (in a comment) what the problem is. 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="manual_grade_for_binary_inverse_b" class="idref" href="#manual_grade_for_binary_inverse_b"><span class="id" title="definition">manual_grade_for_binary_inverse_b</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>.<br/>
+</div>
+
+<div class="doc">
+(c) Define a normalization function -- i.e., a function
+        <span class="inlinecode"><span class="id" title="var">normalize</span></span> going directly from <span class="inlinecode"><span class="id" title="var">bin</span></span> to <span class="inlinecode"><span class="id" title="var">bin</span></span> (i.e., <i>not</i> by
+        converting to <span class="inlinecode"><span class="id" title="var">nat</span></span> and back) such that, for any binary number
+        <span class="inlinecode"><span class="id" title="var">b</span></span>, converting <span class="inlinecode"><span class="id" title="var">b</span></span> to a natural and then back to binary yields
+        <span class="inlinecode">(<span class="id" title="var">normalize</span></span> <span class="inlinecode"><span class="id" title="var">b</span>)</span>.  Prove it.  (Warning: This part is a bit
+        tricky -- you may end up defining several auxiliary lemmas.
+        One good way to find out what you need is to start by trying
+        to prove the main statement, see where you get stuck, and see
+        if you can find a lemma -- perhaps requiring its own inductive
+        proof -- that will allow the main proof to make progress.) Don't
+        define this using <span class="inlinecode"><span class="id" title="var">nat_to_bin</span></span> and <span class="inlinecode"><span class="id" title="var">bin_to_nat</span></span>! 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;Do&nbsp;not&nbsp;modify&nbsp;the&nbsp;following&nbsp;line:&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="manual_grade_for_binary_inverse_c" class="idref" href="#manual_grade_for_binary_inverse_c"><span class="id" title="definition">manual_grade_for_binary_inverse_c</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-09-09&nbsp;20:51&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

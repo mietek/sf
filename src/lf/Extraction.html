@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Extraction: Extracting ML from Coq</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 1: Logical Foundations</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Extraction<span class="subtitle">Extracting ML from Coq</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+<a id="lab398"></a><h1 class="section">Basic Extraction</h1>
+
+<div class="paragraph"> </div>
+
+ In its simplest form, extracting an efficient program from one
+    written in Coq is completely straightforward.
+
+<div class="paragraph"> </div>
+
+    First we say what language we want to extract into.  Options are
+    OCaml (the most mature), Haskell (mostly works), and Scheme (a bit
+    out of date). 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <a class="idref" href="http://coq.inria.fr/library//Coq.extraction.Extraction.html#"><span class="id" title="library">Coq.extraction.Extraction</span></a>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="var">Language</span> <span class="id" title="var">OCaml</span>.<br/>
+</div>
+
+<div class="doc">
+Now we load up the Coq environment with some definitions, either
+    directly or by importing them from other modules. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Arith.Arith.html#"><span class="id" title="library">Arith.Arith</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Nat.html#"><span class="id" title="library">Init.Nat</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Arith.EqNat.html#"><span class="id" title="library">Arith.EqNat</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LF</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ImpCEvalFun.html#"><span class="id" title="library">ImpCEvalFun</span></a>.<br/>
+</div>
+
+<div class="doc">
+Finally, we tell Coq the name of a definition to extract and the
+    name of a file to put the extracted code into. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extraction</span> "imp1.ml" <span class="id" title="var">ceval_step</span>.<br/>
+</div>
+
+<div class="doc">
+When Coq processes this command, it generates a file <span class="inlinecode"><span class="id" title="var">imp1.ml</span></span>
+    containing an extracted version of <span class="inlinecode"><span class="id" title="var">ceval_step</span></span>, together with
+    everything that it recursively depends on.  Compile the present
+    <span class="inlinecode">.<span class="id" title="var">v</span></span> file and have a look at <span class="inlinecode"><span class="id" title="var">imp1.ml</span></span> now. 
+</div>
+
+<div class="doc">
+<a id="lab399"></a><h1 class="section">Controlling Extraction of Specific Types</h1>
+
+<div class="paragraph"> </div>
+
+ We can tell Coq to extract certain <span class="inlinecode"><span class="id" title="keyword">Inductive</span></span> definitions to
+    specific OCaml types.  For each one, we must say
+<ul class="doclist">
+<li> how the Coq type itself should be represented in OCaml, and
+
+</li>
+<li> how each constructor should be translated. 
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a> ⇒ "bool" [ "true" "false" ].<br/>
+</div>
+
+<div class="doc">
+Also, for non-enumeration types (where the constructors take
+    arguments), we give an OCaml expression that can be used as a
+    "recursor" over elements of the type.  (Think Church numerals.) 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> ⇒ "int"<br/>
+&nbsp;&nbsp;[ "0" "(fun x <span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span> x + 1)" ]<br/>
+&nbsp;&nbsp;"(fun zero succ n <span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>
+      if n=0 then zero () else succ (n-1))".<br/>
+</div>
+
+<div class="doc">
+We can also extract defined constants to specific OCaml terms or
+    operators. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">plus</span> ⇒ "( + )".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">mult</span> ⇒ "( * )".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">eqb</span> ⇒ "( = )".<br/>
+</div>
+
+<div class="doc">
+Important: It is entirely <i>your responsibility</i> to make sure that
+    the translations you're proving make sense.  For example, it might
+    be tempting to include this one
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">minus</span> ⇒ "( - )".
+<div class="paragraph"> </div>
+
+</span>    but doing so could lead to serious confusion!  (Why?)
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extraction</span> "imp2.ml" <span class="id" title="var">ceval_step</span>.<br/>
+</div>
+
+<div class="doc">
+Have a look at the file <span class="inlinecode"><span class="id" title="var">imp2.ml</span></span>.  Notice how the fundamental
+    definitions have changed from <span class="inlinecode"><span class="id" title="var">imp1.ml</span></span>. 
+</div>
+
+<div class="doc">
+<a id="lab400"></a><h1 class="section">A Complete Example</h1>
+
+<div class="paragraph"> </div>
+
+ To use our extracted evaluator to run Imp programs, all we need to
+    add is a tiny driver program that calls the evaluator and prints
+    out the result.
+
+<div class="paragraph"> </div>
+
+    For simplicity, we'll print results by dumping out the first four
+    memory locations in the final state.
+
+<div class="paragraph"> </div>
+
+    Also, to make it easier to type in examples, let's extract a
+    parser from the <span class="inlinecode"><span class="id" title="var">ImpParser</span></span> Coq module.  To do this, we first need
+    to set up the right correspondence between Coq strings and lists
+    of OCaml characters. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library//Coq.extraction.ExtrOcamlBasic.html#"><span class="id" title="library">ExtrOcamlBasic</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library//Coq.extraction.ExtrOcamlString.html#"><span class="id" title="library">ExtrOcamlString</span></a>.<br/>
+</div>
+
+<div class="doc">
+We also need one more variant of booleans. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Specif.html#sumbool"><span class="id" title="inductive">sumbool</span></a> ⇒ "bool" ["true" "false"].<br/>
+</div>
+
+<div class="doc">
+The extraction is the same as always. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LF</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Imp.html#"><span class="id" title="library">Imp</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LF</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ImpParser.html#"><span class="id" title="library">ImpParser</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">LF</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="Maps.html#"><span class="id" title="library">Maps</span></a>.<br/>
+<span class="id" title="keyword">Extraction</span> "imp.ml" <span class="id" title="var">empty_st</span> <span class="id" title="var">ceval_step</span> <span class="id" title="var">parse</span>.<br/>
+</div>
+
+<div class="doc">
+Now let's run our generated Imp evaluator.  First, have a look at
+    <span class="inlinecode"><span class="id" title="var">impdriver.ml</span></span>.  (This was written by hand, not extracted.)
+
+<div class="paragraph"> </div>
+
+    Next, compile the driver together with the extracted code and
+    execute it, as follows.
+<pre>
+        ocamlc -w -20 -w -26 -o impdriver imp.mli imp.ml impdriver.ml
+        ./impdriver
+</pre>
+    (The <span class="inlinecode">-<span class="id" title="var">w</span></span> flags to <span class="inlinecode"><span class="id" title="var">ocamlc</span></span> are just there to suppress a few
+    spurious warnings.) 
+</div>
+
+<div class="doc">
+<a id="lab401"></a><h1 class="section">Discussion</h1>
+
+<div class="paragraph"> </div>
+
+ Since we've proved that the <span class="inlinecode"><span class="id" title="var">ceval_step</span></span> function behaves the same
+    as the <span class="inlinecode"><span class="id" title="var">ceval</span></span> relation in an appropriate sense, the extracted
+    program can be viewed as a <i>certified</i> Imp interpreter.  Of
+    course, the parser we're using is not certified, since we didn't
+    prove anything about it! 
+</div>
+
+<div class="doc">
+<a id="lab402"></a><h1 class="section">Going Further</h1>
+
+<div class="paragraph"> </div>
+
+ Further details about extraction can be found in the Extract
+    chapter in <i>Verified Functional Algorithms</i> (<i>Software
+    Foundations</i> volume 3). 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-09-09&nbsp;20:51&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
