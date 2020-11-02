@@ -1,0 +1,788 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Verif_append1: List segments</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vc.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 5: Verifiable C</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Verif_append1<span class="subtitle">List segments</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ Here is a little C program, <span class="inlinecode"><span class="id" title="var">append.c</span></span>
+
+<div class="paragraph"> </div>
+
+<pre>
+    #include &lt;stddef.h&gt;
+
+    struct list {int head; struct list *tail;};
+
+    struct list *append (struct list *x, struct list *y) {
+      struct list *t, *u;
+      if (x==NULL)
+        return y;
+      else {
+        t = x;
+        u = t<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail;
+        while (u!=NULL) {
+          t = u;
+          u = t<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail;
+        }
+        t<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail = y;
+        return x;
+      }
+    }
+</pre>
+
+<div class="paragraph"> </div>
+
+In this chapter, we will learn to verify this in-place linked-list-append
+operation. That is, two original lists will be destructed and a new list,
+the concatenation of them, will be constructed in this program.
+As we did in previous chapters, we import VST and the C program's AST. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <a class="idref" href="Preface.html#"><span class="id" title="library">VC.Preface</span></a>. <span class="comment">(*&nbsp;Check&nbsp;for&nbsp;the&nbsp;right&nbsp;version&nbsp;of&nbsp;VST&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VST.floyd.proofauto</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VC.append</span>.<br/>
+<span class="id" title="keyword">Instance</span> <a id="CompSpecs" class="idref" href="#CompSpecs"><span class="id" title="instance">CompSpecs</span></a> : <span class="id" title="class">compspecs</span>. <span class="id" title="var">make_compspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">Definition</span> <a id="Vprog" class="idref" href="#Vprog"><span class="id" title="definition">Vprog</span></a> : <span class="id" title="definition">varspecs</span>. <span class="id" title="var">mk_varspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab68"></a><h2 class="section">Specification of the <span class="inlinecode"><span class="id" title="var">append</span></span> function.</h2>
+
+<div class="paragraph"> </div>
+
+ Here we just copy what we have defined in <a href="Verif_reverse.html"><span class="inlineref">Verif_reverse</span></a> 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="t_list" class="idref" href="#t_list"><span class="id" title="definition">t_list</span></a> := <span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Fixpoint</span> <a id="listrep" class="idref" href="#listrep"><span class="id" title="definition">listrep</span></a> (<a id="sigma:1" class="idref" href="#sigma:1"><span class="id" title="binder">sigma</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="p:2" class="idref" href="#p:2"><span class="id" title="binder">p</span></a>: <span class="id" title="inductive">val</span>) : <span class="id" title="definition">mpred</span> :=<br/>
+&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Verif_append1.html#sigma:1"><span class="id" title="variable">sigma</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;| <span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">hs</span> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="y:5" class="idref" href="#y:5"><span class="id" title="binder">y</span></a>:<span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_append1.html#y:5"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#p:2"><span class="id" title="variable">p</span></a>  <span class="id" title="notation">×</span>  <a class="idref" href="Verif_append1.html#listrep:3"><span class="id" title="definition">listrep</span></a> <span class="id" title="var">hs</span> <a class="idref" href="Verif_append1.html#y:5"><span class="id" title="variable">y</span></a><br/>
+&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> ⇒ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#p:2"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="definition">nullval</span><span class="id" title="notation">)</span> <span class="id" title="notation">&amp;&amp;</span> <span class="id" title="method">emp</span><br/>
+&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <span class="id" title="var">sigma</span> <span class="id" title="var">p</span> : <span class="id" title="tactic">simpl</span> <span class="id" title="var">never</span>.<br/>
+</div>
+
+<div class="doc">
+Then we can easily describe the functionality of this <span class="inlinecode"><span class="id" title="var">append</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="append_spec" class="idref" href="#append_spec"><span class="id" title="definition">append_spec</span></a> :=<br/>
+&nbsp;<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_append</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">WITH</span> <a id="x:10" class="idref" href="#x:10"><span class="id" title="binder">x</span></a><span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="y:11" class="idref" href="#y:11"><span class="id" title="binder">y</span></a><span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="s<sub>1</sub>:12" class="idref" href="#s<sub>1</sub>:12"><span class="id" title="binder">s<sub>1</sub></span></a><span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="s<sub>2</sub>:13" class="idref" href="#s<sub>2</sub>:13"><span class="id" title="binder">s<sub>2</sub></span></a><span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PRE</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <span class="id" title="notation">,</span> <span class="id" title="definition">tptr</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a><span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span><span class="id" title="notation">()</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PARAMS</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#x:6"><span class="id" title="variable">x</span></a><span class="id" title="notation">;</span> <a class="idref" href="Verif_append1.html#y:7"><span class="id" title="variable">y</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s<sub>1</sub>:8"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_append1.html#x:6"><span class="id" title="variable">x</span></a><span class="id" title="notation">;</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:9"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_append1.html#y:7"><span class="id" title="variable">y</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="r:14" class="idref" href="#r:14"><span class="id" title="binder">r</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span><span class="id" title="notation">()</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">RETURN</span><span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#r:14"><span class="id" title="variable">r</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> (<a class="idref" href="Verif_append1.html#s<sub>1</sub>:12"><span class="id" title="variable">s<sub>1</sub></span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a><a class="idref" href="Verif_append1.html#s<sub>2</sub>:13"><span class="id" title="variable">s<sub>2</sub></span></a>) <a class="idref" href="Verif_append1.html#r:14"><span class="id" title="variable">r</span></a><span class="id" title="notation">)</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="Gprog" class="idref" href="#Gprog"><span class="id" title="definition">Gprog</span></a> : <span class="id" title="definition">funspecs</span> := <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a> <a class="idref" href="Verif_append1.html#append_spec"><span class="id" title="definition">append_spec</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab69"></a><h2 class="section">List segments.</h2>
+
+<div class="paragraph"> </div>
+
+ When verifying this program, a critical step is to figure out
+a correct loop invariant. If we try to simulate this program,
+especially the loop in it, we may want a loop invariant which
+can be illustrated by the following diagram. 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+<pre>
+        +---+---+            +---+---+   +---+---+   +---+---+   
+  x ==&gt; |   |  ===&gt; ... ===&gt; |   | t ==&gt; | b | u ==&gt; |   |  ===&gt; ... 
+        +---+---+            +---+---+   +---+---+   +---+---+
+
+      | &lt;========= s1a =========&gt; |       (b)       | &lt;==== s1c ====&gt; |
+      | &lt;============================= s<sub>1</sub> ==========================&gt; |
+
+
+        +---+---+   +---+---+   +---+---+   
+  y ==&gt; |   |  ===&gt; |   |   ==&gt; |   |  ===&gt; ... 
+        +---+---+   +---+---+   +---+---+
+
+      | &lt;================ s<sub>2</sub> =================&gt; |
+</pre>
+
+<div class="paragraph"> </div>
+
+ To describe this loop invariant, we need a separation logic predicate to
+describe the partial linked list from address <span class="inlinecode"><span class="id" title="var">x</span></span> to address <span class="inlinecode"><span class="id" title="var">t</span></span> with contents
+<span class="inlinecode"><span class="id" title="var">s1a</span></span>. This must a new predicate different from <span class="inlinecode"><span class="id" title="var">listrep</span></span> because <span class="inlinecode"><span class="id" title="var">listrep</span></span>
+describes linked lists ending with <span class="inlinecode"><span class="id" title="var">NULL</span></span> which is not the case here. We call
+this new predicate <span class="inlinecode"><span class="id" title="var">lseg</span></span>, pronounced "list-segment". 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="lseg" class="idref" href="#lseg"><span class="id" title="definition">lseg</span></a> (<a id="contents:15" class="idref" href="#contents:15"><span class="id" title="binder">contents</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="x:16" class="idref" href="#x:16"><span class="id" title="binder">x</span></a> <a id="z:17" class="idref" href="#z:17"><span class="id" title="binder">z</span></a>: <span class="id" title="inductive">val</span>) : <span class="id" title="definition">mpred</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Verif_append1.html#contents:15"><span class="id" title="variable">contents</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> ⇒ <span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#x:16"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Verif_append1.html#z:17"><span class="id" title="variable">z</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">&amp;&amp;</span> <span class="id" title="method">emp</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">hs</span> ⇒ <span class="id" title="notation">EX</span> <a id="y:20" class="idref" href="#y:20"><span class="id" title="binder">y</span></a>:<span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:20"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:16"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#lseg:18"><span class="id" title="definition">lseg</span></a> <span class="id" title="var">hs</span> <a class="idref" href="Verif_append1.html#y:20"><span class="id" title="variable">y</span></a> <a class="idref" href="Verif_append1.html#z:17"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <span class="id" title="var">contents</span> <span class="id" title="var">x</span> <span class="id" title="var">z</span> : <span class="id" title="tactic">simpl</span> <span class="id" title="var">never</span>.<br/>
+</div>
+
+<div class="doc">
+Now, we can prove some useful properties about <span class="inlinecode"><span class="id" title="var">lseg</span></span>. 
+<div class="paragraph"> </div>
+
+<a id="lab70"></a><h4 class="section">Exercise: 1 star, standard (singleton_lseg)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="singleton_lseg" class="idref" href="#singleton_lseg"><span class="id" title="lemma">singleton_lseg</span></a>: <span class="id" title="keyword">∀</span> (<a id="a:21" class="idref" href="#a:21"><span class="id" title="binder">a</span></a>: <span class="id" title="inductive">val</span>) (<a id="x:22" class="idref" href="#x:22"><span class="id" title="binder">x</span></a> <a id="y:23" class="idref" href="#y:23"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#a:21"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:23"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:22"><span class="id" title="variable">x</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="Verif_append1.html#a:21"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a> <a class="idref" href="Verif_append1.html#x:22"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:23"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+ It is critical to observe that a partial linked list defined by
+ <span class="inlinecode"><span class="id" title="var">lseg</span></span> <span class="inlinecode"><span class="id" title="var">s</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">y</span></span> may have a loop. For example, the following diagram does
+ satisfy <span class="inlinecode"><span class="id" title="var">lseg</span></span> <span class="inlinecode">[<span class="id" title="var">a</span>;</span> <span class="inlinecode"><span class="id" title="var">b</span>]</span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">y</span></span>. 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+<pre>
+        +---+---+   +---+---+   
+  x ==&gt; | a | y ==&gt; | b | y ====+ 
+        +---+---+   +- -+---+   |
+                      ^         |
+                      |         |
+                      +=========+
+</pre>
+We can prove this formally. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="lseg_maybe_loop" class="idref" href="#lseg_maybe_loop"><span class="id" title="lemma">lseg_maybe_loop</span></a>: <span class="id" title="keyword">∀</span> (<a id="a:24" class="idref" href="#a:24"><span class="id" title="binder">a</span></a> <a id="b:25" class="idref" href="#b:25"><span class="id" title="binder">b</span></a> <a id="x:26" class="idref" href="#x:26"><span class="id" title="binder">x</span></a> <a id="y:27" class="idref" href="#y:27"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#a:24"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:27"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:26"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#b:25"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:27"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#y:27"><span class="id" title="variable">y</span></a> <br/>
+&nbsp;&nbsp;<span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a><a class="idref" href="Verif_append1.html#a:24"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="Verif_append1.html#b:25"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a> <a class="idref" href="Verif_append1.html#x:26"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:27"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Exists</span> <span class="id" title="var">y</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Exists</span> <span class="id" title="var">y</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Is our definition of <span class="inlinecode"><span class="id" title="var">lseg</span></span> wrong? The answer is no because a loopy <span class="inlinecode"><span class="id" title="var">lseg</span></span>
+cannot connect to a nonempty linked list. For instance, we can prove that
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;<span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">a</span>, <span class="id" title="var">y</span>) <span class="id" title="var">x</span> × <span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">b</span>, <span class="id" title="var">y</span>) <span class="id" title="var">y</span> × <span class="id" title="var">listrep</span> [<span class="id" title="var">c</span>] <span class="id" title="var">y</span>
+<div class="paragraph"> </div>
+
+</span>will lead to a contradication. Here, the first two separating conjuncts build
+a loopy <span class="inlinecode"><span class="id" title="var">lseg</span></span> and the third separating conjunct is a nonempty <span class="inlinecode"><span class="id" title="var">listrep</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="loopy_lseg_not_bad" class="idref" href="#loopy_lseg_not_bad"><span class="id" title="lemma">loopy_lseg_not_bad</span></a>: <span class="id" title="keyword">∀</span> (<a id="a:28" class="idref" href="#a:28"><span class="id" title="binder">a</span></a> <a id="b:29" class="idref" href="#b:29"><span class="id" title="binder">b</span></a> <a id="c:30" class="idref" href="#c:30"><span class="id" title="binder">c</span></a> <a id="x:31" class="idref" href="#x:31"><span class="id" title="binder">x</span></a> <a id="y:32" class="idref" href="#y:32"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#a:28"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:32"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:31"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#b:29"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:32"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#y:32"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="Verif_append1.html#c:30"><span class="id" title="variable">c</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a> <a class="idref" href="Verif_append1.html#y:32"><span class="id" title="variable">y</span></a> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="method">FF</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Intros</span> <span class="id" title="var">u</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">subst</span>.<br/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="lemma">data_at_conflict</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">c</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="definition">nullval</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="var">sep_apply</span> (<span class="id" title="lemma">data_at_conflict</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">c</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="definition">nullval</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a>).<br/>
+&nbsp;&nbsp;+ <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;+ <span class="id" title="var">entailer</span>!.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Important note!  The proof above demonstrates the use of the <span class="inlinecode"><span class="id" title="var">sep_apply</span></span>
+ tactic.  Step through that part of the proof to see what <span class="inlinecode"><span class="id" title="var">sep_apply</span></span> does. 
+<div class="paragraph"> </div>
+
+ Now we can prove the following theorems about partial linked
+ lists and complete linked lists. 
+<div class="paragraph"> </div>
+
+<a id="lab71"></a><h4 class="section">Exercise: 1 star, standard (lseg_lseg)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="lseg_lseg" class="idref" href="#lseg_lseg"><span class="id" title="lemma">lseg_lseg</span></a>: <span class="id" title="keyword">∀</span> (<a id="s<sub>1</sub>:33" class="idref" href="#s<sub>1</sub>:33"><span class="id" title="binder">s<sub>1</sub></span></a> <a id="s<sub>2</sub>:34" class="idref" href="#s<sub>2</sub>:34"><span class="id" title="binder">s<sub>2</sub></span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="x:35" class="idref" href="#x:35"><span class="id" title="binder">x</span></a> <a id="y:36" class="idref" href="#y:36"><span class="id" title="binder">y</span></a> <a id="z:37" class="idref" href="#z:37"><span class="id" title="binder">z</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>1</sub>:33"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_append1.html#x:35"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:36"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:34"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_append1.html#y:36"><span class="id" title="variable">y</span></a> <a class="idref" href="Verif_append1.html#z:37"><span class="id" title="variable">z</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> (<a class="idref" href="Verif_append1.html#s<sub>1</sub>:33"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:34"><span class="id" title="variable">s<sub>2</sub></span></a>) <a class="idref" href="Verif_append1.html#x:35"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#z:37"><span class="id" title="variable">z</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab72"></a><h4 class="section">Exercise: 1 star, standard (lseg_list)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="lseg_list" class="idref" href="#lseg_list"><span class="id" title="lemma">lseg_list</span></a>: <span class="id" title="keyword">∀</span> (<a id="s<sub>1</sub>:38" class="idref" href="#s<sub>1</sub>:38"><span class="id" title="binder">s<sub>1</sub></span></a> <a id="s<sub>2</sub>:39" class="idref" href="#s<sub>2</sub>:39"><span class="id" title="binder">s<sub>2</sub></span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="x:40" class="idref" href="#x:40"><span class="id" title="binder">x</span></a> <a id="y:41" class="idref" href="#y:41"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>1</sub>:38"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_append1.html#x:40"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:41"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:39"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_append1.html#y:41"><span class="id" title="variable">y</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> (<a class="idref" href="Verif_append1.html#s<sub>1</sub>:38"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:39"><span class="id" title="variable">s<sub>2</sub></span></a>) <a class="idref" href="Verif_append1.html#x:40"><span class="id" title="variable">x</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+ Is it possible to define <span class="inlinecode"><span class="id" title="var">lseg</span></span> in a different way so that loopy 
+   situations can be banned?  Yes.  We discuss this near the end of 
+   the chapter. 
+<div class="paragraph"> </div>
+
+<a id="lab73"></a><h2 class="section">Proof of the <span class="inlinecode"><span class="id" title="var">append</span></span> function</h2>
+
+<div class="paragraph"> </div>
+
+ Before verifying the functional correctness of <span class="inlinecode"><span class="id" title="var">append</span></span>, we still need
+to add lemmas to hint databases for separation logic predicates. Readers
+may copy proofs from <a href="Verif_reverse.html"><span class="inlineref">Verif_reverse</span></a> or just skip down to "End of the
+material". 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_local_facts" class="idref" href="#listrep_local_facts"><span class="id" title="lemma">listrep_local_facts</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:42" class="idref" href="#sigma:42"><span class="id" title="binder">sigma</span></a> <a id="p:43" class="idref" href="#p:43"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#sigma:42"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_append1.html#p:43"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><span class="id" title="definition">is_pointer_or_null</span> <a class="idref" href="Verif_append1.html#p:43"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#p:43"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><span class="id" title="definition">nullval</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;-&gt;'_x"><span class="id" title="notation">↔</span></a> <a class="idref" href="Verif_append1.html#sigma:42"><span class="id" title="variable">sigma</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">)</span></a><span class="id" title="notation">)</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">listrep_local_facts</span> : <span class="id" title="var">saturate_local</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_valid_pointer" class="idref" href="#listrep_valid_pointer"><span class="id" title="lemma">listrep_valid_pointer</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:44" class="idref" href="#sigma:44"><span class="id" title="binder">sigma</span></a> <a id="p:45" class="idref" href="#p:45"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#sigma:44"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_append1.html#p:45"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="definition">valid_pointer</span> <a class="idref" href="Verif_append1.html#p:45"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">listrep_valid_pointer</span> : <span class="id" title="var">valid_pointer</span>.<br/>
+</div>
+
+<div class="doc">
+(End of the material repeated from Verif_reverse.v) 
+<div class="paragraph"> </div>
+
+ In C programs, we test whether the head pointer of a linked list is null
+ to determine whether that list is empty or not. Thus, from a separating
+ conjunct <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span>, it is useful to prove <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">nil</span></span> (or
+ <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">≠</span> <span class="inlinecode"><span class="id" title="var">nil</span></span>) when knowing that <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">nullval</span></span> (or <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">≠</span> <span class="inlinecode"><span class="id" title="var">nullval</span></span>). The
+ following two lemmas state such correlation. They will be used several
+ times in the C function <span class="inlinecode"><span class="id" title="var">append</span></span>'s correctness proof. 
+<div class="paragraph"> </div>
+
+<a id="lab74"></a><h4 class="section">Exercise: 1 star, standard (listrep_null)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="listrep_null" class="idref" href="#listrep_null"><span class="id" title="lemma">listrep_null</span></a>: <span class="id" title="keyword">∀</span> <a id="contents:46" class="idref" href="#contents:46"><span class="id" title="binder">contents</span></a> <a id="x:47" class="idref" href="#x:47"><span class="id" title="binder">x</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#x:47"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="definition">nullval</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#contents:46"><span class="id" title="variable">contents</span></a> <a class="idref" href="Verif_append1.html#x:47"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#contents:46"><span class="id" title="variable">contents</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">&amp;&amp;</span> <span class="id" title="method">emp</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+</div>
+
+<div class="doc">
+Hint: One way to prove <span class="inlinecode"><span class="id" title="var">P</span>=<span class="id" title="var">Q</span></span>, where P and Q are <span class="inlinecode"><span class="id" title="var">mpred</span></span>s,
+  is to apply <span class="inlinecode"><span class="id" title="var">pred_ext</span></span> and then prove <span class="inlinecode"><span class="id" title="var">P</span><span class="nowrap">&vert;--</span><span class="id" title="var">Q</span></span> and <span class="inlinecode"><span class="id" title="var">Q</span><span class="nowrap">&vert;--</span><span class="id" title="var">P</span></span>. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab75"></a><h4 class="section">Exercise: 1 star, standard (listrep_nonnull)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="listrep_nonnull" class="idref" href="#listrep_nonnull"><span class="id" title="lemma">listrep_nonnull</span></a>: <span class="id" title="keyword">∀</span> <a id="contents:48" class="idref" href="#contents:48"><span class="id" title="binder">contents</span></a> <a id="x:49" class="idref" href="#x:49"><span class="id" title="binder">x</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#x:49"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <span class="id" title="definition">nullval</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#contents:48"><span class="id" title="variable">contents</span></a> <a class="idref" href="Verif_append1.html#x:49"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="h:50" class="idref" href="#h:50"><span class="id" title="binder">h</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="hs:51" class="idref" href="#hs:51"><span class="id" title="binder">hs</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="y:52" class="idref" href="#y:52"><span class="id" title="binder">y</span></a>:<span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#contents:48"><span class="id" title="variable">contents</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Verif_append1.html#h:50"><span class="id" title="variable">h</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Verif_append1.html#hs:51"><span class="id" title="variable">hs</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">&amp;&amp;</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#h:50"><span class="id" title="variable">h</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:52"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:49"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#hs:51"><span class="id" title="variable">hs</span></a> <a class="idref" href="Verif_append1.html#y:52"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+</div>
+
+<div class="doc">
+Again, <span class="inlinecode"><span class="id" title="var">pred_ext</span></span> will be useful here. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+ Now, let's prove this <span class="inlinecode"><span class="id" title="var">append</span></span> function correct. 
+<div class="paragraph"> </div>
+
+<a id="lab76"></a><h4 class="section">Exercise: 3 stars, standard (body_append)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="body_append" class="idref" href="#body_append"><span class="id" title="lemma">body_append</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_append1.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_append1.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_append</span> <a class="idref" href="Verif_append1.html#append_spec"><span class="id" title="definition">append_spec</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="var">start_function</span>.<br/>
+<span class="id" title="var">forward_if</span>. <span class="comment">(*&nbsp;if&nbsp;(x&nbsp;==&nbsp;NULL)&nbsp;*)</span><br/>
+- <span class="comment">(*&nbsp;If-then&nbsp;*)</span><br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+This if-then branch handles the cases in which <span class="inlinecode"><span class="id" title="var">x</span></span> is null. In other
+   words, <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> should be <span class="inlinecode"><span class="id" title="var">nil</span></span>. We can easily derive this by <span class="inlinecode"><span class="id" title="var">listrep_null</span></span>.
+   The rest of the proof in this branch is left as an exercise. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<a class="idref" href="Verif_append1.html#listrep_null"><span class="id" title="axiom">listrep_null</span></a> <span class="id" title="var">_</span> <span class="id" title="var">x</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
+- <span class="comment">(*&nbsp;If-else&nbsp;*)</span><br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+This time, we know that <span class="inlinecode"><span class="id" title="var">x</span></span> is not null; thus <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> should
+    be nonempty. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<a class="idref" href="Verif_append1.html#listrep_nonnull"><span class="id" title="axiom">listrep_nonnull</span></a> <span class="id" title="var">_</span> <span class="id" title="var">x</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Intros</span> <span class="id" title="var">h</span> <span class="id" title="var">r</span> <span class="id" title="var">u</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;t&nbsp;=&nbsp;x;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;u&nbsp;=&nbsp;t&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;tail;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+After symbolically executing two assignment commands, we arrive
+     at the while loop. As mentioned above, we can verify it using
+     the following loop invariant. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">forward_while</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( <span class="id" title="notation">EX</span> <a id="s1a:58" class="idref" href="#s1a:58"><span class="id" title="binder">s1a</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="b:59" class="idref" href="#b:59"><span class="id" title="binder">b</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="s1c:60" class="idref" href="#s1c:60"><span class="id" title="binder">s1c</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="t:61" class="idref" href="#t:61"><span class="id" title="binder">t</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="u:62" class="idref" href="#u:62"><span class="id" title="binder">u</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span><span class="id" title="var">s<sub>1</sub></span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Verif_append1.html#s1a:53"><span class="id" title="variable">s1a</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_append1.html#b:54"><span class="id" title="variable">b</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Verif_append1.html#s1c:55"><span class="id" title="variable">s1c</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">LOCAL</span> <span class="id" title="notation">(</span><span class="id" title="constructor">temp</span> <span class="id" title="definition">_x</span> <span class="id" title="var">x</span><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_t</span> <a class="idref" href="Verif_append1.html#t:56"><span class="id" title="variable">t</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_u</span> <a class="idref" href="Verif_append1.html#u:57"><span class="id" title="variable">u</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_y</span> <span class="id" title="var">y</span><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s1a:53"><span class="id" title="variable">s1a</span></a> <span class="id" title="var">x</span> <a class="idref" href="Verif_append1.html#t:56"><span class="id" title="variable">t</span></a><span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#b:54"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#u:57"><span class="id" title="variable">u</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#t:56"><span class="id" title="variable">t</span></a><span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s1c:55"><span class="id" title="variable">s1c</span></a> <a class="idref" href="Verif_append1.html#u:57"><span class="id" title="variable">u</span></a><span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <span class="id" title="var">s<sub>2</sub></span> <span class="id" title="var">y</span><span class="id" title="notation">)</span>)%<span class="id" title="tactic">assert</span>.<br/>
+&nbsp;+ <span class="comment">(*&nbsp;current&nbsp;assertion&nbsp;implies&nbsp;loop&nbsp;invariant&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Exists</span> (@<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> <span class="id" title="inductive">val</span>) <span class="id" title="var">h</span> <span class="id" title="var">r</span> <span class="id" title="var">x</span> <span class="id" title="var">u</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">s<sub>1</sub></span>. <span class="id" title="var">entailer</span>!. <span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a>; <span class="id" title="var">entailer</span>!.<br/>
+&nbsp;+ <span class="comment">(*&nbsp;loop&nbsp;test&nbsp;is&nbsp;safe&nbsp;to&nbsp;execute&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+&nbsp;+  <span class="comment">(*&nbsp;loop&nbsp;body&nbsp;preserves&nbsp;invariant&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+We know <span class="inlinecode"><span class="id" title="var">u</span></span> is not null from the fact that the loop condition
+       is true. Thus we can represent <span class="inlinecode"><span class="id" title="var">s1c</span></span> in the form of <span class="inlinecode">(<span class="id" title="var">c</span></span> <span class="inlinecode">::</span> <span class="inlinecode"><span class="id" title="var">s1d</span>)</span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">clear</span> <span class="id" title="var">h</span> <span class="id" title="var">r</span> <span class="id" title="var">u</span> <span class="id" title="var">H<sub>0</sub></span>; <span class="id" title="tactic">rename</span> <span class="id" title="var">u<sub>0</sub></span> <span class="id" title="var">into</span> <span class="id" title="var">u</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<a class="idref" href="Verif_append1.html#listrep_nonnull"><span class="id" title="axiom">listrep_nonnull</span></a> <span class="id" title="var">_</span> <span class="id" title="var">u</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Intros</span> <span class="id" title="var">c</span> <span class="id" title="var">s1d</span> <span class="id" title="var">z</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;t&nbsp;=&nbsp;u;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;u&nbsp;=&nbsp;t&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;tail;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+In the end of the loop body, we need to re-establish the
+      loop invariant. At this point, the memory layout can be
+      illustrated by the following diagram. 
+</div>
+<div class="code">
+</div>
+
+<div class="doc">
+<pre>
+                                 new t       new u
+                                   |           |
+                                   |           |
+                 +---+---+   +---+---+   +---+---+   +---+---+   
+  x ==&gt; ... ===&gt; |   | t ==&gt; | b | u ==&gt; | c | z ==&gt; |   |  ===&gt; ... 
+                 +---+---+   +---+---+   +---+---+   +---+---+
+
+      | &lt;===== s1a =====&gt; |   (b)         (c)      | &lt;==== s1d ====&gt; |
+      | &lt;========== new s1a ========&gt; |  (new b)   | &lt;== new s1c ==&gt; |
+
+
+        +---+---+   +---+---+   +---+---+   
+  y ==&gt; |   |  ===&gt; |   |   ==&gt; |   |  ===&gt; ... 
+        +---+---+   +---+---+   +---+---+
+      | &lt;================ s<sub>2</sub> =================&gt; |
+</pre>
+
+<div class="paragraph"> </div>
+
+ Clearly, <span class="inlinecode"><span class="id" title="var">s1a</span></span> <span class="inlinecode">++</span> <span class="inlinecode"><span class="id" title="var">b</span></span> <span class="inlinecode">::</span> <span class="inlinecode"><span class="id" title="var">nil</span></span> should be the new value of <span class="inlinecode"><span class="id" title="var">s1a</span></span>;  <span class="inlinecode"><span class="id" title="var">c</span></span> should be
+ the new value of <span class="inlinecode"><span class="id" title="var">b</span></span>; <span class="inlinecode"><span class="id" title="var">s1d</span></span> should be the new value of <span class="inlinecode"><span class="id" title="var">s1c</span></span>; <span class="inlinecode"><span class="id" title="var">u</span></span> should be
+ the new value of <span class="inlinecode"><span class="id" title="var">t</span></span>; and <span class="inlinecode"><span class="id" title="var">z</span></span> should be the new value of <span class="inlinecode"><span class="id" title="var">u</span></span>. The next 
+ command instantiates the existentially quantified variables in our loop
+ invariant accordingly. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">Exists</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">((</span></a><span class="id" title="var">s1a</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">),</span></a><span class="id" title="var">c</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">s1d</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">u</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">z</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a>. <span class="id" title="tactic">unfold</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#fst"><span class="id" title="definition">fst</span></a>, <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#snd"><span class="id" title="definition">snd</span></a>.<br/>
+</div>
+
+<div class="doc">
+As usual, we try <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> to solve this proof goal. This time,
+ <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> does not solve it directly. Instead, two simplified proof goals
+ are left. Their proofs are left for the reader, using <span class="inlinecode"><span class="id" title="var">app_assoc</span></span>, 
+ <span class="inlinecode"><span class="id" title="var">singleton_lseg</span></span> and <span class="inlinecode"><span class="id" title="var">lseg_lseg</span></span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;× <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;× <span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
+&nbsp;+ <span class="comment">(*&nbsp;after&nbsp;the&nbsp;loop&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+After exiting the loop, the loop condition must be false, i.e.
+    <span class="inlinecode"><span class="id" title="var">u</span></span> is the null pointer. Thus <span class="inlinecode"><span class="id" title="var">s1c</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">nil</span></span> and <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">s1a</span></span> <span class="inlinecode">++</span> <span class="inlinecode">[<span class="id" title="var">b</span>]</span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">clear</span> <span class="id" title="var">h</span> <span class="id" title="var">r</span> <span class="id" title="var">u</span> <span class="id" title="var">H<sub>0</sub></span>; <span class="id" title="tactic">rename</span> <span class="id" title="var">u<sub>0</sub></span> <span class="id" title="var">into</span> <span class="id" title="var">u</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<a class="idref" href="Verif_append1.html#listrep_null"><span class="id" title="axiom">listrep_null</span></a> <span class="id" title="var">s1c</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">s1c</span>.<br/>
+</div>
+
+<div class="doc">
+The rest of the proof is standard. Hint, <span class="inlinecode"><span class="id" title="var">singleton_lseg</span></span>,
+    <span class="inlinecode"><span class="id" title="var">lseg_lseg</span></span> and/or <span class="inlinecode"><span class="id" title="var">lseg_list</span></span> may be useful. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab77"></a><h2 class="section">Additional exercises: more proofs about list segments</h2>
+
+<div class="paragraph"> </div>
+
+ For verifying the C function <span class="inlinecode"><span class="id" title="var">append</span></span>, it is enough to have only three
+ separation logic proof rules about <span class="inlinecode"><span class="id" title="var">lseg</span></span>: <span class="inlinecode"><span class="id" title="var">singleton_lseg</span></span>, <span class="inlinecode"><span class="id" title="var">lseg_lseg</span></span>
+ and <span class="inlinecode"><span class="id" title="var">lseg_list</span></span>. The following exercises are other important properties
+ of <span class="inlinecode"><span class="id" title="var">lseg</span></span>. 
+<div class="paragraph"> </div>
+
+<a id="lab78"></a><h4 class="section">Exercise: 1 star, standard: (lseg2listrep)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="lseg2listrep" class="idref" href="#lseg2listrep"><span class="id" title="lemma">lseg2listrep</span></a>: <span class="id" title="keyword">∀</span> <a id="s:63" class="idref" href="#s:63"><span class="id" title="binder">s</span></a> <a id="x:64" class="idref" href="#x:64"><span class="id" title="binder">x</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s:63"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_append1.html#x:64"><span class="id" title="variable">x</span></a> <span class="id" title="definition">nullval</span> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s:63"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_append1.html#x:64"><span class="id" title="variable">x</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab79"></a><h4 class="section">Exercise: 1 star, standard: (listrep2lseg)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="listrep2lseg" class="idref" href="#listrep2lseg"><span class="id" title="lemma">listrep2lseg</span></a>: <span class="id" title="keyword">∀</span> <a id="s:65" class="idref" href="#s:65"><span class="id" title="binder">s</span></a> <a id="x:66" class="idref" href="#x:66"><span class="id" title="binder">x</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s:65"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_append1.html#x:66"><span class="id" title="variable">x</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s:65"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_append1.html#x:66"><span class="id" title="variable">x</span></a> <span class="id" title="definition">nullval</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Corollary</span> <a id="lseg_listrep_equiv" class="idref" href="#lseg_listrep_equiv"><span class="id" title="lemma">lseg_listrep_equiv</span></a>: <span class="id" title="keyword">∀</span> <a id="s:67" class="idref" href="#s:67"><span class="id" title="binder">s</span></a> <a id="x:68" class="idref" href="#x:68"><span class="id" title="binder">x</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s:67"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_append1.html#x:68"><span class="id" title="variable">x</span></a> <span class="id" title="definition">nullval</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s:67"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_append1.html#x:68"><span class="id" title="variable">x</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="method">pred_ext</span>.<br/>
+&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <a class="idref" href="Verif_append1.html#lseg2listrep"><span class="id" title="axiom">lseg2listrep</span></a>.<br/>
+&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <a class="idref" href="Verif_append1.html#listrep2lseg"><span class="id" title="axiom">listrep2lseg</span></a>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab80"></a><h4 class="section">Exercise: 2 stars, standard: (lseg_lseg_inv)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="lseg_lseg_inv" class="idref" href="#lseg_lseg_inv"><span class="id" title="lemma">lseg_lseg_inv</span></a>: <span class="id" title="keyword">∀</span> <a id="s<sub>1</sub>:69" class="idref" href="#s<sub>1</sub>:69"><span class="id" title="binder">s<sub>1</sub></span></a> <a id="s<sub>2</sub>:70" class="idref" href="#s<sub>2</sub>:70"><span class="id" title="binder">s<sub>2</sub></span></a> <a id="x:71" class="idref" href="#x:71"><span class="id" title="binder">x</span></a> <a id="z:72" class="idref" href="#z:72"><span class="id" title="binder">z</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> (<a class="idref" href="Verif_append1.html#s<sub>1</sub>:69"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:70"><span class="id" title="variable">s<sub>2</sub></span></a>) <a class="idref" href="Verif_append1.html#x:71"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#z:72"><span class="id" title="variable">z</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="notation">EX</span> <a id="y:73" class="idref" href="#y:73"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>1</sub>:69"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_append1.html#x:71"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:73"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:70"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_append1.html#y:73"><span class="id" title="variable">y</span></a> <a class="idref" href="Verif_append1.html#z:72"><span class="id" title="variable">z</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab81"></a><h4 class="section">Exercise: 2 stars, standard: (loopy_lseg_no_connection)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="loopy_lseg_no_connection" class="idref" href="#loopy_lseg_no_connection"><span class="id" title="lemma">loopy_lseg_no_connection</span></a>: <span class="id" title="keyword">∀</span> <a id="s<sub>1</sub>:74" class="idref" href="#s<sub>1</sub>:74"><span class="id" title="binder">s<sub>1</sub></span></a> <a id="s<sub>2</sub>:75" class="idref" href="#s<sub>2</sub>:75"><span class="id" title="binder">s<sub>2</sub></span></a> <a id="x:76" class="idref" href="#x:76"><span class="id" title="binder">x</span></a> <a id="y:77" class="idref" href="#y:77"><span class="id" title="binder">y</span></a> <a id="z:78" class="idref" href="#z:78"><span class="id" title="binder">z</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#s<sub>1</sub>:74"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#s<sub>2</sub>:75"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#x:76"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Verif_append1.html#y:77"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>1</sub>:74"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_append1.html#x:76"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:77"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#lseg"><span class="id" title="definition">lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:75"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_append1.html#y:77"><span class="id" title="variable">y</span></a> <a class="idref" href="Verif_append1.html#z:78"><span class="id" title="variable">z</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="method">FF</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab82"></a><h2 class="section">Additional exercises: loop-free list segments</h2>
+
+<div class="paragraph"> </div>
+
+ In the following exercise, try to redo the proof above
+  using a different partial-linked-list predicate.
+
+<div class="paragraph"> </div>
+
+ We have mentioned that the <span class="inlinecode"><span class="id" title="var">lseg</span></span> predicate allows a loopy structure,
+ which is quite counterintuitive. Here is an alternate definition that
+ prohibits loops: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="nt_lseg" class="idref" href="#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> (<a id="contents:79" class="idref" href="#contents:79"><span class="id" title="binder">contents</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="x:80" class="idref" href="#x:80"><span class="id" title="binder">x</span></a> <a id="z:81" class="idref" href="#z:81"><span class="id" title="binder">z</span></a>: <span class="id" title="inductive">val</span>) : <span class="id" title="definition">mpred</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Verif_append1.html#contents:79"><span class="id" title="variable">contents</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> ⇒ <span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#x:80"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Verif_append1.html#z:81"><span class="id" title="variable">z</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">&amp;&amp;</span> <span class="id" title="method">emp</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">hs</span> ⇒ <span class="id" title="notation">EX</span> <a id="y:84" class="idref" href="#y:84"><span class="id" title="binder">y</span></a>:<span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_append1.html#x:80"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="Verif_append1.html#z:81"><span class="id" title="variable">z</span></a><span class="id" title="notation">)</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">&amp;&amp;</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:84"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:80"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#nt_lseg:82"><span class="id" title="definition">nt_lseg</span></a> <span class="id" title="var">hs</span> <a class="idref" href="Verif_append1.html#y:84"><span class="id" title="variable">y</span></a> <a class="idref" href="Verif_append1.html#z:81"><span class="id" title="variable">z</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="Verif_append1.html#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> <span class="id" title="var">contents</span> <span class="id" title="var">x</span> <span class="id" title="var">z</span> : <span class="id" title="tactic">simpl</span> <span class="id" title="var">never</span>.<br/>
+</div>
+
+<div class="doc">
+Here, "nt" means no-touch. 
+<div class="paragraph"> </div>
+
+ The difference between <span class="inlinecode"><span class="id" title="var">nt_lseg</span></span> and <span class="inlinecode"><span class="id" title="var">lseg</span></span> is the extra proposition
+  <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">≠</span> <span class="inlinecode"><span class="id" title="var">z</span></span> in the nonempty situation. This extra clause in <span class="inlinecode"><span class="id" title="var">nt_lseg</span></span> 
+  prevents loop structures.
+
+<div class="paragraph"> </div>
+
+  The proof theories of <span class="inlinecode"><span class="id" title="var">nt_lseg</span></span> and <span class="inlinecode"><span class="id" title="var">lseg</span></span> are a bit different as
+  well. The following diagram shows that the counterpart of <span class="inlinecode"><span class="id" title="var">lseg_lseg</span></span>
+  is not valid! 
+<pre>
+        +---+---+   +---+---+   +---+---+   +---+---+   
+  x ==&gt; | a | u ==&gt; | b | y ==&gt; | c | v ==&gt; | d | u ===+
+        +---+---+   +- -+---+   +---+---+   +---+---+  |
+                      ^                                |
+                      |                                |
+                      +================================+
+</pre>
+  In this example, both <span class="inlinecode"></span> <span class="inlinecode">[<span class="id" title="var">a</span>;</span> <span class="inlinecode"><span class="id" title="var">b</span>]</span> <span class="inlinecode"></span> and <span class="inlinecode"></span> <span class="inlinecode">[<span class="id" title="var">c</span>;</span> <span class="inlinecode"><span class="id" title="var">d</span>]</span> <span class="inlinecode"></span> are stored in loop-free 
+  partial linked lists but it is not true for their concatenation. In 
+  general, if <span class="inlinecode">(<span class="id" title="var">nt_lseg</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">y</span>)</span> and <span class="inlinecode">(<span class="id" title="var">nt_lseg</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span></span> <span class="inlinecode"><span class="id" title="var">y</span></span> <span class="inlinecode"><span class="id" title="var">z</span>)</span> describe two 
+  loop-free partial linked lists, the assertion
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">nt_lseg</span> <span class="id" title="var">s<sub>1</sub></span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> × <span class="id" title="var">nt_lseg</span> <span class="id" title="var">s<sub>2</sub></span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>)
+<div class="paragraph"> </div>
+
+</span>  cannot ensure that the structure is loop free. Specifically, the address
+  <span class="inlinecode"><span class="id" title="var">z</span></span> may be used in <span class="inlinecode">(<span class="id" title="var">nt_lseg</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">y</span>)</span>. In other words,
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;<span class="id" title="var">nt_lseg</span> <span class="id" title="var">s<sub>1</sub></span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> × <span class="id" title="var">nt_lseg</span> <span class="id" title="var">s<sub>2</sub></span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> &#x22A2;/- <span class="id" title="var">nt_lseg</span> (<span class="id" title="var">s<sub>1</sub></span> ++ <span class="id" title="var">s<sub>2</sub></span>) <span class="id" title="var">x</span> <span class="id" title="var">z</span> 
+<div class="paragraph"> </div>
+
+</span>
+<div class="paragraph"> </div>
+
+ For <span class="inlinecode"><span class="id" title="var">nt_lseg</span></span>, the following proof rules are useful. 
+<div class="paragraph"> </div>
+
+<a id="lab83"></a><h4 class="section">Exercise: 2 stars, standard, optional (nt_lseg)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="singleton_nt_lseg" class="idref" href="#singleton_nt_lseg"><span class="id" title="lemma">singleton_nt_lseg</span></a>: <span class="id" title="keyword">∀</span> (<a id="contents:85" class="idref" href="#contents:85"><span class="id" title="binder">contents</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="a:86" class="idref" href="#a:86"><span class="id" title="binder">a</span></a> <a id="x:87" class="idref" href="#x:87"><span class="id" title="binder">x</span></a> <a id="y:88" class="idref" href="#y:88"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#a:86"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:88"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:87"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#contents:85"><span class="id" title="variable">contents</span></a> <a class="idref" href="Verif_append1.html#y:88"><span class="id" title="variable">y</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="Verif_append1.html#a:86"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a> <a class="idref" href="Verif_append1.html#x:87"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:88"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#contents:85"><span class="id" title="variable">contents</span></a> <a class="idref" href="Verif_append1.html#y:88"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab84"></a><h4 class="section">Exercise: 2 stars, standard, optional (singleton_nt_lseg')</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="singleton_nt_lseg'" class="idref" href="#singleton_nt_lseg'"><span class="id" title="lemma">singleton_nt_lseg'</span></a>: <span class="id" title="keyword">∀</span> (<a id="a:89" class="idref" href="#a:89"><span class="id" title="binder">a</span></a> <a id="b:90" class="idref" href="#b:90"><span class="id" title="binder">b</span></a> <a id="x:91" class="idref" href="#x:91"><span class="id" title="binder">x</span></a> <a id="y:92" class="idref" href="#y:92"><span class="id" title="binder">y</span></a> <a id="z:93" class="idref" href="#z:93"><span class="id" title="binder">z</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#a:89"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#y:92"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#x:91"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#b:90"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#z:93"><span class="id" title="variable">z</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#y:92"><span class="id" title="variable">y</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="Verif_append1.html#a:89"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a> <a class="idref" href="Verif_append1.html#x:91"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:92"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#b:90"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#z:93"><span class="id" title="variable">z</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#y:92"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab85"></a><h4 class="section">Exercise: 2 stars, standard, optional (nt_lseg_nt_lseg)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="nt_lseg_nt_lseg" class="idref" href="#nt_lseg_nt_lseg"><span class="id" title="lemma">nt_lseg_nt_lseg</span></a>: <span class="id" title="keyword">∀</span> (<a id="s<sub>1</sub>:94" class="idref" href="#s<sub>1</sub>:94"><span class="id" title="binder">s<sub>1</sub></span></a> <a id="s<sub>2</sub>:95" class="idref" href="#s<sub>2</sub>:95"><span class="id" title="binder">s<sub>2</sub></span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="a:96" class="idref" href="#a:96"><span class="id" title="binder">a</span></a> <a id="x:97" class="idref" href="#x:97"><span class="id" title="binder">x</span></a> <a id="y:98" class="idref" href="#y:98"><span class="id" title="binder">y</span></a> <a id="z:99" class="idref" href="#z:99"><span class="id" title="binder">z</span></a> <a id="u:100" class="idref" href="#u:100"><span class="id" title="binder">u</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>1</sub>:94"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_append1.html#x:97"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:98"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:95"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_append1.html#y:98"><span class="id" title="variable">y</span></a> <a class="idref" href="Verif_append1.html#z:99"><span class="id" title="variable">z</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#a:96"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#u:100"><span class="id" title="variable">u</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#z:99"><span class="id" title="variable">z</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> (<a class="idref" href="Verif_append1.html#s<sub>1</sub>:94"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:95"><span class="id" title="variable">s<sub>2</sub></span></a>) <a class="idref" href="Verif_append1.html#x:97"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#z:99"><span class="id" title="variable">z</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_append1.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_append1.html#a:96"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_append1.html#u:100"><span class="id" title="variable">u</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_append1.html#z:99"><span class="id" title="variable">z</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+</div>
+
+<div class="doc">
+Hint:  This lemma illustrates the most classic case where aggressive
+ <span class="inlinecode"><span class="id" title="var">cancel</span></span> can turn a provable goal into an unprovable goal.  For that reason,
+  you may need to use <span class="inlinecode"><span class="id" title="var">entailer</span></span> rather than <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> at one point. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab86"></a><h4 class="section">Exercise: 2 stars, standard, optional (nt_lseg_list)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="nt_lseg_list" class="idref" href="#nt_lseg_list"><span class="id" title="lemma">nt_lseg_list</span></a>: <span class="id" title="keyword">∀</span> (<a id="s<sub>1</sub>:101" class="idref" href="#s<sub>1</sub>:101"><span class="id" title="binder">s<sub>1</sub></span></a> <a id="s<sub>2</sub>:102" class="idref" href="#s<sub>2</sub>:102"><span class="id" title="binder">s<sub>2</sub></span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="x:103" class="idref" href="#x:103"><span class="id" title="binder">x</span></a> <a id="y:104" class="idref" href="#y:104"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_append1.html#nt_lseg"><span class="id" title="definition">nt_lseg</span></a> <a class="idref" href="Verif_append1.html#s<sub>1</sub>:101"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_append1.html#x:103"><span class="id" title="variable">x</span></a> <a class="idref" href="Verif_append1.html#y:104"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:102"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_append1.html#y:104"><span class="id" title="variable">y</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <a class="idref" href="Verif_append1.html#listrep"><span class="id" title="definition">listrep</span></a> (<a class="idref" href="Verif_append1.html#s<sub>1</sub>:101"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_append1.html#s<sub>2</sub>:102"><span class="id" title="variable">s<sub>2</sub></span></a>) <a class="idref" href="Verif_append1.html#x:103"><span class="id" title="variable">x</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+ Now, we will use <span class="inlinecode"><span class="id" title="var">nt_lseg</span></span> instead of <span class="inlinecode"><span class="id" title="var">lseg</span></span> in the loop invariant to
+prove <span class="inlinecode"><span class="id" title="var">body_append</span></span>. 
+<div class="paragraph"> </div>
+
+<a id="lab87"></a><h4 class="section">Exercise: 3 stars, standard, optional (body_append_alter1)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="body_append_alter1" class="idref" href="#body_append_alter1"><span class="id" title="lemma">body_append_alter1</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_append1.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_append1.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_append</span> <a class="idref" href="Verif_append1.html#append_spec"><span class="id" title="definition">append_spec</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="var">start_function</span>.<br/>
+<span class="id" title="var">forward_if</span>. <span class="comment">(*&nbsp;if&nbsp;(x&nbsp;==&nbsp;NULL)&nbsp;*)</span><br/>
+- <span class="comment">(*&nbsp;If-then&nbsp;*)</span><br/>
+&nbsp;<span class="id" title="tactic">rewrite</span> (<a class="idref" href="Verif_append1.html#listrep_null"><span class="id" title="axiom">listrep_null</span></a> <span class="id" title="var">_</span> <span class="id" title="var">x</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
+- <span class="comment">(*&nbsp;If-else&nbsp;*)</span><br/>
+&nbsp;<span class="id" title="tactic">rewrite</span> (<a class="idref" href="Verif_append1.html#listrep_nonnull"><span class="id" title="axiom">listrep_nonnull</span></a> <span class="id" title="var">_</span> <span class="id" title="var">x</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;<span class="id" title="var">Intros</span> <span class="id" title="var">h</span> <span class="id" title="var">r</span> <span class="id" title="var">u</span>.<br/>
+&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;t&nbsp;=&nbsp;x;&nbsp;*)</span><br/>
+&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;u&nbsp;=&nbsp;t&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;tail;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Now use <span class="inlinecode"><span class="id" title="var">forward_while</span></span> to verify this while loop.  Remember,
+  <span class="inlinecode"><span class="id" title="var">forward_while</span></span> will generate four proof goals: current precondition 
+  implies loop invariant; loop test is safe to execute; loop body preserves
+  invariant; and the correctness of after-loop commands. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-09-18&nbsp;15:39&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

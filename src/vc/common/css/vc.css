@@ -1,0 +1,19 @@
+/*   Styles for SF: V5: Verifiable C     */
+
+/*   Background   */
+body {  background-image: url('../media/image/vc-bg.jpg');   }
+/* #header { background-color: rgb(89, 48, 53); */
+#header { background-color: rgb(166, 89, 101);
+}
+
+/*   This volume's color   */
+/* .section, ul#menu li.section_name, div.button  { background-color: rgb(89,48,53); } */
+.section, ul#menu li.section_name, div.button  { background-color:  rgb(159, 125, 140);
+
+h2.section {
+    color: rgb(112,50,80);
+}
+
+h2.section {
+    color: rgb(102,40,70);
+}
