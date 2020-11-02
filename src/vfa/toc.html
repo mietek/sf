@@ -1,0 +1,615 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Table of contents</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vfa.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body><script>
+$( function() {
+    var icons = {
+      header: "ui-icon-circle-arrow-e",
+      activeHeader: "ui-icon-circle-arrow-s"
+    };
+
+    $("#accordion").accordion({
+      collapsible : true,
+      active : false,
+      icons : icons,
+      heightStyle : 'content'
+    });
+
+    // Enable navigation links in section headers
+    $('#accordion').each(function() {
+      this.addEventListener('click', ev => {
+        if ($(ev.target).closest('a').length > 0) ev.stopPropagation();
+      }, {capture: true});
+    });
+  } );
+</script>
+
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 3: Verified Functional Algorithms</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
+</ul>
+</div>
+</div>
+
+<div id="main">
+
+<div id="toc">
+<div id="accordion">
+<h2><a href="Preface.html">Preface</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Preface.html#lab1">Welcome</a>
+
+</li>
+<li><a href="Preface.html#lab2">Practicalities</a>
+<div>
+<ul class="doclist">
+<li><a href="Preface.html#lab3">Chapter Dependencies</a>
+
+</li>
+<li><a href="Preface.html#lab4">System Requirements</a>
+
+</li>
+<li><a href="Preface.html#lab5">Exercises</a>
+
+</li>
+<li><a href="Preface.html#lab6">Downloading the Coq Files</a>
+
+</li>
+<li><a href="Preface.html#lab7">Lecture Videos</a>
+
+</li>
+<li><a href="Preface.html#lab8">For Instructors and Contributors</a>
+
+</li>
+<li><a href="Preface.html#lab9">Recommended Citation Format</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Preface.html#lab10">Thanks</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Perm.html">Basic Techniques for Comparisons and Permutations &nbsp;&nbsp; (<i>Perm</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Perm.html#lab11">The Less-Than Order on the Natural Numbers</a>
+<div>
+<ul class="doclist">
+<li><a href="Perm.html#lab12">The Omega Tactic</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Perm.html#lab13">Swapping</a>
+<div>
+<ul class="doclist">
+<li><a href="Perm.html#lab14">Reflection</a>
+
+</li>
+<li><a href="Perm.html#lab15">A Tactic for Boolean Destruction</a>
+
+</li>
+<li><a href="Perm.html#lab16">Finishing the <span class="inlinecode"><span class="id" title="var">maybe_swap</span></span> Proof</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Perm.html#lab17">Permutations</a>
+<div>
+<ul class="doclist">
+<li><a href="Perm.html#lab21">Correctness of <span class="inlinecode"><span class="id" title="var">maybe_swap</span></span></a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Perm.html#lab22">Summary: Comparisons and Permutations</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Sort.html">Insertion Sort &nbsp;&nbsp; (<i>Sort</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Sort.html#lab24">The Insertion-Sort Program</a>
+
+</li>
+<li><a href="Sort.html#lab25">Specification of Correctness</a>
+
+</li>
+<li><a href="Sort.html#lab26">Proof of Correctness</a>
+
+</li>
+<li><a href="Sort.html#lab32">Validating the Specification (Advanced)</a>
+
+</li>
+<li><a href="Sort.html#lab35">Proving Correctness from the Alternative Spec (Optional)</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Multiset.html">Insertion Sort Verified With Multisets &nbsp;&nbsp; (<i>Multiset</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Multiset.html#lab37">Multisets</a>
+
+</li>
+<li><a href="Multiset.html#lab41">Specification of Sorting</a>
+
+</li>
+<li><a href="Multiset.html#lab42">Verification of Insertion Sort</a>
+
+</li>
+<li><a href="Multiset.html#lab47">Equivalence of Permutation and Multiset Specifications</a>
+<div>
+<ul class="doclist">
+<li><a href="Multiset.html#lab48">The Forward Direction</a>
+
+</li>
+<li><a href="Multiset.html#lab50">The Backward Direction (Advanced)</a>
+
+</li>
+<li><a href="Multiset.html#lab55">The Main Theorem</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+</ul>
+</div>
+<h2><a href="BagPerm.html">Insertion Sort With Bags &nbsp;&nbsp; (<i>BagPerm</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="BagPerm.html#lab59">Correctness</a>
+
+</li>
+<li><a href="BagPerm.html#lab63">Permutations and Multisets</a>
+
+</li>
+<li><a href="BagPerm.html#lab69">The Main Theorem: Equivalence of Multisets and Permutations</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Selection.html">Selection Sort &nbsp;&nbsp; (<i>Selection</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Selection.html#lab70">The Selection-Sort Program</a>
+
+</li>
+<li><a href="Selection.html#lab71">Proof of Correctness</a>
+
+</li>
+<li><a href="Selection.html#lab84">Recursive Functions That are Not Structurally Recursive</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Merge.html">Merge Sort, With Specification and Proof of Correctness &nbsp;&nbsp; (<i>Merge</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><div>
+<ul class="doclist">
+<li><a href="Merge.html#lab87">Split and its properties</a>
+
+</li>
+<li><a href="Merge.html#lab89">Defining Merge</a>
+
+</li>
+<li><a href="Merge.html#lab90">Defining Mergesort</a>
+
+</li>
+<li><a href="Merge.html#lab91">Correctness: Sortedness</a>
+
+</li>
+<li><a href="Merge.html#lab95">Correctness: Permutation</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+</ul>
+</div>
+<h2><a href="SearchTree.html">Binary Search Trees &nbsp;&nbsp; (<i>SearchTree</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="SearchTree.html#lab98">BST Implementation</a>
+
+</li>
+<li><a href="SearchTree.html#lab99">BST Invariant</a>
+
+</li>
+<li><a href="SearchTree.html#lab102">Correctness of BST Operations</a>
+
+</li>
+<li><a href="SearchTree.html#lab105">BSTs vs. Higher-order Functions (Optional)</a>
+
+</li>
+<li><a href="SearchTree.html#lab110">Converting a BST to a List</a>
+<div>
+<ul class="doclist">
+<li><a href="SearchTree.html#lab111">Part 1: Same Bindings</a>
+
+</li>
+<li><a href="SearchTree.html#lab118">Part 2: Sorted (Advanced)</a>
+
+</li>
+<li><a href="SearchTree.html#lab121">Part 3: No Duplicates (Advanced and Optional)</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="SearchTree.html#lab124">A Faster <span class="inlinecode"><span class="id" title="var">elements</span></span> Implementation</a>
+
+</li>
+<li><a href="SearchTree.html#lab126">An Algebraic Specification of <span class="inlinecode"><span class="id" title="var">elements</span></span></a>
+
+</li>
+<li><a href="SearchTree.html#lab129">Model-based Specifications</a>
+
+</li>
+<li><a href="SearchTree.html#lab136">An Alternative Abstraction Relation (Optional, Advanced)</a>
+
+</li>
+<li><a href="SearchTree.html#lab145">Efficiency of Search Trees</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="ADT.html">Abstract Data Types &nbsp;&nbsp; (<i>ADT</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="ADT.html#lab146">The Table ADT</a>
+
+</li>
+<li><a href="ADT.html#lab147">Implementing <span class="inlinecode"><span class="id" title="var">Table</span></span> with Functions</a>
+
+</li>
+<li><a href="ADT.html#lab149">Implementing <span class="inlinecode"><span class="id" title="var">Table</span></span> with Lists</a>
+
+</li>
+<li><a href="ADT.html#lab151">Implementing <span class="inlinecode"><span class="id" title="var">Table</span></span> with BSTs</a>
+
+</li>
+<li><a href="ADT.html#lab152">Tables with an <span class="inlinecode"><span class="id" title="var">elements</span></span> Operation</a>
+<div>
+<ul class="doclist">
+<li><a href="ADT.html#lab153">A First Attempt at <span class="inlinecode"><span class="id" title="var">ETable</span></span></a>
+
+</li>
+<li><a href="ADT.html#lab154">A Revised <span class="inlinecode"><span class="id" title="var">ETable</span></span></a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="ADT.html#lab155">Encapsulation with the Coq Module System (Advanced)</a>
+
+</li>
+<li><a href="ADT.html#lab157">Model-based Specification</a>
+
+</li>
+<li><a href="ADT.html#lab161">Summary of ADT Verification</a>
+
+</li>
+<li><a href="ADT.html#lab162">Another ADT: Queue</a>
+
+</li>
+<li><a href="ADT.html#lab165">Representation Invariants and Subset Types</a>
+<div>
+<ul class="doclist">
+<li><a href="ADT.html#lab166">Example: The Even Naturals</a>
+
+</li>
+<li><a href="ADT.html#lab167">Defining Subset Types</a>
+
+</li>
+<li><a href="ADT.html#lab168">Example: Vectors</a>
+
+</li>
+<li><a href="ADT.html#lab172">Using Subset Types to Enforce the BST Invariant</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+</ul>
+</div>
+<h2><a href="Extract.html">Running Coq Programs in OCaml &nbsp;&nbsp; (<i>Extract</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Extract.html#lab174">Extraction</a>
+
+</li>
+<li><a href="Extract.html#lab175">Lightweight Extraction to <span class="inlinecode"><span class="id" title="var">int</span></span></a>
+
+</li>
+<li><a href="Extract.html#lab176">Insertion Sort, Extracted</a>
+
+</li>
+<li><a href="Extract.html#lab178">Binary Search Trees, Extracted</a>
+
+</li>
+<li><a href="Extract.html#lab182">Performance Tests</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Redblack.html">Red-Black Trees &nbsp;&nbsp; (<i>Redblack</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Redblack.html#lab183">Implementation</a>
+
+</li>
+<li><a href="Redblack.html#lab184">Case-Analysis Automation</a>
+
+</li>
+<li><a href="Redblack.html#lab185">The BST Invariant</a>
+
+</li>
+<li><a href="Redblack.html#lab190">Verification</a>
+
+</li>
+<li><a href="Redblack.html#lab195">Efficiency</a>
+
+</li>
+<li><a href="Redblack.html#lab201">Performance of Extracted Code</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Trie.html">Number Representations and Efficient Lookup Tables &nbsp;&nbsp; (<i>Trie</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Trie.html#lab202">LogN Penalties in Functional Programming</a>
+
+</li>
+<li><a href="Trie.html#lab203">A Simple Program That's Waaaaay Too Slow.</a>
+
+</li>
+<li><a href="Trie.html#lab204">Efficient Positive Numbers</a>
+<div>
+<ul class="doclist">
+<li><a href="Trie.html#lab208">Coq's Integer Type, <span class="inlinecode"><span class="id" title="var">Z</span></span></a>
+
+</li>
+<li><a href="Trie.html#lab209">From <span class="inlinecode"><span class="id" title="var">N</span>×<span class="id" title="var">N</span>×<span class="id" title="var">N</span></span> to <span class="inlinecode"><span class="id" title="var">N</span>×<span class="id" title="var">N</span>×<span class="id" title="var">logN</span></span></a>
+
+</li>
+<li><a href="Trie.html#lab210">From <span class="inlinecode"><span class="id" title="var">N</span>×<span class="id" title="var">N</span>×<span class="id" title="var">logN</span></span> to <span class="inlinecode"><span class="id" title="var">N</span>×<span class="id" title="var">logN</span>×<span class="id" title="var">logN</span></span></a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Trie.html#lab211">Tries: Efficient Lookup Tables on Positive Binary Numbers</a>
+<div>
+<ul class="doclist">
+<li><a href="Trie.html#lab212">From <span class="inlinecode"><span class="id" title="var">N</span>×<span class="id" title="var">logN</span>×<span class="id" title="var">logN</span></span> to <span class="inlinecode"><span class="id" title="var">N</span>×<span class="id" title="var">logN</span></span></a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Trie.html#lab214">Proving the Correctness of Trie Tables</a>
+<div>
+<ul class="doclist">
+<li><a href="Trie.html#lab215">Lemmas About the Relation Between <span class="inlinecode"><span class="id" title="var">lookup</span></span> and <span class="inlinecode"><span class="id" title="var">insert</span></span></a>
+
+</li>
+<li><a href="Trie.html#lab219">Bijection Between <span class="inlinecode"><span class="id" title="var">positive</span></span> and <span class="inlinecode"><span class="id" title="var">nat</span></span>.</a>
+
+</li>
+<li><a href="Trie.html#lab221">Proving That Tries are a "Table" ADT.</a>
+
+</li>
+<li><a href="Trie.html#lab226">Sanity Check</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Trie.html#lab227">Conclusion</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Priqueue.html">Priority Queues &nbsp;&nbsp; (<i>Priqueue</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Priqueue.html#lab228">Module Signature</a>
+
+</li>
+<li><a href="Priqueue.html#lab229">Implementation</a>
+<div>
+<ul class="doclist">
+<li><a href="Priqueue.html#lab230">Some Preliminaries</a>
+
+</li>
+<li><a href="Priqueue.html#lab232">The Program</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Priqueue.html#lab233">Predicates on Priority Queues</a>
+<div>
+<ul class="doclist">
+<li><a href="Priqueue.html#lab234">The Representation Invariant</a>
+
+</li>
+<li><a href="Priqueue.html#lab235">Sanity Checks on the Abstraction Relation</a>
+
+</li>
+<li><a href="Priqueue.html#lab236">Characterizations of the Operations on Queues</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+</ul>
+</div>
+<h2><a href="Binom.html">Binomial Queues &nbsp;&nbsp; (<i>Binom</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Binom.html#lab238">Required Reading</a>
+
+</li>
+<li><a href="Binom.html#lab239">The Program</a>
+
+</li>
+<li><a href="Binom.html#lab240">Characterization Predicates</a>
+
+</li>
+<li><a href="Binom.html#lab241">Proof of Algorithm Correctness</a>
+<div>
+<ul class="doclist">
+<li><a href="Binom.html#lab242">Various Functions Preserve the Representation Invariant</a>
+
+</li>
+<li><a href="Binom.html#lab249">The Abstraction Relation</a>
+
+</li>
+<li><a href="Binom.html#lab251">Sanity Checks on the Abstraction Relation</a>
+
+</li>
+<li><a href="Binom.html#lab257">Various Functions Preserve the Abstraction Relation</a>
+
+</li>
+<li><a href="Binom.html#lab260">Optional Exercises</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Binom.html#lab267">Measurement.</a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Decide.html">Programming with Decision Procedures &nbsp;&nbsp; (<i>Decide</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Decide.html#lab269">Using <span class="inlinecode"><span class="id" title="var">reflect</span></span> to characterize decision procedures</a>
+
+</li>
+<li><a href="Decide.html#lab270">Using <span class="inlinecode"><span class="id" title="var">sumbool</span></span> to Characterize Decision Procedures</a>
+<div>
+<ul class="doclist">
+<li><a href="Decide.html#lab271"><span class="inlinecode"><span class="id" title="var">sumbool</span></span> in the Coq Standard Library</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Decide.html#lab273">Decidability and Computability</a>
+
+</li>
+<li><a href="Decide.html#lab274">Opacity of <span class="inlinecode"><span class="id" title="keyword">Qed</span></span></a>
+
+</li>
+<li><a href="Decide.html#lab276">Advantages and Disadvantages of <span class="inlinecode"><span class="id" title="var">reflect</span></span> Versus <span class="inlinecode"><span class="id" title="var">sumbool</span></span></a>
+
+</li>
+</ul>
+</div>
+<h2><a href="Color.html">Graph Coloring &nbsp;&nbsp; (<i>Color</i>)</a></h2>
+<div>
+<ul class="doclist">
+<li><a href="Color.html#lab277">Preliminaries: Representing Graphs</a>
+
+</li>
+<li><a href="Color.html#lab278">Lemmas About Sets and Maps</a>
+<div>
+<ul class="doclist">
+<li><a href="Color.html#lab279">equivlistA</a>
+
+</li>
+<li><a href="Color.html#lab280">SortA_equivlistA_eqlistA</a>
+
+</li>
+<li><a href="Color.html#lab281">S.remove and S.elements</a>
+
+</li>
+<li><a href="Color.html#lab283">Lists of (key,value) Pairs</a>
+
+</li>
+<li><a href="Color.html#lab286">Cardinality</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Color.html#lab293">Now Begins the Graph Coloring Program</a>
+<div>
+<ul class="doclist">
+<li><a href="Color.html#lab294">Some Proofs in Support of Termination</a>
+
+</li>
+<li><a href="Color.html#lab297">The Rest of the Algorithm</a>
+
+</li>
+</ul>
+</div>
+
+</li>
+<li><a href="Color.html#lab298">Proof of Correctness of the Algorithm.</a>
+
+</li>
+<li><a href="Color.html#lab302">Trying Out the Algorithm on an Actual Test Case</a>
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+</body>
+</html>

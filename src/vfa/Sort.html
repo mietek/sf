@@ -1,0 +1,494 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Sort: Insertion Sort</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vfa.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 3: Verified Functional Algorithms</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Sort<span class="subtitle">Insertion Sort</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ Sorting can be done in expected O(N log N) time by various
+    algorithms (quicksort, mergesort, heapsort, etc.).  But for
+    smallish inputs, a simple quadratic-time algorithm such as
+    insertion sort can actually be faster.  It's certainly easier to
+    implement -- and to verify. 
+<div class="paragraph"> </div>
+
+ If you don't recall insertion sort or haven't seen it in
+    a while, see Wikipedia or read any standard textbook; for example:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Sections 2.0 and 2.1 of <i>Algorithms, Fourth Edition</i>, by
+      Sedgewick and Wayne, Addison Wesley 2011; or
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Section 2.1 of <i>Introduction to Algorithms, 3rd Edition</i>, by
+      Cormen, Leiserson, and Rivest, MIT Press 2009. 
+</li>
+</ul>
+
+</div>
+
+<div class="doc">
+<a id="lab24"></a><h1 class="section">The Insertion-Sort Program</h1>
+
+<div class="paragraph"> </div>
+
+ Insertion sort is usually presented as an imperative program
+    operating on arrays.  But it works just as well as a functional
+    program operating on linked lists. 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;<span class="inlinecode"><span class="id" title="var">insert</span></span> <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode"><span class="id" title="var">l</span></span>&nbsp;inserts&nbsp;<span class="inlinecode"><span class="id" title="var">i</span></span>&nbsp;into&nbsp;its&nbsp;sorted&nbsp;place&nbsp;in&nbsp;list&nbsp;<span class="inlinecode"><span class="id" title="var">l</span></span>.<br/>
+&nbsp;&nbsp;&nbsp;Precondition:&nbsp;<span class="inlinecode"><span class="id" title="var">l</span></span>&nbsp;is&nbsp;sorted.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="insert" class="idref" href="#insert"><span class="id" title="definition">insert</span></a> (<a id="i:1" class="idref" href="#i:1"><span class="id" title="binder">i</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<a id="l:2" class="idref" href="#l:2"><span class="id" title="binder">l</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Sort.html#l:2"><span class="id" title="variable">l</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="Sort.html#i:1"><span class="id" title="variable">i</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="var">h</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <span class="id" title="var">t</span> ⇒ <span class="id" title="keyword">if</span> <a class="idref" href="Sort.html#i:1"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Arith.PeanoNat.html#0f31f5c1c6b6a21a3a187247222bc9e<sub>4</sub>"><span class="id" title="notation">&lt;=?</span></a> <span class="id" title="var">h</span> <span class="id" title="keyword">then</span> <a class="idref" href="Sort.html#i:1"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <span class="id" title="var">h</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <span class="id" title="var">t</span> <span class="id" title="keyword">else</span> <span class="id" title="var">h</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Sort.html#insert:3"><span class="id" title="definition">insert</span></a> <a class="idref" href="Sort.html#i:1"><span class="id" title="variable">i</span></a> <span class="id" title="var">t</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Fixpoint</span> <a id="sort" class="idref" href="#sort"><span class="id" title="definition">sort</span></a> (<a id="l:5" class="idref" href="#l:5"><span class="id" title="binder">l</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Sort.html#l:5"><span class="id" title="variable">l</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="var">h</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <span class="id" title="var">t</span> ⇒ <a class="idref" href="Sort.html#insert"><span class="id" title="definition">insert</span></a> <span class="id" title="var">h</span> (<a class="idref" href="Sort.html#sort:6"><span class="id" title="definition">sort</span></a> <span class="id" title="var">t</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Example</span> <a id="sort_pi" class="idref" href="#sort_pi"><span class="id" title="definition">sort_pi</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="Sort.html#sort"><span class="id" title="definition">sort</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a>3<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>4<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>5<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>9<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>2<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>6<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>5<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>3<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>5<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>2<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>3<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>3<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>4<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>5<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>5<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>5<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>6<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a>9<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a>.<br/>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay('proof1');toggleDisplay('proofcontrol1')">
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div class="doc">
+We won't analyze or prove anything about the efficiency of
+    <span class="inlinecode"><span class="id" title="var">sort</span></span>. Instead, we will verify its correctness: that it produces
+    the correct output for a given input. 
+</div>
+
+<div class="doc">
+<a id="lab25"></a><h1 class="section">Specification of Correctness</h1>
+
+<div class="paragraph"> </div>
+
+ A sorting algorithm must rearrange the elements into a list
+    that is totally ordered. There are many ways we might express that
+    idea formally in Coq.  One is with an inductively-defined
+    relation that says: 
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> The empty list is sorted.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Any single-element list is sorted.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> For any two adjacent elements, they must be in the proper order. 
+</li>
+</ul>
+
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <a id="sorted" class="idref" href="#sorted"><span class="id" title="inductive">sorted</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <span class="id" title="keyword">Prop</span> :=<br/>
+| <a id="sorted_nil" class="idref" href="#sorted_nil"><span class="id" title="constructor">sorted_nil</span></a> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#sorted:8"><span class="id" title="inductive">sorted</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+| <a id="sorted_1" class="idref" href="#sorted_1"><span class="id" title="constructor">sorted_1</span></a> : <span class="id" title="keyword">∀</span> <a id="x:10" class="idref" href="#x:10"><span class="id" title="binder">x</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#sorted:8"><span class="id" title="inductive">sorted</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="Sort.html#x:10"><span class="id" title="variable">x</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a><br/>
+| <a id="sorted_cons" class="idref" href="#sorted_cons"><span class="id" title="constructor">sorted_cons</span></a> : <span class="id" title="keyword">∀</span> <a id="x:11" class="idref" href="#x:11"><span class="id" title="binder">x</span></a> <a id="y:12" class="idref" href="#y:12"><span class="id" title="binder">y</span></a> <a id="l:13" class="idref" href="#l:13"><span class="id" title="binder">l</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#x:11"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a<sub>3</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Sort.html#y:12"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#sorted:8"><span class="id" title="inductive">sorted</span></a> (<a class="idref" href="Sort.html#y:12"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Sort.html#l:13"><span class="id" title="variable">l</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#sorted:8"><span class="id" title="inductive">sorted</span></a> (<a class="idref" href="Sort.html#x:11"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Sort.html#y:12"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Sort.html#l:13"><span class="id" title="variable">l</span></a>).<br/><hr class='doublespaceincode'/>
+</div>
+
+<div class="doc">
+This definition might not be the most obvious. Another definition,
+    perhaps more familiar, might be: for any two elements of the list
+    (regardless of whether they are adjacent), they should be in the
+    proper order.  Let's try formalizing that.
+
+<div class="paragraph"> </div>
+
+    We can think in terms of indices into a list <span class="inlinecode"><span class="id" title="var">lst</span></span>, and say: for
+    any valid indices <span class="inlinecode"><span class="id" title="var">i</span></span> and <span class="inlinecode"><span class="id" title="var">j</span></span>, if <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">j</span></span> then <span class="inlinecode"><span class="id" title="var">index</span></span> <span class="inlinecode"><span class="id" title="var">lst</span></span> <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode">≤</span>
+    <span class="inlinecode"><span class="id" title="var">index</span></span> <span class="inlinecode"><span class="id" title="var">lst</span></span> <span class="inlinecode"><span class="id" title="var">j</span></span>, where <span class="inlinecode"><span class="id" title="var">index</span></span> <span class="inlinecode"><span class="id" title="var">lst</span></span> <span class="inlinecode"><span class="id" title="var">n</span></span> means the element of <span class="inlinecode"><span class="id" title="var">lst</span></span> at
+    index <span class="inlinecode"><span class="id" title="var">n</span></span>.  Unfortunately, formalizing this idea becomes messy,
+    because any Coq implementing <span class="inlinecode"><span class="id" title="var">index</span></span> must be total: it must return
+    some result even if the index is out of range for the list.
+    The Coq standard library contains two such functions: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth"><span class="id" title="definition">nth</span></a> : <span class="id" title="keyword">∀</span> <a id="A:14" class="idref" href="#A:14"><span class="id" title="binder">A</span></a> : <span class="id" title="keyword">Type</span>, <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="Sort.html#A:14"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#A:14"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#A:14"><span class="id" title="variable">A</span></a>.<br/>
+<span class="id" title="keyword">Check</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth_error"><span class="id" title="definition">nth_error</span></a> : <span class="id" title="keyword">∀</span> <a id="A:15" class="idref" href="#A:15"><span class="id" title="binder">A</span></a> : <span class="id" title="keyword">Type</span>, <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="Sort.html#A:15"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="Sort.html#A:15"><span class="id" title="variable">A</span></a>.<br/>
+</div>
+
+<div class="doc">
+These two functions ensure totality in different ways:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" title="var">nth</span></span> takes an additional argument of type <span class="inlinecode"><span class="id" title="var">A</span></span> --a <i>default</i>
+      value-- to be returned if the index is out of range, whereas
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">nth_error</span></span> returns <span class="inlinecode"><span class="id" title="var">Some</span></span> <span class="inlinecode"><span class="id" title="var">v</span></span> if the index is in range and <span class="inlinecode"><span class="id" title="var">None</span></span>
+<ul class="doclist">
+<li>-an error-- otherwise.
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    If we use <span class="inlinecode"><span class="id" title="var">nth</span></span>, we must ensure that indices are in range: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="sorted''" class="idref" href="#sorted''"><span class="id" title="definition">sorted''</span></a> (<a id="al:16" class="idref" href="#al:16"><span class="id" title="binder">al</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <span class="id" title="keyword">∀</span> <a id="i:17" class="idref" href="#i:17"><span class="id" title="binder">i</span></a> <a id="j:18" class="idref" href="#j:18"><span class="id" title="binder">j</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#i:17"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#::nat_scope:x_'&lt;'_x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Sort.html#j:18"><span class="id" title="variable">j</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#::nat_scope:x_'&lt;'_x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#length"><span class="id" title="definition">length</span></a> <a class="idref" href="Sort.html#al:16"><span class="id" title="variable">al</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth"><span class="id" title="definition">nth</span></a> <a class="idref" href="Sort.html#i:17"><span class="id" title="variable">i</span></a> <a class="idref" href="Sort.html#al:16"><span class="id" title="variable">al</span></a> 0 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a<sub>3</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth"><span class="id" title="definition">nth</span></a> <a class="idref" href="Sort.html#j:18"><span class="id" title="variable">j</span></a> <a class="idref" href="Sort.html#al:16"><span class="id" title="variable">al</span></a> 0.<br/>
+</div>
+
+<div class="doc">
+The choice of default value, here 0, is unimportant, because it
+    will never be returned for the <span class="inlinecode"><span class="id" title="var">i</span></span> and <span class="inlinecode"><span class="id" title="var">j</span></span> we pass.
+
+<div class="paragraph"> </div>
+
+    If we use <span class="inlinecode"><span class="id" title="var">nth_error</span></span>, we must add additional antecedents: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="sorted'" class="idref" href="#sorted'"><span class="id" title="definition">sorted'</span></a> (<a id="al:19" class="idref" href="#al:19"><span class="id" title="binder">al</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <span class="id" title="keyword">∀</span> <a id="i:20" class="idref" href="#i:20"><span class="id" title="binder">i</span></a> <a id="j:21" class="idref" href="#j:21"><span class="id" title="binder">j</span></a> <a id="iv:22" class="idref" href="#iv:22"><span class="id" title="binder">iv</span></a> <a id="jv:23" class="idref" href="#jv:23"><span class="id" title="binder">jv</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#i:20"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#::nat_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Sort.html#j:21"><span class="id" title="variable">j</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth_error"><span class="id" title="definition">nth_error</span></a> <a class="idref" href="Sort.html#al:19"><span class="id" title="variable">al</span></a> <a class="idref" href="Sort.html#i:20"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="Sort.html#iv:22"><span class="id" title="variable">iv</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth_error"><span class="id" title="definition">nth_error</span></a> <a class="idref" href="Sort.html#al:19"><span class="id" title="variable">al</span></a> <a class="idref" href="Sort.html#j:21"><span class="id" title="variable">j</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="Sort.html#jv:23"><span class="id" title="variable">jv</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#iv:22"><span class="id" title="variable">iv</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a<sub>3</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Sort.html#jv:23"><span class="id" title="variable">jv</span></a>.<br/>
+</div>
+
+<div class="doc">
+Here, the validity of <span class="inlinecode"><span class="id" title="var">i</span></span> and <span class="inlinecode"><span class="id" title="var">j</span></span> are implicit in the fact
+    that we get <span class="inlinecode"><span class="id" title="var">Some</span></span> results back from each call to <span class="inlinecode"><span class="id" title="var">nth_error</span></span>. 
+<div class="paragraph"> </div>
+
+ All three definitions of sortedness are reasonable.  In practice,
+    <span class="inlinecode"><span class="id" title="var">sorted'</span></span> is easier to work with than <span class="inlinecode"><span class="id" title="var">sorted''</span></span> because it
+    doesn't need to mention the <span class="inlinecode"><span class="id" title="var">length</span></span> function. And <span class="inlinecode"><span class="id" title="var">sorted</span></span> is
+    easiest, because it doesn't need to mention indices. 
+<div class="paragraph"> </div>
+
+ Using <span class="inlinecode"><span class="id" title="var">sorted</span></span>, we specify what it means to be a correct sorting
+    algorthm: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="is_a_sorting_algorithm" class="idref" href="#is_a_sorting_algorithm"><span class="id" title="definition">is_a_sorting_algorithm</span></a> (<a id="f:24" class="idref" href="#f:24"><span class="id" title="binder">f</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <span class="id" title="keyword">∀</span> <a id="al:25" class="idref" href="#al:25"><span class="id" title="binder">al</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Sorting.Permutation.html#Permutation"><span class="id" title="inductive">Permutation</span></a> <a class="idref" href="Sort.html#al:25"><span class="id" title="variable">al</span></a> (<a class="idref" href="Sort.html#f:24"><span class="id" title="variable">f</span></a> <a class="idref" href="Sort.html#al:25"><span class="id" title="variable">al</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="Sort.html#sorted"><span class="id" title="inductive">sorted</span></a> (<a class="idref" href="Sort.html#f:24"><span class="id" title="variable">f</span></a> <a class="idref" href="Sort.html#al:25"><span class="id" title="variable">al</span></a>).<br/>
+</div>
+
+<div class="doc">
+Function <span class="inlinecode"><span class="id" title="var">f</span></span> is a correct sorting algorithm if <span class="inlinecode"><span class="id" title="var">f</span></span> <span class="inlinecode"><span class="id" title="var">al</span></span> is
+    <span class="inlinecode"><span class="id" title="var">sorted</span></span> and is a permutation of its input. 
+</div>
+
+<div class="doc">
+<a id="lab26"></a><h1 class="section">Proof of Correctness</h1>
+
+<div class="paragraph"> </div>
+
+ In the following exercises, you will prove the correctness of
+    insertion sort. 
+<div class="paragraph"> </div>
+
+<a id="lab27"></a><h4 class="section">Exercise: 3 stars, standard (insert_sorted)</h4>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;Prove&nbsp;that&nbsp;insertion&nbsp;maintains&nbsp;sortedness.&nbsp;Make&nbsp;use&nbsp;of&nbsp;tactic<br/>
+&nbsp;&nbsp;&nbsp;<span class="inlinecode"><span class="id" title="var">bdestruct</span></span>,&nbsp;defined&nbsp;in&nbsp;<a href="Perm.html"><span class="inlineref">Perm</span></a>.&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="insert_sorted" class="idref" href="#insert_sorted"><span class="id" title="lemma">insert_sorted</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="a:26" class="idref" href="#a:26"><span class="id" title="binder">a</span></a> <a id="l:27" class="idref" href="#l:27"><span class="id" title="binder">l</span></a>, <a class="idref" href="Sort.html#sorted"><span class="id" title="inductive">sorted</span></a> <a class="idref" href="Sort.html#l:27"><span class="id" title="variable">l</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#sorted"><span class="id" title="inductive">sorted</span></a> (<a class="idref" href="Sort.html#insert"><span class="id" title="definition">insert</span></a> <a class="idref" href="Sort.html#a:26"><span class="id" title="variable">a</span></a> <a class="idref" href="Sort.html#l:27"><span class="id" title="variable">l</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">a</span> <span class="id" title="var">l</span> <span class="id" title="var">S</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">S</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab28"></a><h4 class="section">Exercise: 2 stars, standard (sort_sorted)</h4>
+
+<div class="paragraph"> </div>
+
+ Using <span class="inlinecode"><span class="id" title="var">insert_sorted</span></span>, prove that insertion sort makes a list
+    sorted. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="sort_sorted" class="idref" href="#sort_sorted"><span class="id" title="lemma">sort_sorted</span></a>: <span class="id" title="keyword">∀</span> <a id="l:28" class="idref" href="#l:28"><span class="id" title="binder">l</span></a>, <a class="idref" href="Sort.html#sorted"><span class="id" title="inductive">sorted</span></a> (<a class="idref" href="Sort.html#sort"><span class="id" title="definition">sort</span></a> <a class="idref" href="Sort.html#l:28"><span class="id" title="variable">l</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab29"></a><h4 class="section">Exercise: 3 stars, standard (insert_perm)</h4>
+
+<div class="paragraph"> </div>
+
+ The following lemma will be useful soon as a helper. Take
+    advantage of helpful theorems from the <span class="inlinecode"><span class="id" title="var">Permutation</span></span> library. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="insert_perm" class="idref" href="#insert_perm"><span class="id" title="lemma">insert_perm</span></a>: <span class="id" title="keyword">∀</span> <a id="x:29" class="idref" href="#x:29"><span class="id" title="binder">x</span></a> <a id="l:30" class="idref" href="#l:30"><span class="id" title="binder">l</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Sorting.Permutation.html#Permutation"><span class="id" title="inductive">Permutation</span></a> (<a class="idref" href="Sort.html#x:29"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Sort.html#l:30"><span class="id" title="variable">l</span></a>) (<a class="idref" href="Sort.html#insert"><span class="id" title="definition">insert</span></a> <a class="idref" href="Sort.html#x:29"><span class="id" title="variable">x</span></a> <a class="idref" href="Sort.html#l:30"><span class="id" title="variable">l</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab30"></a><h4 class="section">Exercise: 3 stars, standard (sort_perm)</h4>
+
+<div class="paragraph"> </div>
+
+ Prove that <span class="inlinecode"><span class="id" title="var">sort</span></span> is a permutation, using <span class="inlinecode"><span class="id" title="var">insert_perm</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="sort_perm" class="idref" href="#sort_perm"><span class="id" title="lemma">sort_perm</span></a>: <span class="id" title="keyword">∀</span> <a id="l:31" class="idref" href="#l:31"><span class="id" title="binder">l</span></a>, <a class="idref" href="http://coq.inria.fr/library//Coq.Sorting.Permutation.html#Permutation"><span class="id" title="inductive">Permutation</span></a> <a class="idref" href="Sort.html#l:31"><span class="id" title="variable">l</span></a> (<a class="idref" href="Sort.html#sort"><span class="id" title="definition">sort</span></a> <a class="idref" href="Sort.html#l:31"><span class="id" title="variable">l</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab31"></a><h4 class="section">Exercise: 1 star, standard (insertion_sort_correct)</h4>
+
+<div class="paragraph"> </div>
+
+ Finish the proof of correctness! 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="insertion_sort_correct" class="idref" href="#insertion_sort_correct"><span class="id" title="lemma">insertion_sort_correct</span></a>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#is_a_sorting_algorithm"><span class="id" title="definition">is_a_sorting_algorithm</span></a> <a class="idref" href="Sort.html#sort"><span class="id" title="definition">sort</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+
+<div class="doc">
+<a id="lab32"></a><h1 class="section">Validating the Specification (Advanced)</h1>
+
+<div class="paragraph"> </div>
+
+ You can prove that a program satisfies a specification, but how
+    can you prove you have the right specification?  Actually, you
+    cannot.  The specification is an informal requirement in your
+    mind.  As Alan Perlis quipped, "One can't proceed from the
+    informal to the formal by formal means."
+
+<div class="paragraph"> </div>
+
+    But one way to build confidence in a specification is to state it
+    in two different ways, then prove they are equivalent. 
+<div class="paragraph"> </div>
+
+<a id="lab33"></a><h4 class="section">Exercise: 4 stars, advanced (sorted_sorted')</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="sorted_sorted'" class="idref" href="#sorted_sorted'"><span class="id" title="lemma">sorted_sorted'</span></a>: <span class="id" title="keyword">∀</span> <a id="al:32" class="idref" href="#al:32"><span class="id" title="binder">al</span></a>, <a class="idref" href="Sort.html#sorted"><span class="id" title="inductive">sorted</span></a> <a class="idref" href="Sort.html#al:32"><span class="id" title="variable">al</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#sorted'"><span class="id" title="definition">sorted'</span></a> <a class="idref" href="Sort.html#al:32"><span class="id" title="variable">al</span></a>.<br/>
+</div>
+
+<div class="doc">
+Hint: Instead of doing induction on the list <span class="inlinecode"><span class="id" title="var">al</span></span>, do induction on
+    the sortedness of <span class="inlinecode"><span class="id" title="var">al</span></span>. This proof is a bit tricky, so you may
+    have to think about how to approach it, and try out one or two
+    different ideas.
+</div>
+<div class="code">
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab34"></a><h4 class="section">Exercise: 3 stars, advanced (sorted'_sorted)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="sorted'_sorted" class="idref" href="#sorted'_sorted"><span class="id" title="lemma">sorted'_sorted</span></a> : <span class="id" title="keyword">∀</span> <a id="al:33" class="idref" href="#al:33"><span class="id" title="binder">al</span></a>, <a class="idref" href="Sort.html#sorted'"><span class="id" title="definition">sorted'</span></a> <a class="idref" href="Sort.html#al:33"><span class="id" title="variable">al</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#sorted"><span class="id" title="inductive">sorted</span></a> <a class="idref" href="Sort.html#al:33"><span class="id" title="variable">al</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+</div>
+
+<div class="doc">
+Here, you can't do induction on the sortedness of the list,
+    because <span class="inlinecode"><span class="id" title="var">sorted'</span></span> is not an inductive predicate. But the proof
+    is not hard. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab35"></a><h1 class="section">Proving Correctness from the Alternative Spec (Optional)</h1>
+
+<div class="paragraph"> </div>
+
+ Depending on how you write the specification of a program, it can
+    be harder or easier to prove correctness.  We saw that predicates
+    <span class="inlinecode"><span class="id" title="var">sorted</span></span> and <span class="inlinecode"><span class="id" title="var">sorted'</span></span> are equivalent.  It is significantly
+    harder, though, to prove correctness of insertion sort directly
+    from <span class="inlinecode"><span class="id" title="var">sorted'</span></span>.
+
+<div class="paragraph"> </div>
+
+    Give it a try!  The best proof we know of makes essential use of
+    the auxiliary lemma <span class="inlinecode"><span class="id" title="var">nth_default_insert</span></span>, so you may want to prove
+    that first.  And some other auxiliary lemmas may be needed too.
+    But maybe you will find a simpler appraoch!
+
+<div class="paragraph"> </div>
+
+    DO NOT USE <span class="inlinecode"><span class="id" title="var">sorted_sorted'</span></span>, <span class="inlinecode"><span class="id" title="var">sorted'_sorted</span></span>, <span class="inlinecode"><span class="id" title="var">insert_sorted</span></span>, or
+    <span class="inlinecode"><span class="id" title="var">sort_sorted</span></span> in these proofs.  That would defeat the purpose! 
+<div class="paragraph"> </div>
+
+<a id="lab36"></a><h4 class="section">Exercise: 5 stars, standard, optional (insert_sorted')</h4>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="nth_error_insert" class="idref" href="#nth_error_insert"><span class="id" title="lemma">nth_error_insert</span></a> : <span class="id" title="keyword">∀</span> <a id="l:34" class="idref" href="#l:34"><span class="id" title="binder">l</span></a> <a id="a:35" class="idref" href="#a:35"><span class="id" title="binder">a</span></a> <a id="i:36" class="idref" href="#i:36"><span class="id" title="binder">i</span></a> <a id="iv:37" class="idref" href="#iv:37"><span class="id" title="binder">iv</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth_error"><span class="id" title="definition">nth_error</span></a> (<a class="idref" href="Sort.html#insert"><span class="id" title="definition">insert</span></a> <a class="idref" href="Sort.html#a:35"><span class="id" title="variable">a</span></a> <a class="idref" href="Sort.html#l:34"><span class="id" title="variable">l</span></a>) <a class="idref" href="Sort.html#i:36"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="Sort.html#iv:37"><span class="id" title="variable">iv</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Sort.html#a:35"><span class="id" title="variable">a</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Sort.html#iv:37"><span class="id" title="variable">iv</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e<sub>25</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"><span class="id" title="notation">∃</span></a> <a id="i':38" class="idref" href="#i':38"><span class="id" title="binder">i'</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"><span class="id" title="notation">,</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#nth_error"><span class="id" title="definition">nth_error</span></a> <a class="idref" href="Sort.html#l:34"><span class="id" title="variable">l</span></a> <a class="idref" href="Sort.html#i':38"><span class="id" title="variable">i'</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="Sort.html#iv:37"><span class="id" title="variable">iv</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="insert_sorted'" class="idref" href="#insert_sorted'"><span class="id" title="lemma">insert_sorted'</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="a:39" class="idref" href="#a:39"><span class="id" title="binder">a</span></a> <a id="l:40" class="idref" href="#l:40"><span class="id" title="binder">l</span></a>, <a class="idref" href="Sort.html#sorted'"><span class="id" title="definition">sorted'</span></a> <a class="idref" href="Sort.html#l:40"><span class="id" title="variable">l</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Sort.html#sorted'"><span class="id" title="definition">sorted'</span></a> (<a class="idref" href="Sort.html#insert"><span class="id" title="definition">insert</span></a> <a class="idref" href="Sort.html#a:39"><span class="id" title="variable">a</span></a> <a class="idref" href="Sort.html#l:40"><span class="id" title="variable">l</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a id="sort_sorted'" class="idref" href="#sort_sorted'"><span class="id" title="lemma">sort_sorted'</span></a>: <span class="id" title="keyword">∀</span> <a id="l:41" class="idref" href="#l:41"><span class="id" title="binder">l</span></a>, <a class="idref" href="Sort.html#sorted'"><span class="id" title="definition">sorted'</span></a> (<a class="idref" href="Sort.html#sort"><span class="id" title="definition">sort</span></a> <a class="idref" href="Sort.html#l:41"><span class="id" title="variable">l</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">l</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">unfold</span> <a class="idref" href="Sort.html#sorted'"><span class="id" title="definition">sorted'</span></a>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">i</span>; <span class="id" title="var">inv</span> <span class="id" title="var">H<sub>0</sub></span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">apply</span> <a class="idref" href="Sort.html#insert_sorted'"><span class="id" title="axiom">insert_sorted'</span></a>. <span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+If you complete the proofs above, you will note that the proof of
+    <span class="inlinecode"><span class="id" title="var">insert_sorted</span></span> is relatively easy compared to the proof of
+    <span class="inlinecode"><span class="id" title="var">insert_sorted'</span></span>, even though <span class="inlinecode"><span class="id" title="var">sorted</span></span> <span class="inlinecode"><span class="id" title="var">al</span></span> <span class="inlinecode">↔</span> <span class="inlinecode"><span class="id" title="var">sorted'</span></span> <span class="inlinecode"><span class="id" title="var">al</span></span>.  So,
+    suppose someone asked you to prove <span class="inlinecode"><span class="id" title="var">sort_sorted'</span></span>.  Instead of
+    proving it directly, it would be much easier to design predicate
+    <span class="inlinecode"><span class="id" title="var">sorted</span></span>, then prove <span class="inlinecode"><span class="id" title="var">sort_sorted</span></span> and <span class="inlinecode"><span class="id" title="var">sorted_sorted'</span></span>.
+
+<div class="paragraph"> </div>
+
+    The moral of the story is therefore: <i>Different formulations of
+    the functional specification can lead to great differences in the
+    difficulty of the correctness proofs</i>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-08-07&nbsp;17:08&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
