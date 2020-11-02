@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Introduction</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/qc.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 4: QuickChick: Property-Based Testing in Coq</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Introduction</h1>
+
+<div class="code">
+</div>
+
+
+<div class="doc">
+<a id="lab5"></a><h1 class="section">A First Taste of Testing</h1>
+
+<div class="paragraph"> </div>
+
+ Consider the following definition of a function <span class="inlinecode"><span class="id" title="var">remove</span></span>, which
+    takes a natural number <span class="inlinecode"><span class="id" title="var">x</span></span> and a list of nats <span class="inlinecode"><span class="id" title="var">l</span></span> and removes <span class="inlinecode"><span class="id" title="var">x</span></span>
+    from the list. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="remove" class="idref" href="#remove"><span class="id" title="definition">remove</span></a> (<a id="x:1" class="idref" href="#x:1"><span class="id" title="binder">x</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<a id="l:2" class="idref" href="#l:2"><span class="id" title="binder">l</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Introduction.html#l:2"><span class="id" title="variable">l</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a>   ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">t</span> ⇒ <span class="id" title="keyword">if</span> <span class="id" title="var">h</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Arith.PeanoNat.html#ad2ec4e405f68c46c0a176e3e94ae2e<sub>3</sub>"><span class="id" title="notation">=?</span></a> <a class="idref" href="Introduction.html#x:1"><span class="id" title="variable">x</span></a> <span class="id" title="keyword">then</span> <span class="id" title="var">t</span> <span class="id" title="keyword">else</span> <span class="id" title="var">h</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Introduction.html#remove:3"><span class="id" title="definition">remove</span></a> <a class="idref" href="Introduction.html#x:1"><span class="id" title="variable">x</span></a> <span class="id" title="var">t</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+One possible specification for <span class="inlinecode"><span class="id" title="var">remove</span></span> might be this property... 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Conjecture</span> <a id="removeP" class="idref" href="#removeP"><span class="id" title="axiom">removeP</span></a> : <span class="id" title="keyword">∀</span> <a id="x:5" class="idref" href="#x:5"><span class="id" title="binder">x</span></a> <a id="l:6" class="idref" href="#l:6"><span class="id" title="binder">l</span></a>,  <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">¬</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#In"><span class="id" title="definition">In</span></a> <a class="idref" href="Introduction.html#x:5"><span class="id" title="variable">x</span></a> (<a class="idref" href="Introduction.html#remove"><span class="id" title="definition">remove</span></a> <a class="idref" href="Introduction.html#x:5"><span class="id" title="variable">x</span></a> <a class="idref" href="Introduction.html#l:6"><span class="id" title="variable">l</span></a>)<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">)</span></a>.<br/>
+</div>
+
+<div class="doc">
+...which says that <span class="inlinecode"><span class="id" title="var">x</span></span> never occurs in the result of <span class="inlinecode"><span class="id" title="var">remove</span></span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode"><span class="id" title="var">l</span></span>
+    for any <span class="inlinecode"><span class="id" title="var">x</span></span> and <span class="inlinecode"><span class="id" title="var">l</span></span>.  (<span class="inlinecode"><span class="id" title="var">Conjecture</span></span> <span class="inlinecode"><span class="id" title="var">foo</span>...</span> means the same as
+    <span class="inlinecode"><span class="id" title="keyword">Theorem</span></span> <span class="inlinecode"><span class="id" title="var">foo</span>...</span> <span class="inlinecode"><span class="id" title="var">Admitted</span>.</span>  Formally, <span class="inlinecode"><span class="id" title="var">foo</span></span> is treated as an
+    axiom.) 
+<div class="paragraph"> </div>
+
+ Sadly, this property is false, as we would (eventually) discover
+    if we were to try to prove it. 
+<div class="paragraph"> </div>
+
+ A different -- perhaps much more efficient -- way to discover
+    the discrepancy between the definition and specification is
+    to <i>test</i> it: 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;QuickChick&nbsp;removeP.&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+(Try uncommenting and evaluating the previous line.) 
+<div class="paragraph"> </div>
+
+ The <span class="inlinecode"><span class="id" title="var">QuickChick</span></span> command takes an "executable" property (we'll see
+    later exactly what this means) and attempts to falsify it by
+    running it on many randomly generated inputs, resulting in output
+    like this:
+<pre>
+       0 
+       [0, 0] 
+       Failed! After 17 tests and 12 shrinks
+</pre>
+    This means that, if we run <span class="inlinecode"><span class="id" title="var">remove</span></span> with <span class="inlinecode"><span class="id" title="var">x</span></span> being <span class="inlinecode">0</span> and <span class="inlinecode"><span class="id" title="var">l</span></span> 
+    being the two-element list containing two zeros, then the property 
+    <span class="inlinecode"><span class="id" title="var">removeP</span></span> fails. 
+<div class="paragraph"> </div>
+
+ With this example in hand, we can see that the <span class="inlinecode"><span class="id" title="keyword">then</span></span> branch
+    of <span class="inlinecode"><span class="id" title="var">remove</span></span> fails to make a recursive call, which means that only
+    one occurence of <span class="inlinecode"><span class="id" title="var">x</span></span> will be deleted. The last line of the output
+    records that it took 17 tests to identify some fault-inducing
+    input and 12 "shrinks" to reduce it to a minimal
+    counterexample. 
+<div class="paragraph"> </div>
+
+<a id="lab6"></a><h4 class="section">Exercise: 1 star, standard (insertP)</h4>
+ Here is a somewhat mangled definition of a function for inserting a
+    new element into a sorted list of numbers: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="insert" class="idref" href="#insert"><span class="id" title="definition">insert</span></a> <a id="x:8" class="idref" href="#x:8"><span class="id" title="binder">x</span></a> <a id="l:9" class="idref" href="#l:9"><span class="id" title="binder">l</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Introduction.html#l:9"><span class="id" title="variable">l</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="Introduction.html#x:8"><span class="id" title="variable">x</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="var">y</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">t</span> ⇒ <span class="id" title="keyword">if</span> <span class="id" title="var">y</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Arith.PeanoNat.html#6b7621b45fff0af5e2b2cbb2bc2d4e1d"><span class="id" title="notation">&lt;?</span></a> <a class="idref" href="Introduction.html#x:8"><span class="id" title="variable">x</span></a> <span class="id" title="keyword">then</span> <a class="idref" href="Introduction.html#insert:10"><span class="id" title="definition">insert</span></a> <a class="idref" href="Introduction.html#x:8"><span class="id" title="variable">x</span></a> <span class="id" title="var">t</span> <span class="id" title="keyword">else</span> <span class="id" title="var">y</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">t</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+Write a property that says "inserting a number <span class="inlinecode"><span class="id" title="var">x</span></span> into a list <span class="inlinecode"><span class="id" title="var">l</span></span>
+    always yields a list containing <span class="inlinecode"><span class="id" title="var">x</span></span>."  Make sure QuickChick finds
+    a counterexample. 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab7"></a><h4 class="section">Exercise: 2 stars, standard (insertP2)</h4>
+ Translate the following claim into a <span class="inlinecode"><span class="id" title="var">Conjecture</span></span> (using <span class="inlinecode"><span class="id" title="var">In</span></span> for
+    list membership): "For all numbers <span class="inlinecode"><span class="id" title="var">x</span></span> and <span class="inlinecode"><span class="id" title="var">y</span></span> and lists <span class="inlinecode"><span class="id" title="var">l</span></span>, if
+    <span class="inlinecode"><span class="id" title="var">y</span></span> is in <span class="inlinecode"><span class="id" title="var">l</span></span> then it is also in the list that results from
+    inserting <span class="inlinecode"><span class="id" title="var">x</span></span> into <span class="inlinecode"><span class="id" title="var">l</span></span>" (i.e., <span class="inlinecode"><span class="id" title="var">insert</span></span> preserves all the elements
+    already in <span class="inlinecode"><span class="id" title="var">l</span></span>). Make sure QuickChick finds a counterexample. 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab8"></a><h1 class="section">Overview</h1>
+
+<div class="paragraph"> </div>
+
+ Property-based random testing involves four basic ingredients:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> an <i>executable property</i> like <span class="inlinecode"><span class="id" title="var">removeP</span></span>,
+
+</li>
+<li> <i>generators</i> for random elements of the types of the inputs to
+      the property (here, numbers and lists of numbers),
+
+</li>
+<li> <i>printers</i> for converting data structures like numbers and lists
+      to strings when reporting counterexamples, and
+
+</li>
+<li> <i>shrinkers</i>, which are used to minimize counterexamples. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ We will delve into each of these in detail later on, but first we
+    need to make a digression to explain Coq's support for
+    <i>typeclasses</i>, which QuickChick uses extensively both internally
+    and in its programmatic interface to users.  This is the
+    <a href="Typeclasses.html"><span class="inlineref">Typeclasses</span></a> chapter.
+
+<div class="paragraph"> </div>
+
+    In the <a href="QC.html"><span class="inlineref">QC</span></a> chapter we'll cover the core concepts and
+    features of QuickChick itself.
+
+<div class="paragraph"> </div>
+
+    The <a href="TImp.html"><span class="inlineref">TImp</span></a> chapter develops a small case study around a typed
+    variant of the Imp language.
+
+<div class="paragraph"> </div>
+
+    The <a href="QuickChickTool.html"><span class="inlineref">QuickChickTool</span></a> chapter presents a command line tool,
+    <i>quickChick</i>, that supports larger-scale projects and mutation
+    testing.
+
+<div class="paragraph"> </div>
+
+    The <a href="QuickChickInterface.html"><span class="inlineref">QuickChickInterface</span></a> chapter is a complete reference
+    manual for QuickChick.
+
+<div class="paragraph"> </div>
+
+    Finally, the <a href="Postscript.html"><span class="inlineref">Postscript</span></a> chapter gives some suggestions for
+    further reading. 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-10-14&nbsp;10:23&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
