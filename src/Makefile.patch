@@ -1,8 +1,8 @@
---- Makefile
-+++ Makefile
-@@ -16,14 +16,17 @@
+--- Makefile.coq.orig	2020-11-03 12:37:48.421365500 +0900
++++ Makefile.coq	2020-11-03 12:41:37.736258200 +0900
+@@ -19,14 +19,17 @@
  # definitions, like the list of .v files or the path to Coq
- include Makefile.conf
+ include Makefile.coq.conf
  
 +# Generate chapters in the right order
 +reverse=$(if $1,$(call reverse,$(wordlist 2,$(words $1),$1))) $(firstword $1)
@@ -12,7 +12,7 @@
 +VFILES            := $(call reverse,$(COQMF_VFILES))
  MLIFILES          := $(COQMF_MLIFILES)
  MLFILES           := $(COQMF_MLFILES)
- ML4FILES          := $(COQMF_ML4FILES)
+ MLGFILES          := $(COQMF_MLGFILES)
  MLPACKFILES       := $(COQMF_MLPACKFILES)
  MLLIBFILES        := $(COQMF_MLLIBFILES)
 -CMDLINE_VFILES    := $(COQMF_CMDLINE_VFILES)
@@ -20,14 +20,13 @@
  INSTALLCOQDOCROOT := $(COQMF_INSTALLCOQDOCROOT)
  OTHERFLAGS        := $(COQMF_OTHERFLAGS)
  COQ_SRC_SUBDIRS   := $(COQMF_COQ_SRC_SUBDIRS)
-@@ -170,7 +173,9 @@
- 
- COQFLAGS?=-q $(OPT) $(COQLIBS) $(OTHERFLAGS)
- COQCHKFLAGS?=-silent -o $(COQLIBS)
--COQDOCFLAGS?=-interpolate -utf8
-+
+@@ -191,7 +194,8 @@
+ # these variables are meant to be overridden if you want to add *extra* flags
+ COQEXTRAFLAGS?=
+ COQCHKEXTRAFLAGS?=
+-COQDOCEXTRAFLAGS?=
 +# Work around the LaTeX nesting limit
-+COQDOCFLAGS?=-interpolate -utf8 -p '\usepackage{enumitem}\setlistdepth{9}\setlist[itemize,1]{label=$$\bullet$$}\setlist[itemize,2]{label=$$\bullet$$}\setlist[itemize,3]{label=$$\bullet$$}\setlist[itemize,4]{label=$$\bullet$$}\setlist[itemize,5]{label=$$\bullet$$}\setlist[itemize,6]{label=$$\bullet$$}\setlist[itemize,7]{label=$$\bullet$$}\setlist[itemize,8]{label=$$\bullet$$}\setlist[itemize,9]{label=$$\bullet$$}\renewlist{itemize}{itemize}{9}'
- COQDOCLIBS?=$(COQLIBS_NOML)
++COQDOCEXTRAFLAGS?=-p '\usepackage{enumitem}\setlistdepth{9}\setlist[itemize,1]{label=$$\bullet$$}\setlist[itemize,2]{label=$$\bullet$$}\setlist[itemize,3]{label=$$\bullet$$}\setlist[itemize,4]{label=$$\bullet$$}\setlist[itemize,5]{label=$$\bullet$$}\setlist[itemize,6]{label=$$\bullet$$}\setlist[itemize,7]{label=$$\bullet$$}\setlist[itemize,8]{label=$$\bullet$$}\setlist[itemize,9]{label=$$\bullet$$}\renewlist{itemize}{itemize}{9}'
  
- # The version of Coq being run and the version of coq_makefile that
+ # these flags do NOT contain the libraries, to make them easier to overwrite
+ COQFLAGS?=-q $(OTHERFLAGS) $(COQEXTRAFLAGS)
