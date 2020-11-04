@@ -1,0 +1,23 @@
+--- Preface.v.orig	2020-11-03 13:07:54.400253800 +0900
++++ Preface.v	2020-11-03 19:04:14.280718100 +0900
+@@ -350,14 +350,14 @@
+ (** If you want to refer to this volume in your own writing, please
+     do so as follows:
+ 
+-   @book            {$FIRSTAUTHOR:SF$VOLUMENUMBER,
+-   author       =   {$AUTHORS},
+-   title        =   "$VOLUMENAME",
++   @book            {Pierce:SF1,
++   author       =   {Benjamin C. Pierce, Arthur Azevedo de Amorim, Chris Casinghino, Marco Gaboardi, Michael Greenberg, Cătălin Hriţcu, Vilhelm Sjöberg, Brent Yorgey},
++   title        =   "Logical Foundations",
+    series       =   "Software Foundations",
+-   volume       =   "$VOLUMENUMBER",
+-   year         =   "$VOLUMEYEAR",
++   volume       =   "1",
++   year         =   "2020",
+    publisher    =   "Electronic textbook",
+-   note         =   {Version $VERSION, \URLhttp://softwarefoundations.cis.upenn.edu },
++   note         =   {Version 5.8, \URLhttp://softwarefoundations.cis.upenn.edu },
+    }
+ *)
+ 

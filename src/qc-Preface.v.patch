@@ -1,0 +1,23 @@
+--- Preface.v.orig	2020-11-03 18:52:06.050362000 +0900
++++ Preface.v	2020-11-03 18:54:52.947241400 +0900
+@@ -23,14 +23,14 @@
+ (** If you want to refer to this volume in your own writing, please
+     do so as follows:
+ 
+-   @book            {$FIRSTAUTHOR:SF$VOLUMENUMBER,
+-   author       =   {$AUTHORS},
+-   title        =   "$VOLUMENAME",
++   @book            {Lampropoulos:SF4,
++   author       =   {Leonidas Lampropoulos and Benjamin C. Pierce}
++   title        =   "QuickChick: Property-Based Testing in Coq"
+    series       =   "Software Foundations",
+-   volume       =   "$VOLUMENUMBER",
+-   year         =   "$VOLUMEYEAR",
++   volume       =   "4",
++   year         =   "2020",
+    publisher    =   "Electronic textbook",
+-   note         =   {Version $VERSION, \URLhttp://softwarefoundations.cis.upenn.edu },
++   note         =   {Version 1.1, \URLhttp://softwarefoundations.cis.upenn.edu },
+    }
+ *)
+ 
