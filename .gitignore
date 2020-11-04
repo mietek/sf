@@ -6,4 +6,9 @@
 *.rej
 *.toc
 *.vo
+*.vos
+*.vok
+.lia.cache
 Makefile.conf
+Makefile.coq
+Makefile.coq.conf
