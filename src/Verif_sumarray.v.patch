@@ -1,0 +1,14 @@
+--- Verif_sumarray.v.orig	2020-11-03 20:28:55.259059700 +0900
++++ Verif_sumarray.v	2020-11-03 20:51:38.352547500 +0900
+@@ -715,9 +715,11 @@
+   and we can see its SEP assertion in the precondition of the
+   current proof goal:
+ 
++[[
+    data_at Ews (tarray tuint 4)
+            (map Vint [Int.repr 1; Int.repr 2; Int.repr 3; Int.repr 4])
+            (gv _four)
++]]
+ *)
+ 
+ (** SEE ALSO: VC.pdf Chapter 20 (_Function calls_)

@@ -1,0 +1,17 @@
+--- Verif_reverse.v.orig	2020-11-03 20:52:56.284178000 +0900
++++ Verif_reverse.v	2020-11-03 20:54:09.738201600 +0900
+@@ -714,12 +714,14 @@
+   abbreviate_semax.
+ (** Now, our proof goal is:
+ 
++[[
+   semax Delta
+     (PROP ( )
+      LOCAL (temp _t y; temp _w w; temp _v v)
+      SEP (listrep s1 w; data_at Tsh t_list (h, y) v; listrep r y))
+     ((_v -> _tail) = _w; MORE_COMMANDS)
+     POSTCONDITION.
++]]
+ 
+ The next [forward] tactic will do symbolic execution of [v->tail = w]. *)
+    forward. (* v->tail = w;
