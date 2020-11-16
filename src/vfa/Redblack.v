@@ -1,741 +1,825 @@
-(** * Redblack: Implementation and Proof of Red-Black Trees *)
+(** * Redblack: Red-Black Trees *)
 
-(* ################################################################# *)
-(** * Required Reading *)
+(** Red-black trees are a kind of _balanced_ binary search tree (BST).
+    Keeping the tree balanced ensures that the worst-case running
+    time of operations is logarithmic rather than linear. *)
 
-(** 
- (1) General background on red-black trees, 
-   - Section 3.3 of  _Algorithms, Fourth Edition_,
-       by Sedgewick and Wayne, Addison Wesley 2011;  or
-   - Chapter 13 of _Introduction to Algorithms, 3rd Edition_,
-       by Cormen, Leiserson, and Rivest, MIT Press 2009
-   - or Wikipedia.
+(** This chapter uses Okasaki's algorithms for red-black trees.
+    If you don't recall those or haven't seem them in a while, read one
+    of the following:
 
- (2) an explanation of the particular implementation we use here.
- Red-Black Trees in a Functional Setting, by Chris Okasaki. 
-_Journal of Functional Programming_, 9(4):471-477, July 1999. 
- http://www.westpoint.edu/eecs/SiteAssets/SitePages/Faculty%20Publication%20Documents/Okasaki/jfp99redblack.pdf
+    - Red-Black Trees in a Functional Setting, by Chris Okasaki.
+      _Journal of Functional Programming_, 9(4):471-477, July 1999.
+      Available from https://doi.org/10.1017/S0956796899003494.
+      Archived at
+      https://web.archive.org/web/20070926220746/http://www.eecs.usma.edu/webs/people/okasaki/jfp99.ps.
 
- (3) Optional reading:
-  Efficient Verified Red-Black Trees, by Andrew W. Appel, September 2011. 
-  http://www.cs.princeton.edu/~appel/papers/redblack.pdf
-*)
+    - _Purely Functional Data Structures_, by Chris Okasaki. Section
+      3.3.  Cambridge University Press, 1998.
 
-(** Red-black trees are a form of binary search tree (BST), but with
-     _balance_.   Recall that the _depth_ of a node in a tree is the
-    distance from the root to that node.  The _height_ of a tree is
-    the depth of the deepest node.  The [insert] or [lookup] function
-    of the BST algorithm (Chapter [SearchTree]) takes time 
-    proportional to the depth of the node that is found (or inserted).
-    To make these functions run fast, we want trees where the
-    worst-case depth (or the average depth) is as small as possible.
+    You can also consult Wikipedia or other standard textbooks, though
+    they are likely to use different, imperative implementations. *)
 
-    In a perfectly balanced tree of N nodes, every node has depth less
-    than or or equal to log N, using logarithms base 2.   In an 
-    approximately balanced tree, every node has depth less than or
-    equal to 2 log N.  That's good enough to make [insert] and [lookup]
-    run in time proportional to log N.
+(** This chapter is based on the Coq standard library module
+    [MSetRBT], which can be found at
+    [https://coq.inria.fr/distrib/current/stdlib/Coq.MSets.MSetRBT.html].
+    The design decisions for that module are described in the
+    following paper:
 
-    The trick is to mark the nodes Red and Black, and by these marks
-    to know when to locally rebalance the tree.  For more explanation
-    and pictures, see the Required Reading above.
-*)
+    - Efficient Verified Red-Black Trees, by Andrew W. Appel,
+      September 2011.  Available from
+      http://www.cs.princeton.edu/~appel/papers/redblack.pdf.  *)
 
-(** We will use the same framework as in Extract.v:  keys are Ocaml
-   integers. We don't repeat the [Extract] commands, because they are
-   imported implicitly from Extract.v *)
-
+From Coq Require Import String.
+From Coq Require Import Logic.FunctionalExtensionality.
 From VFA Require Import Perm.
 From VFA Require Import Extract.
-Require Import Coq.Lists.List. 
-Export ListNotations.
-Require Import Coq.Logic.FunctionalExtensionality.
-Require Import ZArith.
 Open Scope Z_scope.
 
-Definition key := int.
+(* ################################################################# *)
+(** * Implementation *)
 
-Inductive color := Red | Black.
+(** A [Section] enables declaration of some [Variable]s, which are in
+    scope throughout. That saves us from having to write [V] and
+    [default] as arguments to most of the definitions in the
+    chapter. The variables do get inserted by Coq as arguments after
+    the section is closed. *)
 
-Section TREES.
-Variable V : Type.
-Variable default: V.
+Section ValueType.
 
- Inductive tree  : Type :=
- | E : tree 
- | T: color -> tree -> key -> V -> tree -> tree.
+  Variable V : Type.
+  Variable default : V.
 
- Definition empty_tree := E.
+  (** We use the [int] type axiomatized in [Extract] as the key
+      type. *)
+  Definition key := int.
 
-(** lookup is exactly as in our (unbalanced) search-tree algorithm in
-  Extract.v, except that the [T] constructor carries a [color] component,
-  which we can ignore here. *)
+  Inductive color := Red | Black.
 
-Fixpoint lookup (x: key) (t : tree) : V :=
-  match t with
-  | E => default
-  | T _ tl k v tr => if ltb x k then lookup x tl 
-                         else if ltb k x then lookup x tr
-                         else v
-  end.
+  Inductive tree : Type :=
+  | E : tree
+  | T : color -> tree -> key -> V -> tree -> tree.
 
-(** The [balance] function is copied directly from Okasaki's paper.
-  Now, the nice thing about machine-checked proof in Coq is that you
-  can prove this correct without actually understanding it!
-  So, do read Okasaki's paper, but don't worry too much about the details
-  of this [balance] function.
+  Definition empty_tree : tree :=
+    E.
 
-  In contrast, Sedgewick has proposed _left-leaning red-black trees_,
-  which have a simpler balance function (but a more complicated invariant).
-  He does this in order to make the proof of correctness easier: there
-  are fewer cases in the [balance] function, and therefore fewer cases
-  in the case-analysis of the proof of correctness of [balance].  But as you
-  will see, our proofs about [balance] will have automated case analyses,
-  so we don't care how many cases there are! *)
+  (** The [lookup] implementation for red-black trees is exactly the same
+      as the [lookup] for BSTs, except that the [T] constructor
+      carries a [color] component that is ignored. *)
 
-Definition balance rb t1 k vk t2 :=
- match rb with Red => T Red t1 k vk t2
- | _ => 
- match t1 with 
- | T Red (T Red a x vx b) y vy c =>
-      T Red (T Black a x vx b) y vy (T Black c k vk t2)
- | T Red a x vx (T Red b y vy c) =>
-      T Red (T Black a x vx b) y vy (T Black c k vk t2)
- | a => match t2 with 
-            | T Red (T Red b y vy c) z vz d =>
-	        T Red (T Black t1 k vk b) y vy (T Black c z vz d)
-            | T Red b y vy (T Red c z vz d)  =>
-	        T Red (T Black t1 k vk b) y vy (T Black c z vz d)
-            | _ => T Black t1 k vk t2
-            end
-  end
- end.
+  
+  Fixpoint lookup (x: key) (t : tree) : V :=
+    match t with
+    | E => default
+    | T _ tl k v tr => if ltb x k then lookup x tl
+                      else if ltb k x then lookup x tr
+                           else v
+    end.
 
-Definition makeBlack t := 
-  match t with 
-  | E => E
-  | T _ a x vx b => T Black a x vx b
-  end.
+  (** We won't explain the [insert] algorithm here; read Okasaki's
+      work if you want to understand it.  In fact, you'll need very
+      little understanding of it to follow along with the verification
+      below. It uses [balance] and [ins] as helpers:
 
-Fixpoint ins x vx s :=
- match s with 
- | E => T Red E x vx E
- | T c a y vy b => if ltb x y then balance c (ins x vx a) y vy b
-                        else if ltb y x then balance c a y vy (ins x vx b)
-                        else T c a x vx b
- end.
+      - [ins] recurses down the tree to find where to insert, and is
+        mostly the same as the BST [insert] algorithm.
 
-Definition insert x vx s := makeBlack (ins x vx s).
+      - [balance] takes care of rebalancing the tree on the way back
+        up. *)
 
-(** Now that the program has been defined, it's time to prove its properties.
-   A red-black tree has two kinds of properties:
-  - [SearchTree]: the keys in each left subtree are all less than the
-       node's key, and the keys in each right subtree are greater
-  - [Balanced]:  there is the same number of black nodes on any path from
-     the root to each leaf; and there are never two red nodes in a row.
+  
+  Definition balance (rb : color) (t1 : tree) (k : key) (vk : V) (t2 : tree) : tree :=
+    match rb with
+    | Red => T Red t1 k vk t2
+    | _ => match t1 with
+          | T Red (T Red a x vx b) y vy c =>
+            T Red (T Black a x vx b) y vy (T Black c k vk t2)
+          | T Red a x vx (T Red b y vy c) =>
+            T Red (T Black a x vx b) y vy (T Black c k vk t2)
+          | a => match t2 with
+                | T Red (T Red b y vy c) z vz d =>
+	          T Red (T Black t1 k vk b) y vy (T Black c z vz d)
+                | T Red b y vy (T Red c z vz d)  =>
+	          T Red (T Black t1 k vk b) y vy (T Black c z vz d)
+                | _ => T Black t1 k vk t2
+                end
+          end
+    end.
 
-  First, we'll treat the [SearchTree] property. *)
+  Fixpoint ins (x : key) (vx : V) (t : tree) : tree :=
+    match t with
+    | E => T Red E x vx E
+    | T c a y vy b => if ltb x y then balance c (ins x vx a) y vy b
+                      else if ltb y x then balance c a y vy (ins x vx b)
+                           else T c a x vx b
+    end.
+
+  Definition make_black (t : tree) : tree :=
+    match t with
+    | E => E
+    | T _ a x vx b => T Black a x vx b
+    end.
+
+  Definition insert (x : key) (vx : V) (t : tree) :=
+    make_black (ins x vx t).
+
+  (** The [elements] implementation is the same as for BSTs, except that it
+      ignores colors. *)
+
+  
+  Fixpoint elements_tr (t : tree) (acc: list (key * V)) : list (key * V) :=
+    match t with
+    | E => acc
+    | T _ l k v r => elements_tr l ((k, v) :: elements_tr r acc)
+    end.
+
+  Definition elements (t : tree) : list (key * V) :=
+    elements_tr t [].
+
+  (* ###################################################################### *)
+  (** * Case-Analysis Automation *)
+
+  (** Before verifying the correctness of our red-black tree
+      implementation, let's warm up by proving that the result of any
+      [insert] is a nonempty tree. *)
+
+  
+  Lemma ins_not_E : forall (x : key) (vx : V) (t : tree),
+      ins x vx t <> E.
+  Proof.
+    intros. destruct t; simpl.
+    discriminate.
+
+    (* Let's [destruct] on the topmost case, [ltb x k]. We can use
+       [destruct] instead of [bdestruct] because we don't need to know
+       whether [x < k] or [x >= k]. *)
+
+    destruct (ltb x k).
+    unfold balance.
+
+    (* A huge goal!  The proof of this goal begins by matching
+       against a color. *)
+
+    destruct c.
+    discriminate.
+
+    (* Another [match], this time against a tree. *)
+
+    destruct (ins x vx t1).
+
+    (* Another [match] against a tree. *)
+
+    destruct t2.
+    discriminate.
+
+    (* Yet another [match]. This pattern deserves automation.  The
+       following tactic applies [destruct] whenever the current goal
+       is a [match] against a color or a tree. *)
+
+    
+    match goal with
+    | |- match ?c with Red => _ | Black => _  end <> _ => destruct c
+    | |- match ?t with E => _ | T _ _ _ _ _ => _ end  <> _=> destruct t
+    end.
+
+    (* Let's apply that tactic repeatedly. *)
+
+    repeat
+      match goal with
+      | |- match ?c with Red => _ | Black => _  end <> _ => destruct c
+      | |- match ?t with E => _ | T _ _ _ _ _ => _ end  <> _=> destruct t
+      end.
+
+    (* Now we're down to a base case. *)
+
+    discriminate.
+
+    (* And another base case. We could match against those, too. *)
+
+    match goal with
+    | |- T _ _ _ _ _ <> E => discriminate
+    end.
+
+    (* Let's restart the proof to incorporate this automation. *)
+
+  Abort.
+
+  Lemma ins_not_E : forall (x : key) (vx : V) (t : tree),
+      ins x vx t <> E.
+  Proof.
+    intros. destruct t; simpl.
+    - discriminate.
+    - unfold balance.
+      repeat
+        match goal with
+        | |- (if ?x then _ else _) <> _ => destruct x
+        | |- match ?c with Red => _ | Black => _  end <> _=> destruct c
+        | |- match ?t with E => _ | T _ _ _ _ _ => _ end  <> _=> destruct t
+        | |- T _ _ _ _ _ <> E => discriminate
+        end.
+  Qed.
+
+  (** This automation of case analysis will be quite useful in the rest
+      of our development. *)
+
+  (* ###################################################################### *)
+  (** * The BST Invariant *)
+
+  (** The BST invariant is mostly the same for red-black trees as it
+      was for ordinary BSTs as defined in [SearchTree].  We adapt
+      it by ignoring the color of each node, and changing from [nat]
+      keys to [int]. *)
+
+  
+  (** [ForallT P t] holds if [P k v] holds for every [(k, v)] node of
+      tree [t]. *)
+
+  Fixpoint ForallT (P: int -> V -> Prop) (t: tree) : Prop :=
+    match t with
+    | E => True
+    | T c l k v r => P k v /\ ForallT P l /\ ForallT P r
+    end.
+
+  Inductive BST : tree -> Prop :=
+  | ST_E : BST E
+  | ST_T : forall (c : color) (l : tree) (k : key) (v : V) (r : tree),
+      ForallT (fun k' _ => (Abs k') < (Abs k)) l ->
+      ForallT (fun k' _ => (Abs k') > (Abs k)) r ->
+      BST l ->
+      BST r ->
+      BST (T c l k v r).
+
+  Lemma empty_tree_BST:  BST empty_tree.
+  Proof.
+    unfold empty_tree. constructor.
+  Qed.
+
+  (** Let's show that [insert] preserves the BST invariant, that is: *)
+
+  Theorem insert_BST : forall t v k,
+      BST t ->
+      BST (insert k v t).
+  Abort.
+
+  (** It will take quite a bit of work, but automation will help. *)
+
+  (** First, we show that if a non-empty tree would be a BST, then the
+      balanced version of it is also a BST: *)
+
+  Lemma balance_BST: forall (c : color) (l : tree) (k : key) (v : V) (r : tree),
+      ForallT (fun k' _ => (Abs k') < (Abs k)) l ->
+      ForallT (fun k' _ => (Abs k') > (Abs k)) r ->
+      BST l ->
+      BST r ->
+      BST (balance c l k v r).
+  Proof.
+    intros c l k v r PL PR BL BR. unfold balance.
+
+    repeat
+      match goal with
+      | |- BST (match ?c with Red => _ | Black => _ end)  => destruct c
+      | |- BST (match ?t with E => _ | T _ _ _ _ _ => _ end)  => destruct t
+      end.
+
+    (* 58 cases remaining. *)
+
+    - constructor. assumption. assumption. assumption. assumption.
+    - constructor; auto.
+    - constructor; auto.
+    - (* Now the tree gets bigger, and the proof gets more complicated. *)
+      constructor; auto.
+
+      + simpl in *. repeat split.
+        (* The intro pattern [?] means to let Coq choose the name. *)
+        destruct PR as [? _]. omega.
+
+      + simpl in *. repeat split.
+        * inv BR. simpl in *. destruct H5 as [? _]. omega.
+        * inv BR. simpl in *. destruct H5 as [_ [? _]]. auto.
+        * inv BR. simpl in *. destruct H5 as [_ [_ ?]]. auto.
+
+      + constructor; auto.
+
+      + inv BR. inv H7. constructor; auto.
+
+    - constructor; auto.
+
+    - (* 53 cases remain. This could go on for a while... *)
+
+  Abort.
+
+  (** Let's use some of what we discovered above to automate.
+      Whenever we have a subgoal of the form
+
+        ForallT _ (T _ _ _ _ _)
+
+      we can split it.  Whenever we have a hypothesis of the form
+
+        BST (T _ _ _ _ _)
+
+      we can invert it.  And with a hypothesis
+
+        ForallT _ (T _ _ _ _ _)
+
+      we can simplify then destruct it.  Actually, the simplification
+      is optional -- Coq will do the destruct without needing the
+      simplification.  Anything else seems able to be finished with
+      [constructor], [auto], and [omega].  Let's see how far that can
+      take us...
+   *)
+
+  
+  Lemma balance_BST: forall (c : color) (l : tree) (k : key) (v : V) (r : tree),
+      ForallT (fun k' _ => (Abs k') < (Abs k)) l ->
+      ForallT (fun k' _ => (Abs k') > (Abs k)) r ->
+      BST l ->
+      BST r ->
+      BST (balance c l k v r).
+  Proof.
+    intros. unfold balance.
+
+    repeat
+      (match goal with
+       |  |- BST (match ?c with Red => _ | Black => _ end)  => destruct c
+       |  |- BST (match ?t with E => _ | T _ _ _ _ _ => _ end)  => destruct t
+       |  |- ForallT _ (T _ _ _ _ _) => repeat split
+       |  H: ForallT _ (T _ _ _ _ _) |- _ => destruct H as [? [? ?] ]
+       |  H: BST (T _ _ _ _ _) |- _ => inv H
+       end;
+       (try constructor; auto; try omega)).
+
+  (** 41 cases remain.  It's a little disappointing that we didn't clear
+      more of them.  Let's look at why are we stuck.
+
+      All the remaining subgoals appear to be about proving an inequality
+      over all the nodes of a subtree.  For example, the first subgoal
+      follows from the hypotheses
+
+        ForallT (fun (k' : int) (_ : V) => Abs k' > Abs k0) r2
+        Abs k1 < Abs k0
+
+      The other goals look similar. *)
+
+  
+  Abort.
+
+  (** To make progress, we can set up some helper lemmas. *)
+
+  Lemma ForallT_imp : forall (P Q : int -> V -> Prop) t,
+      ForallT P t ->
+      (forall k v, P k v -> Q k v) ->
+      ForallT Q t.
+  Proof.
+    induction t; intros.
+    - auto.
+    - destruct H as [? [? ?]]. repeat split; auto.
+  Qed.
+
+  Lemma ForallT_greater : forall t k k0,
+      ForallT (fun k' _ => Abs k' > Abs k) t  ->
+      Abs k > Abs k0 ->
+      ForallT (fun k' _ => Abs k' > Abs k0) t.
+  Proof.
+    intros. eapply ForallT_imp; eauto.
+    intros. simpl in H1. omega.
+  Qed.
+
+  Lemma ForallT_less : forall t k k0,
+      ForallT (fun k' _ => Abs k' < Abs k) t  ->
+      Abs k < Abs k0 ->
+      ForallT (fun k' _ => Abs k' < Abs k0) t.
+  Proof.
+    intros; eapply ForallT_imp; eauto.
+    intros. simpl in H1. omega.
+  Qed.
+
+  (** Now we can return to automating the proof. *)
+
+  Lemma balance_BST: forall (c : color) (l : tree) (k : key) (v : V) (r : tree),
+      ForallT (fun k' _ => (Abs k') < (Abs k)) l ->
+      ForallT (fun k' _ => (Abs k') > (Abs k)) r ->
+      BST l ->
+      BST r ->
+      BST (balance c l k v r).
+  Proof.
+    intros. unfold balance.
+
+    repeat
+      (match goal with
+       |  |- BST  (match ?c with Red => _ | Black => _ end)  => destruct c
+       |  |- BST  (match ?s with E => _ | T _ _ _ _ _ => _ end)  => destruct s
+       |  |- ForallT _ (T _ _ _ _ _) => repeat split
+       |  H: ForallT _ (T _ _ _ _ _) |- _ => destruct H as [? [? ?] ]
+       |  H: BST (T _ _ _ _ _) |- _ => inv H
+       end;
+       (try constructor; auto; try omega)).
+
+    (* [all: t] applies [t] to every subgoal. *)
+    all: try eapply ForallT_greater; try eapply ForallT_less; eauto; try omega.
+  Qed.
+
+    (** **** Exercise: 2 stars, standard (balanceP)  *)
+
+  (** Prove that [balance] preserves [ForallT P]. Use proof automation
+      with [match goal] and/or [all:].*)
+
+  Lemma balanceP : forall (P : key -> V -> Prop) (c : color) (l r : tree) (k : key) (v : V),
+      ForallT P l ->
+      ForallT P r ->
+      P k v ->
+      ForallT P (balance c l k v r).
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** **** Exercise: 2 stars, standard (insP)  *)
+
+  (** Prove that [ins] preserves [ForallT P]. Hint: proceed by induction on [t].
+      Use the previous lemma. There's no need for automated case analysis. *)
+
+  Lemma insP : forall (P : key -> V -> Prop) (t : tree) (k : key) (v : V),
+      ForallT P t ->
+      P k v ->
+      ForallT P (ins k v t).
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** **** Exercise: 3 stars, standard (ins_BST)  *)
+
+  (** Prove that [ins] maintains [BST].  Proceed by induction on the evidence
+      that [t] is a BST.  You don't need any automated case analysis. *)
+
+  Lemma ins_BST : forall (t : tree) (k : key) (v : V),
+      BST t ->
+      BST (ins k v t).
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  
+  
+  (** **** Exercise: 2 stars, standard (insert_BST)  *)
+
+  (** Prove the main theorem: [insert] preserves [BST]. *)
+
+  Theorem insert_BST : forall t v k,
+      BST t ->
+      BST (insert k v t).
+  Proof.
+    (* FILL IN HERE *) Admitted.
+  (** [] *)
+
+  (* ###################################################################### *)
+  (** * Verification *)
+
+  (** We now verify that the equational specification of maps holds for
+      red-black trees:
+
+        lookup k empty_tree = default
+        lookup k (insert k v t) = v
+        lookup k' (insert k v t) = lookup k' t       if k <> k'
+
+      The first equation is trivial to verify. *)
+
+  Lemma lookup_empty : forall k, lookup k empty_tree = default.
+  Proof. auto. Qed.
+
+  (** The next two equations are more challenging because of [balance]. *)
+
+    (** **** Exercise: 4 stars, standard (balance_lookup)  *)
+
+  (** Prove that [balance] preserves the result of [lookup] on
+      non-empty trees. Hint: automate the case analysis similarly to
+      [balance_BST]. *)
+
+  Lemma balance_lookup: forall (c : color) (k k' : key) (v : V) (l r : tree),
+      BST l ->
+      BST r ->
+      ForallT (fun k' _ => Abs k' < Abs k) l ->
+      ForallT (fun k' _ => Abs k' > Abs k) r ->
+      lookup k' (balance c l k v r) =
+      if Abs k' <? Abs k
+      then lookup k' l
+      else if Abs k' >? Abs k
+           then lookup k' r
+           else v.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** **** Exercise: 3 stars, standard (lookup_ins_eq)  *)
+
+  (** Verify the second equation, though for [ins] rather than
+      [insert].  Proceed by induction on the evidence that [t] is a
+      [BST].  Note that precondition [BST t] will be essential in your
+      proof, unlike the ordinary BST's we saw in [SearchTree].
+
+      Hint: no automation of case analysis is needed; rely on the
+      lemmas we've already proved above about [balance] and [ins]. *)
+
+  Lemma lookup_ins_eq: forall (t : tree) (k : key) (v : V),
+      BST t ->
+      lookup k (ins k v t) = v.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** **** Exercise: 3 stars, standard (lookup_ins_neq)  *)
+
+  (** Verify the third equation, again for [ins] instead of [insert].
+      The same hints as for the second equation hold.  *)
+
+  Theorem lookup_ins_neq: forall (t : tree) (k k' : key) (v : V),
+      BST t ->
+      k <> k' ->
+      lookup k' (ins k v t) = lookup k' t.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** Finally, finish verify the second and third equations.  The
+      proofs are almost identical.  *)
+
+  
+  
+  (** **** Exercise: 3 stars, standard (lookup_insert)  *)
+
+  Theorem lookup_insert_eq : forall (t : tree) (k : key) (v : V),
+      BST t ->
+      lookup k (insert k v t) = v.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  Theorem lookup_insert_neq: forall (t : tree) (k k' : key) (v : V),
+      BST t ->
+      k <> k' ->
+      lookup k' (insert k v t) = lookup k' t.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+    
+  (** [] *)
+
+    (** That concludes the verification of the map equations for red-black trees.
+      We have proved these main theorems: *)
+
+  Check empty_tree_BST : BST empty_tree.
+
+  Check insert_BST :
+    forall (t : tree) (v : V) (k : key),
+      BST t -> BST (insert k v t).
+
+  Check lookup_empty :
+    forall k : key,
+      lookup k empty_tree = default.
+
+  Check lookup_insert_eq :
+    forall (t : tree) (k : key) (v : V),
+      BST t -> lookup k (insert k v t) = v.
+
+  Check lookup_insert_neq :
+    forall (t : tree) (k k' : key) (v : V),
+      BST t ->
+      k <> k' ->
+      lookup k' (insert k v t) = lookup k' t.
+
+  (** We could now proceed to reprove all the facts about [elements]
+      that we developed in [SearchTree].  But since [elements]
+      does not not pay attention to colors, and does not rebalance the
+      tree, these proofs should be a simple copy-paste from that
+      chapter, with only minor edits.  This would be an uninteresting
+      exercise, so we don't pursue it here. *)
+  
+  (* ###################################################################### *)
+  (** * Efficiency *)
+
+  (** Red-black trees are more efficient than ordinary search trees,
+      because red-black trees stay balanced.  The [insert] operation
+      ensures that these _red-black invariants_ hold: *)
+
+  
+  (** - Local Invariant: No red node has a red child.
+
+      - Global Invariant: Every path from the root to a leaf has the
+        same number of black nodes. *)
+
+  (** Together these invariants guarantee that no leaf is more
+      than twice as deep as another leaf, a property that we will here
+      call _approximately balanced_.  The maximum depth of a node is
+      therefore [2 log N], so the running-time of [insert] and
+      [lookup] is [O(log N)], where [N] is the number of nodes in the
+      tree.
+
+      Coq does not have a formal time--cost model for its execution,
+      so we cannot verify that logarithmic running time in Coq.  But
+      we can prove that the trees are approximately balanced. *)
+
+  (** These ensure that the tree remains approximately balanced. *)
+
+  (** Relation [RB], below, formalizes the red-black
+      invariants. Proposition [RB t c n] holds when [t] satisfies the
+      red-black invariants, assuming that [c] is the color of [t]'s
+      parent, and [n] is the black height that [t] is supposed to
+      have.
+
+      If [t] happens to have no parent (i.e., it is the entire tree),
+      then it will be colored black by [insert], so it won't actually
+      matter what color its (non-existent) parent might purportedly
+      have: whether red or black, it can't violate the local
+      invariant.
+
+      If [t] is a leaf, then it likewise won't matter what its parent
+      color is, and its black height must be zero. *)
+
+  
+  Inductive RB : tree -> color -> nat -> Prop :=
+  | RB_leaf: forall (c : color), RB E c 0
+  | RB_r: forall (l r : tree) (k : key) (v : V) (n : nat),
+      RB l Red n ->
+      RB r Red n ->
+      RB (T Red l k v r) Black n
+  | RB_b: forall (c : color) (l r : tree) (k : key) (v : V) (n : nat),
+      RB l Black n ->
+      RB r Black n ->
+      RB (T Black l k v r) c (S n).
+
+    (** **** Exercise: 2 stars, standard (RB_blacken_parent)  *)
+
+  (** Prove that blackening a parent would preserve the red-black
+      invariants. *)
+
+  Lemma RB_blacken_parent : forall (t : tree) (n : nat),
+      RB t Red n -> RB t Black n.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** **** Exercise: 2 stars, standard (RB_blacken_root)  *)
+
+  (** Prove that blackening a subtree root (whose hypothetical parent
+      is black) would preserve the red-black invariants, though the
+      black height of the subtree might change (and the color of the
+      parent would need to become red). *)
+
+  Lemma RB_blacken_root : forall (t : tree) (n : nat),
+      RB t Black n ->
+      exists (n' : nat), RB (make_black t) Red n'.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** Relation [NearlyRB] expresses, "the tree is a red-black tree,
+      except that it's nonempty and it is permitted to have two
+      consecutive red nodes at the root only."  *)
+
+  Inductive NearlyRB : tree -> nat -> Prop :=
+  | NearlyRB_r : forall (l r : tree) (k : key) (v : V) (n : nat),
+      RB l Black n ->
+      RB r Black n ->
+      NearlyRB (T Red l k v r) n
+  | NearlyRB_b : forall (l r : tree) (k : key) (v : V) (n : nat),
+      RB l Black n ->
+      RB r Black n ->
+      NearlyRB (T Black l k v r) (S n).
+
+  (** **** Exercise: 5 stars, standard (ins_RB)  *)
+
+  (** Prove that [ins] creates a tree that is either red-black or
+      nearly so, depending on what the parent's color was.  You will
+      need significant case-analysis automation in a similar style to
+      the proofs of [ins_not_E] and [balance_lookup]. *)
+
+  
+
+  Lemma ins_RB : forall (k : key) (v : V) (t : tree) (n : nat),
+      (RB t Black n -> NearlyRB (ins k v t) n) /\
+      (RB t Red n -> RB (ins k v t) Black n).
+  Proof.
+    induction t; intro n; simpl; split; intros; inv H; repeat constructor; auto.
+    * destruct (IHt1 n); clear IHt1.
+      destruct (IHt2 n); clear IHt2.
+      specialize (H0 H6).
+      specialize (H2 H7).
+      clear H H1.
+      unfold balance.
+
+      (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+  (** Therefore, [ins] produces a red-black tree when given one as
+      input -- though the parent color changes. *)
+  Corollary ins_red : forall (t : tree) (k : key) (v : V) (n : nat),
+      (RB t Red n -> RB (ins k v t) Black n).
+  Proof.
+    intros. apply ins_RB. assumption.
+  Qed.
+  
+  
+  (** **** Exercise: 2 stars, standard (insert_RB)  *)
+
+  (** Prove that [insert] produces a red-black tree when given one as
+      input.  This can be done entirely with lemmas already proved. *)
+
+  
+  Lemma insert_RB : forall (t : tree) (k : key) (v : V) (n : nat),
+      RB t Red n ->
+      exists (n' : nat), RB (insert k v t) Red n'.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (** [] *)
+
+    (** **** Exercise: 4 stars, advanced (redblack_bound)  *)
+
+  (** To confirm that red-black trees are approximately balanced,
+      define functions to compute the height (i.e., maximum depth) and
+      minimum depth of a red-black tree, and prove that the height is
+      bounded by twice the minimum depth, possibly plus 1.  Hints:
+
+      - Prove two auxiliary lemmas, one about height and the other
+        about mindepth, and then combine them to get the result.  The
+        lemma about height will need a slightly complicated induction
+        hypothesis for the proof to go through.
+
+      - Depending on how you defined [height] and [mindepth], the
+        tactic [zify] (defined in the standard library
+        [Coq.omega.PreOmega]) may be useful as a preliminary to using
+        [omega] when proving these lemmas. *)
+
+  Fixpoint height (t : tree) : nat
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+
+  Fixpoint mindepth (t : tree) : nat
+  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+
+  
+
+  Lemma redblack_balanced : forall t c n,
+      RB t c n ->
+      (height t <= 2 * mindepth t + 1)%nat.
+  Proof.
+    (* FILL IN HERE *) Admitted.
+
+  (* Do not modify the following line: *)
+Definition manual_grade_for_redblack_bound : option (nat*string) := None.
+
+  (** [] *)
+
+  
+End ValueType.
 
 (* ################################################################# *)
-(** * Proof Automation for Case-Analysis Proofs. *)
+(** * Performance of Extracted Code *)
 
-Lemma T_neq_E:
-  forall c l k v r, T c l k v r <> E.
-Proof.
-intros. intro Hx. inversion Hx.
-Qed.
-
-(** Several of the proofs for red-black trees require a big case analysis
-   over all the clauses of the [balance] function. These proofs are very tedious
-   to do "by hand," but are easy to automate. *)
-
-Lemma ins_not_E: forall x vx s, ins x vx s <> E.
-Proof.
-intros. destruct s; simpl.
-apply T_neq_E.
-remember (ins x vx s1) as a1.
-unfold balance.
-
-(** Here we go!  Let's just "destruct" on the topmost case.
-   Right, here it's [ltb x k].  We can use [destruct] instead of [bdestruct]
-   because we don't need to remember whether [x<k] or [x>=k]. *)
-
-destruct (ltb x k).
-(* The topmost test is [match c with...], so just [destruct c] *)
-destruct c.
-(* This one is easy. *)
-apply T_neq_E.
-(* The topmost test is [match a1 with...], so just [destruct a1] *)
-destruct a1.
-(* The topmost test is [match s2 with...], so just [destruct s2] *)
-destruct s2.
-(* This one is easy by inversion. *)
-intro Hx; inversion Hx.
-
-(** How long will this go on?  A long time!  But it will terminate.
-    Just keep typing.  Better yet, let's automate.
-    The following tactic applies whenever the current goal looks like,
-      [match ?c with Red => _ | Black => _  end <> _ ],
-     and what it does in that case is, [destruct c] *)
-
-match goal with 
-| |- match ?c with Red => _ | Black => _  end <> _=> destruct c
-end.
-
-(**  The following tactic applies whenever the current goal looks like,
-
-     [match ?s with E => _ | T _ _ _ _ _ => _ end  <> _],
-
-     and what it does in that case is, [destruct s] *)
-
-match goal with 
-    | |- match ?s with E => _ | T _ _ _ _ _ => _ end  <> _=>destruct s
-end.
-
-(** Let's apply that tactic again, and then try it on the subgoals, recursively.
-    Recall that the [repeat] tactical keeps trying the same tactic on subgoals. *)
-
-repeat match goal with 
-    | |- match ?s with E => _ | T _ _ _ _ _ => _ end  <> _=>destruct s
-end.
-match goal with 
-  | |- T _ _ _ _ _ <> E => apply T_neq_E
-end.
-
-(** Let's start the proof all over again. *)
-
-Abort.
-
-Lemma ins_not_E: forall x vx s, ins x vx s <> E.
-Proof.
-intros. destruct s; simpl.
-apply T_neq_E.
-remember (ins x vx s1) as a1.
-unfold balance.
-
-(** This is the beginning of the big case analysis.  This time,
-  let's combine several tactics together: *)
-
-repeat match goal with 
-  | |- (if ?x then _ else _) <> _ => destruct x
-  | |- match ?c with Red => _ | Black => _  end <> _=> destruct c
-  | |- match ?s with E => _ | T _ _ _ _ _ => _ end  <> _=>destruct s
-end.
-
-(** What we have left is 117 cases, every one of which can be proved
-  the same way: *)
-
-apply T_neq_E.
-apply T_neq_E.
-apply T_neq_E.
-apply T_neq_E.
-apply T_neq_E.
-apply T_neq_E.
-(* Only 111 cases to go... *)
-apply T_neq_E.
-apply T_neq_E.
-apply T_neq_E.
-apply T_neq_E.
-(* Only 107 cases to go... *)
-Abort.
-
-Lemma ins_not_E: forall x vx s, ins x vx s <> E.
-Proof.
-intros. destruct s; simpl.
-apply T_neq_E.
-remember (ins x vx s1) as a1.
-unfold balance.
-
-(** This is the beginning of the big case analysis.  This time,
-  we add one more clause to the [match goal] command: *)
-
-repeat match goal with 
-  | |- (if ?x then _ else _) <> _ => destruct x
-  | |- match ?c with Red => _ | Black => _  end <> _=> destruct c
-  | |- match ?s with E => _ | T _ _ _ _ _ => _ end  <> _=>destruct s
-  | |- T _ _ _ _ _ <> E => apply T_neq_E
- end.
-Qed.
-
-(* ################################################################# *)
-(** * The SearchTree Property *)
-
-(** The SearchTree property for red-black trees is exactly the
-   same as for ordinary searchtrees (we just ignore the color [c]
-   of each node). *)
-
-Inductive SearchTree' : Z -> tree -> Z -> Prop :=
-| ST_E : forall lo hi, lo <= hi -> SearchTree' lo E hi
-| ST_T: forall lo c l k v r hi,
-    SearchTree' lo l (int2Z k) ->
-    SearchTree' (int2Z k + 1) r hi ->
-    SearchTree' lo (T c l k v r) hi.
-
-Inductive SearchTree: tree -> Prop :=
-| ST_intro: forall t lo hi, SearchTree' lo t hi -> SearchTree t.
-
-(** Now we prove that if [t] is a SearchTree, then the rebalanced 
-     version of [t] is also a SearchTree. *) 
-Lemma balance_SearchTree:
- forall c  s1 k kv s2 lo hi, 
-   SearchTree' lo s1 (int2Z k) ->
-   SearchTree' (int2Z k + 1) s2 hi ->
-   SearchTree' lo (balance c s1 k kv s2) hi.
-Proof.
-intros.
-unfold balance.
-
-(** Use proof automation for this case analysis. *)
-
-repeat  match goal with
-  |  |- SearchTree' _ (match ?c with Red => _ | Black => _ end) _ => destruct c
-  |  |- SearchTree' _ (match ?s with E => _ | T _ _ _ _ _ => _ end) _ => destruct s
-  end.
-
-(** 58 cases to consider! *)
-
-* constructor; auto.
-* constructor; auto.
-* constructor; auto.
-* constructor; auto.
-  constructor; auto. constructor; auto.
-  (* To prove this one, we have to do [inversion] on  the proof goals above the line. *)
-  inv H. inv H0. inv H8. inv H9.
-  auto.
-  constructor; auto.
-  inv H. inv H0. inv H8. inv H9. auto.
-  inv H. inv H0. inv H8. inv H9. auto.
-
-(** There's a pattern here.  Whenever we have a hypothesis above the line
-    that looks like,
-    -  H: SearchTree' _ E _    
-    -  H: SearchTree' _ (T _ _ _ _ _) _
-
-   we should invert it.   Let's build that idea into our proof automation.
-*)
-
-Abort.
-
-Lemma balance_SearchTree:
- forall c  s1 k kv s2 lo hi, 
-   SearchTree' lo s1 (int2Z k) ->
-   SearchTree' (int2Z k + 1) s2 hi ->
-   SearchTree' lo (balance c s1 k kv s2) hi.
-Proof.
-intros.
-unfold balance.
-
-(** Use proof automation for this case analysis. *)
-
-repeat  match goal with
-  | |- SearchTree' _ (match ?c with Red => _ | Black => _ end) _ =>
-             destruct c
-  | |- SearchTree' _ (match ?s with E => _ | T _ _ _ _ _ => _ end) _ =>
-             destruct s
-  | H: SearchTree' _ E _   |- _  => inv H
-  | H: SearchTree' _ (T _ _ _ _ _) _   |- _  => inv H
-  end.
-(** 58 cases to consider! *)
-
-* constructor; auto.
-* constructor; auto. constructor; auto. constructor; auto.
-* constructor; auto. constructor; auto. constructor; auto. constructor; auto. constructor; auto.
-* constructor; auto. constructor; auto. constructor; auto. constructor; auto. constructor; auto.
-* constructor; auto. constructor; auto. constructor; auto. constructor; auto. constructor; auto.
-
-(** Do we see a pattern here?  We can add that to our automation! *)
-
-Abort.
-
-Lemma balance_SearchTree:
- forall c  s1 k kv s2 lo hi, 
-   SearchTree' lo s1 (int2Z k) ->
-   SearchTree' (int2Z k + 1) s2 hi ->
-   SearchTree' lo (balance c s1 k kv s2) hi.
-Proof.
-intros.
-unfold balance.
-
-(** Use proof automation for this case analysis. *)
-
-repeat  match goal with
-  | |- SearchTree' _ (match ?c with Red => _ | Black => _ end) _ =>
-              destruct c
-  | |- SearchTree' _ (match ?s with E => _ | T _ _ _ _ _ => _ end) _ =>
-              destruct s
-  | H: SearchTree' _ E _   |- _  => inv H
-  | H: SearchTree' _ (T _ _ _ _ _) _   |- _  => inv H
-  end;
- repeat (constructor; auto).
-Qed.
-
-(** **** Exercise: 2 stars (ins_SearchTree)  *)
-(** This one is pretty easy, even without proof automation.
-  Copy-paste your proof of insert_SearchTree from Extract.v.
-  You will need to apply [balance_SearchTree] in two places.
- *)
-Lemma ins_SearchTree: 
-   forall x vx s lo hi, 
-                    lo <= int2Z x ->
-                    int2Z x < hi ->
-                    SearchTree' lo s hi ->
-                    SearchTree' lo (ins x vx s) hi.
-Proof.
-(* FILL IN HERE *) Admitted.
-(** [] *)
-
-(** **** Exercise: 2 stars (valid)  *)
-
-Lemma empty_tree_SearchTree: SearchTree empty_tree.
-(* FILL IN HERE *) Admitted.
-
-Lemma SearchTree'_le:
-  forall lo t hi, SearchTree' lo t hi -> lo <= hi.
-Proof.
-induction 1; omega.
-Qed.
-
-Lemma expand_range_SearchTree':
-  forall s lo hi,
-   SearchTree' lo s hi ->
-   forall lo' hi',
-   lo' <= lo -> hi <= hi' ->
-   SearchTree' lo' s hi'.
-Proof.
-induction 1; intros.
-constructor.
-omega.
-constructor.
-apply IHSearchTree'1; omega.
-apply IHSearchTree'2; omega.
-Qed.
-
-Lemma insert_SearchTree: forall x vx s,
-    SearchTree s -> SearchTree (insert x vx s).
-(* FILL IN HERE *) Admitted.
-(** [] *)
-
-Import IntMaps.
-
-Definition combine {A} (pivot: Z) (m1 m2: total_map A) : total_map A :=
-  fun x => if Z.ltb x pivot  then m1 x else m2 x.
-
-Inductive Abs:  tree -> total_map V -> Prop :=
-| Abs_E: Abs E (t_empty default)
-| Abs_T: forall a b c l k vk r,
-      Abs l a ->
-      Abs r b ->
-      Abs (T c l k vk r)  (t_update (combine (int2Z k) a b) (int2Z k) vk).
-
-Theorem empty_tree_relate: Abs empty_tree (t_empty default).
-Proof.
-constructor.
-Qed.
-
-(** **** Exercise: 3 stars (lookup_relate)  *)
-Theorem lookup_relate:
-  forall k t cts ,   Abs t cts -> lookup k t =  cts (int2Z k).
-Proof.  (* Copy your proof from Extract.v, and adapt it. *)
-(* FILL IN HERE *) Admitted.
-(** [] *)
-
-Lemma Abs_helper:
-  forall m' t m, Abs t m' ->    m' = m ->     Abs t m.
-Proof.
-   intros. subst. auto.
-Qed.
-
-Ltac contents_equivalent_prover :=
- extensionality x; unfold t_update, combine, t_empty;
- repeat match goal with
-  | |- context [if ?A then _ else _] => bdestruct A
- end;
- auto;
- omega.
-
-(** **** Exercise: 4 stars (balance_relate)  *)
-(** You will need proof automation for this one.  Study the methods used
-  in [ins_not_E] and [balance_SearchTree], and try them here.
-  Add one clause at a time to your [match goal]. *)
-
-Theorem balance_relate:
-  forall c l k vk r m,
-    SearchTree (T c l k vk r) ->
-    Abs (T c l k vk r) m ->
-    Abs (balance c l k vk r) m.
-Proof.
-intros.
-inv H.
-unfold balance.
-repeat match goal with
- | H: Abs E _ |- _ => inv H
-end.
-(** Add these clauses, one at a time, to your [repeat match goal] tactic,
-   and try it out:
-   -1. Whenever a clause [H: Abs E _] is above the line, invert it by [inv H].
-             Take note: with just this one clause, how many subgoals remain?
-   -2. Whenever [Abs (T _ _ _ _ _) _] is above the line, invert it.
-             Take note: with just these two clause, how many subgoals remain?
-   -3. Whenever [SearchTree' _ E _] is above the line, invert it.
-             Take note after this step and each step: how many subgoals remain?
-   -4. Same for [SearchTree' _ (T _ _ _ _ _) _].
-   -5. When [Abs match c with Red => _ | Black => _ end _] is below the line,
-          [destruct c].
-   -6. When [Abs match s with E => _ | T ... => _ end _] is below the line,
-          [destruct s].
-   -7. Whenever [Abs (T _ _ _ _ _) _] is below the line, 
-                  prove it by [apply Abs_T].   This won't always work;
-         Sometimes the "cts" in the proof goal does not exactly match the form
-         of the "cts" required by the [Abs_T] constructor.  But it's all right if
-         a clause fails; in that case, the [match goal] will just try the next clause.
-          Take note, as usual: how many clauses remain?
-   -8.  Whenever [Abs E _] is below the line, solve it by [apply Abs_E].
-   -9.  Whenever the current proof goal matches a hypothesis above the line,
-          just use it.  That is, just add this clause:
-       | |- _ => assumption
-   -10.  At this point, if all has gone well, you should have exactly 21 subgoals.
-       Each one should be of the form, [  Abs (T ...) (t_update...) ]
-       What you want to do is replace (t_update...) with a different "contents"
-       that matches the form required by the Abs_T constructor.
-       In the first proof goal, do this: [eapply Abs_helper].
-       Notice that you have two subgoals.
-       The first subgoal you can prove by:
-           apply Abs_T. apply Abs_T. apply Abs_E. apply Abs_E. 
-           apply Abs_T. eassumption. eassumption.
-       Step through that, one at a time, to see what it's doing.
-       Now, undo those 7 commands, and do this instead:
-            repeat econstructor; eassumption.
-       That solves the subgoal in exactly the same way.
-       Now, wrap this all up, by adding this clause to your [match goal]:
-       | |- _ =>  eapply Abs_helper; [repeat econstructor; eassumption | ]
-   -11.  You should still have exactly 21 subgoals, each one of the form,
-             [ t_update... = t_update... ].  Notice above the line you have some 
-           assumptions of the form,  [ H: SearchTree' lo _ hi ].  For this equality 
-         proof, we'll need to know that [lo <= hi].  So, add a clause at the end 
-        of your [match goal] to apply SearchTree'_le in any such assumption,
-        when below the line the proof goal is an equality [ _ = _ ].
-   -12.  Still exactly 21 subgoals.  In the first subgoal, try:
-          [contents_equivalent_prover].   That should solve the goal.
-          Look above, at [Ltac contents_equivalent_prover], to see how it works.
-          Now, add a clause to  [match goal] that does this for all the subgoals.
-
-   -Qed! *)
-
-(* FILL IN HERE *) Admitted.
-
-(** Extend this list, so that the nth entry shows how many subgoals
-    were remaining after you followed the nth instruction in the list above.
-    Your list should be exactly 13 elements long; there was one subgoal 
-    *before* step 1, after all. *)
-
-Definition how_many_subgoals_remaining :=
-    [1; 1; 1; 1; 1; 2
- 
-  ].
-(** [] *)
-
-(** **** Exercise: 3 stars (ins_relate)  *)
-Theorem ins_relate:
- forall k v t cts,
-    SearchTree t ->
-    Abs t cts ->
-    Abs (ins k v t) (t_update cts (int2Z k) v).
-Proof.  (* Copy your proof from SearchTree.v, and adapt it. 
-     No need for fancy proof automation. *)
-(* FILL IN HERE *) Admitted.
-(** [] *)
-
-Lemma makeBlack_relate:
- forall t cts,
-    Abs t cts ->
-    Abs (makeBlack t) cts.
-Proof.
-intros.
-destruct t; simpl; auto.
-inv H; constructor; auto.
-Qed.
-
-Theorem insert_relate:
- forall k v t cts,
-    SearchTree t ->
-    Abs t cts ->
-    Abs (insert k v t) (t_update cts (int2Z k) v).
-Proof.
-intros.
-unfold insert.
-apply makeBlack_relate.
-apply ins_relate; auto.
-Qed.
-
-(** OK, we're almost done!  We have proved all these main theorems: *)
-
-Check empty_tree_SearchTree.
-Check empty_tree_relate.
-Check lookup_relate.
-Check insert_SearchTree.
-Check insert_relate.
-
-(** Together these imply that this implementation of red-black trees
-     (1) preserves the representation invariant, and
-     (2) respects the abstraction relation. *)
-
-(** **** Exercise: 4 stars, optional (elements)  *)
-(** Prove the correctness of the [elements] function.  Because [elements]
-    does not pay attention to colors, and does not rebalance the tree,
-    then its proof should be a simple copy-paste from SearchTree.v,
-    with only minor edits. *)
-
-Fixpoint elements' (s: tree) (base: list (key*V)) : list (key * V) :=
- match s with
- | E => base
- | T _ a k v b => elements' a ((k,v) :: elements' b base)
- end.
-
-Definition elements (s: tree) : list (key * V) := elements' s nil.
-
-Definition elements_property (t: tree) (cts: total_map V) : Prop :=
-   forall k v,
-     (In (k,v) (elements t) -> cts (int2Z k) = v) /\
-     (cts (int2Z k) <> default ->
-      exists k', int2Z k = int2Z k' /\ In (k', cts (int2Z k)) (elements t)).
-
-Theorem elements_relate:
-  forall t cts,  
-  SearchTree t ->
-  Abs t cts -> 
-  elements_property t cts.
-Proof.
-(* FILL IN HERE *) Admitted.
-(** [] *)
-
-(* ################################################################# *)
-(** * Proving Efficiency *)
-
-(** Red-black trees are supposed to be more efficient than ordinary search trees,
-   because they stay balanced.  In a perfectly balanced tree, any two leaves
-   have exactly the same depth, or the difference in depth is at most 1.
-   In an approximately balanced tree, no leaf is more than twice as deep as
-   another leaf.   Red-black trees are approximately balanced.
-   Consequently, no node is more then 2logN deep, and the run time for
-   insert or lookup is bounded by a constant times 2logN.
-
-   We can't prove anything _directly_ about the run time, because we don't
-   have a cost model for Coq functions.  But we can prove that the trees
-   stay approximately balanced; this tells us important information about
-   their efficiency. *)
-
-(** **** Exercise: 4 stars (is_redblack_properties)   *)
-(** The relation [is_redblack] ensures that there are exactly [n] black 
-   nodes in every path from the root to a leaf, and that there are never
-   two red nodes in a row. *)
-
- Inductive is_redblack : tree -> color -> nat -> Prop :=
- | IsRB_leaf: forall c, is_redblack E c 0
- | IsRB_r: forall tl k kv tr n,
-          is_redblack tl Red n ->
-          is_redblack tr Red n ->
-          is_redblack (T Red tl k kv tr) Black n
- | IsRB_b: forall c tl k kv tr n,
-          is_redblack tl Black n ->
-          is_redblack tr Black n ->
-          is_redblack (T Black tl k kv tr) c (S n).
-
-Lemma is_redblack_toblack:
-  forall s n, is_redblack s Red n -> is_redblack s Black n.
-Proof.
-(* FILL IN HERE *) Admitted.
-
-Lemma makeblack_fiddle:
-  forall s n, is_redblack s Black n -> 
-            exists n, is_redblack (makeBlack s) Red n.
-Proof.
-(* FILL IN HERE *) Admitted.
-
-(** [nearly_redblack] expresses, "the tree is a red-black tree, except that
-  it's nonempty and it is permitted to have two red nodes in a row at 
-  the very root (only)."   *)
-
-Inductive nearly_redblack : tree -> nat -> Prop :=
-| nrRB_r: forall tl k kv tr n,
-         is_redblack tl Black n ->
-         is_redblack tr Black n ->
-         nearly_redblack (T Red tl k kv tr) n
-| nrRB_b: forall tl k kv tr n,
-         is_redblack tl Black n ->
-         is_redblack tr Black n ->
-         nearly_redblack (T Black tl k kv tr) (S n).
-
-
-Lemma ins_is_redblack:
-  forall x vx s n, 
-    (is_redblack s Black n -> nearly_redblack (ins x vx s) n) /\
-    (is_redblack s Red n -> is_redblack (ins x vx s) Black n).
-Proof.
-induction s; intro n; simpl; split; intros; inv H; repeat constructor; auto.
-*
-destruct (IHs1 n); clear IHs1.
-destruct (IHs2 n); clear IHs2.
-specialize (H0 H6).
-specialize (H2 H7).
-clear H H1.
-unfold balance.
-
-(** You will need proof automation, in a similar style to
-   the proofs of [ins_not_E] and [balance_relate]. *)
-
-(* FILL IN HERE *) Admitted.
-
-Lemma insert_is_redblack:
-  forall x xv s n, is_redblack s Red n ->
-                    exists n', is_redblack (insert x xv s) Red n'.
-Proof.
-  (* Just apply a couple of lemmas: 
-     ins_is_redblack and makeblack_fiddle *)
-(* FILL IN HERE *) Admitted.
-(** [] *)
-
-End TREES.
-
-(* ################################################################# *)
-(** * Extracting and Measuring Red-Black Trees *)
+(** We can extract the red-black tree implementation: *)
 
 Extraction "redblack.ml" empty_tree insert lookup elements.
 
-(** You can run this inside the ocaml top level by:
+(** Run it in the OCaml top level with these commands:
 
-#use "redblack.ml";;
-#use "test_searchtree.ml";;
-run_tests();;
+      #use "redblack.ml";;
+      #use "test_searchtree.ml";;
 
+    On a recent machine with a 2.9 GHz Intel Core i9 that prints:
 
-On my machine, in the byte-code interpreter this prints,
+      Insert and lookup 1000000 random integers in 0.860663 seconds.
+      Insert and lookup 20000 random integers in 0.007908 seconds.
+      Insert and lookup 20000 consecutive integers in 0.004668 seconds.
 
-Insert and lookup 1000000 random integers in 0.889 seconds.
-Insert and lookup 20000 random integers in 0.016 seconds.
-Insert and lookup 20000 consecutive integers in 0.015 seconds.
+    That execution uses the bytecode interpreter.  The native compiler
+    will have better performance:
 
+      $ ocamlopt -c redblack.mli redblack.ml
+      $ ocamlopt redblack.cmx -open Redblack test_searchtree.ml -o test_redblack
+      $ ./test_redblack
 
-You can compile and run this with the ocaml native-code compiler by:
+On the same machine that prints,
 
-ocamlopt redblack.mli redblack.ml -open Redblack test_searchtree.ml -o test_redblack
-./test_redblack
-
-
-On my machine this prints,
-
-Insert and lookup 1000000 random integers in 0.436 seconds.
-Insert and lookup 20000 random integers in 0. seconds.
-Insert and lookup 20000 consecutive integers in 0. seconds.
+      Insert and lookup 1000000 random integers in 0.475669 seconds.
+      Insert and lookup 20000 random integers in 0.00312 seconds.
+      Insert and lookup 20000 consecutive integers in 0.001183 seconds.
 *)
 
-(* ################################################################# *)
-(** * Success! *)
-(** The benchmark measurements above (and in Extract.v) demonstrate that:
-  - On random insertions, red-black trees are slightly faster than ordinary BSTs
-     (red-black 0.436 seconds, vs ordinary 0.468 seconds)
-  - On consecutive insertions, red-black trees are _much_ faster than ordinary BSTs
-     (red-black 0. seconds, vs ordinary 0.374 seconds)
-  In particular, red-black trees are almost exactly as fast on the
-     consecutive insertions (0.015 seconds) as on the random (0.016 seconds).
-*)
+(** The benchmark measurements above (and in [Extract])
+    demonstrate the following:
 
+    - On random insertions, red-black trees are about the same as
+      ordinary BSTs.
+
+    - On consecutive insertions, red-black trees are _much_ faster
+      than ordinary BSTs.
+
+    - Red-black trees are about as fast on consecutive insertions as
+      on random. *)
+
+(* 2020-08-07 17:08 *)

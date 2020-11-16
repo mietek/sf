@@ -14,19 +14,17 @@ Set Warnings "-notation-overridden,-parsing".
 
 From Coq Require Import Arith.Arith.
 
-From PLF Require Import Maps.
-From PLF Require Import Imp.
-From PLF Require Import Types.
-From PLF Require Import Smallstep.
-From PLF Require Import LibTactics.
-
+From PLF Require Maps.
 From PLF Require Stlc.
-From PLF Require Equiv.
-From PLF Require Imp.
-From PLF Require References.
+From PLF Require Types.
 From PLF Require Smallstep.
+From PLF Require LibTactics.
+From PLF Require Equiv.
+From PLF Require References.
 From PLF Require Hoare.
 From PLF Require Sub.
+
+Import LibTactics.
 
 (** Remark: SSReflect is another package providing powerful tactics.
     The library "LibTactics" differs from "SSReflect" in two respects:
@@ -45,7 +43,7 @@ From PLF Require Sub.
     from the "LibTactics" library. It does not aim at presenting all
     the features of "LibTactics". The detailed specification of tactics
     can be found in the source file [LibTactics.v]. Further documentation
-    as well as demos can be found at http://www.chargueraud.org/softs/tlc/. *)
+    as well as demos can be found at https://www.chargueraud.org/softs/tlc/. *)
 
 (** In this tutorial, tactics are presented using examples taken from
     the core chapters of the "Software Foundations" course. To illustrate
@@ -64,9 +62,11 @@ From PLF Require Sub.
 (** ** The Tactic [introv] *)
 
 Module IntrovExamples.
-  Import Stlc.
-  Import Imp.
-  Import STLC.
+
+Import Maps.
+Import Imp.
+Import Equiv.
+Import Stlc.
 
 (** The tactic [introv] allows to automatically introduce the
     variables of a theorem and explicitly name the hypotheses
@@ -127,10 +127,9 @@ End IntrovExamples.
 (** ** The Tactic [inverts] *)
 
 Module InvertsExamples.
-  Import Stlc.
-  Import Equiv.
-  Import Imp.
-  Import STLC.
+Import Maps.
+Import Imp.
+Import Equiv.
 
 (** The [inversion] tactic of Coq is not very satisfying for
     three reasons. First, it produces a bunch of equalities
@@ -148,7 +147,7 @@ Module InvertsExamples.
     that are being produced by [inversion]. *)
 
 Theorem skip_left: forall c,
-  cequiv (SKIP;; c) c.
+  cequiv <{skip; c}> c.
 Proof.
   introv. split; intros H.
   dup. (* duplicate the goal for comparison *)
@@ -187,7 +186,7 @@ Theorem ceval_deterministic': forall c st st1 st2,
   st1 = st2.
 Proof.
   introv E1 E2. generalize dependent st2.
-  (induction E1); intros st2 E2;
+  induction E1; intros st2 E2;
     inverts E2 as.
   - (* E_Skip *) reflexivity.
   - (* E_Ass *)
@@ -225,33 +224,41 @@ Abort.
     equivalent to [inverts H as; introv H1 H2 H3]. An example follows. *)
 
 Theorem skip_left': forall c,
-  cequiv (SKIP;; c) c.
+  cequiv <{ skip ; c}> c.
 Proof.
   introv. split; intros H.
   inverts H as U V. (* new hypotheses are named [U] and [V] *)
   inverts U. assumption.
 Abort.
 
+End InvertsExamples.
+
 (** A more involved example appears next. In particular, this example
     shows that the name of the hypothesis being inverted can be reused. *)
 
+Module InvertsExamples1.
+Import Types.
+Import Stlc.
+Import STLC.
+Import Maps.
+
 Example typing_nonexample_1 :
   ~ exists T,
-      has_type empty
-        (abs x Bool
-            (abs y Bool
-               (app (var x) (var y))))
+      empty |-
+        \x:Bool,
+            \y:Bool,
+               (x y) \in
         T.
 Proof.
   dup 3.
 
   (* The old proof: *)
-  - intros C. destruct C.
-  inversion H. subst. clear H.
-  inversion H5. subst. clear H5.
-  inversion H4. subst. clear H4.
-  inversion H2. subst. clear H2.
-  inversion H1.
+  -  intros Hc. destruct Hc as [T Hc].
+  inversion Hc; subst; clear Hc.
+  inversion H4; subst; clear H4.
+  inversion H5; subst; clear H5 H4.
+  inversion H2; subst; clear H2.
+  discriminate H1.
 
   (* The new proof: *)
   - intros C. destruct C.
@@ -270,14 +277,12 @@ Proof.
   inverts H1.
 Qed.
 
-End InvertsExamples.
+End InvertsExamples1.
 
 (** Note: in the rare cases where one needs to perform an inversion
     on an hypothesis [H] without clearing [H] from the context,
     one can use the tactic [inverts keep H], where the keyword [keep]
     indicates that the hypothesis should be kept in the context. *)
-
-
 
 (* ################################################################# *)
 (** * Tactics for N-ary Connectives *)
@@ -324,7 +329,7 @@ Lemma demo_branch : forall n m,
   n < m \/ n = m \/ m < n.
 Proof.
   intros.
-  destruct (lt_eq_lt_dec n m) as [[H1|H2]|H3].
+  destruct (lt_eq_lt_dec n m) as [ [H1|H2]|H3].
   - branch 1. apply H1.
   - branch 2. apply H2.
   - branch 3. apply H3.
@@ -372,7 +377,7 @@ Proof.
     reflexivity. (* subgoal [n*m = m*n] *)
 Qed.
 
-(*** Remark: the syntax [asserts_rewrite (E1 = E2) in H] allows
+(** Remark: the syntax [asserts_rewrite (E1 = E2) in H] allows
      rewriting in the hypothesis [H] rather than in the goal. *)
 
 (** The tactic [cuts_rewrite (E1 = E2)] is like
@@ -588,30 +593,33 @@ Qed.
 (** ** The Tactic [gen] *)
 
 (** The tactic [gen] is a shortand for [generalize dependent]
-    that accepts several arguments at once. An invokation of
+    that accepts several arguments at once. An invocation of
     this tactic takes the form [gen x y z]. *)
 
 Module GenExample.
   Import Stlc.
   Import STLC.
+  Import Maps.
 
-Lemma substitution_preserves_typing : forall Gamma x U v t S,
-  has_type (update Gamma x U) t S ->
-  has_type empty v U ->
-  has_type Gamma ([x:=v]t) S.
+Lemma substitution_preserves_typing : forall Gamma x U t v T,
+  x |-> U ; Gamma |- t \in T ->
+  empty |- v \in U   ->
+  Gamma |- [x:=v]t \in T.
 Proof.
   dup.
 
   (* The old proof: *)
-  intros Gamma x U v t S Htypt Htypv.
-  generalize dependent S. generalize dependent Gamma.
-  induction t; intros; simpl.
-  admit. admit. admit. admit. admit. admit.
+  - intros Gamma x U t v T Ht Hv.
+  generalize dependent Gamma. generalize dependent T.
+  induction t; intros T Gamma H;
+    inversion H; clear H; subst; simpl; eauto.
+  admit. admit.
 
   (* The new proof: *)
-  introv Htypt Htypv. gen S Gamma.
-  induction t; intros; simpl.
-  admit. admit. admit. admit. admit. admit.
+  - introv Ht Hv. gen Gamma T.
+  induction t; intros S Gamma H;
+    inversion H; clear H; subst; simpl; eauto.
+  admit. admit.
 Abort.
 
 End GenExample.
@@ -620,12 +628,10 @@ End GenExample.
 (** ** The Tactics [admits], [admit_rewrite] and [admit_goal] *)
 
 (** Temporarily admitting a given subgoal is very useful when
-    constructing proofs. Several tactics are provided as 
+    constructing proofs. Several tactics are provided as
     useful wrappers around the builtin [admit] tactic. *)
 
 Module SkipExample.
-  Import Stlc.
-  Import STLC.
 
 (** The tactic [admits H: P] adds the hypothesis [H: P] to the context,
     without checking whether the proposition [P] is true.
@@ -671,6 +677,8 @@ Admitted.
     of the induction hypotheses; then, focus on fixing the invokations
     of the induction hypothesis. *)
 
+Import Imp.
+
 Theorem ceval_deterministic: forall c st st1 st2,
   st =[ c ]=> st1 ->
   st =[ c ]=> st2 ->
@@ -683,7 +691,7 @@ Proof.
      right away, but the point is to do the proof and use [IH]
      only at the places where we need an induction hypothesis. *)
   introv E1 E2. gen st2.
-  (induction E1); introv E2; inverts E2 as.
+  induction E1; introv E2; inverts E2 as.
   - (* E_Skip *) reflexivity.
   - (* E_Ass *)
     subst n.
@@ -719,7 +727,7 @@ Theorem ceval_deterministic: forall c st st1 st2,
 Proof.
   intros c st st1 st2 E1 E2.
   generalize dependent st2.
-  (induction E1); intros st2 E2; inverts E2.
+  induction E1; intros st2 E2; inverts E2.
   admit. admit. (* Skipping some trivial cases *)
   sort. (* Observe how the context is reorganized *)
 Abort.
@@ -776,11 +784,14 @@ Module ExamplesLets.
 (* To illustrate the working of [lets], assume that we want to
    exploit the following lemma. *)
 
+Import Maps.
 Import Sub.
+Import String.
 
-Axiom typing_inversion_var : forall (G:context) (x:string) (T:ty),
-  has_type G (var x) T ->
-  exists S, G x = Some S /\ subtype S T.
+Axiom typing_inversion_var : forall Gamma (x:string) T,
+  Gamma |- x \in T ->
+  exists S,
+    Gamma x = Some S /\ S <: T.
 
 (** First, assume we have an assumption [H] with the type of the form
     [has_type G (var x) T]. We can obtain the conclusion of the
@@ -788,7 +799,7 @@ Axiom typing_inversion_var : forall (G:context) (x:string) (T:ty),
     [lets K: typing_inversion_var H], as shown next. *)
 
 Lemma demo_lets_1 : forall (G:context) (x:string) (T:ty),
-  has_type G (var x) T ->
+  G |- x \in T ->
   True.
 Proof.
   intros G x T H. dup.
@@ -817,7 +828,7 @@ Proof.
 Abort.
 
 (** Usually, there is only one context [G] and one type [T] that are
-    going to be suitable for proving [has_type G (var x) T], so
+    going to be suitable for proving [has_type G (tm_var x) T], so
     we don't really need to bother giving [G] and [T] explicitly.
     It suffices to call [lets (S & Eq & Sub): typing_inversion_var x].
     The variables [G] and [T] are then instantiated using existential
@@ -906,91 +917,6 @@ End ExamplesLets.
 
     Examples of use of [applys] appear further on. Several examples of
     use of [forwards] can be found in the tutorial chapter [UseAuto]. *)
-
-(* ================================================================= *)
-(** ** Example of Instantiations *)
-
-Module ExamplesInstantiations.
-  Import Sub.
-
-(** The following proof shows several examples where [lets] is used
-    instead of [destruct], as well as examples where [applys] is used
-    instead of [apply]. The proof also contains some holes that you
-    need to fill in as an exercise. *)
-
-Lemma substitution_preserves_typing : forall Gamma x U v t S,
-  has_type (update Gamma x U) t S ->
-  has_type empty v U ->
-  has_type Gamma ([x:=v]t) S.
-Proof with eauto.
-  intros Gamma x U v t S Htypt Htypv.
-  generalize dependent S. generalize dependent Gamma.
-  (induction t); intros; simpl.
-  - (* var *)
-    rename s into y.
-
-    (* An example where [destruct] is replaced with [lets]. *)
-    (* old: destruct (typing_inversion_var _ _ _ Htypt) as [T [Hctx Hsub]].*)
-    (* new: *) lets (T&Hctx&Hsub): typing_inversion_var Htypt.
-    unfold update, t_update in Hctx.
-    destruct (eqb_stringP x y)...
-    + (* x=y *)
-      subst.
-      inversion Hctx; subst. clear Hctx.
-      apply context_invariance with empty...
-      intros x Hcontra.
-
-       (* A more involved example. *)
-       (* old: destruct (free_in_context _ _ S empty Hcontra)
-                 as [T' HT']... *)
-       (* new: *)
-        lets [T' HT']: free_in_context S (@empty ty) Hcontra...
-        inversion HT'.
-  - (* app *)
-
-    (* Exercise: replace the following [destruct] with a [lets]. *)
-    (* old: destruct (typing_inversion_app _ _ _ _ Htypt)
-              as [T1 [Htypt1 Htypt2]]. eapply T_App... *)
-    (* FILL IN HERE *) admit.
-
-  - (* abs *)
-    rename s into y. rename t into T1.
-
-    (* Here is another example of using [lets]. *)
-    (* old: destruct (typing_inversion_abs _ _ _ _ _ Htypt). *)
-    (* new: *) lets (T2&Hsub&Htypt2): typing_inversion_abs Htypt.
-
-    (* An example of where [apply with] can be replaced with [applys]. *)
-    (* old: apply T_Sub with (Arrow T1 T2)... *)
-    (* new: *) applys T_Sub (Arrow T1 T2)...
-     apply T_Abs...
-    destruct (eqb_stringP x y).
-    + (* x=y *)
-      eapply context_invariance...
-      subst.
-      intros x Hafi. unfold update, t_update.
-      destruct (eqb_stringP y x)...
-    + (* x<>y *)
-      apply IHt. eapply context_invariance...
-      intros z Hafi. unfold update, t_update.
-      destruct (eqb_stringP y z)...
-      subst. rewrite false_eqb_string...
-  - (* tru *)
-    lets: typing_inversion_true Htypt...
-  - (* fls *)
-    lets: typing_inversion_false Htypt...
-  - (* test *)
-    lets (Htyp1&Htyp2&Htyp3): typing_inversion_if Htypt...
-  - (* unit *)
-    (* An example where [assert] can be replaced with [lets]. *)
-    (* old: assert (subtype Unit S)
-             by apply (typing_inversion_unit _ _ Htypt)... *)
-    (* new: *) lets: typing_inversion_unit Htypt...
-  
-Admitted.
-
-End ExamplesInstantiations.
-
 (* ################################################################# *)
 (** * Summary *)
 
@@ -1025,8 +951,8 @@ End ExamplesInstantiations.
 
     If you are interested in using [LibTactics.v] in your own developments,
     make sure you get the lastest version from:
-    http://www.chargueraud.org/softs/tlc/.
+    https://www.chargueraud.org/softs/tlc/.
 
 *)
 
-(* Thu Feb 7 20:09:27 EST 2019 *)
+(* 2020-09-09 21:08 *)

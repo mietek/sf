@@ -38,8 +38,8 @@ idtac " ".
 idtac "#> SimpleArith1.test_step_2".
 idtac "Possible points: 1".
 check_type @SimpleArith1.test_step_2 (
-(SimpleArith1.step (P (C 0) (P (C 2) (P (C 0) (C 3))))
-   (P (C 0) (P (C 2) (C (0 + 3)))))).
+(SimpleArith1.step (P (C 0) (P (C 2) (P (C 1) (C 3))))
+   (P (C 0) (P (C 2) (C 4))))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions SimpleArith1.test_step_2.
@@ -154,7 +154,7 @@ idtac "-------------------  combined_properties  --------------------".
 idtac " ".
 
 idtac "#> Manually graded: combined_properties".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 print_manual_grade manual_grade_for_combined_properties.
 idtac " ".
 
@@ -185,10 +185,23 @@ idtac " ".
 
 idtac " ".
 
-idtac "Max points - standard: 25".
-idtac "Max points - advanced: 31".
+idtac "Max points - standard: 27".
+idtac "Max points - advanced: 33".
+idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
 idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- SimpleArith1.test_step_2 ---------".
@@ -221,6 +234,4 @@ idtac "---------- compiler_is_correct ---------".
 Print Assumptions compiler_is_correct.
 Abort.
 
-(* Thu Feb 7 20:08:12 EST 2019 *)
-
-(* Thu Feb 7 20:09:28 EST 2019 *)
+(* 2020-09-09 21:08 *)

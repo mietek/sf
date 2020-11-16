@@ -39,22 +39,27 @@ idtac "#> STLCExtendedRecords.typing_example_2".
 idtac "Possible points: 0.5".
 check_type @STLCExtendedRecords.typing_example_2 (
 (STLCExtendedRecords.has_type (@Maps.empty STLCExtendedRecords.ty)
-   (STLCExtendedRecords.app
-      (STLCExtendedRecords.abs "a"
-         (STLCExtendedRecords.RCons "i1"
-            (STLCExtendedRecords.Arrow STLCExtendedRecords.A
+   (STLCExtendedRecords.tm_app
+      (STLCExtendedRecords.tm_abs STLCExtendedRecords.a
+         (STLCExtendedRecords.Ty_RCons STLCExtendedRecords.i1
+            (STLCExtendedRecords.Ty_Arrow STLCExtendedRecords.A
                STLCExtendedRecords.A)
-            (STLCExtendedRecords.RCons "i2"
-               (STLCExtendedRecords.Arrow STLCExtendedRecords.B
-                  STLCExtendedRecords.B) STLCExtendedRecords.RNil))
-         (STLCExtendedRecords.rproj (STLCExtendedRecords.var "a") "i2"))
-      (STLCExtendedRecords.rcons "i1"
-         (STLCExtendedRecords.abs "a" STLCExtendedRecords.A
-            (STLCExtendedRecords.var "a"))
-         (STLCExtendedRecords.rcons "i2"
-            (STLCExtendedRecords.abs "a" STLCExtendedRecords.B
-               (STLCExtendedRecords.var "a")) STLCExtendedRecords.trnil)))
-   (STLCExtendedRecords.Arrow STLCExtendedRecords.B STLCExtendedRecords.B))).
+            (STLCExtendedRecords.Ty_RCons STLCExtendedRecords.i2
+               (STLCExtendedRecords.Ty_Arrow STLCExtendedRecords.B
+                  STLCExtendedRecords.B) STLCExtendedRecords.Ty_RNil))
+         (STLCExtendedRecords.tm_rproj
+            (STLCExtendedRecords.tm_var STLCExtendedRecords.a)
+            STLCExtendedRecords.i2))
+      (STLCExtendedRecords.tm_rcons STLCExtendedRecords.i1
+         (STLCExtendedRecords.tm_abs STLCExtendedRecords.a
+            STLCExtendedRecords.A
+            (STLCExtendedRecords.tm_var STLCExtendedRecords.a))
+         (STLCExtendedRecords.tm_rcons STLCExtendedRecords.i2
+            (STLCExtendedRecords.tm_abs STLCExtendedRecords.a
+               STLCExtendedRecords.B
+               (STLCExtendedRecords.tm_var STLCExtendedRecords.a))
+            STLCExtendedRecords.tm_rnil)))
+   (STLCExtendedRecords.Ty_Arrow STLCExtendedRecords.B STLCExtendedRecords.B))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtendedRecords.typing_example_2.
@@ -68,13 +73,15 @@ check_type @STLCExtendedRecords.typing_nonexample (
  (exists T : STLCExtendedRecords.ty,
     STLCExtendedRecords.has_type
       (@Maps.update STLCExtendedRecords.ty
-         (@Maps.empty STLCExtendedRecords.ty) "a"
-         (STLCExtendedRecords.RCons "i2"
-            (STLCExtendedRecords.Arrow STLCExtendedRecords.A
-               STLCExtendedRecords.A) STLCExtendedRecords.RNil))
-      (STLCExtendedRecords.rcons "i1"
-         (STLCExtendedRecords.abs "a" STLCExtendedRecords.B
-            (STLCExtendedRecords.var "a")) (STLCExtendedRecords.var "a")) T))).
+         (@Maps.empty STLCExtendedRecords.ty) STLCExtendedRecords.a
+         (STLCExtendedRecords.Ty_RCons STLCExtendedRecords.i2
+            (STLCExtendedRecords.Ty_Arrow STLCExtendedRecords.A
+               STLCExtendedRecords.A) STLCExtendedRecords.Ty_RNil))
+      (STLCExtendedRecords.tm_rcons STLCExtendedRecords.i1
+         (STLCExtendedRecords.tm_abs STLCExtendedRecords.a
+            STLCExtendedRecords.B
+            (STLCExtendedRecords.tm_var STLCExtendedRecords.a))
+         (STLCExtendedRecords.tm_var STLCExtendedRecords.a)) T))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtendedRecords.typing_nonexample.
@@ -90,14 +97,18 @@ check_type @STLCExtendedRecords.typing_nonexample_2 (
     STLCExtendedRecords.has_type
       (@Maps.update STLCExtendedRecords.ty
          (@Maps.empty STLCExtendedRecords.ty) y STLCExtendedRecords.A)
-      (STLCExtendedRecords.app
-         (STLCExtendedRecords.abs "a"
-            (STLCExtendedRecords.RCons "i1" STLCExtendedRecords.A
-               STLCExtendedRecords.RNil)
-            (STLCExtendedRecords.rproj (STLCExtendedRecords.var "a") "i1"))
-         (STLCExtendedRecords.rcons "i1" (STLCExtendedRecords.var y)
-            (STLCExtendedRecords.rcons "i2" (STLCExtendedRecords.var y)
-               STLCExtendedRecords.trnil))) T))).
+      (STLCExtendedRecords.tm_app
+         (STLCExtendedRecords.tm_abs STLCExtendedRecords.a
+            (STLCExtendedRecords.Ty_RCons STLCExtendedRecords.i1
+               STLCExtendedRecords.A STLCExtendedRecords.Ty_RNil)
+            (STLCExtendedRecords.tm_rproj
+               (STLCExtendedRecords.tm_var STLCExtendedRecords.a)
+               STLCExtendedRecords.i1))
+         (STLCExtendedRecords.tm_rcons STLCExtendedRecords.i1
+            (STLCExtendedRecords.tm_var y)
+            (STLCExtendedRecords.tm_rcons STLCExtendedRecords.i2
+               (STLCExtendedRecords.tm_var y) STLCExtendedRecords.tm_rnil)))
+      T))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtendedRecords.typing_nonexample_2.
@@ -109,7 +120,20 @@ idtac " ".
 idtac "Max points - standard: 2".
 idtac "Max points - advanced: 2".
 idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
+idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- STLCExtendedRecords.typing_example_2 ---------".
@@ -122,6 +146,4 @@ idtac "".
 idtac "********** Advanced **********".
 Abort.
 
-(* Thu Feb 7 20:08:37 EST 2019 *)
-
-(* Thu Feb 7 20:09:28 EST 2019 *)
+(* 2020-09-09 21:09 *)

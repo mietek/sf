@@ -1,28 +1,29 @@
 Set Warnings "-notation-overridden,-parsing".
 From Coq Require Export String.
 From VFA Require Import Color.
-Parameter MISSING: Type. 
 
-Module Check. 
+Parameter MISSING: Type.
 
-Ltac check_type A B := 
-match type of A with 
-| context[MISSING] => idtac "Missing:" A  
-| ?T => first [unify T B; idtac "Type: ok" | idtac "Type: wrong - should be (" B ")"] 
-end. 
+Module Check.
 
-Ltac print_manual_grade A := 
-match eval compute in A with 
-| Some (pair ?S ?C) => 
-idtac "Score:"  S; 
-match eval compute in C with  
-| ""%string => idtac "Comment: None"  
-| _ => idtac "Comment:" C 
-end 
-| None => 
-idtac "Score: Ungraded"; 
-idtac "Comment: None" 
-end. 
+Ltac check_type A B :=
+    match type of A with
+    | context[MISSING] => idtac "Missing:" A
+    | ?T => first [unify T B; idtac "Type: ok" | idtac "Type: wrong - should be (" B ")"]
+    end.
+
+Ltac print_manual_grade A :=
+    match eval compute in A with
+    | Some (_ ?S ?C) =>
+        idtac "Score:"  S;
+        match eval compute in C with
+          | ""%string => idtac "Comment: None"
+          | _ => idtac "Comment:" C
+        end
+    | None =>
+        idtac "Score: Ungraded";
+        idtac "Comment: None"
+    end.
 
 End Check.
 
@@ -85,7 +86,7 @@ idtac "-------------------  cardinal_map  --------------------".
 idtac " ".
 
 idtac "#> cardinal_map".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 check_type @cardinal_map (
 (forall (A B : Type) (f : A -> B) (g : M.t A),
  @M.cardinal B (@M.map A B f g) = @M.cardinal A g)).
@@ -99,7 +100,7 @@ idtac "-------------------  Sremove_cardinal_less  --------------------".
 idtac " ".
 
 idtac "#> Sremove_cardinal_less".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 check_type @Sremove_cardinal_less (
 (forall (i : S.elt) (s : S.t),
  S.In i s -> S.cardinal (S.remove i s) < S.cardinal s)).
@@ -113,7 +114,7 @@ idtac "-------------------  Mremove_elements  --------------------".
 idtac " ".
 
 idtac "#> Mremove_elements".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 check_type @Mremove_elements (
 (forall (A : Type) (i : M.key) (s : M.t A),
  @M.In A i s ->
@@ -242,7 +243,7 @@ idtac "-------------------  color_correct  --------------------".
 idtac " ".
 
 idtac "#> color_correct".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 check_type @color_correct (
 (forall (palette : S.t) (g : graph),
  no_selfloop g -> undirected g -> coloring_ok palette g (color palette g))).
@@ -254,6 +255,72 @@ idtac " ".
 
 idtac " ".
 
-idtac "Max points - standard: 43".
-idtac "Max points - advanced: 43".
+idtac "Max points - standard: 51".
+idtac "Max points - advanced: 51".
+idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "functional_extensionality_dep".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "int".
+idtac "Abs".
+idtac "Abs_inj".
+idtac "ltb".
+idtac "ltb_lt".
+idtac "leb".
+idtac "leb_le".
+idtac "Extract.int".
+idtac "Extract.Abs".
+idtac "Extract.Abs_inj".
+idtac "Extract.ltb".
+idtac "Extract.ltb_lt".
+idtac "Extract.leb".
+idtac "Extract.leb_le".
+idtac "".
+idtac "".
+idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
+idtac "".
+idtac "********** Standard **********".
+idtac "---------- Sremove_elements ---------".
+Print Assumptions Sremove_elements.
+idtac "---------- InA_map_fst_key ---------".
+Print Assumptions InA_map_fst_key.
+idtac "---------- Sorted_lt_key ---------".
+Print Assumptions Sorted_lt_key.
+idtac "---------- cardinal_map ---------".
+Print Assumptions cardinal_map.
+idtac "---------- Sremove_cardinal_less ---------".
+Print Assumptions Sremove_cardinal_less.
+idtac "---------- Mremove_elements ---------".
+Print Assumptions Mremove_elements.
+idtac "---------- Mremove_cardinal_less ---------".
+Print Assumptions Mremove_cardinal_less.
+idtac "---------- fold_right_rev_left ---------".
+Print Assumptions fold_right_rev_left.
+idtac "---------- Snot_in_empty ---------".
+Print Assumptions Snot_in_empty.
+idtac "---------- Sin_domain ---------".
+Print Assumptions Sin_domain.
+idtac "---------- subset_nodes_sub ---------".
+Print Assumptions subset_nodes_sub.
+idtac "---------- select_terminates ---------".
+Print Assumptions select_terminates.
+idtac "---------- adj_ext ---------".
+Print Assumptions adj_ext.
+idtac "---------- in_colors_of_1 ---------".
+Print Assumptions in_colors_of_1.
+idtac "---------- color_correct ---------".
+Print Assumptions color_correct.
+idtac "".
+idtac "********** Advanced **********".
 Abort.
+
+(* 2020-08-07 17:10 *)

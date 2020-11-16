@@ -47,7 +47,7 @@ idtac "#> STLCExtended.Examples.Prodtest.typechecks".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.Prodtest.typechecks (
 (STLCExtended.has_type (@Maps.empty STLCExtended.ty)
-   STLCExtended.Examples.Prodtest.test STLCExtended.Nat)).
+   STLCExtended.Examples.Prodtest.test STLCExtended.Ty_Nat)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.Prodtest.typechecks.
@@ -58,7 +58,7 @@ idtac "#> STLCExtended.Examples.Prodtest.reduces".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.Prodtest.reduces (
 (STLCExtended.multistep STLCExtended.Examples.Prodtest.test
-   (STLCExtended.const 6))).
+   (STLCExtended.tm_const 6))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.Prodtest.reduces.
@@ -69,7 +69,7 @@ idtac "#> STLCExtended.Examples.LetTest.typechecks".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.LetTest.typechecks (
 (STLCExtended.has_type (@Maps.empty STLCExtended.ty)
-   STLCExtended.Examples.LetTest.test STLCExtended.Nat)).
+   STLCExtended.Examples.LetTest.test STLCExtended.Ty_Nat)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.LetTest.typechecks.
@@ -80,7 +80,7 @@ idtac "#> STLCExtended.Examples.LetTest.reduces".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.LetTest.reduces (
 (STLCExtended.multistep STLCExtended.Examples.LetTest.test
-   (STLCExtended.const 6))).
+   (STLCExtended.tm_const 6))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.LetTest.reduces.
@@ -92,7 +92,7 @@ idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest1.typechecks (
 (STLCExtended.has_type (@Maps.empty STLCExtended.ty)
    STLCExtended.Examples.FixTest1.fact
-   (STLCExtended.Arrow STLCExtended.Nat STLCExtended.Nat))).
+   (STLCExtended.Ty_Arrow STLCExtended.Ty_Nat STLCExtended.Ty_Nat))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest1.typechecks.
@@ -103,8 +103,8 @@ idtac "#> STLCExtended.Examples.FixTest1.reduces".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest1.reduces (
 (STLCExtended.multistep
-   (STLCExtended.app STLCExtended.Examples.FixTest1.fact
-      (STLCExtended.const 4)) (STLCExtended.const 24))).
+   (STLCExtended.tm_app STLCExtended.Examples.FixTest1.fact
+      (STLCExtended.tm_const 4)) (STLCExtended.tm_const 24))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest1.reduces.
@@ -116,9 +116,10 @@ idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest2.typechecks (
 (STLCExtended.has_type (@Maps.empty STLCExtended.ty)
    STLCExtended.Examples.FixTest2.map
-   (STLCExtended.Arrow (STLCExtended.Arrow STLCExtended.Nat STLCExtended.Nat)
-      (STLCExtended.Arrow (STLCExtended.List STLCExtended.Nat)
-         (STLCExtended.List STLCExtended.Nat))))).
+   (STLCExtended.Ty_Arrow
+      (STLCExtended.Ty_Arrow STLCExtended.Ty_Nat STLCExtended.Ty_Nat)
+      (STLCExtended.Ty_Arrow (STLCExtended.Ty_List STLCExtended.Ty_Nat)
+         (STLCExtended.Ty_List STLCExtended.Ty_Nat))))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest2.typechecks.
@@ -129,16 +130,17 @@ idtac "#> STLCExtended.Examples.FixTest2.reduces".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest2.reduces (
 (STLCExtended.multistep
-   (STLCExtended.app
-      (STLCExtended.app STLCExtended.Examples.FixTest2.map
-         (STLCExtended.abs "a" STLCExtended.Nat
-            (STLCExtended.scc (STLCExtended.var "a"))))
-      (STLCExtended.tcons (STLCExtended.const 1)
-         (STLCExtended.tcons (STLCExtended.const 2)
-            (STLCExtended.tnil STLCExtended.Nat))))
-   (STLCExtended.tcons (STLCExtended.const 2)
-      (STLCExtended.tcons (STLCExtended.const 3)
-         (STLCExtended.tnil STLCExtended.Nat))))).
+   (STLCExtended.tm_app
+      (STLCExtended.tm_app STLCExtended.Examples.FixTest2.map
+         (STLCExtended.tm_abs STLCExtended.Examples.a STLCExtended.Ty_Nat
+            (STLCExtended.tm_succ
+               (STLCExtended.tm_var STLCExtended.Examples.a))))
+      (STLCExtended.tm_cons (STLCExtended.tm_const 1)
+         (STLCExtended.tm_cons (STLCExtended.tm_const 2)
+            (STLCExtended.tm_nil STLCExtended.Ty_Nat))))
+   (STLCExtended.tm_cons (STLCExtended.tm_const 2)
+      (STLCExtended.tm_cons (STLCExtended.tm_const 3)
+         (STLCExtended.tm_nil STLCExtended.Ty_Nat))))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest2.reduces.
@@ -150,8 +152,8 @@ idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest3.typechecks (
 (STLCExtended.has_type (@Maps.empty STLCExtended.ty)
    STLCExtended.Examples.FixTest3.equal
-   (STLCExtended.Arrow STLCExtended.Nat
-      (STLCExtended.Arrow STLCExtended.Nat STLCExtended.Nat)))).
+   (STLCExtended.Ty_Arrow STLCExtended.Ty_Nat
+      (STLCExtended.Ty_Arrow STLCExtended.Ty_Nat STLCExtended.Ty_Nat)))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest3.typechecks.
@@ -162,10 +164,10 @@ idtac "#> STLCExtended.Examples.FixTest3.reduces".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest3.reduces (
 (STLCExtended.multistep
-   (STLCExtended.app
-      (STLCExtended.app STLCExtended.Examples.FixTest3.equal
-         (STLCExtended.const 4)) (STLCExtended.const 4))
-   (STLCExtended.const 1))).
+   (STLCExtended.tm_app
+      (STLCExtended.tm_app STLCExtended.Examples.FixTest3.equal
+         (STLCExtended.tm_const 4)) (STLCExtended.tm_const 4))
+   (STLCExtended.tm_const 1))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest3.reduces.
@@ -177,7 +179,7 @@ idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest4.typechecks (
 (STLCExtended.has_type (@Maps.empty STLCExtended.ty)
    STLCExtended.Examples.FixTest4.eotest
-   (STLCExtended.Prod STLCExtended.Nat STLCExtended.Nat))).
+   (STLCExtended.Ty_Prod STLCExtended.Ty_Nat STLCExtended.Ty_Nat))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest4.typechecks.
@@ -188,7 +190,7 @@ idtac "#> STLCExtended.Examples.FixTest4.reduces".
 idtac "Possible points: 0.25".
 check_type @STLCExtended.Examples.FixTest4.reduces (
 (STLCExtended.multistep STLCExtended.Examples.FixTest4.eotest
-   (STLCExtended.pair (STLCExtended.const 0) (STLCExtended.const 1)))).
+   (STLCExtended.tm_pair (STLCExtended.tm_const 0) (STLCExtended.tm_const 1)))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCExtended.Examples.FixTest4.reduces.
@@ -201,14 +203,6 @@ idtac " ".
 idtac "#> Manually graded: STLCExtended.progress".
 idtac "Possible points: 3".
 print_manual_grade STLCExtended.manual_grade_for_progress.
-idtac " ".
-
-idtac "-------------------  STLCE_context_invariance  --------------------".
-idtac " ".
-
-idtac "#> Manually graded: STLCExtended.context_invariance".
-idtac "Possible points: 3".
-print_manual_grade STLCExtended.manual_grade_for_context_invariance.
 idtac " ".
 
 idtac "-------------------  STLCE_subst_preserves_typing  --------------------".
@@ -229,10 +223,23 @@ idtac " ".
 
 idtac " ".
 
-idtac "Max points - standard: 17".
-idtac "Max points - advanced: 17".
+idtac "Max points - standard: 14".
+idtac "Max points - advanced: 14".
+idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
 idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- extensions_definition ---------".
@@ -263,8 +270,6 @@ idtac "---------- STLCExtended.Examples.FixTest4.reduces ---------".
 Print Assumptions STLCExtended.Examples.FixTest4.reduces.
 idtac "---------- progress ---------".
 idtac "MANUAL".
-idtac "---------- context_invariance ---------".
-idtac "MANUAL".
 idtac "---------- substitution_preserves_typing ---------".
 idtac "MANUAL".
 idtac "---------- preservation ---------".
@@ -273,6 +278,4 @@ idtac "".
 idtac "********** Advanced **********".
 Abort.
 
-(* Thu Feb 7 20:08:27 EST 2019 *)
-
-(* Thu Feb 7 20:09:28 EST 2019 *)
+(* 2020-09-09 21:08 *)

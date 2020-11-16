@@ -98,21 +98,21 @@ Proof.
     - apply le_S. apply le_n. }
   discriminate Nonsense.   Qed.
 
-(** **** Exercise: 2 stars, standard, optional (total_relation_not_partial)  
+(** **** Exercise: 2 stars, standard, optional (total_relation_not_partial) 
 
     Show that the [total_relation] defined in (an exercise in)
     [IndProp] is not a partial function. *)
 
-(* FILL IN HERE 
+(* FILL IN HERE
 
     [] *)
 
-(** **** Exercise: 2 stars, standard, optional (empty_relation_partial)  
+(** **** Exercise: 2 stars, standard, optional (empty_relation_partial) 
 
     Show that the [empty_relation] defined in (an exercise in)
     [IndProp] is a partial function. *)
 
-(* FILL IN HERE 
+(* FILL IN HERE
 
     [] *)
 
@@ -157,7 +157,7 @@ Proof.
   apply Hnm.
   apply Hmo. Qed.
 
-(** **** Exercise: 2 stars, standard, optional (le_trans_hard_way)  
+(** **** Exercise: 2 stars, standard, optional (le_trans_hard_way) 
 
     We can also prove [lt_trans] more laboriously by induction,
     without using [le_trans].  Do this. *)
@@ -172,7 +172,7 @@ Proof.
     (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (lt_trans'')  
+(** **** Exercise: 2 stars, standard, optional (lt_trans'') 
 
     Prove the same thing again by induction on [o]. *)
 
@@ -203,7 +203,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (le_Sn_n_inf)  
+(** **** Exercise: 2 stars, standard, optional (le_Sn_n_inf) 
 
     Provide an informal proof of the following theorem:
 
@@ -213,7 +213,7 @@ Proof.
     writing an informal proof without doing the formal proof first.
 
     Proof: *)
-    (* FILL IN HERE 
+    (* FILL IN HERE
 
     [] *)
 
@@ -394,4 +394,4 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(* Wed Jan 9 12:02:46 EST 2019 *)
+(* 2020-09-09 20:51 *)

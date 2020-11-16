@@ -16,6 +16,25 @@
     more gently. *)
 
 (* ################################################################# *)
+(** * Practicalities *)
+(* ================================================================= *)
+(** ** Recommended Citation Format *)
+
+(** If you want to refer to this volume in your own writing, please
+    do so as follows:
+
+   @book            {$FIRSTAUTHOR:SF$VOLUMENUMBER,
+   author       =   {$AUTHORS},
+   title        =   "$VOLUMENAME",
+   series       =   "Software Foundations",
+   volume       =   "$VOLUMENUMBER",
+   year         =   "$VOLUMEYEAR",
+   publisher    =   "Electronic textbook",
+   note         =   {Version $VERSION, \URLhttp://softwarefoundations.cis.upenn.edu },
+   }
+*)
+
+(* ################################################################# *)
 (** * Thanks *)
 
 (** Development of the _Software Foundations_ series has been
@@ -24,5 +43,4 @@
     Specification_.  Work on this volume was also supported by NSF
     grant 1421243, _Random Testing for Language Design_. *)
 
-
-(* Tue Oct 9 11:47:30 EDT 2018 *)
+(* 2020-10-14 10:23 *)

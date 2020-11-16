@@ -31,11 +31,13 @@ Export STLC.
 
 (** First, we need a function to compare two types for equality... *)
 
+Locate "Bool".
+
 Fixpoint eqb_ty (T1 T2:ty) : bool :=
   match T1,T2 with
-  | Bool, Bool =>
+  | <{ Bool }> , <{ Bool }> =>
       true
-  | Arrow T11 T12, Arrow T21 T22 =>
+  | <{ T11->T12 }>, <{ T21->T22 }> =>
       andb (eqb_ty T11 T21) (eqb_ty T12 T22)
   | _,_ =>
       false
@@ -45,12 +47,12 @@ Fixpoint eqb_ty (T1 T2:ty) : bool :=
     the boolean result returned by [eqb_ty] and the logical
     proposition that its inputs are equal. *)
 
-Lemma eqb_ty_refl : forall T1,
-  eqb_ty T1 T1 = true.
+Lemma eqb_ty_refl : forall T,
+  eqb_ty T T = true.
 Proof.
-  intros T1. induction T1; simpl.
+  intros T. induction T; simpl.
     reflexivity.
-    rewrite IHT1_1. rewrite IHT1_2. reflexivity.  Qed.
+    rewrite IHT1. rewrite IHT2. reflexivity.  Qed.
 
 Lemma eqb_ty__eq : forall T1 T2,
   eqb_ty T1 T2 = true -> T1 = T2.
@@ -58,7 +60,7 @@ Proof with auto.
   intros T1. induction T1; intros T2 Hbeq; destruct T2; inversion Hbeq.
   - (* T1=Bool *)
     reflexivity.
-  - (* T1=Arrow T1_1 T1_2 *)
+  - (* T1 = T1_1->T1_2 *)
     rewrite andb_true_iff in H0. inversion H0 as [Hbeq1 Hbeq2].
     apply IHT1_1 in Hbeq1. apply IHT1_2 in Hbeq2. subst...  Qed.
 End STLCTypes.
@@ -72,7 +74,7 @@ End STLCTypes.
     pattern-match on the results to make sure that they are not
     [None].  Also, in the [app] case, we use pattern matching to
     extract the left- and right-hand sides of the function's arrow
-    type (and fail if the type of the function is not [Arrow T11 T12]
+    type (and fail if the type of the function is not [T11->T12]
     for some [T11] and [T12]). *)
 
 Module FirstTry.
@@ -80,26 +82,26 @@ Import STLCTypes.
 
 Fixpoint type_check (Gamma : context) (t : tm) : option ty :=
   match t with
-  | var x =>
+  | tm_var x =>
       Gamma x
-  | abs x T11 t12 =>
-      match type_check (update Gamma x T11) t12 with
-      | Some T12 => Some (Arrow T11 T12)
+  | <{\x:T2, t1}> =>
+      match type_check (x |-> T2 ; Gamma) t1 with
+      | Some T1 => Some <{T2->T1}>
       | _ => None
       end
-  | app t1 t2 =>
+  | <{t1 t2}> =>
       match type_check Gamma t1, type_check Gamma t2 with
-      | Some (Arrow T11 T12),Some T2 =>
+      | Some <{T11->T12}>, Some T2 =>
           if eqb_ty T11 T2 then Some T12 else None
       | _,_ => None
       end
-  | tru =>
-      Some Bool
-  | fls =>
-      Some Bool
-  | test guard t f =>
+  | <{true}> =>
+      Some <{Bool}>
+  | <{false}> =>
+      Some <{Bool}>
+  | <{if guard then t else f}> =>
       match type_check Gamma guard with
-      | Some Bool =>
+      | Some <{Bool}> =>
           match type_check Gamma t, type_check Gamma f with
           | Some T1, Some T2 =>
               if eqb_ty T1 T2 then Some T1 else None
@@ -131,7 +133,7 @@ Notation " x <- e1 ;; e2" := (match e1 with
 
 Notation " 'return' e "
   := (Some e) (at level 60).
-         
+
 Notation " 'fail' "
   := None.
 
@@ -143,32 +145,32 @@ Import STLCTypes.
 
 Fixpoint type_check (Gamma : context) (t : tm) : option ty :=
   match t with
-  | var x =>
+  | tm_var x =>
       match Gamma x with
       | Some T => return T
       | None   => fail
       end
-  | abs x T11 t12 =>
-      T12 <- type_check (update Gamma x T11) t12 ;;
-      return (Arrow T11 T12)
-  | app t1 t2 =>
+  | <{\x:T2, t1}> =>
+      T1 <- type_check (x |-> T2 ; Gamma) t1 ;;
+      return <{T2->T1}>
+  | <{t1 t2}> =>
       T1 <- type_check Gamma t1 ;;
       T2 <- type_check Gamma t2 ;;
-      match T1 with 
-      | Arrow T11 T12 =>
+      match T1 with
+      | <{T11->T12}> =>
           if eqb_ty T11 T2 then return T12 else fail
       | _ => fail
       end
-  | tru =>
-      return Bool
-  | fls =>
-      return Bool
-  | test guard t1 t2 =>
+  | <{true}> =>
+      return <{ Bool }>
+  | <{false}> =>
+      return <{ Bool }>
+  | <{if guard then t1 else t2}> =>
       Tguard <- type_check Gamma guard ;;
       T1 <- type_check Gamma t1 ;;
       T2 <- type_check Gamma t2 ;;
       match Tguard with
-      | Bool =>
+      | <{ Bool }> =>
           if eqb_ty T1 T2 then return T1 else fail
       | _ => fail
       end
@@ -187,12 +189,12 @@ Theorem type_checking_sound : forall Gamma t T,
 Proof with eauto.
   intros Gamma t. generalize dependent Gamma.
   induction t; intros Gamma T Htc; inversion Htc.
-  - (* var *) rename s into x. destruct (Gamma x) eqn:H. 
+  - (* var *) rename s into x. destruct (Gamma x) eqn:H.
     rename t into T'. inversion H0. subst. eauto. solve_by_invert.
   - (* app *)
     remember (type_check Gamma t1) as TO1.
     destruct TO1 as [T1|]; try solve_by_invert;
-    destruct T1 as [|T11 T12]; try solve_by_invert; 
+    destruct T1 as [|T11 T12]; try solve_by_invert;
     remember (type_check Gamma t2) as TO2;
     destruct TO2 as [T2|]; try solve_by_invert.
     destruct (eqb_ty T11 T2) eqn: Heqb.
@@ -200,8 +202,8 @@ Proof with eauto.
     inversion H0; subst...
     inversion H0.
   - (* abs *)
-    rename s into x. rename t into T1.
-    remember (update Gamma x T1) as G'.
+    rename s into x, t into T1.
+    remember (x |-> T1 ; Gamma) as G'.
     remember (type_check G' t0) as TO2.
     destruct TO2; try solve_by_invert.
     inversion H0; subst...
@@ -230,11 +232,11 @@ Proof with auto.
   - (* T_Abs *) rewrite IHHty...
   - (* T_App *)
     rewrite IHHty1. rewrite IHHty2.
-    rewrite (eqb_ty_refl T11)...
+    rewrite (eqb_ty_refl T2)...
   - (* T_True *) eauto.
   - (* T_False *) eauto.
   - (* T_If *) rewrite IHHty1. rewrite IHHty2.
-    rewrite IHHty3. rewrite (eqb_ty_refl T)...
+    rewrite IHHty3. rewrite (eqb_ty_refl T1)...
 Qed.
 
 End STLCChecker.
@@ -242,7 +244,7 @@ End STLCChecker.
 (* ################################################################# *)
 (** * Exercises *)
 
-(** **** Exercise: 5 stars, standard (typechecker_extensions)  
+(** **** Exercise: 5 stars, standard (typechecker_extensions) 
 
     In this exercise we'll extend the typechecker to deal with the
     extended features discussed in chapter [MoreStlc].  Your job
@@ -258,30 +260,28 @@ Import STLCExtended.
 
 Fixpoint eqb_ty (T1 T2 : ty) : bool :=
   match T1,T2 with
-  | Nat, Nat =>
+  | <{{Nat}}>, <{{Nat}}> =>
       true
-  | Unit, Unit =>
+  | <{{Unit}}>, <{{Unit}}> =>
       true
-  | Arrow T11 T12, Arrow T21 T22 =>
+  | <{{T11 -> T12}}>, <{{T21 -> T22}}> =>
       andb (eqb_ty T11 T21) (eqb_ty T12 T22)
-  | Prod T11 T12, Prod T21 T22 =>
+  | <{{T11 * T12}}>, <{{T21 * T22}}> =>
       andb (eqb_ty T11 T21) (eqb_ty T12 T22)
-  | Sum T11 T12, Sum T21 T22 =>
+  | <{{T11 + T12}}>, <{{T21 + T22}}> =>
       andb (eqb_ty T11 T21) (eqb_ty T12 T22)
-  | List T11, List T21 =>
+  | <{{List T11}}>, <{{List T21}}> =>
       eqb_ty T11 T21
   | _,_ =>
       false
   end.
 
-Lemma eqb_ty_refl : forall T1,
-  eqb_ty T1 T1 = true.
+Lemma eqb_ty_refl : forall T,
+  eqb_ty T T = true.
 Proof.
-  intros T1.
-  induction T1; simpl;
-    try reflexivity;
-    try (rewrite IHT1_1; rewrite IHT1_2; reflexivity);
-    try (rewrite IHT1; reflexivity).  Qed.
+  intros T.
+  induction T; simpl; auto;
+    rewrite IHT1; rewrite IHT2; reflexivity.  Qed.
 
 Lemma eqb_ty__eq : forall T1 T2,
   eqb_ty T1 T2 = true -> T1 = T2.
@@ -296,49 +296,49 @@ Proof.
 
 Fixpoint type_check (Gamma : context) (t : tm) : option ty :=
   match t with
-  | var x =>
+  | tm_var x =>
       match Gamma x with
       | Some T => return T
       | None   => fail
       end
-  | abs x1 T1 t2 =>
-      T2 <- type_check (update Gamma x1 T1) t2 ;;
-      return (Arrow T1 T2)
-  | app t1 t2 =>
+  | <{ \ x1 : T1, t2 }> =>
+      T2 <- type_check (x1 |-> T1 ; Gamma) t2 ;;
+      return <{{T1 -> T2}}>
+  | <{ t1 t2 }> =>
       T1 <- type_check Gamma t1 ;;
       T2 <- type_check Gamma t2 ;;
-      match T1 with 
-      | Arrow T11 T12 =>
+      match T1 with
+      | <{{T11 -> T12}}> =>
           if eqb_ty T11 T2 then return T12 else fail
       | _ => fail
       end
-  | const _ =>
-      return Nat
-  | scc t1 =>
+  | tm_const _ =>
+      return <{{Nat}}>
+  | <{ succ t1 }> =>
       T1 <- type_check Gamma t1 ;;
-      match T1 with 
-      | Nat => return Nat
+      match T1 with
+      | <{{Nat}}> => return <{{Nat}}>
       | _ => fail
       end
-  | prd t1 =>
+  | <{ pred t1 }> =>
       T1 <- type_check Gamma t1 ;;
-      match T1 with 
-      | Nat => return Nat
+      match T1 with
+      | <{{Nat}}> => return <{{Nat}}>
       | _ => fail
       end
-  | mlt t1 t2 =>
+  | <{ t1 * t2 }> =>
       T1 <- type_check Gamma t1 ;;
       T2 <- type_check Gamma t2 ;;
       match T1, T2 with
-      | Nat, Nat => return Nat
+      | <{{Nat}}>, <{{Nat}}> => return <{{Nat}}>
       | _,_        => fail
       end
-  | test0 guard t f =>
+  | <{ if0 guard then t else f }> =>
       Tguard <- type_check Gamma guard ;;
       T1 <- type_check Gamma t ;;
       T2 <- type_check Gamma f ;;
       match Tguard with
-      | Nat => if eqb_ty T1 T2 then return T1 else fail
+      | <{{Nat}}> => if eqb_ty T1 T2 then return T1 else fail
       | _ => fail
       end
 
@@ -348,11 +348,11 @@ Fixpoint type_check (Gamma : context) (t : tm) : option ty :=
   (* FILL IN HERE *)
   (* lists (the [tlcase] is given for free) *)
   (* FILL IN HERE *)
-  | tlcase t0 t1 x21 x22 t2 =>
+  | <{ case t0 of | nil => t1 | x21 :: x22 => t2 }> =>
       match type_check Gamma t0 with
-      | Some (List T) =>
+      | Some <{{List T}}> =>
           match type_check Gamma t1,
-                type_check (update (update Gamma x22 (List T)) x21 T) t2 with
+                type_check (x21 |-> T ; x22 |-> <{{List T}}> ; Gamma) t2 with
           | Some T1', Some T2' =>
               if eqb_ty T1' T2' then Some T1' else None
           | _,_ => None
@@ -375,7 +375,7 @@ Fixpoint type_check (Gamma : context) (t : tm) : option ty :=
 
 Ltac invert_typecheck Gamma t T :=
   remember (type_check Gamma t) as TO;
-  destruct TO as [T|]; 
+  destruct TO as [T|];
   try solve_by_invert; try (inversion H0; eauto); try (subst; eauto).
 
 Ltac analyze T T1 T2 :=
@@ -393,11 +393,12 @@ Ltac case_equality S T :=
   inversion H0; apply eqb_ty__eq in Heqb; subst; subst; eauto.
 
 Theorem type_checking_sound : forall Gamma t T,
-  type_check Gamma t = Some T -> has_type Gamma t T.
+  type_check Gamma t = Some T ->
+  has_type Gamma t T.
 Proof with eauto.
   intros Gamma t. generalize dependent Gamma.
   induction t; intros Gamma T Htc; inversion Htc.
-  - (* var *) rename s into x. destruct (Gamma x) eqn:H. 
+  - (* var *) rename s into x. destruct (Gamma x) eqn:H.
     rename t into T'. inversion H0. subst. eauto. solve_by_invert.
   - (* app *)
     invert_typecheck Gamma t1 T1.
@@ -405,8 +406,8 @@ Proof with eauto.
     analyze T1 T11 T12.
     case_equality T11 T2.
   - (* abs *)
-    rename s into x. rename t into T1.
-    remember (update Gamma x T1) as Gamma'.
+    rename s into x, t into T1.
+    remember (x |-> T1 ; Gamma) as Gamma'.
     invert_typecheck Gamma' t0 T0.
   - (* const *) eauto.
   - (* scc *)
@@ -428,17 +429,18 @@ Proof with eauto.
     case_equality T2 T3.
   (* FILL IN HERE *)
   - (* tlcase *)
-    rename s into x31. rename s0 into x32.
+    rename s into x31, s0 into x32.
     fully_invert_typecheck Gamma t1 T1 T11 T12.
     invert_typecheck Gamma t2 T2.
-    remember (update (update Gamma x32 (List T11)) x31 T11) as Gamma'2.
+    remember (x31 |-> T11 ; x32 |-> <{{List T11}}> ; Gamma) as Gamma'2.
     invert_typecheck Gamma'2 t3 T3.
     case_equality T2 T3.
   (* FILL IN HERE *)
 Qed.
 
 Theorem type_checking_complete : forall Gamma t T,
-  has_type Gamma t T -> type_check Gamma t = Some T.
+  has_type Gamma t T ->
+  type_check Gamma t = Some T.
 Proof.
   intros Gamma t T Hty.
   induction Hty; simpl;
@@ -446,23 +448,24 @@ Proof.
     try (rewrite IHHty1);
     try (rewrite IHHty2);
     try (rewrite IHHty3);
-    try (rewrite (eqb_ty_refl T)); 
-    try (rewrite (eqb_ty_refl T1)); 
-    try (rewrite (eqb_ty_refl T2)); 
+    try (rewrite (eqb_ty_refl T0));
+    try (rewrite (eqb_ty_refl T1));
+    try (rewrite (eqb_ty_refl T2));
+    try (rewrite (eqb_ty_refl T3));
     eauto.
-  - destruct (Gamma x); try solve_by_invert. eauto.
-  Admitted. (* ... and delete this line *)
+    - destruct (Gamma x0); [assumption| solve_by_invert].
+      Admitted. (* ... and delete this line *)
 (* 
 Qed. (* ... and uncomment this one *)
 *)
 End TypecheckerExtensions.
 (** [] *)
 
-(** **** Exercise: 5 stars, standard, optional (stlc_step_function)  
+(** **** Exercise: 5 stars, standard, optional (stlc_step_function) 
 
     Above, we showed how to write a typechecking function and prove it
     sound and complete for the typing relation.  Do the same for the
-    operational semantics -- i.e., write a function [stepf] of type
+    operational semantics -- i.e., write a _function_ [stepf] of type
     [tm -> option tm] and prove that it is sound and complete with
     respect to [step] from chapter [MoreStlc]. *)
 
@@ -487,7 +490,7 @@ Proof. (* FILL IN HERE *) Admitted.
 End StepFunction.
 (** [] *)
 
-(** **** Exercise: 5 stars, standard, optional (stlc_impl)  
+(** **** Exercise: 5 stars, standard, optional (stlc_impl) 
 
     Using the Imp parser described in the [ImpParser] chapter
     of _Logical Foundations_ as a guide, build a parser for extended
@@ -502,4 +505,4 @@ Import StepFunction.
 End StlcImpl.
 (** [] *)
 
-(* Thu Feb 7 20:09:25 EST 2019 *)
+(* 2020-09-09 21:08 *)

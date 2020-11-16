@@ -1,0 +1,12 @@
+--- Verif_strlib.v.orig	2020-11-03 20:54:56.722608400 +0900
++++ Verif_strlib.v	2020-11-03 20:55:20.647973000 +0900
+@@ -270,7 +270,9 @@
+ start_function.
+ (** Look at the proof goal below the line.  We have the assertion,
+ 
++[[
+   PROP ( )  LOCAL (temp _str str)  SEP (cstring sh s str))
++]]
+ 
+  When proving things about a string-manipulating function, the
+   first decision is:  Does this function treat the string _abstractly_

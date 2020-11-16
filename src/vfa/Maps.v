@@ -1,8 +1,10 @@
 (** * Maps: Total and Partial Maps *)
 
 (** This file is almost identical to the [Maps] chapter of Software
-    Foundations volume 1 (Logical Foundations), except that it implements
-    functions from [nat] to [A] rather than functions from [id] to [A].
+    Foundations volume 1 (Logical Foundations), except that it
+    implements functions from [nat] to [A] rather than functions from
+    [id] to [A] and the concrete notations for writing down maps are
+    somewhat different.
 
     Maps (or dictionaries) are ubiquitous data structures, both in
     software construction generally and in the theory of programming
@@ -33,16 +35,15 @@
     own definitions and theorems the same as their counterparts in the
     standard library, wherever they overlap. *)
 
-Require Import Coq.Arith.Arith.
-Require Import Coq.Bool.Bool.
-Require Import Coq.Logic.FunctionalExtensionality.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Logic.FunctionalExtensionality.
 
 (** Documentation for the standard library can be found at
-    http://coq.inria.fr/library/.  
+    https://coq.inria.fr/library/.
 
     The [Search] command is a good way to look for theorems 
     involving objects of specific types. *)
-
 
 (* ################################################################# *)
 (** * Total Maps *)
@@ -81,7 +82,7 @@ Definition t_empty {A:Type} (v : A) : total_map A :=
 
 Definition t_update {A:Type} (m : total_map A)
                     (x : nat) (v : A) :=
-  fun x' => if beq_nat x x' then v else m x'.
+  fun x' => if x =? x' then v else m x'.
 
 (** This definition is a nice example of higher-order programming.
     The [t_update] function takes a _function_ [m] and yields a new
@@ -117,15 +118,17 @@ Proof. reflexivity. Qed.
     extensionality axiom, which is discussed in the [Logic]
     chapter and included in the Coq standard library.) *)
 
-(** **** Exercise: 1 star, optional (t_apply_empty)  *)
-(** First, the empty map returns its default element for all keys: *)
+(** **** Exercise: 1 star, standard, optional (t_apply_empty) 
+
+    First, the empty map returns its default element for all keys: *)
 Lemma t_apply_empty:  forall A x v, @t_empty A v x = v.
 Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, optional (t_update_eq)  *)
-(** Next, if we update a map [m] at a key [x] with a new value [v]
+(** **** Exercise: 2 stars, standard, optional (t_update_eq) 
+
+    Next, if we update a map [m] at a key [x] with a new value [v]
     and then look up [x] in the map resulting from the [update], we
     get back [v]: *)
 
@@ -135,8 +138,9 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, optional (t_update_neq)  *)
-(** On the other hand, if we update a map [m] at a key [x1] and then
+(** **** Exercise: 2 stars, standard, optional (t_update_neq) 
+
+    On the other hand, if we update a map [m] at a key [x1] and then
     look up a _different_ key [x2] in the resulting map, we get the
     same result that [m] would have given: *)
 
@@ -148,8 +152,9 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, optional (t_update_shadow)  *)
-(** If we update a map [m] at a key [x] with a value [v1] and then
+(** **** Exercise: 2 stars, standard, optional (t_update_shadow) 
+
+    If we update a map [m] at a key [x] with a value [v1] and then
     update again with the same key [x] and another value [v2], the
     resulting map behaves the same (gives the same result when applied
     to any key) as the simpler map obtained by performing just
@@ -165,25 +170,27 @@ Proof.
 (** For the final two lemmas about total maps, it's convenient to use
     the reflection idioms introduced in chapter [IndProp].  We begin
     by proving a fundamental _reflection lemma_ relating the equality
-    proposition on [id]s with the boolean function [beq_id]. *)
+    proposition on [id]s with the boolean function [eqb_id]. *)
 
-(** **** Exercise: 2 stars (beq_idP)  *)
-(** Use the proof of [beq_natP] in chapter [IndProp] as a template to
+(** **** Exercise: 2 stars, standard (eqb_idP) 
+
+    Use the proof of [eqb_natP] in chapter [IndProp] as a template to
     prove the following: *)
 
-Lemma beq_idP : forall x y, reflect (x = y) (beq_nat x y).
+Lemma eqb_idP : forall x y, reflect (x = y) (x =? y).
 Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** Now, given [id]s [x1] and [x2], we can use the [destruct (beq_idP
+(** Now, given [id]s [x1] and [x2], we can use the [destruct (eqb_idP
     x1 x2)] to simultaneously perform case analysis on the result of
-    [beq_id x1 x2] and generate hypotheses about the equality (in the
+    [eqb_id x1 x2] and generate hypotheses about the equality (in the
     sense of [=]) of [x1] and [x2]. *)
 
-(** **** Exercise: 2 stars (t_update_same)  *)
-(** Using the example in chapter [IndProp] as a template, use
-    [beq_idP] to prove the following theorem, which states that if we
+(** **** Exercise: 2 stars, standard (t_update_same) 
+
+    Using the example in chapter [IndProp] as a template, use
+    [eqb_idP] to prove the following theorem, which states that if we
     update a map to assign key [x] the same value as it already has in
     [m], then the result is equal to [m]: *)
 
@@ -193,8 +200,9 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, recommended (t_update_permute)  *)
-(** Use [beq_idP] to prove one final property of the [update]
+(** **** Exercise: 3 stars, standard, especially useful (t_update_permute) 
+
+    Use [eqb_idP] to prove one final property of the [update]
     function: If we update a map [m] at two distinct keys, it doesn't
     matter in which order we do the updates. *)
 
@@ -273,5 +281,4 @@ Proof.
   apply t_update_permute.
 Qed.
 
-(** $Date$ *)
-
+(* 2020-08-07 17:08 *)

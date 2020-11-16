@@ -5,7 +5,7 @@
      [Transitive], etc.) and [Proper].  They are described in the
      second half of _A Gentle Introduction to Type Classes and
 -    Relations in Coq_, by Castéran and Sozeau.
-+    Relations in Coq_, by Casteran and Sozeau.
-     http://www.labri.fr/perso/casteran/CoqArt/TypeClassesTut/typeclassestut.pdf.
++    Relations in Coq_, by Castéran and Sozeau.
+     https://www.labri.fr/perso/casteran/CoqArt/TypeClassesTut/typeclassestut.pdf.
  
      A much larger collection of typeclasses for formalizing

@@ -51,7 +51,7 @@
              with an eye to formal verification. *)
 
 (* ################################################################# *)
-(** * Other sources *)
+(** * Resources *)
 
 (** Here are some other good places to learn more...
 
@@ -88,4 +88,4 @@
          https://deepspec.org/event/dsss17/index.html
 *)
 
-(* Wed Jan 9 12:02:47 EST 2019 *)
+(* 2020-09-09 20:51 *)

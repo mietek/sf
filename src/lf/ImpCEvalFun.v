@@ -10,39 +10,37 @@
 (* ################################################################# *)
 (** * A Broken Evaluator *)
 
-From Coq Require Import omega.Omega.
+From Coq Require Import Lia.
 From Coq Require Import Arith.Arith.
 From LF Require Import Imp Maps.
 
 (** Here was our first try at an evaluation function for commands,
-    omitting [WHILE]. *)
+    omitting [while]. *)
 
-Open Scope imp_scope.
 Fixpoint ceval_step1 (st : state) (c : com) : state :=
   match c with
-    | SKIP =>
+    | <{ skip }> =>
         st
-    | l ::= a1 =>
+    | <{ l := a1 }> =>
         (l !-> aeval st a1 ; st)
-    | c1 ;; c2 =>
+    | <{ c1 ; c2 }> =>
         let st' := ceval_step1 st c1 in
         ceval_step1 st' c2
-    | TEST b THEN c1 ELSE c2 FI =>
+    | <{ if b then c1 else c2 end }> =>
         if (beval st b)
           then ceval_step1 st c1
           else ceval_step1 st c2
-    | WHILE b1 DO c1 END =>
+    | <{ while b1 do c1 end }> =>
         st  (* bogus *)
   end.
-Close Scope imp_scope.
 
 (** As we remarked in chapter [Imp], in a traditional functional
-    programming language like ML or Haskell we could write the WHILE
+    programming language like ML or Haskell we could write the while
     case as follows:
 
-    | WHILE b1 DO c1 END =>
+    | while b1 do c1 end =>
         if (beval st b1) then
-          ceval_step1 st (c1;; WHILE b1 DO c1 END)
+          ceval_step1 st <{ c1; while b1 do c1 end }>
         else st
 
     Coq doesn't accept such a definition ([Error: Cannot guess
@@ -78,31 +76,29 @@ Close Scope imp_scope.
     evaluator runs out of gas -- it doesn't really matter because the
     result is going to be wrong in either case!) *)
 
-Open Scope imp_scope.
 Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
   match i with
   | O => empty_st
   | S i' =>
     match c with
-      | SKIP =>
+      | <{ skip }> =>
           st
-      | l ::= a1 =>
+      | <{ l := a1 }> =>
           (l !-> aeval st a1 ; st)
-      | c1 ;; c2 =>
+      | <{ c1 ; c2 }> =>
           let st' := ceval_step2 st c1 i' in
           ceval_step2 st' c2 i'
-      | TEST b THEN c1 ELSE c2 FI =>
+      | <{ if b then c1 else c2 end }> =>
           if (beval st b)
             then ceval_step2 st c1 i'
             else ceval_step2 st c2 i'
-      | WHILE b1 DO c1 END =>
+      | <{ while b1 do c1 end }> =>
           if (beval st b1)
           then let st' := ceval_step2 st c1 i' in
                ceval_step2 st' c i'
           else st
     end
   end.
-Close Scope imp_scope.
 
 (** _Note_: It is tempting to think that the index [i] here is
     counting the "number of steps of evaluation."  But if you look
@@ -119,27 +115,26 @@ Close Scope imp_scope.
     so that we can distinguish between normal and abnormal
     termination. *)
 
-Open Scope imp_scope.
 Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
                     : option state :=
   match i with
   | O => None
   | S i' =>
     match c with
-      | SKIP =>
+      | <{ skip }> =>
           Some st
-      | l ::= a1 =>
+      | <{ l := a1 }> =>
           Some (l !-> aeval st a1 ; st)
-      | c1 ;; c2 =>
+      | <{ c1 ; c2 }> =>
           match (ceval_step3 st c1 i') with
           | Some st' => ceval_step3 st' c2 i'
           | None => None
           end
-      | TEST b THEN c1 ELSE c2 FI =>
+      | <{ if b then c1 else c2 end }> =>
           if (beval st b)
             then ceval_step3 st c1 i'
             else ceval_step3 st c2 i'
-      | WHILE b1 DO c1 END =>
+      | <{ while b1 do c1 end }> =>
           if (beval st b1)
           then match (ceval_step3 st c1 i') with
                | Some st' => ceval_step3 st' c i'
@@ -148,7 +143,6 @@ Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
           else Some st
     end
   end.
-Close Scope imp_scope.
 
 (** We can improve the readability of this version by introducing a
     bit of auxiliary notation to hide the plumbing involved in
@@ -161,32 +155,30 @@ Notation "'LETOPT' x <== e1 'IN' e2"
        end)
    (right associativity, at level 60).
 
-Open Scope imp_scope.
 Fixpoint ceval_step (st : state) (c : com) (i : nat)
                     : option state :=
   match i with
   | O => None
   | S i' =>
     match c with
-      | SKIP =>
+      | <{ skip }> =>
           Some st
-      | l ::= a1 =>
+      | <{ l := a1 }> =>
           Some (l !-> aeval st a1 ; st)
-      | c1 ;; c2 =>
+      | <{ c1 ; c2 }> =>
           LETOPT st' <== ceval_step st c1 i' IN
           ceval_step st' c2 i'
-      | TEST b THEN c1 ELSE c2 FI =>
+      | <{ if b then c1 else c2 end }> =>
           if (beval st b)
             then ceval_step st c1 i'
             else ceval_step st c2 i'
-      | WHILE b1 DO c1 END =>
+      | <{ while b1 do c1 end }> =>
           if (beval st b1)
           then LETOPT st' <== ceval_step st c1 i' IN
                ceval_step st' c i'
           else Some st
     end
   end.
-Close Scope imp_scope.
 
 Definition test_ceval (st:state) (c:com) :=
   match ceval_step st c 500 with
@@ -204,7 +196,7 @@ Definition test_ceval (st:state) (c:com) :=
    ====>
       Some (2, 0, 4)   *)
 
-(** **** Exercise: 2 stars, standard, recommended (pup_to_n)  
+(** **** Exercise: 2 stars, standard, especially useful (pup_to_n) 
 
     Write an Imp program that sums the numbers from [1] to
    [X] (inclusive: [1 + 2 + ... + X]) in the variable [Y].  Make sure
@@ -219,16 +211,16 @@ Example pup_to_n_1 :
   test_ceval (X !-> 5) pup_to_n
   = Some (0, 15, 0).
 Proof. reflexivity. Qed.
+*)
+(** [] *)
 
-    [] *)
-
-(** **** Exercise: 2 stars, standard, optional (peven)  
+(** **** Exercise: 2 stars, standard, optional (peven) 
 
     Write an [Imp] program that sets [Z] to [0] if [X] is even and
     sets [Z] to [1] otherwise.  Use [test_ceval] to test your
     program. *)
 
-(* FILL IN HERE 
+(* FILL IN HERE
 
     [] *)
 
@@ -259,10 +251,10 @@ Proof.
     intros c st st' H.
     destruct c;
            simpl in H; inversion H; subst; clear H.
-      + (* SKIP *) apply E_Skip.
-      + (* ::= *) apply E_Ass. reflexivity.
+      + (* skip *) apply E_Skip.
+      + (* := *) apply E_Ass. reflexivity.
 
-      + (* ;; *)
+      + (* ; *)
         destruct (ceval_step st c1 i') eqn:Heqr1.
         * (* Evaluation of r1 terminates normally *)
           apply E_Seq with s.
@@ -271,7 +263,7 @@ Proof.
         * (* Otherwise -- contradiction *)
           discriminate H1.
 
-      + (* TEST *)
+      + (* if *)
         destruct (beval st b) eqn:Heqr.
         * (* r = true *)
           apply E_IfTrue. rewrite Heqr. reflexivity.
@@ -280,7 +272,7 @@ Proof.
           apply E_IfFalse. rewrite Heqr. reflexivity.
           apply IHi'. assumption.
 
-      + (* WHILE *) destruct (beval st b) eqn :Heqr.
+      + (* while *) destruct (beval st b) eqn :Heqr.
         * (* r = true *)
          destruct (ceval_step st c i') eqn:Heqr1.
          { (* r1 = Some s *)
@@ -290,10 +282,10 @@ Proof.
            apply IHi'. simpl in H1. assumption. }
          { (* r1 = None *) discriminate H1. }
         * (* r = false *)
-          injection H1. intros H2. rewrite <- H2.
+          injection H1 as H2. rewrite <- H2.
           apply E_WhileFalse. apply Heqr. Qed.
 
-(** **** Exercise: 4 stars, standard (ceval_step__ceval_inf)  
+(** **** Exercise: 4 stars, standard (ceval_step__ceval_inf) 
 
     Write an informal proof of [ceval_step__ceval], following the
     usual template.  (The template for case analysis on an inductively
@@ -318,15 +310,15 @@ induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
     simpl in Hceval. discriminate Hceval.
   - (* i1 = S i1' *)
     destruct i2 as [|i2']. inversion Hle.
-    assert (Hle': i1' <= i2') by omega.
+    assert (Hle': i1' <= i2') by lia.
     destruct c.
-    + (* SKIP *)
+    + (* skip *)
       simpl in Hceval. inversion Hceval.
       reflexivity.
-    + (* ::= *)
+    + (* := *)
       simpl in Hceval. inversion Hceval.
       reflexivity.
-    + (* ;; *)
+    + (* ; *)
       simpl in Hceval. simpl.
       destruct (ceval_step st c1 i1') eqn:Heqst1'o.
       * (* st1'o = Some *)
@@ -336,12 +328,12 @@ induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
       * (* st1'o = None *)
         discriminate Hceval.
 
-    + (* TEST *)
+    + (* if *)
       simpl in Hceval. simpl.
       destruct (beval st b); apply (IHi1' i2') in Hceval;
         assumption.
 
-    + (* WHILE *)
+    + (* while *)
       simpl in Hceval. simpl.
       destruct (beval st b); try assumption.
       destruct (ceval_step st c i1') eqn: Heqst1'o.
@@ -352,7 +344,7 @@ induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
       * (* i1'o = None *)
         simpl in Hceval. discriminate Hceval.  Qed.
 
-(** **** Exercise: 3 stars, standard, recommended (ceval__ceval_step)  
+(** **** Exercise: 3 stars, standard, especially useful (ceval__ceval_step) 
 
     Finish the following proof.  You'll need [ceval_step_more] in a
     few places, as well as some basic facts about [<=] and [plus]. *)
@@ -394,6 +386,6 @@ Proof.
   apply ceval_step_more with (i2 := i1 + i2) in E1.
   apply ceval_step_more with (i2 := i1 + i2) in E2.
   rewrite E1 in E2. inversion E2. reflexivity.
-  omega. omega.  Qed.
+  lia. lia.  Qed.
 
-(* Wed Jan 9 12:02:46 EST 2019 *)
+(* 2020-09-09 20:51 *)

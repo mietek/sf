@@ -74,7 +74,7 @@ Fixpoint list_of_string (s : string) : list ascii :=
   | String c s => c :: (list_of_string s)
   end.
 
-Fixpoint string_of_list (xs : list ascii) : string :=
+Definition string_of_list (xs : list ascii) : string :=
   fold_right String EmptyString xs.
 
 Definition token := string.
@@ -166,7 +166,7 @@ Fixpoint many_helper {T} (p : parser T) acc steps xs :=
 
 (** A (step-indexed) parser that expects zero or more [p]s: *)
 
-Fixpoint many {T} (p : parser T) (steps : nat) : parser (list T) :=
+Definition many {T} (p : parser T) (steps : nat) : parser (list T) :=
   many_helper p [] steps.
 
 (** A parser that expects a given token, followed by [p]: *)
@@ -355,35 +355,35 @@ Fixpoint parseSimpleCommand (steps:nat)
   match steps with
   | 0 => NoneE "Too many recursive calls"
   | S steps' =>
-    TRY ' (u, rest) <- expect "SKIP" xs ;;
-        SomeE (SKIP%imp, rest)
+    TRY ' (u, rest) <- expect "skip" xs ;;
+        SomeE (<{skip}>, rest)
     OR
     TRY ' (e,rest) <-
-            firstExpect "TEST"
+            firstExpect "if"
                         (parseBExp steps') xs ;;
         ' (c,rest') <-
-            firstExpect "THEN"
+            firstExpect "then"
                         (parseSequencedCommand steps') rest ;;
         ' (c',rest'') <-
-            firstExpect "ELSE"
+            firstExpect "else"
                         (parseSequencedCommand steps') rest' ;;
         ' (tt,rest''') <-
-            expect "END" rest'' ;;
-       SomeE(TEST e THEN c ELSE c' FI%imp, rest''')
+            expect "end" rest'' ;;
+       SomeE(<{if e then c else c' end}>, rest''')
     OR
     TRY ' (e,rest) <-
-            firstExpect "WHILE"
+            firstExpect "while"
                         (parseBExp steps') xs ;;
         ' (c,rest') <-
-            firstExpect "DO"
+            firstExpect "do"
                         (parseSequencedCommand steps') rest ;;
         ' (u,rest'') <-
-            expect "END" rest' ;;
-        SomeE(WHILE e DO c END%imp, rest'')
+            expect "end" rest' ;;
+        SomeE(<{while e do c end}>, rest'')
     OR
     TRY ' (i, rest) <- parseIdentifier xs ;;
-        ' (e, rest') <- firstExpect "::=" (parseAExp steps') rest ;;
-        SomeE ((i ::= e)%imp, rest')
+        ' (e, rest') <- firstExpect ":=" (parseAExp steps') rest ;;
+        SomeE (<{i := e}>, rest')
     OR
         NoneE "Expecting a command"
 end
@@ -395,9 +395,9 @@ with parseSequencedCommand (steps:nat)
   | S steps' =>
     ' (c, rest) <- parseSimpleCommand steps' xs ;;
     TRY ' (c', rest') <-
-            firstExpect ";;"
+            firstExpect ";"
                         (parseSequencedCommand steps') rest ;;
-        SomeE ((c ;; c')%imp, rest')
+        SomeE (<{c ; c'}>, rest')
     OR
     SomeE (c, rest)
   end.
@@ -416,49 +416,49 @@ Definition parse (str : string) : optionE com :=
 (** * Examples *)
 
 Example eg1 : parse "
-  TEST x = y + 1 + 2 - y * 6 + 3 THEN
-    x ::= x * 1;;
-    y ::= 0
-  ELSE
-    SKIP
-  END  "
+  if x = y + 1 + 2 - y * 6 + 3 then
+    x := x * 1;
+    y := 0
+  else
+    skip
+  end  "
 =
-  SomeE (
-      TEST "x" = "y" + 1 + 2 - "y" * 6 + 3 THEN
-        "x" ::= "x" * 1;;
-        "y" ::= 0
-      ELSE
-        SKIP
-      FI)%imp.
+  SomeE <{
+      if ("x" = ("y" + 1 + 2 - "y" * 6 + 3)) then
+        "x" := "x" * 1;
+        "y" := 0
+      else
+        skip
+      end }>.
 Proof. cbv. reflexivity. Qed.
 
 Example eg2 : parse "
-  SKIP;;
-  z::=x*y*(x*x);;
-  WHILE x=x DO
-    TEST (z <= z*z) && ~(x = 2) THEN
-      x ::= z;;
-      y ::= z
-    ELSE
-      SKIP
-    END;;
-    SKIP
-  END;;
-  x::=z  "
+  skip;
+  z:=x*y*(x*x);
+  while x=x do
+    if (z <= z*z) && ~(x = 2) then
+      x := z;
+      y := z
+    else
+      skip
+    end;
+    skip
+  end;
+  x:=z  "
 =
-  SomeE (
-      SKIP;;
-      "z" ::= "x" * "y" * ("x" * "x");;
-      WHILE "x" = "x" DO
-        TEST ("z" <= "z" * "z") && ~("x" = 2) THEN
-          "x" ::= "z";;
-          "y" ::= "z"
-        ELSE
-          SKIP
-        FI;;
-        SKIP
-      END;;
-      "x" ::= "z")%imp.
+  SomeE <{
+      skip;
+      "z" := "x" * "y" * ("x" * "x");
+      while ("x" = "x") do
+        if ("z" <= "z" * "z") && ~("x" = 2) then
+          "x" := "z";
+          "y" := "z"
+        else
+          skip
+        end;
+        skip
+      end;
+      "x" := "z" }>.
 Proof. cbv. reflexivity. Qed.
 
-(* Wed Jan 9 12:02:46 EST 2019 *)
+(* 2020-09-09 20:51 *)

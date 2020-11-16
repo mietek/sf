@@ -1,0 +1,44 @@
+--- Verif_hash.v.orig	2020-11-04 17:33:32.700145200 +0900
++++ Verif_hash.v	2020-11-04 17:34:23.357208300 +0900
+@@ -284,11 +284,15 @@
+     [0 <= i <= Zlength contents].
+   In the LOCAL part of your loop invariant, try to use something like
+ 
++[[
+     temp _c (Vbyte (Znth i (contents ++ [Byte.zero]))
++]]
+ 
+   instead of 
+ 
++[[
+     temp _c (Znth i (map Vbyte (...)))
++]]
+ 
+   The reason is that [temp _c (Vint x)] or [temp _c (Vbyte y)] is much 
+   easier for Floyd to handle than [temp _c X]
+@@ -653,7 +657,9 @@
+ 
+   We will describe variable [r] something like this:
+ 
++[[
+   PROP() LOCAL(temp _r r) SEP(data_at Ews (tptr tcell) q r).
++]]
+ 
+   That is, pointer to a single word containing [q].  But when
+   we do [r = &(p->next)] we will have [r] pointing into the middle
+@@ -972,6 +978,7 @@
+ 
+ (**
+ 
++<<
+   void incr_list (struct cell **r0, char *s);
+ 
+   void incr (struct hashtable *table, char *s) {
+@@ -979,6 +986,7 @@
+     unsigned int b = h % N;
+     incr_list (& table->buckets[b], s);
+   }
++>>
+ 
+   The difficult part here is the function-argument, [ & table->buckets[b] ].
+   The precondition of the [incr_list] function requires just a single

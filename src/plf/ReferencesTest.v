@@ -76,7 +76,7 @@ idtac "-------------------  factorial_ref  --------------------".
 idtac " ".
 
 idtac "#> STLCRef.RefsAndNontermination.factorial".
-idtac "Possible points: 2".
+idtac "Possible points: 3".
 check_type @STLCRef.RefsAndNontermination.factorial (STLCRef.tm).
 idtac "Assumptions:".
 Abort.
@@ -85,11 +85,11 @@ Goal True.
 idtac " ".
 
 idtac "#> STLCRef.RefsAndNontermination.factorial_type".
-idtac "Possible points: 2".
+idtac "Possible points: 3".
 check_type @STLCRef.RefsAndNontermination.factorial_type (
-(STLCRef.has_type (@Maps.empty STLCRef.ty) (@nil STLCRef.ty)
+(STLCRef.has_type (@nil STLCRef.ty) (@Maps.empty STLCRef.ty)
    STLCRef.RefsAndNontermination.factorial
-   (STLCRef.Arrow STLCRef.Nat STLCRef.Nat))).
+   (STLCRef.Ty_Arrow STLCRef.Ty_Nat STLCRef.Ty_Nat))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLCRef.RefsAndNontermination.factorial_type.
@@ -98,10 +98,23 @@ idtac " ".
 
 idtac " ".
 
-idtac "Max points - standard: 15".
-idtac "Max points - advanced: 15".
+idtac "Max points - standard: 17".
+idtac "Max points - advanced: 17".
+idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
 idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- compact_update ---------".
@@ -122,6 +135,4 @@ idtac "".
 idtac "********** Advanced **********".
 Abort.
 
-(* Thu Feb 7 20:08:42 EST 2019 *)
-
-(* Thu Feb 7 20:09:29 EST 2019 *)
+(* 2020-09-09 21:09 *)

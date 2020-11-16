@@ -1,0 +1,429 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Hashfun: Functional model of hash tables</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vc.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 5: Verifiable C</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Hashfun<span class="subtitle">Functional model of hash tables</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ This C program, <span class="inlinecode"><span class="id" title="var">hash.c</span></span>, implements a hash table with
+   external chaining.  See <a href="https://www.cs.princeton.edu/~appel/HashTables.pdf"><span class="inlineref">https://www.cs.princeton.edu/~appel/HashTables.pdf</span></a>
+   for an introduction to hash tables.
+
+<div class="paragraph"> </div>
+
+<pre>
+    /* First, access a few standard-library functions */
+    #include &lt;stddef.h&gt;
+    extern void * malloc (size_t n);
+    extern void exit(int n);
+    extern size_t strlen(const char *str);
+    extern char *strcpy(char *dest, const char *src);
+    extern int strcmp(const char *str1, const char *str2);
+
+    /* A function to turn a character-string into an integer */
+    unsigned int hash (char *s) {
+      unsigned int n=0;
+      unsigned int i=0;
+      int c=s[i];
+      while (c) {
+        n = n*65599u+(unsigned)c;
+        i++;
+        c=s[i];
+      }
+      return n;
+    }
+
+    /* Each "bucket" is a linked list of these cells: */
+    struct cell {
+      char *key;
+      unsigned int count;
+      struct cell *next;
+    };
+
+    /* How many buckets in the hash table */
+    enum {N = 109};
+
+    /* A hash table is an array of buckets */
+    struct hashtable {
+      struct cell *buckets[N];
+    };
+
+    /* first malloc space for a new copy of a string, then copy it. */
+    char *copy_string (char *s) {
+      int i,n = strlen(s)+1;
+      char *p = malloc(n);
+      if (!p) exit(1);
+      strcpy(p,s);
+      return p;
+    }
+
+    /* create an empty table */
+    struct hashtable *new_table (void) {
+      int i;
+      struct hashtable *p = 
+           (struct hashtable * )malloc(sizeof(struct hashtable));
+      if (!p) exit(1);
+      for (i=0; i&lt;N; i++) p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>buckets[i]=NULL;
+      return p;
+    }  
+
+    /* allocate and initialize a new linked-list cell */
+    struct cell *new_cell (char *key, int count, struct cell *next) {
+      struct cell *p = (struct cell * )malloc(sizeof(struct cell));
+      if (!p) exit(1);
+      p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>key = copy_string(key);
+      p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>count = count;
+      p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>next = next;
+      return p;
+    }
+
+    /* lookup up a string in the hash table, getting its occurrence count */
+    unsigned int get (struct hashtable *table, char *s) {
+      unsigned int h = hash(s);
+      unsigned int b = h % N;
+      struct cell *p = table<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>buckets[b];
+      while (p) {
+        if (strcmp(p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>key, s)==0)
+          return p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>count;
+        p=p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>next;
+      }
+      return 0;
+    }
+
+    /* increment to the occurrence count of the string s in bucket *r<sub>0</sub> */
+    void incr_list (struct cell **r<sub>0</sub>, char *s) {
+      struct cell *p, **r;
+      for(r=r<sub>0</sub>; ; r=&amp;p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>next) {
+        p = *r;
+        if (!p) {
+          *r = new_cell(s,1,NULL);
+          return;
+        }
+        if (strcmp(p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>key, s)==0) {
+          p<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>count++;
+          return;
+        }
+      }
+    }  
+
+    /* increment to the occurrence count of the string s the whole hash table */
+    void incr (struct hashtable *table, char *s) {
+      unsigned int h = hash(s);
+      unsigned int b = h % N;
+      incr_list (&amp; table<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>buckets[b], s);
+    }
+</pre>
+
+<div class="paragraph"> </div>
+
+<a id="lab116"></a><h2 class="section">A functional model</h2>
+
+<div class="paragraph"> </div>
+
+ Before we prove the C program correct, we write a functional
+ program that models its behavior as closely as possible.  
+ The functional program won't be (average) constant time per access,
+ like the C program, because it takes linear time to get the nth
+ element of a list, while the C program can subscript an array in
+ constant time.  But we are not worried about the execution time
+ of the functional program; only that it serve as a model
+ for specifying the C program. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VST.floyd.functional_base</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Instance</span> <a id="EqDec_string" class="idref" href="#EqDec_string"><span class="id" title="instance">EqDec_string</span></a>: <span class="id" title="class">EqDec</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>) := <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#list_eq_dec"><span class="id" title="lemma">list_eq_dec</span></a> <span class="id" title="lemma">Byte.eq_dec</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Fixpoint</span> <a id="hashfun_aux" class="idref" href="#hashfun_aux"><span class="id" title="definition">hashfun_aux</span></a> (<a id="h:1" class="idref" href="#h:1"><span class="id" title="binder">h</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) (<a id="s:2" class="idref" href="#s:2"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>) : <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> :=<br/>
+&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Hashfun.html#s:2"><span class="id" title="variable">s</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> ⇒ <a class="idref" href="Hashfun.html#h:1"><span class="id" title="variable">h</span></a><br/>
+&nbsp;| <span class="id" title="var">c</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <span class="id" title="var">s'</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashfun.html#hashfun_aux:3"><span class="id" title="definition">hashfun_aux</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">(</span></a><a class="idref" href="Hashfun.html#h:1"><span class="id" title="variable">h</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#d3ea1afb7d81263dc23c4eb0da2a3c4e"><span class="id" title="notation">×</span></a> 65599 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <span class="id" title="definition">Byte.signed</span> <span class="id" title="var">c</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">mod</span></a> <span class="id" title="definition">Int.modulus</span>) <span class="id" title="var">s'</span><br/>
+<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="hashfun" class="idref" href="#hashfun"><span class="id" title="definition">hashfun</span></a> (<a id="s:5" class="idref" href="#s:5"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>) := <a class="idref" href="Hashfun.html#hashfun_aux"><span class="id" title="definition">hashfun_aux</span></a> 0 <a class="idref" href="Hashfun.html#s:5"><span class="id" title="variable">s</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="hashtable_contents" class="idref" href="#hashtable_contents"><span class="id" title="definition">hashtable_contents</span></a> := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>)).<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="N" class="idref" href="#N"><span class="id" title="definition">N</span></a> := 109.<br/>
+<span class="id" title="keyword">Lemma</span> <a id="N_eq" class="idref" href="#N_eq"><span class="id" title="lemma">N_eq</span></a> : <a class="idref" href="Hashfun.html#N"><span class="id" title="definition">N</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 109.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">Hint Rewrite</span> <a class="idref" href="Hashfun.html#N_eq"><span class="id" title="lemma">N_eq</span></a> : <span class="id" title="var">rep_lia</span>.<br/>
+<span class="id" title="keyword">Global Opaque</span> <a class="idref" href="Hashfun.html#N"><span class="id" title="definition">N</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="empty_table" class="idref" href="#empty_table"><span class="id" title="definition">empty_table</span></a> : <a class="idref" href="Hashfun.html#hashtable_contents"><span class="id" title="definition">hashtable_contents</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> <a class="idref" href="Hashfun.html#N"><span class="id" title="definition">N</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Fixpoint</span> <a id="list_get" class="idref" href="#list_get"><span class="id" title="definition">list_get</span></a> (<a id="s:6" class="idref" href="#s:6"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>) (<a id="al:7" class="idref" href="#al:7"><span class="id" title="binder">al</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>)) : <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Hashfun.html#al:7"><span class="id" title="variable">al</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">k</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <span class="id" title="var">al'</span> ⇒ <span class="id" title="keyword">if</span> <span class="id" title="definition">eq_dec</span> <a class="idref" href="Hashfun.html#s:6"><span class="id" title="variable">s</span></a> <span class="id" title="var">k</span> <span class="id" title="keyword">then</span> <span class="id" title="var">i</span> <span class="id" title="keyword">else</span> <a class="idref" href="Hashfun.html#list_get:8"><span class="id" title="definition">list_get</span></a> <a class="idref" href="Hashfun.html#s:6"><span class="id" title="variable">s</span></a> <span class="id" title="var">al'</span><br/>
+&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> ⇒ 0<br/>
+&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Fixpoint</span> <a id="list_incr" class="idref" href="#list_incr"><span class="id" title="definition">list_incr</span></a> (<a id="s:10" class="idref" href="#s:10"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>) (<a id="al:11" class="idref" href="#al:11"><span class="id" title="binder">al</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:  <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Hashfun.html#al:11"><span class="id" title="variable">al</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">k</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <span class="id" title="var">al'</span> ⇒ <span class="id" title="keyword">if</span> <span class="id" title="definition">eq_dec</span> <a class="idref" href="Hashfun.html#s:10"><span class="id" title="variable">s</span></a> <span class="id" title="var">k</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">k</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">i</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">al'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">k</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><a class="idref" href="Hashfun.html#list_incr:12"><span class="id" title="definition">list_incr</span></a> <a class="idref" href="Hashfun.html#s:10"><span class="id" title="variable">s</span></a> <span class="id" title="var">al'</span><br/>
+&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Hashfun.html#s:10"><span class="id" title="variable">s</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> 1<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a><br/>
+&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="hashtable_get" class="idref" href="#hashtable_get"><span class="id" title="definition">hashtable_get</span></a>  (<a id="s:14" class="idref" href="#s:14"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>) (<a id="contents:15" class="idref" href="#contents:15"><span class="id" title="binder">contents</span></a>: <a class="idref" href="Hashfun.html#hashtable_contents"><span class="id" title="definition">hashtable_contents</span></a>) : <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Hashfun.html#list_get"><span class="id" title="definition">list_get</span></a> <a class="idref" href="Hashfun.html#s:14"><span class="id" title="variable">s</span></a> (<span class="id" title="definition">Znth</span> (<a class="idref" href="Hashfun.html#hashfun"><span class="id" title="definition">hashfun</span></a> <a class="idref" href="Hashfun.html#s:14"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">mod</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#contents:15"><span class="id" title="variable">contents</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">)</span></a>) <a class="idref" href="Hashfun.html#contents:15"><span class="id" title="variable">contents</span></a>).<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="hashtable_incr" class="idref" href="#hashtable_incr"><span class="id" title="definition">hashtable_incr</span></a> (<a id="s:16" class="idref" href="#s:16"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>) (<a id="contents:17" class="idref" href="#contents:17"><span class="id" title="binder">contents</span></a>: <a class="idref" href="Hashfun.html#hashtable_contents"><span class="id" title="definition">hashtable_contents</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <a class="idref" href="Hashfun.html#hashtable_contents"><span class="id" title="definition">hashtable_contents</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <a id="h:18" class="idref" href="#h:18"><span class="id" title="binder">h</span></a> := <a class="idref" href="Hashfun.html#hashfun"><span class="id" title="definition">hashfun</span></a> <a class="idref" href="Hashfun.html#s:16"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">mod</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#contents:17"><span class="id" title="variable">contents</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">in</span> <span class="id" title="keyword">let</span> <a id="al:19" class="idref" href="#al:19"><span class="id" title="binder">al</span></a> := <span class="id" title="definition">Znth</span> <a class="idref" href="Hashfun.html#h:18"><span class="id" title="variable">h</span></a> <a class="idref" href="Hashfun.html#contents:17"><span class="id" title="variable">contents</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">in</span> <span class="id" title="definition">upd_Znth</span> <a class="idref" href="Hashfun.html#h:18"><span class="id" title="variable">h</span></a> <a class="idref" href="Hashfun.html#contents:17"><span class="id" title="variable">contents</span></a> (<a class="idref" href="Hashfun.html#list_incr"><span class="id" title="definition">list_incr</span></a> <a class="idref" href="Hashfun.html#s:16"><span class="id" title="variable">s</span></a> <a class="idref" href="Hashfun.html#al:19"><span class="id" title="variable">al</span></a>).<br/>
+</div>
+
+<div class="doc">
+<a id="lab117"></a><h4 class="section">Exercise: 2 stars, standard (hashfun_inrange)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="hashfun_inrange" class="idref" href="#hashfun_inrange"><span class="id" title="lemma">hashfun_inrange</span></a>: <span class="id" title="keyword">∀</span> <a id="s:20" class="idref" href="#s:20"><span class="id" title="binder">s</span></a>, 0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Hashfun.html#hashfun"><span class="id" title="definition">hashfun</span></a> <a class="idref" href="Hashfun.html#s:20"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <span class="id" title="definition">Int.max_unsigned</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab118"></a><h4 class="section">Exercise: 1 star, standard (hashfun_get_unfold)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="hashtable_get_unfold" class="idref" href="#hashtable_get_unfold"><span class="id" title="lemma">hashtable_get_unfold</span></a>:<br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:21" class="idref" href="#sigma:21"><span class="id" title="binder">sigma</span></a> (<a id="cts:22" class="idref" href="#cts:22"><span class="id" title="binder">cts</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <span class="id" title="inductive">val</span>)),<br/>
+&nbsp;<a class="idref" href="Hashfun.html#hashtable_get"><span class="id" title="definition">hashtable_get</span></a> <a class="idref" href="Hashfun.html#sigma:21"><span class="id" title="variable">sigma</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#fst"><span class="id" title="definition">fst</span></a> <a class="idref" href="Hashfun.html#cts:22"><span class="id" title="variable">cts</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="Hashfun.html#list_get"><span class="id" title="definition">list_get</span></a> <a class="idref" href="Hashfun.html#sigma:21"><span class="id" title="variable">sigma</span></a> (<span class="id" title="definition">Znth</span> (<a class="idref" href="Hashfun.html#hashfun"><span class="id" title="definition">hashfun</span></a> <a class="idref" href="Hashfun.html#sigma:21"><span class="id" title="variable">sigma</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">mod</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#cts:22"><span class="id" title="variable">cts</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">)</span></a>) (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#fst"><span class="id" title="definition">fst</span></a> <a class="idref" href="Hashfun.html#cts:22"><span class="id" title="variable">cts</span></a>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab119"></a><h4 class="section">Exercise: 2 stars, standard (Zlength_hashtable_incr)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="Zlength_hashtable_incr" class="idref" href="#Zlength_hashtable_incr"><span class="id" title="lemma">Zlength_hashtable_incr</span></a>:<br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:23" class="idref" href="#sigma:23"><span class="id" title="binder">sigma</span></a> <a id="cts:24" class="idref" href="#cts:24"><span class="id" title="binder">cts</span></a>, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#cts:24"><span class="id" title="variable">cts</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> (<a class="idref" href="Hashfun.html#hashtable_incr"><span class="id" title="definition">hashtable_incr</span></a> <a class="idref" href="Hashfun.html#sigma:23"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Hashfun.html#cts:24"><span class="id" title="variable">cts</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#cts:24"><span class="id" title="variable">cts</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<span class="id" title="keyword">Hint Rewrite</span> <a class="idref" href="Hashfun.html#Zlength_hashtable_incr"><span class="id" title="axiom">Zlength_hashtable_incr</span></a> <span class="id" title="keyword">using</span> <span class="id" title="var">list_solve</span> : <span class="id" title="var">sublist</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab120"></a><h4 class="section">Exercise: 3 stars, standard (hashfun_snoc)</h4>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="Int_repr_eq_mod" class="idref" href="#Int_repr_eq_mod"><span class="id" title="lemma">Int_repr_eq_mod</span></a>:<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="a:25" class="idref" href="#a:25"><span class="id" title="binder">a</span></a>,  <span class="id" title="definition">Int.repr</span> (<a class="idref" href="Hashfun.html#a:25"><span class="id" title="variable">a</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">mod</span></a> <span class="id" title="definition">Int.modulus</span>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="definition">Int.repr</span> <a class="idref" href="Hashfun.html#a:25"><span class="id" title="variable">a</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">Int.eqm</span>. <span class="comment">(*&nbsp;This&nbsp;is&nbsp;a&nbsp;hint&nbsp;about&nbsp;how&nbsp;to&nbsp;prove&nbsp;the&nbsp;lemma&nbsp;*)</span><br/>
+<span class="id" title="keyword">Search</span> <span class="id" title="definition">Int.eqm</span>. <span class="comment">(*&nbsp;This&nbsp;is&nbsp;a&nbsp;hint&nbsp;about&nbsp;how&nbsp;to&nbsp;prove&nbsp;the&nbsp;lemma&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+</div>
+
+<div class="doc">
+Use <span class="inlinecode"><span class="id" title="var">Int_repr_eq_mod</span></span> in the proof of <span class="inlinecode"><span class="id" title="var">hashfun_aux_snoc</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="hashfun_aux_snoc" class="idref" href="#hashfun_aux_snoc"><span class="id" title="lemma">hashfun_aux_snoc</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:26" class="idref" href="#sigma:26"><span class="id" title="binder">sigma</span></a> <a id="h:27" class="idref" href="#h:27"><span class="id" title="binder">h</span></a> <a id="lo:28" class="idref" href="#lo:28"><span class="id" title="binder">lo</span></a> <a id="i:29" class="idref" href="#i:29"><span class="id" title="binder">i</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#306329b0eca7a2b86c198702f594ad8e"><span class="id" title="notation">≤</span></a> <a class="idref" href="Hashfun.html#lo:28"><span class="id" title="variable">lo</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashfun.html#lo:28"><span class="id" title="variable">lo</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Hashfun.html#i:29"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#sigma:26"><span class="id" title="variable">sigma</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">Int.repr</span> (<a class="idref" href="Hashfun.html#hashfun_aux"><span class="id" title="definition">hashfun_aux</span></a> <a class="idref" href="Hashfun.html#h:27"><span class="id" title="variable">h</span></a> (<span class="id" title="definition">sublist</span> <a class="idref" href="Hashfun.html#lo:28"><span class="id" title="variable">lo</span></a> (<a class="idref" href="Hashfun.html#i:29"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1) <a class="idref" href="Hashfun.html#sigma:26"><span class="id" title="variable">sigma</span></a>)) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">Int.repr</span> (<a class="idref" href="Hashfun.html#hashfun_aux"><span class="id" title="definition">hashfun_aux</span></a> <a class="idref" href="Hashfun.html#h:27"><span class="id" title="variable">h</span></a> (<span class="id" title="definition">sublist</span> <a class="idref" href="Hashfun.html#lo:28"><span class="id" title="variable">lo</span></a> <a class="idref" href="Hashfun.html#i:29"><span class="id" title="variable">i</span></a> <a class="idref" href="Hashfun.html#sigma:26"><span class="id" title="variable">sigma</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#d3ea1afb7d81263dc23c4eb0da2a3c4e"><span class="id" title="notation">×</span></a> 65599<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <span class="id" title="definition">Byte.signed</span> (<span class="id" title="definition">Znth</span> <a class="idref" href="Hashfun.html#i:29"><span class="id" title="variable">i</span></a> <a class="idref" href="Hashfun.html#sigma:26"><span class="id" title="variable">sigma</span></a>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="hashfun_snoc" class="idref" href="#hashfun_snoc"><span class="id" title="lemma">hashfun_snoc</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:30" class="idref" href="#sigma:30"><span class="id" title="binder">sigma</span></a> <a id="i:31" class="idref" href="#i:31"><span class="id" title="binder">i</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Hashfun.html#i:31"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#sigma:30"><span class="id" title="variable">sigma</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">Int.repr</span> (<a class="idref" href="Hashfun.html#hashfun"><span class="id" title="definition">hashfun</span></a> (<span class="id" title="definition">sublist</span> 0 (<a class="idref" href="Hashfun.html#i:31"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1) <a class="idref" href="Hashfun.html#sigma:30"><span class="id" title="variable">sigma</span></a>)) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">Int.repr</span> (<a class="idref" href="Hashfun.html#hashfun"><span class="id" title="definition">hashfun</span></a> (<span class="id" title="definition">sublist</span> 0 <a class="idref" href="Hashfun.html#i:31"><span class="id" title="variable">i</span></a> <a class="idref" href="Hashfun.html#sigma:30"><span class="id" title="variable">sigma</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#d3ea1afb7d81263dc23c4eb0da2a3c4e"><span class="id" title="notation">×</span></a> 65599 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <span class="id" title="definition">Byte.signed</span> (<span class="id" title="definition">Znth</span> <a class="idref" href="Hashfun.html#i:31"><span class="id" title="variable">i</span></a> <a class="idref" href="Hashfun.html#sigma:30"><span class="id" title="variable">sigma</span></a>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab121"></a><h2 class="section">Functional model satisfies the high-level specification</h2>
+
+<div class="paragraph"> </div>
+
+ The purpose of a hash table is to implement a finite mapping,
+  (a finite function) from keys to values.  We claim that the
+  functional model (<span class="inlinecode"><span class="id" title="var">empty_table</span>,</span> <span class="inlinecode"><span class="id" title="var">hashtable_get</span>,</span> <span class="inlinecode"><span class="id" title="var">hashtable_incr</span></span>)
+  correctly implements the appropriate operations on the abstract
+  data type of finite functions.
+
+<div class="paragraph"> </div>
+
+  We formalize that statement by defining a Module Type: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <a id="COUNT_TABLE" class="idref" href="#COUNT_TABLE"><span class="id" title="module">COUNT_TABLE</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Parameter</span> <a id="COUNT_TABLE.table" class="idref" href="#COUNT_TABLE.table"><span class="id" title="axiom">table</span></a>: <span class="id" title="keyword">Type</span>.<br/>
+&nbsp;<span class="id" title="keyword">Parameter</span> <a id="COUNT_TABLE.key" class="idref" href="#COUNT_TABLE.key"><span class="id" title="axiom">key</span></a> : <span class="id" title="keyword">Type</span>.<br/>
+&nbsp;<span class="id" title="keyword">Parameter</span> <a id="COUNT_TABLE.empty" class="idref" href="#COUNT_TABLE.empty"><span class="id" title="axiom">empty</span></a>: <a class="idref" href="Hashfun.html#COUNT_TABLE.table"><span class="id" title="axiom">table</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Parameter</span> <a id="COUNT_TABLE.get" class="idref" href="#COUNT_TABLE.get"><span class="id" title="axiom">get</span></a>: <a class="idref" href="Hashfun.html#COUNT_TABLE.key"><span class="id" title="axiom">key</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#COUNT_TABLE.table"><span class="id" title="axiom">table</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Parameter</span> <a id="COUNT_TABLE.incr" class="idref" href="#COUNT_TABLE.incr"><span class="id" title="axiom">incr</span></a>: <a class="idref" href="Hashfun.html#COUNT_TABLE.key"><span class="id" title="axiom">key</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#COUNT_TABLE.table"><span class="id" title="axiom">table</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#COUNT_TABLE.table"><span class="id" title="axiom">table</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Axiom</span> <a id="COUNT_TABLE.gempty" class="idref" href="#COUNT_TABLE.gempty"><span class="id" title="axiom">gempty</span></a>: <span class="id" title="keyword">∀</span> <a id="k:37" class="idref" href="#k:37"><span class="id" title="binder">k</span></a>,   <span class="comment">(*&nbsp;get-empty&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashfun.html#COUNT_TABLE.get"><span class="id" title="axiom">get</span></a> <a class="idref" href="Hashfun.html#k:37"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#COUNT_TABLE.empty"><span class="id" title="axiom">empty</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 0.<br/>
+&nbsp;<span class="id" title="keyword">Axiom</span> <a id="COUNT_TABLE.gss" class="idref" href="#COUNT_TABLE.gss"><span class="id" title="axiom">gss</span></a>: <span class="id" title="keyword">∀</span> <a id="k:39" class="idref" href="#k:39"><span class="id" title="binder">k</span></a> <a id="t:40" class="idref" href="#t:40"><span class="id" title="binder">t</span></a>,      <span class="comment">(*&nbsp;get-set-same&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashfun.html#COUNT_TABLE.get"><span class="id" title="axiom">get</span></a> <a class="idref" href="Hashfun.html#k:39"><span class="id" title="variable">k</span></a> (<a class="idref" href="Hashfun.html#COUNT_TABLE.incr"><span class="id" title="axiom">incr</span></a> <a class="idref" href="Hashfun.html#k:39"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:40"><span class="id" title="variable">t</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+(</span></a><a class="idref" href="Hashfun.html#COUNT_TABLE.get"><span class="id" title="axiom">get</span></a> <a class="idref" href="Hashfun.html#k:39"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:40"><span class="id" title="variable">t</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">)</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Axiom</span> <a id="COUNT_TABLE.gso" class="idref" href="#COUNT_TABLE.gso"><span class="id" title="axiom">gso</span></a>: <span class="id" title="keyword">∀</span> <a id="j:42" class="idref" href="#j:42"><span class="id" title="binder">j</span></a> <a id="k:43" class="idref" href="#k:43"><span class="id" title="binder">k</span></a> <a id="t:44" class="idref" href="#t:44"><span class="id" title="binder">t</span></a>,    <span class="comment">(*&nbsp;get-set-other&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashfun.html#j:42"><span class="id" title="variable">j</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="Hashfun.html#k:43"><span class="id" title="variable">k</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#COUNT_TABLE.get"><span class="id" title="axiom">get</span></a> <a class="idref" href="Hashfun.html#j:42"><span class="id" title="variable">j</span></a> (<a class="idref" href="Hashfun.html#COUNT_TABLE.incr"><span class="id" title="axiom">incr</span></a> <a class="idref" href="Hashfun.html#k:43"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:44"><span class="id" title="variable">t</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashfun.html#COUNT_TABLE.get"><span class="id" title="axiom">get</span></a> <a class="idref" href="Hashfun.html#j:42"><span class="id" title="variable">j</span></a> <a class="idref" href="Hashfun.html#t:44"><span class="id" title="variable">t</span></a>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="Hashfun.html#COUNT_TABLE"><span class="id" title="module">COUNT_TABLE</span></a>.<br/>
+</div>
+
+<div class="doc">
+This means:  in any <span class="inlinecode"><span class="id" title="keyword">Module</span></span> that satisfies this <span class="inlinecode"><span class="id" title="keyword">Module</span></span> <span class="inlinecode"><span class="id" title="keyword">Type</span></span>,
+   there's a type <span class="inlinecode"><span class="id" title="var">table</span></span> of count-tables,
+   and operators <span class="inlinecode"><span class="id" title="var">empty</span></span>, <span class="inlinecode"><span class="id" title="var">get</span></span>, <span class="inlinecode"><span class="id" title="tactic">set</span></span> that satisfy the axioms
+   <span class="inlinecode"><span class="id" title="var">gempty</span></span>, <span class="inlinecode"><span class="id" title="var">gss</span></span>, and <span class="inlinecode"><span class="id" title="var">gso</span></span>. 
+<div class="paragraph"> </div>
+
+<a id="lab122"></a><h3 class="section">A "reference" implementation of COUNT_TABLE</h3>
+
+<div class="paragraph"> </div>
+
+<a id="lab123"></a><h4 class="section">Exercise: 2 stars, standard (FunTable)</h4>
+  It's easy to make a slow implementation of <span class="inlinecode"><span class="id" title="var">COUNT_TABLE</span></span>, 
+  using functions. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <a id="FunTable" class="idref" href="#FunTable"><span class="id" title="module">FunTable</span></a> &lt;: <a class="idref" href="Hashfun.html#COUNT_TABLE"><span class="id" title="module">COUNT_TABLE</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="FunTable.table" class="idref" href="#FunTable.table"><span class="id" title="definition">table</span></a>: <span class="id" title="keyword">Type</span> := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="FunTable.key" class="idref" href="#FunTable.key"><span class="id" title="definition">key</span></a> : <span class="id" title="keyword">Type</span> := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="FunTable.empty" class="idref" href="#FunTable.empty"><span class="id" title="definition">empty</span></a>: <a class="idref" href="Hashfun.html#FunTable.table"><span class="id" title="definition">table</span></a> := <span class="id" title="keyword">fun</span> <a id="k:46" class="idref" href="#k:46"><span class="id" title="binder">k</span></a> ⇒ 0.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="FunTable.get" class="idref" href="#FunTable.get"><span class="id" title="definition">get</span></a> (<a id="k:47" class="idref" href="#k:47"><span class="id" title="binder">k</span></a>: <a class="idref" href="Hashfun.html#FunTable.key"><span class="id" title="definition">key</span></a>) (<a id="t:48" class="idref" href="#t:48"><span class="id" title="binder">t</span></a>: <a class="idref" href="Hashfun.html#FunTable.table"><span class="id" title="definition">table</span></a>) : <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> := <a class="idref" href="Hashfun.html#t:48"><span class="id" title="variable">t</span></a> <a class="idref" href="Hashfun.html#k:47"><span class="id" title="variable">k</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="FunTable.incr" class="idref" href="#FunTable.incr"><span class="id" title="definition">incr</span></a> (<a id="k:49" class="idref" href="#k:49"><span class="id" title="binder">k</span></a>: <a class="idref" href="Hashfun.html#FunTable.key"><span class="id" title="definition">key</span></a>) (<a id="t:50" class="idref" href="#t:50"><span class="id" title="binder">t</span></a>: <a class="idref" href="Hashfun.html#FunTable.table"><span class="id" title="definition">table</span></a>) : <a class="idref" href="Hashfun.html#FunTable.table"><span class="id" title="definition">table</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <a id="k':51" class="idref" href="#k':51"><span class="id" title="binder">k'</span></a> ⇒ <span class="id" title="keyword">if</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Arith.PeanoNat.html#Nat.eqb"><span class="id" title="definition">Nat.eqb</span></a> <a class="idref" href="Hashfun.html#k':51"><span class="id" title="variable">k'</span></a> <a class="idref" href="Hashfun.html#k:49"><span class="id" title="variable">k</span></a> <span class="id" title="keyword">then</span> 1 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <a class="idref" href="Hashfun.html#t:50"><span class="id" title="variable">t</span></a> <a class="idref" href="Hashfun.html#k':51"><span class="id" title="variable">k'</span></a> <span class="id" title="keyword">else</span> <a class="idref" href="Hashfun.html#t:50"><span class="id" title="variable">t</span></a> <a class="idref" href="Hashfun.html#k':51"><span class="id" title="variable">k'</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Lemma</span> <a id="FunTable.gempty" class="idref" href="#FunTable.gempty"><span class="id" title="lemma">gempty</span></a>: <span class="id" title="keyword">∀</span> <a id="k:52" class="idref" href="#k:52"><span class="id" title="binder">k</span></a>,  <a class="idref" href="Hashfun.html#FunTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#k:52"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#FunTable.empty"><span class="id" title="definition">empty</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 0.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+&nbsp;<span class="id" title="keyword">Lemma</span> <a id="FunTable.gss" class="idref" href="#FunTable.gss"><span class="id" title="lemma">gss</span></a>: <span class="id" title="keyword">∀</span> <a id="k:53" class="idref" href="#k:53"><span class="id" title="binder">k</span></a> <a id="t:54" class="idref" href="#t:54"><span class="id" title="binder">t</span></a>,  <a class="idref" href="Hashfun.html#FunTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#k:53"><span class="id" title="variable">k</span></a> (<a class="idref" href="Hashfun.html#FunTable.incr"><span class="id" title="definition">incr</span></a> <a class="idref" href="Hashfun.html#k:53"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:54"><span class="id" title="variable">t</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+(</span></a><a class="idref" href="Hashfun.html#FunTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#k:53"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:54"><span class="id" title="variable">t</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">)</span></a>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+&nbsp;<span class="id" title="keyword">Lemma</span> <a id="FunTable.gso" class="idref" href="#FunTable.gso"><span class="id" title="lemma">gso</span></a>: <span class="id" title="keyword">∀</span> <a id="j:55" class="idref" href="#j:55"><span class="id" title="binder">j</span></a> <a id="k:56" class="idref" href="#k:56"><span class="id" title="binder">k</span></a> <a id="t:57" class="idref" href="#t:57"><span class="id" title="binder">t</span></a>,  <a class="idref" href="Hashfun.html#j:55"><span class="id" title="variable">j</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="Hashfun.html#k:56"><span class="id" title="variable">k</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#FunTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#j:55"><span class="id" title="variable">j</span></a> (<a class="idref" href="Hashfun.html#FunTable.incr"><span class="id" title="definition">incr</span></a> <a class="idref" href="Hashfun.html#k:56"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:57"><span class="id" title="variable">t</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashfun.html#FunTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#j:55"><span class="id" title="variable">j</span></a> <a class="idref" href="Hashfun.html#t:57"><span class="id" title="variable">t</span></a>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="Hashfun.html#FunTable"><span class="id" title="module">FunTable</span></a>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab124"></a><h3 class="section">Demonstration that hash tables implement COUNT_TABLE</h3>
+
+<div class="paragraph"> </div>
+
+<a id="lab125"></a><h4 class="section">Exercise: 3 stars, standard (IntHashTable)</h4>
+  Now we make a "fast" implementation using hash tables.  We
+  put "fast" in quotes because, unlike the imperative implementation,
+ the purely functional implementation takes linear time, not constant time,
+ to select the the i'th bucket.  That is, <span class="inlinecode"><span class="id" title="var">Znth</span></span> <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode"><span class="id" title="var">al</span></span> takes time proportional
+ to <span class="inlinecode"><span class="id" title="var">i</span></span>. But that is no problem, because we are not using <span class="inlinecode"><span class="id" title="var">hashtable_get</span></span> and
+ <span class="inlinecode"><span class="id" title="var">hashtable_incr</span></span> as our real implementation; they are serving as the 
+ <i>functional model</i> of the fast implementation in C.  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <a id="IntHashTable" class="idref" href="#IntHashTable"><span class="id" title="module">IntHashTable</span></a> &lt;: <a class="idref" href="Hashfun.html#COUNT_TABLE"><span class="id" title="module">COUNT_TABLE</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="IntHashTable.hashtable_invariant" class="idref" href="#IntHashTable.hashtable_invariant"><span class="id" title="definition">hashtable_invariant</span></a> (<a id="cts:58" class="idref" href="#cts:58"><span class="id" title="binder">cts</span></a>: <a class="idref" href="Hashfun.html#hashtable_contents"><span class="id" title="definition">hashtable_contents</span></a>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Hashfun.html#cts:58"><span class="id" title="variable">cts</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashfun.html#N"><span class="id" title="definition">N</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="i:59" class="idref" href="#i:59"><span class="id" title="binder">i</span></a>, 0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Hashfun.html#i:59"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Hashfun.html#N"><span class="id" title="definition">N</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="inductive">list_norepet</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#fst"><span class="id" title="definition">fst</span></a> (<span class="id" title="definition">Znth</span> <a class="idref" href="Hashfun.html#i:59"><span class="id" title="variable">i</span></a> <a class="idref" href="Hashfun.html#cts:58"><span class="id" title="variable">cts</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#Forall"><span class="id" title="inductive">Forall</span></a> (<span class="id" title="keyword">fun</span> <a id="s:60" class="idref" href="#s:60"><span class="id" title="binder">s</span></a> ⇒ <a class="idref" href="Hashfun.html#hashfun"><span class="id" title="definition">hashfun</span></a> <a class="idref" href="Hashfun.html#s:60"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'mod'_x"><span class="id" title="notation">mod</span></a> <a class="idref" href="Hashfun.html#N"><span class="id" title="definition">N</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashfun.html#i:59"><span class="id" title="variable">i</span></a>) (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#fst"><span class="id" title="definition">fst</span></a> (<span class="id" title="definition">Znth</span> <a class="idref" href="Hashfun.html#i:59"><span class="id" title="variable">i</span></a> <a class="idref" href="Hashfun.html#cts:58"><span class="id" title="variable">cts</span></a>)).<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="IntHashTable.table" class="idref" href="#IntHashTable.table"><span class="id" title="definition">table</span></a> := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Specif.html#sig"><span class="id" title="inductive">sig</span></a> <a class="idref" href="Hashfun.html#IntHashTable.hashtable_invariant"><span class="id" title="definition">hashtable_invariant</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="IntHashTable.key" class="idref" href="#IntHashTable.key"><span class="id" title="definition">key</span></a> := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>.<br/><hr class='doublespaceincode'/>
+&nbsp;<span class="id" title="keyword">Lemma</span> <a id="IntHashTable.empty_invariant" class="idref" href="#IntHashTable.empty_invariant"><span class="id" title="lemma">empty_invariant</span></a>: <a class="idref" href="Hashfun.html#IntHashTable.hashtable_invariant"><span class="id" title="definition">hashtable_invariant</span></a> <a class="idref" href="Hashfun.html#empty_table"><span class="id" title="definition">empty_table</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="IntHashTable.incr_invariant" class="idref" href="#IntHashTable.incr_invariant"><span class="id" title="lemma">incr_invariant</span></a>: <span class="id" title="keyword">∀</span> <a id="k:61" class="idref" href="#k:61"><span class="id" title="binder">k</span></a> <a id="cts:62" class="idref" href="#cts:62"><span class="id" title="binder">cts</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashfun.html#IntHashTable.hashtable_invariant"><span class="id" title="definition">hashtable_invariant</span></a> <a class="idref" href="Hashfun.html#cts:62"><span class="id" title="variable">cts</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#IntHashTable.hashtable_invariant"><span class="id" title="definition">hashtable_invariant</span></a> (<a class="idref" href="Hashfun.html#hashtable_incr"><span class="id" title="definition">hashtable_incr</span></a> <a class="idref" href="Hashfun.html#k:61"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#cts:62"><span class="id" title="variable">cts</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="IntHashTable.empty" class="idref" href="#IntHashTable.empty"><span class="id" title="definition">empty</span></a> : <a class="idref" href="Hashfun.html#IntHashTable.table"><span class="id" title="definition">table</span></a> := <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Specif.html#exist"><span class="id" title="constructor">exist</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <a class="idref" href="Hashfun.html#IntHashTable.empty_invariant"><span class="id" title="axiom">empty_invariant</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="IntHashTable.get" class="idref" href="#IntHashTable.get"><span class="id" title="definition">get</span></a> : <a class="idref" href="Hashfun.html#IntHashTable.key"><span class="id" title="definition">key</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#IntHashTable.table"><span class="id" title="definition">table</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <a id="k:63" class="idref" href="#k:63"><span class="id" title="binder">k</span></a> <a id="tbl:64" class="idref" href="#tbl:64"><span class="id" title="binder">tbl</span></a> ⇒ <a class="idref" href="Hashfun.html#hashtable_get"><span class="id" title="definition">hashtable_get</span></a> <a class="idref" href="Hashfun.html#k:63"><span class="id" title="variable">k</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Specif.html#proj1_sig"><span class="id" title="definition">proj1_sig</span></a> <a class="idref" href="Hashfun.html#tbl:64"><span class="id" title="variable">tbl</span></a>).<br/>
+&nbsp;<span class="id" title="keyword">Definition</span> <a id="IntHashTable.incr" class="idref" href="#IntHashTable.incr"><span class="id" title="definition">incr</span></a> : <a class="idref" href="Hashfun.html#IntHashTable.key"><span class="id" title="definition">key</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#IntHashTable.table"><span class="id" title="definition">table</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#IntHashTable.table"><span class="id" title="definition">table</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <a id="k:65" class="idref" href="#k:65"><span class="id" title="binder">k</span></a> <a id="tbl:66" class="idref" href="#tbl:66"><span class="id" title="binder">tbl</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Specif.html#exist"><span class="id" title="constructor">exist</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span> (<a class="idref" href="Hashfun.html#IntHashTable.incr_invariant"><span class="id" title="axiom">incr_invariant</span></a> <a class="idref" href="Hashfun.html#k:65"><span class="id" title="variable">k</span></a> <span class="id" title="var">_</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Specif.html#proj2_sig"><span class="id" title="definition">proj2_sig</span></a> <a class="idref" href="Hashfun.html#tbl:66"><span class="id" title="variable">tbl</span></a>)).<br/><hr class='doublespaceincode'/>
+&nbsp;<span class="id" title="keyword">Theorem</span> <a id="IntHashTable.gempty" class="idref" href="#IntHashTable.gempty"><span class="id" title="lemma">gempty</span></a>: <span class="id" title="keyword">∀</span> <a id="k:67" class="idref" href="#k:67"><span class="id" title="binder">k</span></a>, <a class="idref" href="Hashfun.html#IntHashTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#k:67"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#IntHashTable.empty"><span class="id" title="definition">empty</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 0.<br/>
+&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+&nbsp;<span class="id" title="keyword">Theorem</span> <a id="IntHashTable.gss" class="idref" href="#IntHashTable.gss"><span class="id" title="lemma">gss</span></a>: <span class="id" title="keyword">∀</span> <a id="k:68" class="idref" href="#k:68"><span class="id" title="binder">k</span></a> <a id="t:69" class="idref" href="#t:69"><span class="id" title="binder">t</span></a>,  <a class="idref" href="Hashfun.html#IntHashTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#k:68"><span class="id" title="variable">k</span></a> (<a class="idref" href="Hashfun.html#IntHashTable.incr"><span class="id" title="definition">incr</span></a> <a class="idref" href="Hashfun.html#k:68"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:69"><span class="id" title="variable">t</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a>  1 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">(</span></a><a class="idref" href="Hashfun.html#IntHashTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#k:68"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:69"><span class="id" title="variable">t</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">)</span></a>.<br/>
+&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/><hr class='doublespaceincode'/>
+&nbsp;<span class="id" title="keyword">Theorem</span> <a id="IntHashTable.gso" class="idref" href="#IntHashTable.gso"><span class="id" title="lemma">gso</span></a>: <span class="id" title="keyword">∀</span> <a id="j:70" class="idref" href="#j:70"><span class="id" title="binder">j</span></a> <a id="k:71" class="idref" href="#k:71"><span class="id" title="binder">k</span></a> <a id="t:72" class="idref" href="#t:72"><span class="id" title="binder">t</span></a>,    <span class="comment">(*&nbsp;get-set-other&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Hashfun.html#j:70"><span class="id" title="variable">j</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="Hashfun.html#k:71"><span class="id" title="variable">k</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="Hashfun.html#IntHashTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#j:70"><span class="id" title="variable">j</span></a> (<a class="idref" href="Hashfun.html#IntHashTable.incr"><span class="id" title="definition">incr</span></a> <a class="idref" href="Hashfun.html#k:71"><span class="id" title="variable">k</span></a> <a class="idref" href="Hashfun.html#t:72"><span class="id" title="variable">t</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Hashfun.html#IntHashTable.get"><span class="id" title="definition">get</span></a> <a class="idref" href="Hashfun.html#j:70"><span class="id" title="variable">j</span></a> <a class="idref" href="Hashfun.html#t:72"><span class="id" title="variable">t</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="Hashfun.html#IntHashTable"><span class="id" title="module">IntHashTable</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;2020-09-18&nbsp;15:39&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -48,10 +48,10 @@ idtac "-------------------  injection_ex3  --------------------".
 idtac " ".
 
 idtac "#> injection_ex3".
-idtac "Possible points: 1".
+idtac "Possible points: 3".
 check_type @injection_ex3 (
 (forall (X : Type) (x y z : X) (l j : list X),
- x :: y :: l = z :: j -> y :: l = x :: j -> x = y)).
+ x :: y :: l = z :: j -> j = z :: l -> x = y)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions injection_ex3.
@@ -69,18 +69,6 @@ check_type @discriminate_ex3 (
 idtac "Assumptions:".
 Abort.
 Print Assumptions discriminate_ex3.
-Goal True.
-idtac " ".
-
-idtac "-------------------  plus_n_n_injective  --------------------".
-idtac " ".
-
-idtac "#> plus_n_n_injective".
-idtac "Possible points: 3".
-check_type @plus_n_n_injective ((forall n m : nat, n + n = m + m -> n = m)).
-idtac "Assumptions:".
-Abort.
-Print Assumptions plus_n_n_injective.
 Goal True.
 idtac " ".
 
@@ -105,6 +93,18 @@ idtac "Possible points: 2".
 print_manual_grade manual_grade_for_informal_proof.
 idtac " ".
 
+idtac "-------------------  plus_n_n_injective  --------------------".
+idtac " ".
+
+idtac "#> plus_n_n_injective".
+idtac "Possible points: 3".
+check_type @plus_n_n_injective ((forall n m : nat, n + n = m + m -> n = m)).
+idtac "Assumptions:".
+Abort.
+Print Assumptions plus_n_n_injective.
+Goal True.
+idtac " ".
+
 idtac "-------------------  gen_dep_practice  --------------------".
 idtac " ".
 
@@ -116,6 +116,20 @@ check_type @nth_error_after_last (
 idtac "Assumptions:".
 Abort.
 Print Assumptions nth_error_after_last.
+Goal True.
+idtac " ".
+
+idtac "-------------------  combine_split  --------------------".
+idtac " ".
+
+idtac "#> combine_split".
+idtac "Possible points: 3".
+check_type @combine_split (
+(forall (X Y : Type) (l : list (X * Y)) (l1 : list X) (l2 : list Y),
+ @split X Y l = (l1, l2) -> @combine X Y l1 l2 = l)).
+idtac "Assumptions:".
+Abort.
+Print Assumptions combine_split.
 Goal True.
 idtac " ".
 
@@ -173,7 +187,7 @@ idtac " ".
 
 idtac "#> existsb_existsb'".
 idtac "Advanced".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 check_type @existsb_existsb' (
 (forall (X : Type) (test : X -> bool) (l : list X),
  @existsb X test l = @existsb' X test l)).
@@ -185,10 +199,23 @@ idtac " ".
 
 idtac " ".
 
-idtac "Max points - standard: 18".
-idtac "Max points - advanced: 30".
+idtac "Max points - standard: 23".
+idtac "Max points - advanced: 37".
+idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
 idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- rev_exercise1 ---------".
@@ -197,12 +224,14 @@ idtac "---------- injection_ex3 ---------".
 Print Assumptions injection_ex3.
 idtac "---------- discriminate_ex3 ---------".
 Print Assumptions discriminate_ex3.
-idtac "---------- plus_n_n_injective ---------".
-Print Assumptions plus_n_n_injective.
 idtac "---------- eqb_true ---------".
 Print Assumptions eqb_true.
+idtac "---------- plus_n_n_injective ---------".
+Print Assumptions plus_n_n_injective.
 idtac "---------- nth_error_after_last ---------".
 Print Assumptions nth_error_after_last.
+idtac "---------- combine_split ---------".
+Print Assumptions combine_split.
 idtac "---------- bool_fn_applied_thrice ---------".
 Print Assumptions bool_fn_applied_thrice.
 idtac "---------- eqb_sym ---------".
@@ -219,4 +248,6 @@ idtac "---------- existsb_existsb' ---------".
 Print Assumptions existsb_existsb'.
 Abort.
 
-(* Wed Jan 9 12:02:11 EST 2019 *)
+(* 2020-09-09 20:51 *)
+
+(* 2020-09-09 20:51 *)

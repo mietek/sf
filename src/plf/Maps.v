@@ -36,10 +36,22 @@ From Coq Require Import Lists.List.
 Import ListNotations.
 
 (** Documentation for the standard library can be found at
-    http://coq.inria.fr/library/.
+    https://coq.inria.fr/library/.
 
     The [Search] command is a good way to look for theorems involving
-    objects of specific types.  Take a minute now to experiment with it. *)
+    objects of specific types. See [Lists] for a reminder of how
+    to use it. *)
+
+(** If you want to find out how or where a notation is defined, the
+    [Locate] command is useful.  For example, where is the natural
+    addition operation defined in the standard library? *)
+
+Locate "+".
+
+(** There are several uses for that notation, but only one for
+    naturals. *)
+
+Print Init.Nat.add.
 
 (* ################################################################# *)
 (** * Identifiers *)
@@ -61,31 +73,34 @@ Definition eqb_string (x y : string) : bool :=
     does not actually return a [bool], but rather a type that looks
     like [{x = y} + {x <> y}], called a [sumbool], which can be
     thought of as an "evidence-carrying boolean."  Formally, an
-    element of [sumbool] is either a proof that two things are equal
+    element of [{x = y} + {x <> y}] is either a proof that [x] and [y] are equal
     or a proof that they are unequal, together with a tag indicating
     which.  But for present purposes you can think of it as just a
     fancy [bool].) *)
 
 (** Now we need a few basic properties of string equality... *)
 Theorem eqb_string_refl : forall s : string, true = eqb_string s s.
-Proof. intros s. unfold eqb_string. destruct (string_dec s s) as [|Hs].
+Proof.
+  intros s. unfold eqb_string.
+  destruct (string_dec s s) as [Hs_eq | Hs_not_eq].
   - reflexivity.
-  - destruct Hs. reflexivity.
+  - destruct Hs_not_eq. reflexivity.
 Qed.
 
-(** The following useful property follows from an analogous
-    lemma about strings: *)
+(** Two strings are equal according to [eqb_string] iff they
+    are equal according to [=].  So [=] is reflected in [eqb_string],
+    in the sense of "reflection" as discussed in [IndProp]. *)
 
 Theorem eqb_string_true_iff : forall x y : string,
     eqb_string x y = true <-> x = y.
 Proof.
    intros x y.
    unfold eqb_string.
-   destruct (string_dec x y) as [|Hs].
-   - subst. split. reflexivity. reflexivity.
+   destruct (string_dec x y) as [Hs_eq | Hs_not_eq].
+   - rewrite Hs_eq. split. reflexivity. reflexivity.
    - split.
      + intros contra. discriminate contra.
-     + intros H. rewrite H in Hs. destruct Hs. reflexivity.
+     + intros H. exfalso. apply Hs_not_eq. apply H.
 Qed.
 
 (** Similarly: *)
@@ -96,7 +111,7 @@ Proof.
   intros x y. rewrite <- eqb_string_true_iff.
   rewrite not_true_iff_false. reflexivity. Qed.
 
-(** This handy variant follows just by rewriting: *)
+(** This corollary follows just by rewriting: *)
 
 Theorem false_eqb_string : forall x y : string,
    x <> y -> eqb_string x y = false.
@@ -203,7 +218,7 @@ Proof. reflexivity. Qed.
 (** (Some of the proofs require the functional extensionality axiom,
     which is discussed in the [Logic] chapter.) *)
 
-(** **** Exercise: 1 star, standard, optional (t_apply_empty)  
+(** **** Exercise: 1 star, standard, optional (t_apply_empty) 
 
     First, the empty map returns its default element for all keys: *)
 
@@ -213,7 +228,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (t_update_eq)  
+(** **** Exercise: 2 stars, standard, optional (t_update_eq) 
 
     Next, if we update a map [m] at a key [x] with a new value [v]
     and then look up [x] in the map resulting from the [update], we
@@ -225,7 +240,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (t_update_neq)  
+(** **** Exercise: 2 stars, standard, optional (t_update_neq) 
 
     On the other hand, if we update a map [m] at a key [x1] and then
     look up a _different_ key [x2] in the resulting map, we get the
@@ -238,7 +253,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (t_update_shadow)  
+(** **** Exercise: 2 stars, standard, optional (t_update_shadow) 
 
     If we update a map [m] at a key [x] with a value [v1] and then
     update again with the same key [x] and another value [v2], the
@@ -255,9 +270,9 @@ Proof.
 (** For the final two lemmas about total maps, it's convenient to use
     the reflection idioms introduced in chapter [IndProp].  We begin
     by proving a fundamental _reflection lemma_ relating the equality
-    proposition on [id]s with the boolean function [eqb_id]. *)
+    proposition on strings with the boolean function [eqb_string]. *)
 
-(** **** Exercise: 2 stars, standard, optional (eqb_stringP)  
+(** **** Exercise: 2 stars, standard, optional (eqb_stringP) 
 
     Use the proof of [eqbP] in chapter [IndProp] as a template to
     prove the following: *)
@@ -274,7 +289,7 @@ Proof.
     hypotheses about the equality (in the sense of [=]) of [x1]
     and [x2]. *)
 
-(** **** Exercise: 2 stars, standard (t_update_same)  
+(** **** Exercise: 2 stars, standard (t_update_same) 
 
     With the example in chapter [IndProp] as a template, use
     [eqb_stringP] to prove the following theorem, which states that
@@ -287,7 +302,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, standard, recommended (t_update_permute)  
+(** **** Exercise: 3 stars, standard, especially useful (t_update_permute) 
 
     Use [eqb_stringP] to prove one final property of the [update]
     function: If we update a map [m] at two distinct keys, it doesn't
@@ -379,4 +394,33 @@ Proof.
   apply t_update_permute.
 Qed.
 
-(* Thu Feb 7 20:09:22 EST 2019 *)
+(** Finally, for partial maps we introduce a notion of map inclusion,
+    stating that one map includes another:  *)
+
+Definition inclusion {A : Type} (m m' : partial_map A) :=
+  forall x v, m x = Some v -> m' x = Some v.
+  
+(** We show that map update preserves map inclusion, that is: *)
+
+Lemma inclusion_update : forall (A : Type) (m m': partial_map A)
+                              x vx,
+  inclusion m m' ->
+  inclusion (x |-> vx ; m) (x |-> vx ; m').
+Proof.
+  unfold inclusion.
+  intros A m m' x vx H.
+  intros y vy.
+  destruct (eqb_stringP x y) as [Hxy | Hxy].
+  - rewrite Hxy. 
+    rewrite update_eq. rewrite update_eq. intro H1. apply H1.
+  - rewrite update_neq. rewrite update_neq.
+    + apply H.
+    + apply Hxy.
+    + apply Hxy.
+Qed.
+
+(** This property is useful for reasoning about the lambda-calculus, 
+where maps are used to keep track of which program variables are 
+defined at a given point. *)
+
+(* 2020-09-09 21:08 *)

@@ -30,13 +30,12 @@ From Coq Require Import Arith.Arith.
 
 From PLF Require Import Maps.
 From PLF Require Import Smallstep.
-From PLF Require Import Stlc.
 From PLF Require Import LibTactics.
-
+From PLF Require Stlc.
 From PLF Require Imp.
 
 From Coq Require Import Lists.List.
-Import ListNotations.
+
 
 (* ################################################################# *)
 (** * Basic Features of Proof Search *)
@@ -432,7 +431,7 @@ Qed.
 
 Lemma search_depth_3 : forall (P : nat->Prop),
   (* Hypothesis H1: *) (P 0) ->
-  (* Hypothesis H2: *) (forall k, P (k-1) -> P k) ->
+  (* Hypothesis H2: *) (forall k, P (k - 1) -> P k) ->
   (* Goal:          *) (P 4).
 Proof. auto. Qed.
 
@@ -440,7 +439,7 @@ Proof. auto. Qed.
 
 Lemma search_depth_4 : forall (P : nat->Prop),
   (* Hypothesis H1: *) (P 0) ->
-  (* Hypothesis H2: *) (forall k, P (k-1) -> P k) ->
+  (* Hypothesis H2: *) (forall k, P (k - 1) -> P k) ->
   (* Goal:          *) (P 5).
 Proof. auto. auto 6. Qed.
 
@@ -454,7 +453,7 @@ Proof. auto. auto 6. Qed.
 
 Lemma search_depth_5 : forall (P : nat->Prop),
   (* Hypothesis H1: *) (P 0) ->
-  (* Hypothesis H2: *) (forall k, P (k-1) -> P k) ->
+  (* Hypothesis H2: *) (forall k, P (k - 1) -> P k) ->
   (* Goal:          *) (P 4 /\ P 4).
 Proof. auto. auto 6. Qed.
 
@@ -469,7 +468,7 @@ Proof. auto. auto 6. Qed.
 
     To illustrate how automation works, we are going to extend the
     previous example with an additional assumption asserting that
-    [P k] is also derivable from [P (k+1)]. Adding this hypothesis
+    [P k] is also derivable from [P (k + 1)]. Adding this hypothesis
     offers a new possibility that [auto] could consider at every step.
 
     There exists a special command that one can use for tracing
@@ -480,8 +479,8 @@ Proof. auto. auto 6. Qed.
 
 Lemma working_of_auto_1 : forall (P : nat->Prop),
   (* Hypothesis H1: *) (P 0) ->
-  (* Hypothesis H2: *) (forall k, P (k-1) -> P k) ->
-  (* Hypothesis H3: *) (forall k, P (k+1) -> P k) ->
+  (* Hypothesis H2: *) (forall k, P (k - 1) -> P k) ->
+  (* Hypothesis H3: *) (forall k, P (k + 1) -> P k) ->
   (* Goal:          *) (P 2).
 (* Uncomment "debug" in the following line to see the debug trace: *)
 Proof. intros P H1 H2 H3. (* debug *) eauto. Qed.
@@ -507,8 +506,8 @@ Proof. intros P H1 H2 H3. (* debug *) eauto. Qed.
 
 Lemma working_of_auto_2 : forall (P : nat->Prop),
   (* Hypothesis H1: *) (P 0) ->
-  (* Hypothesis H3: *) (forall k, P (k+1) -> P k) ->
-  (* Hypothesis H2: *) (forall k, P (k-1) -> P k) ->
+  (* Hypothesis H3: *) (forall k, P (k + 1) -> P k) ->
+  (* Hypothesis H2: *) (forall k, P (k - 1) -> P k) ->
   (* Goal:          *) (P 2).
 Proof. intros P H1 H3 H2. (* debug *) eauto. Qed.
 
@@ -595,7 +594,7 @@ Proof. intros P H1 H3 H2. (* debug *) eauto. Qed.
 Lemma nat_le_refl : forall (x:nat), x <= x.
 Proof. apply le_n. Qed.
 
-Hint Resolve nat_le_refl.
+Hint Resolve nat_le_refl : core.
 
 (** A convenient shorthand for adding all the constructors of an
     inductive datatype as hints is the command [Hint Constructors
@@ -688,7 +687,7 @@ Theorem ceval_deterministic: forall c st st1 st2,
 Proof.
   intros c st st1 st2 E1 E2.
   generalize dependent st2.
-  (induction E1); intros st2 E2; inversion E2; subst.
+  induction E1; intros st2 E2; inversion E2; subst.
   - (* E_Skip *) reflexivity.
   - (* E_Ass *) reflexivity.
   - (* E_Seq *)
@@ -830,8 +829,10 @@ End DeterministicImp.
     let us first import the definitions required to state that lemma. *)
 
 Set Warnings "-notation-overridden,-parsing".
-From PLF Require Import StlcProp.
+From PLF Require StlcProp.
 Module PreservationProgressStlc.
+Import Stlc.
+Import StlcProp.
 Import STLC.
 Import STLCProp.
 
@@ -840,42 +841,34 @@ Import STLCProp.
     mechanism. *)
 
 Theorem preservation : forall t t' T,
-  has_type empty t T  ->
+  empty |- t \in T  ->
   t --> t'  ->
-  has_type empty t' T.
+  empty |- t' \in T.
 Proof with eauto.
-  remember (@empty ty) as Gamma.
   intros t t' T HT. generalize dependent t'.
-  (induction HT); intros t' HE; subst Gamma.
-  - (* T_Var *)
-    inversion HE.
-  - (* T_Abs *)
-    inversion HE.
+  remember empty as Gamma.
+  induction HT;
+       intros t' HE; subst;
+       try solve [inversion HE; subst; auto].
   - (* T_App *)
     inversion HE; subst...
-    (* The ST_App1 and ST_App2 cases are immediate by induction, and
-       auto takes care of them *)
+    (* Most of the cases are immediate by induction,
+       and [eauto] takes care of them *)
     + (* ST_AppAbs *)
-      apply substitution_preserves_typing with T11...
+      apply substitution_preserves_typing with T2...
       inversion HT1...
-  - (* T_True *)
-    inversion HE.
-  - (* T_False *)
-    inversion HE.
-  - (* T_If *)
-    inversion HE; subst...
 Qed.
 
 (** Exercise: rewrite this proof using tactics from [LibTactics]
     and calling automation using the star symbol rather than the
     triple-dot notation. More precisely, make use of the tactics
     [inverts*] and [applys*] to call [auto*] after a call to
-    [inverts] or to [applys]. The solution is three lines long. *)
+    [inverts] or to [applys]. *)
 
 Theorem preservation' : forall t t' T,
-  has_type empty t T  ->
+  empty |- t \in T  ->
   t --> t'  ->
-  has_type empty t' T.
+  empty |- t' \in T.
 Proof.
   (* FILL IN HERE *) admit.
 Admitted.
@@ -886,29 +879,42 @@ Admitted.
 (** Consider the proof of the progress theorem. *)
 
 Theorem progress : forall t T,
-  has_type empty t T ->
+  empty |- t \in T ->
   value t \/ exists t', t --> t'.
 Proof with eauto.
   intros t T Ht.
-  remember (@empty ty) as Gamma.
-  (induction Ht); subst Gamma...
+  remember empty as Gamma.
+  induction Ht; subst Gamma; auto.
+  (* auto solves all three cases in which t is a value *)
   - (* T_Var *)
-    inversion H.
+    (* contradictory: variables cannot be typed in an
+       empty context *)
+    discriminate H.
+
   - (* T_App *)
+    (* [t] = [t1 t2].  Proceed by cases on whether [t1] is a
+       value or steps... *)
     right. destruct IHHt1...
     + (* t1 is a value *)
       destruct IHHt2...
-      * (* t2 is a value *)
-        inversion H; subst; try solve_by_invert.
-        exists ([x0:=t2]t)...
+      * (* t2 is also a value *)
+        eapply canonical_forms_fun in Ht1; [|assumption].
+        destruct Ht1 as [x [t0 H1]]. subst.
+        exists (<{ [x:=t2]t0 }>)...
       * (* t2 steps *)
-       destruct H0 as [t2' Hstp]. exists (app t1 t2')...
+        destruct H0 as [t2' Hstp]. exists (<{t1 t2'}>)...
+
     + (* t1 steps *)
-      destruct H as [t1' Hstp]. exists (app t1' t2)...
+      destruct H as [t1' Hstp]. exists (<{t1' t2}>)...
+
   - (* T_If *)
     right. destruct IHHt1...
-    destruct t1; try solve_by_invert...
-    inversion H. exists (test x0 t2 t3)...
+
+    + (* t1 is a value *)
+      destruct (canonical_forms_bool t1); subst; eauto.
+
+    + (* t1 also steps *)
+      destruct H as [t1' Hstp]. exists <{if t1' then t2 else t3}>...
 Qed.
 
 (** Exercise: optimize the above proof.
@@ -916,7 +922,7 @@ Qed.
     The solution fits on 10 short lines. *)
 
 Theorem progress' : forall t T,
-  has_type empty t T ->
+  empty |- t \in T ->
   value t \/ exists t', t --> t'.
 Proof.
   (* FILL IN HERE *) admit.
@@ -1002,12 +1008,12 @@ End Semantics.
 (* ================================================================= *)
 (** ** Preservation for STLCRef *)
 
-From Coq Require Import omega.Omega.
+From Coq Require Import Lia.
 From PLF Require Import References.
-Import STLCRef.
 Require Import Program.
 Module PreservationProgressReferences.
-Hint Resolve store_weakening extends_refl.
+Import STLCRef.
+Hint Resolve store_weakening extends_refl : core.
 
 (** The proof of preservation for [STLCRef] can be found in chapter
     [References].  The optimized proof script is more than twice
@@ -1016,33 +1022,36 @@ Hint Resolve store_weakening extends_refl.
     the preservation theorem appears afterwards. *)
 
 Theorem preservation : forall ST t t' T st st',
-  has_type empty ST t T ->
+  empty ; ST |- t \in T ->
   store_well_typed ST st ->
   t / st --> t' / st' ->
   exists ST',
-    (extends ST' ST /\
-     has_type empty ST' t' T /\
-     store_well_typed ST' st').
+     extends ST' ST /\
+     empty ; ST' |- t' \in T /\
+     store_well_typed ST' st'.
 Proof.
-  (* old: [Proof. with eauto using store_weakening, extends_refl.]
+  (* old: [Proof with eauto using store_weakening, extends_refl.]
      new: [Proof.], and the two lemmas are registered as hints
      before the proof of the lemma, possibly inside a section in
      order to restrict the scope of the hints. *)
 
-  remember (@empty ty) as Gamma. introv Ht. gen t'.
-  (induction Ht); introv HST Hstep;
-    (* old: [subst; try solve_by_invert; inversion Hstep; subst;
-             try (eauto using store_weakening, extends_refl)]
-       new: [subst Gamma; inverts Hstep; eauto.]
-       We want to be more precise on what exactly we substitute,
-       and we do not want to call [try solve_by_invert] which
-       is way to slow. *)
+  remember empty as Gamma.
+  introv Ht. gen t'.
+  induction Ht; introv HST Hstep;
+
+  (* old: [subst; try solve_by_invert; inversion Hstep; subst;
+           try (eauto using store_weakening, extends_refl)]
+     new: [subst Gamma; inverts Hstep; eauto.]
+     We want to be more precise on what exactly we substitute,
+     and we do not want to call [try solve_by_invert] which
+     is way too slow. *)
    subst Gamma; inverts Hstep; eauto.
 
   (* T_App *)
   - (* ST_AppAbs *)
   (* old:
-      exists ST. inversion Ht1; subst.
+      exists ST.
+      inversion Ht1; subst.
       split; try split... eapply substitution_preserves_typing... *)
   (* new: we use [inverts] in place of [inversion] and [splits] to
      split the conjunction, and [applys*] in place of [eapply...] *)
@@ -1051,7 +1060,7 @@ Proof.
   - (* ST_App1 *)
   (* old:
       eapply IHHt1 in H0...
-      inversion H0 as [ST' [Hext [Hty Hsty]]].
+      destruct H0 as [ST' [Hext [Hty Hsty]]].
       exists ST'... *)
   (* new: The tactic [eapply IHHt1 in H0...] applies [IHHt1] to [H0].
      But [H0] is only thing that [IHHt1] could be applied to, so
@@ -1069,10 +1078,10 @@ Proof.
   (* All the subgoals produced can then be solved by [eauto]. *)
   eauto. eauto. eauto.
 
-  -(* ST_App2 *)
+  - (* ST_App2 *)
   (* old:
       eapply IHHt2 in H5...
-      inversion H5 as [ST' [Hext [Hty Hsty]]].
+      destruct H5 as [ST' [Hext [Hty Hsty]]].
       exists ST'... *)
   (* new: this time, we need to call [forwards] on [IHHt2],
      and we call [jauto] right away, by writing [forwards*],
@@ -1089,18 +1098,18 @@ Proof.
   - (* T_Ref *)
   + (* ST_RefValue *)
     (* old:
-         exists (ST ++ T1::nil).
-         inversion HST; subst.
-         split.
-           apply extends_app.
-         split.
-           replace (TRef T1)
-             with (TRef (store_Tlookup (length st) (ST ++ T1::nil))).
-           apply T_Loc.
-           rewrite <- H. rewrite app_length, plus_comm. simpl. omega.
-           unfold store_Tlookup. rewrite <- H. rewrite app_nth2; try omega.
-           rewrite minus_diag. simpl. reflexivity.
-           apply store_well_typed_app; assumption. *)
+        exists (ST ++ T1::nil).
+        inversion HST; subst.
+        split.
+        { apply extends_app. }
+        split.
+        { replace <{ Ref T1 }>
+            with <{ Ref {store_Tlookup (length st) (ST ++ T1::nil)} }>.
+          { apply T_Loc.
+            rewrite <- H. rewrite app_length, plus_comm. simpl. lia. }
+          unfold store_Tlookup. rewrite <- H. rewrite nth_eq_last.
+          reflexivity. }
+        apply store_well_typed_app; assumption. *)
     (* new: In this proof case, we need to perform an inversion
        without removing the hypothesis. The tactic [inverts keep]
        serves exactly this purpose. *)
@@ -1111,11 +1120,11 @@ Proof.
        a manual [replace] before [T_loc] can be applied. *)
       applys_eq T_Loc 1.
     (* To justify the inequality, there is no need to call [rewrite <- H],
-       because the tactic [omega] is able to exploit [H] on its own.
+       because the tactic [lia] is able to exploit [H] on its own.
        So, only the rewriting of [app_length] and the call to the
-       tactic [omega] remain, with a call to [simpl] to unfold the
+       tactic [lia] remain, with a call to [simpl] to unfold the
        definition of [app]. *)
-        rewrite app_length. simpl. omega.
+        rewrite app_length. simpl. lia.
     (* The next proof case is hard to polish because it relies on the
        lemma [app_nth1] whose statement is not automation-friendly.
        We'll come back to this proof case further on. *)
@@ -1131,7 +1140,7 @@ Proof.
   (* old:
       exists ST. split; try split...
       destruct HST as [_ Hsty].
-      replace T11 with (store_Tlookup l ST).
+      replace T1 with (store_Tlookup l ST).
       apply Hsty...
       inversion Ht; subst... *)
   (* new: we start by calling [exists ST] and [splits*]. *)
@@ -1181,7 +1190,7 @@ Proof. intros. subst. apply nth_eq_last. Qed.
 
 Lemma preservation_ref : forall (st:store) (ST : store_ty) T1,
   length ST = length st ->
-  Ref T1 = Ref (store_Tlookup (length st) (ST ++ T1::nil)).
+  <{ Ref T1 }> = <{ Ref {store_Tlookup (length st) (ST ++ T1::nil)} }>.
 Proof.
   intros. dup.
 
@@ -1195,15 +1204,16 @@ Qed.
 (** The optimized proof of preservation is summarized next. *)
 
 Theorem preservation' : forall ST t t' T st st',
-  has_type empty ST t T ->
+  empty ; ST |- t \in T ->
   store_well_typed ST st ->
   t / st --> t' / st' ->
   exists ST',
-    (extends ST' ST /\
-     has_type empty ST' t' T /\
-     store_well_typed ST' st').
+     extends ST' ST /\
+     empty ; ST' |- t' \in T /\
+     store_well_typed ST' st'.
 Proof.
-  remember (@empty ty) as Gamma. introv Ht. gen t'.
+  remember empty as Gamma.
+  introv Ht. gen t'.
   induction Ht; introv HST Hstep; subst Gamma; inverts Hstep; eauto.
   - exists ST. inverts Ht1. splits*. applys* substitution_preserves_typing.
   - forwards*: IHHt1.
@@ -1216,7 +1226,7 @@ Proof.
   - exists (ST ++ T1::nil). inverts keep HST. splits.
     apply extends_app.
     applys_eq T_Loc 1.
-      rewrite app_length. simpl. omega.
+      rewrite app_length. simpl. lia.
       unfold store_Tlookup. rewrite* nth_eq_last'.
     apply* store_well_typed_app.
   - forwards*: IHHt.
@@ -1236,11 +1246,11 @@ Qed.
     half the length. *)
 
 Theorem progress : forall ST t T st,
-  has_type empty ST t T ->
+  empty ; ST |- t \in T ->
   store_well_typed ST st ->
   (value t \/ exists t' st', t / st --> t' / st').
 Proof.
-  introv Ht HST. remember (@empty ty) as Gamma.
+  introv Ht HST. remember empty as Gamma.
   induction Ht; subst Gamma; tryfalse; try solve [left*].
   - right. destruct* IHHt1 as [K|].
     inverts K; inverts Ht1.
@@ -1276,18 +1286,17 @@ Import Sub.
 
 (** Consider the inversion lemma for typing judgment
     of abstractions in a type system with subtyping. *)
-
 Lemma abs_arrow : forall x S1 s2 T1 T2,
-  has_type empty (abs x S1 s2) (Arrow T1 T2) ->
-     subtype T1 S1
-  /\ has_type (update empty x S1) s2 T2.
+  empty |- \x:S1,s2 \in (T1->T2) ->
+     T1 <: S1
+  /\ (x |-> S1 ; empty) |- s2 \in T2.
 Proof with eauto.
   intros x S1 s2 T1 T2 Hty.
   apply typing_inversion_abs in Hty.
-  destruct Hty as [S2 [Hsub Hty]].
+  destruct Hty as [S2 [Hsub Hty1]].
   apply sub_inversion_arrow in Hsub.
   destruct Hsub as [U1 [U2 [Heq [Hsub1 Hsub2]]]].
-  inversion Heq; subst...
+  injection Heq as Heq; subst...
 Qed.
 
 (** Exercise: optimize the proof script, using
@@ -1297,9 +1306,9 @@ Qed.
     The solution fits on 3 lines. *)
 
 Lemma abs_arrow' : forall x S1 s2 T1 T2,
-  has_type empty (abs x S1 s2) (Arrow T1 T2) ->
-     subtype T1 S1
-  /\ has_type (update empty x S1) s2 T2.
+  empty |- \x:S1,s2 \in (T1->T2) ->
+     T1 <: S1
+  /\ (x |-> S1 ; empty) |- s2 \in T2.
 Proof.
   (* FILL IN HERE *) admit.
 Admitted.
@@ -1409,7 +1418,7 @@ Qed.
     Coq that it should always try to unfold [myFact] when [myFact]
     appears in the goal. *)
 
-Hint Unfold myFact.
+Hint Unfold myFact : core.
 
 (** This time, automation is able to see through the definition
     of [myFact]. *)
@@ -1489,7 +1498,7 @@ Section DemoAbsurd1.
     and see whether we can prove that the proposition
     [exists x, x <= 3 /\ x > 3] is absurd. *)
 
-Hint Resolve le_not_gt.
+Hint Resolve le_not_gt : core.
 
 Lemma demo_auto_absurd_1 :
   (exists x, x <= 3 /\ x > 3) ->
@@ -1505,7 +1514,7 @@ Qed.
     hint, because it concludes on [False], so proof search will try to
     apply it when the current goal is [False]. *)
 
-Hint Resolve le_gt_false.
+Hint Resolve le_gt_false : core.
 
 Lemma demo_auto_absurd_2 :
   (exists x, x <= 3 /\ x > 3) ->
@@ -1603,7 +1612,7 @@ Parameter subtype_trans : forall S T U,
 (** Adding reflexivity as hint is generally a good idea,
     so let's add reflexivity of subtyping as hint. *)
 
-Hint Resolve subtype_refl.
+Hint Resolve subtype_refl : core.
 
 (** Adding transitivity as hint is generally a bad idea.  To
     understand why, let's add it as hint and see what happens.
@@ -1613,7 +1622,7 @@ Hint Resolve subtype_refl.
 
 Section HintsTransitivity.
 
-Hint Resolve subtype_trans.
+Hint Resolve subtype_trans : core.
 
 (** Now, consider the goal [forall S T, subtype S T], which clearly has
     no hope of being solved. Let's call [eauto] on this goal. *)
@@ -1664,7 +1673,7 @@ Hint Extern 1 (subtype ?S ?U) =>
   match goal with
   | H: subtype S ?T |- _ => apply (@subtype_trans S T U)
   | H: subtype ?T U |- _ => apply (@subtype_trans S T U)
-  end.
+  end : core.
 
 (** This hint declaration can be understood as follows.
     - "Hint Extern" introduces the hint.
@@ -1721,7 +1730,7 @@ Abort.
 
 (** A decision procedure is able to solve proof obligations whose
     statement admits a particular form. This section describes three
-    useful decision procedures. The tactic [omega] handles goals
+    useful decision procedures. The tactic [lia] handles goals
     involving arithmetic and inequalities, but not general
     multiplications.  The tactic [ring] handles goals involving
     arithmetic, including multiplications, but does not support
@@ -1730,70 +1739,70 @@ Abort.
     context. *)
 
 (* ================================================================= *)
-(** ** Omega *)
+(** ** Lia *)
 
-(** The tactic [omega] supports natural numbers (type [nat]) as well as
+(** The tactic [lia] supports natural numbers (type [nat]) as well as
     integers (type [Z], available by including the module [ZArith]).
     It supports addition, substraction, equalities and inequalities.
-    Before using [omega], one needs to import the module [Omega],
+    Before using [lia], one needs to import the module [Lia],
     as follows. *)
 
-Require Import Omega.
+Require Import Lia.
 
 (** Here is an example. Let [x] and [y] be two natural numbers
     (they cannot be negative). Assume [y] is less than 4, assume
     [x+x+1] is less than [y], and assume [x] is not zero. Then,
     it must be the case that [x] is equal to one. *)
 
-Lemma omega_demo_1 : forall (x y : nat),
+Lemma lia_demo_1 : forall (x y : nat),
   (y <= 4) ->
   (x + x + 1 <= y) ->
   (x <> 0) ->
   (x = 1).
-Proof. intros. omega. Qed.
+Proof. intros. lia. Qed.
 
 (** Another example: if [z] is the mean of [x] and [y], and if the
     difference between [x] and [y] is at most [4], then the difference
     between [x] and [z] is at most 2. *)
 
-Lemma omega_demo_2 : forall (x y z : nat),
+Lemma lia_demo_2 : forall (x y z : nat),
   (x + y = z + z) ->
   (x - y <= 4) ->
   (x - z <= 2).
-Proof. intros. omega. Qed.
+Proof. intros. lia. Qed.
 
 (** One can proof [False] using [omega] if the mathematical facts
     from the context are contradictory. In the following example,
     the constraints on the values [x] and [y] cannot be all
     satisfied in the same time. *)
 
-Lemma omega_demo_3 : forall (x y : nat),
+Lemma lia_demo_3 : forall (x y : nat),
   (x + 5 <= y) ->
   (y - x < 3) ->
   False.
-Proof. intros. omega. Qed.
+Proof. intros. lia. Qed.
 
 (** Note: [omega] can prove a goal by contradiction only if its
     conclusion reduces to [False]. The tactic [omega] always fails
     when the conclusion is an arbitrary proposition [P], even though
     [False] implies any proposition [P] (by [ex_falso_quodlibet]). *)
 
-Lemma omega_demo_4 : forall (x y : nat) (P : Prop),
+Lemma lia_demo_4 : forall (x y : nat) (P : Prop),
   (x + 5 <= y) ->
   (y - x < 3) ->
   P.
 Proof.
   intros.
-  (* Calling [omega] at this point fails with the message:
-    "Omega: Can't solve a goal with proposition variables" *)
-  (* So, one needs to replace the goal by [False] first. *)
-  false. omega.
+  (* The [lia] tactic can solve non arithmetic goals
+     provided there is a contradiction that it can derive
+     from arithmetic hypotheses *)
+  lia.
 Qed.
 
 (* ================================================================= *)
 (** ** Ring *)
 
-(** Compared with [omega], the tactic [ring] adds support for
+(** Compared with [lia], the tactic [ring] adds support for
     multiplications, however it gives up the ability to reason on
     inequations. Moreover, it supports only integers (type [Z]) and
     not natural numbers (type [nat]). Here is an example showing how
@@ -1877,12 +1886,12 @@ Proof. congruence. Qed.
       disjunctions. However, its support for disjunction can make it
       exponentially slow.
 
-    - [jauto] extends [eauto] with support for  negation, conjunctions, and
+    - [jauto] extends [eauto] with support for negation, conjunctions, and
       existential at the head of hypothesis.
 
     - [congruence] helps reasoning about equalities and inequalities.
 
-    - [omega] proves arithmetic goals with equalities and inequalities,
+    - [lia] proves arithmetic goals with equalities and inequalities,
       but it does not support multiplication.
 
     - [ring] proves arithmetic goals with multiplications, but does not
@@ -1913,4 +1922,4 @@ Proof. congruence. Qed.
     some investment, however this investment will pay off very quickly.
 *)
 
-(* Thu Feb 7 20:09:27 EST 2019 *)
+(* 2020-09-09 21:08 *)

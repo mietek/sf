@@ -1,8 +1,8 @@
 (** * Typeclasses: A Tutorial on Typeclasses in Coq *)
 
-Require Import Coq.Bool.Bool.
-Require Import Coq.Strings.String.
-Require Import Coq.Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Strings.String.
+From Coq Require Import Arith.Arith.
 Require Import Omega.
 Require Import List. Import ListNotations.
 Local Open Scope string.
@@ -147,11 +147,13 @@ Instance showNat : Show nat :=
 
 Compute (show 42).
 
-(** **** Exercise: 1 star (showNatBool)  *)
-(** Write a [Show] instance for pairs of a nat and a bool. *)
+(** **** Exercise: 1 star, standard (showNatBool)
 
-(* FILL IN HERE *)
-(** [] *)
+    Write a [Show] instance for pairs of a nat and a bool. *)
+
+(* FILL IN HERE
+
+    [] *)
 
 (** Next, we can define functions that use the overloaded function
     [show] like this: *)
@@ -186,11 +188,13 @@ Compute (showTwo Red Green).
     instance of [show] determines which of the implicitly supplied
     show functions (for [A] or [B]) gets invoked. *)
 
-(** **** Exercise: 1 star (missingConstraint)  *)
-(** What happens if we forget the class constraints in the definitions
+(** **** Exercise: 1 star, standard (missingConstraint)
+
+    What happens if we forget the class constraints in the definitions
     of [showOne] or [showTwo]?  Try deleting them and see what
-    happens. *)
-(** [] *)    
+    happens.
+
+    [] *)    
 
 (** Of course, [Show] is not the only interesting typeclass.  There
     are many other situations where it is useful to be able to
@@ -235,13 +239,15 @@ Instance eqNat : Eq nat :=
     types.  In particular, equality at types like [nat->nat] is
     undecidable. *)
 
-(** **** Exercise: 3 stars, optional (boolArrowBool)  *)
-(** There are some function types, like [bool->bool], for which
+(** **** Exercise: 3 stars, standard, optional (boolArrowBool)
+
+    There are some function types, like [bool->bool], for which
     checking equality makes perfect sense.  Write an [Eq] instance for
     this type. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (* ================================================================= *)
 (** ** Parameterized Instances: New Typeclasses from Old *)
@@ -285,20 +291,24 @@ Instance showList {A : Type} `{Show A} : Show (list A) :=
     show l := append "[" (append (showListAux show l) "]")
   }.
 
-(** **** Exercise: 3 stars (eqEx)  *)
-(** Write an [Eq] instance for lists and [Show] and [Eq] instances for
+(** **** Exercise: 3 stars, standard (eqEx)
+
+    Write an [Eq] instance for lists and [Show] and [Eq] instances for
     the [option] type constructor. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
 
-(** **** Exercise: 3 stars, optional (boolArrowA)  *)
-(** Generalize your solution to the [boolArrowBool] exercise to build
+    [] *)
+
+(** **** Exercise: 3 stars, standard, optional (boolArrowA)
+
+    Generalize your solution to the [boolArrowBool] exercise to build
     an equality instance for any type of the form [bool->A], where [A]
     itself is an [Eq] type.  Show that it works for [bool->bool->nat]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (* ================================================================= *)
 (** ** Class Hierarchies *)
@@ -353,22 +363,28 @@ Instance natOrd : Ord nat :=
 Definition max {A: Type} `{Eq A} `{Ord A} (x y : A) : A :=
   if le x y then y else x.
 
-(** **** Exercise: 1 star (missingConstraintAgain)  *)
-(** What does Coq say if the [Ord] class constraint is left out of the
-    definition of [max]?  What about the [Eq] class constraint? *)
-(** [] *)    
+(** **** Exercise: 1 star, standard (missingConstraintAgain)
 
-(** **** Exercise: 3 stars (ordMisc)  *)
-(** Define [Ord] instances for options and pairs. *)
+    What does Coq say if the [Ord] class constraint is left out of the
+    definition of [max]?  What about the [Eq] class constraint?
 
-(* FILL IN HERE *)
-(** [] *)
+    [] *)    
 
-(** **** Exercise: 3 stars (ordList)  *)
-(** For a little more practice, define an [Ord] instance for lists. *)
+(** **** Exercise: 3 stars, standard (ordMisc)
 
-(* FILL IN HERE *)
-(** [] *)
+    Define [Ord] instances for options and pairs. *)
+
+(* FILL IN HERE
+
+    [] *)
+
+(** **** Exercise: 3 stars, standard (ordList)
+
+    For a little more practice, define an [Ord] instance for lists. *)
+
+(* FILL IN HERE
+
+    [] *)
 
 (* ################################################################# *)
 (** * How It Works *)
@@ -621,10 +637,12 @@ Check {| lx:=2; ly:=4; label:="hello" |}.
         : LabeledPoint string
 *)
 
-(** **** Exercise: 1 star (rcdParens)  *)
-(** Note that the [A] parameter in the definition of [LabeledPoint] is
-    bound with parens, not curly braces. Why is this a better choice? *)
-(** [] *)
+(** **** Exercise: 1 star, standard (rcdParens)
+
+    Note that the [A] parameter in the definition of [LabeledPoint] is
+    bound with parens, not curly braces. Why is this a better choice?
+
+    [] *)
 
 (* ================================================================= *)
 (** ** Typeclasses are Records *)
@@ -711,13 +729,15 @@ Unset Printing Implicit.
     value using a variant of the [eauto] proof search procedure that
     refers to a "hint database" called [typeclass_instances]. *)
 
-(** **** Exercise: 1 star (HintDb)  *)
-(** Uncomment and execute the following command.  Search for "For
+(** **** Exercise: 1 star, standard (HintDb)
+
+    Uncomment and execute the following command.  Search for "For
     Show" in the output and have a look at the entries for [showNat]
     and [showPair]. *)
 
-(* Print HintDb typeclass_instances. *)
-(** [] *)
+(* Print HintDb typeclass_instances.
+
+    [] *)
 
 (** We can see what's happening during the instance inference process
     if we issue the [Set Typeclasses Debug] command. *)
@@ -768,7 +788,6 @@ Unset Typeclasses Debug.
     @show nat showNat 42
 *)
 
-
 (* ################################################################# *)
 (** * Typeclasses and Proofs *)
 
@@ -805,22 +824,11 @@ Instance eqdecNat : EqDec nat :=
   }.
 
 (** If we do not happen to have an appropriate proof already in the
-    environment, we can simply omit it.  If the [Instance] declaration
-    does not give values for all the class members, Coq will enter
+    environment, we can simply omit it. Coq will enter
     proof mode and ask the user to use tactics to construct
-    inhabitants for the remaining fields. *)
+    inhabitants for the fields. *)
 
-Instance eqdecBool' : EqDec bool := 
-  {
-  }.
-Proof.
-  intros x y. destruct x; destruct y; simpl; unfold iff; auto.
-Defined.
-
-(** (If we are omitting _all_ the fields of an instance declaration,
-    we can also omit the [:= {}] if we like.  Note that the proof
-    needs one more line.) *)
-Instance eqdecBool'' : EqDec bool.
+Instance eqdecBool' : EqDec bool.
 Proof.
   constructor.
   intros x y. destruct x; destruct y; simpl; unfold iff; auto.
@@ -852,7 +860,7 @@ Proof.
     members of other typeclasses: these are called _substructures_.
     Here is an example adapted from the Coq Reference Manual. *)
 
-Require Import Coq.Relations.Relation_Definitions.
+From Coq Require Import Relations.Relation_Definitions.
 
 Class Reflexive (A : Type) (R : relation A) :=
   { 
@@ -938,15 +946,18 @@ Proof.
       right; intro; destruct H; contradiction.
 Defined.
 
-(** **** Exercise: 3 stars (dec_neg_disj)  *)
-(** Give instance declarations showing that, if [P] and [Q] are
+(** **** Exercise: 3 stars, standard (dec_neg_disj)
+
+    Give instance declarations showing that, if [P] and [Q] are
     decidable propositions, then so are [~P] and [P\/Q]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
 
-(** **** Exercise: 4 stars (Dec_All)  *)
-(** The following function converts a list into a proposition claiming
+    [] *)
+
+(** **** Exercise: 4 stars, standard (Dec_All)
+
+    The following function converts a list into a proposition claiming
     that every element of that list satiesfies some proposition
     [P]: *)
 
@@ -959,8 +970,9 @@ Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop :=
 (** Create an instance of [Dec] for [All P l], given that [P a] is
     decidable for every [a]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (** One reason for doing all this is that it makes it easy to move
     back and forth between the boolean and propositional worlds,
@@ -1041,8 +1053,9 @@ Open Scope monad_scope.
        }.
 *)
 (** That is, a type family [M] is an instance of the [Monad] class if
-    we can define functions [ret] and [bind] of the appropriate types. *)
-(** (If you [Print] the actual definition, you'll see something more
+    we can define functions [ret] and [bind] of the appropriate types.
+
+    (If you [Print] the actual definition, you'll see something more
     complicated, involving [Polymorphic Record bla bla]...  The
     [Polymorphic] part refers to Coq's "universe polymorphism," which
     does not concern us here.) *)
@@ -1146,7 +1159,6 @@ Definition sum3opt' (n1 n2 : option nat) :=
     repository (https://github.com/coq-ext-lib/coq-ext-lib) includes
     some further examples of using monads in Coq. *)
 
-
 (* ================================================================= *)
 (** ** Others *)
 
@@ -1155,14 +1167,13 @@ Definition sum3opt' (n1 n2 : option nat) :=
     [Transitive], etc.) and [Proper].  They are described in the
     second half of _A Gentle Introduction to Type Classes and
     Relations in Coq_, by Castéran and Sozeau.
-    http://www.labri.fr/perso/casteran/CoqArt/TypeClassesTut/typeclassestut.pdf.
+    https://www.labri.fr/perso/casteran/CoqArt/TypeClassesTut/typeclassestut.pdf.
 
     A much larger collection of typeclasses for formalizing
     mathematics is described in _Type Classes for Mathematics in Type
     Theory_, by Bas Spitters and Eelis van der
     Weegen. https://arxiv.org/pdf/1102.1323.pdf
 *)
-
 
 (* ################################################################# *)
 (** * Controlling Instantiation *)
@@ -1209,9 +1220,11 @@ Fail Check (foo true).
     The lesson is that it matters a great deal _exactly_ what problems
     are posed to the instance search engine. *)
 
-(** **** Exercise: 1 star (debugDefaulting)  *)
-(** Do [Set Typeclasses Debug] and verify that this is what happened. *)
-(** [] *)
+(** **** Exercise: 1 star, standard (debugDefaulting)
+
+    Do [Set Typeclasses Debug] and verify that this is what happened.
+
+    [] *)
 
 (* ================================================================= *)
 (** ** Manipulating the Hint Database *)
@@ -1316,7 +1329,6 @@ Compute (show (Baz 42)).
 (* ==> 
      = "Baz: 42"
      : string    *)
-
 
 (* ################################################################# *)
 (** * Debugging *)
@@ -1447,8 +1459,9 @@ Compute e3.
 Definition e4 : list nat := mymap false.
 *)
 
-(** **** Exercise: 1 star (nonterm)  *)
-(** Why, exactly, did the search diverge?  Enable typeclass debugging,
+(** **** Exercise: 1 star, standard (nonterm)
+
+    Why, exactly, did the search diverge?  Enable typeclass debugging,
     uncomment the above [Definition], and see what gets printed.  (You
     may want to do this from the command line rather than from inside
     an IDE, to make it easier to kill.) *)
@@ -1702,7 +1715,7 @@ Definition e4 : list nat := mymap false.
     Spitters, Bas, and Eelis Van Der Weegen. “Type Classes for
     Mathematics in Type Theory.” MSCS 21, no. Special Issue 04 (2011):
     795–825. doi:10.1017/S0960129511000119.
-    http://arxiv.org/pdf/1102.1323v1.pdf.
+    https://arxiv.org/pdf/1102.1323v1.pdf.
 
     I think the above paper is missing one argument for unbundling:
     I've seen many libraries that begin by making an interface (say I)
@@ -1719,7 +1732,6 @@ Definition e4 : list nat := mymap false.
     items of the interface they actually use, and not on a big
     bundle. *)
 
-
 (* ################################################################# *)
 (** * Further Reading *)
 
@@ -1727,7 +1739,7 @@ Definition e4 : list nat := mymap false.
       - How to make ad-hoc polymorphism less ad hoc Philip Wadler and
         Stephen Blott. 16'th Symposium on Principles of Programming
         Languages, ACM Press, Austin, Texas, January 1989.
-        http://homepages.inf.ed.ac.uk/wadler/topics/type-classes.html
+        https://homepages.inf.ed.ac.uk/wadler/topics/type-classes.html
 
     The original paper on typeclasses In Coq:
       - Matthieu Sozeau and Nicolas Oury. First-Class Type
@@ -1736,9 +1748,9 @@ Definition e4 : list nat := mymap false.
 
     Sources for this tutorial:
      - Coq Reference Manual:
-       https://coq.inria.fr/refman/Reference-Manual023.html
+       https://coq.inria.fr/refman/
      - Casteran and Sozeau's "Gentle Introduction":
-       http://www.labri.fr/perso/casteran/CoqArt/TypeClassesTut/typeclassestut.pdf
+       https://www.labri.fr/perso/casteran/CoqArt/TypeClassesTut/typeclassestut.pdf
      - Sozeau's slides from a talk at Penn:
        https://www.cis.upenn.edu/~bcpierce/courses/670Fall12/slides.pdf
 
@@ -1748,5 +1760,4 @@ Definition e4 : list nat := mymap false.
        http://learnyouahaskell.com/making-our-own-types-and-typeclasses
 *)
 
-
-(* Tue Oct 9 11:47:30 EDT 2018 *)
+(* 2020-10-14 10:23 *)

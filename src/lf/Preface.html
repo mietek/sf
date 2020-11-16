@@ -2,52 +2,56 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
 <title>Preface</title>
-</head>
 <link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
 <script src="common/jquery-ui/external/jquery/jquery.js"></script>
 <script src="common/jquery-ui/jquery-ui.js"></script>
 <script src="common/toggleproofs.js"></script>
 <link href="common/css/lf.css" rel="stylesheet" type="text/css"/>
+</head>
 
 <body>
 
 <div id="page">
 
 <div id="header">
-<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
-<img src='common/media/image/sf_logo_sm.png'></a>
-</br><a href='index.html'>  <span class='booktitleinheader'>Volume 1: Logical Foundations</span><br></br>
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 1: Logical Foundations</a></div>
 <ul id='menu'>
-   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
-   <a href='coqindex.html'><li class='section_name'>Index</li></a>
-   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
 </ul>
-</a></div>
+</div>
 
 <div id="main">
 
 <h1 class="libtitle">Preface</h1>
 
+<div class="code">
+</div>
 
 
 <div class="doc">
-<a name="lab1"></a><h1 class="section">Welcome</h1>
+<a id="lab1"></a><h1 class="section">Welcome</h1>
 
 <div class="paragraph"> </div>
 
- This is the entry point in a series of electronic textbooks on
-    various aspects of <i>Software Foundations</i> &mdash; the mathematical
+ This is the entry point to a series of electronic textbooks on
+    various aspects of <i>Software Foundations</i>, the mathematical
     underpinnings of reliable software.  Topics in the series include
     basic concepts of logic, computer-assisted theorem proving, the
     Coq proof assistant, functional programming, operational
-    semantics, logics for reasoning about programs, and static type
-    systems.  The exposition is intended for a broad range of readers,
-    from advanced undergraduates to PhD students and researchers.  No
-    specific background in logic or programming languages is assumed,
-    though a degree of mathematical maturity will be helpful.
+    semantics, logics and techniques for reasoning about programs,
+    static type systems, property-based random testing, and
+    verification of practical C code.  The exposition is intended for
+    a broad range of readers, from advanced undergraduates to PhD
+    students and researchers.  No specific background in logic or
+    programming languages is assumed, though a degree of mathematical
+    maturity will be helpful.
 
 <div class="paragraph"> </div>
 
@@ -75,22 +79,22 @@
 </div>
 
 <div class="doc">
-<a name="lab2"></a><h1 class="section">Overview</h1>
+<a id="lab2"></a><h1 class="section">Overview</h1>
 
 <div class="paragraph"> </div>
 
- Building reliable software is really hard.  The scale and
-    complexity of modern systems, the number of people involved, and
-    the range of demands placed on them make it extremely difficult to
-    build software that is even more-or-less correct, much less 100%
-    correct.  At the same time, the increasing degree to which
-    information processing is woven into every aspect of society
-    greatly amplifies the cost of bugs and insecurities.
+ Building reliable software is really hard -- really hard.  The
+    scale and complexity of modern systems, the number of people
+    involved, and the range of demands placed on them make it
+    challenging to build software that is even more-or-less correct,
+    much less 100% correct.  At the same time, the increasing degree
+    to which information processing is woven into every aspect of
+    society greatly amplifies the cost of bugs and insecurities.
 
 <div class="paragraph"> </div>
 
     Computer scientists and software engineers have responded to these
-    challenges by developing a whole host of techniques for improving
+    challenges by developing a host of techniques for improving
     software reliability, ranging from recommendations about managing
     software projects teams (e.g., extreme programming) to design
     philosophies for libraries (e.g., model-view-controller,
@@ -99,11 +103,11 @@
     functional programming, ...) to mathematical techniques for
     specifying and reasoning about properties of software and tools
     for helping validate these properties.  The <i>Software Foundations</i>
-    series is focused on this last set of techniques.
+    series is focused on this last set of tools.
 
 <div class="paragraph"> </div>
 
-    The text is constructed around three conceptual threads:
+    This volume weaves together three conceptual threads:
 
 <div class="paragraph"> </div>
 
@@ -119,20 +123,14 @@
 
     (3) <i>functional programming</i>, both as a method of programming that
         simplifies reasoning about programs and as a bridge between
-        programming and logic.
+        programming and logic. 
+<div class="paragraph"> </div>
+
+<a id="lab3"></a><h2 class="section">Logic</h2>
 
 <div class="paragraph"> </div>
 
-    Some suggestions for further reading can be found in the
-    <a href="Postscript.html"><span class="inlineref">Postscript</span></a> chapter.  Bibliographic information for all
-    cited works can be found in the file <a href="Bib.html"><span class="inlineref">Bib</span></a>. 
-<div class="paragraph"> </div>
-
-<a name="lab3"></a><h2 class="section">Logic</h2>
-
-<div class="paragraph"> </div>
-
- Logic is the field of study whose subject matter is <i>proofs</i> &mdash;
+ Logic is the field of study whose subject matter is <i>proofs</i> --
     unassailable arguments for the truth of particular propositions.
     Volumes have been written about the central role of logic in
     computer science.  Manna and Waldinger called it "the calculus of
@@ -154,7 +152,7 @@
     than you have probably done so far. 
 <div class="paragraph"> </div>
 
-<a name="lab4"></a><h2 class="section">Proof Assistants</h2>
+<a id="lab4"></a><h2 class="section">Proof Assistants</h2>
 
 <div class="paragraph"> </div>
 
@@ -226,12 +224,12 @@
 <li> As an <i>environment for developing formally certified software
       and hardware</i>, Coq has been used, for example, to build
       CompCert, a fully-verified optimizing compiler for C, and
-      CertiKos, a fully verified hypervisor, for proving the
+      CertiKOS, a fully verified hypervisor, for proving the
       correctness of subtle algorithms involving floating point
       numbers, and as the basis for CertiCrypt, an environment for
       reasoning about the security of cryptographic algorithms.  It is
       also being used to build verified implementations of the
-      open-source RISC-V processor.
+      open-source RISC-V processor architecture.
 
 <div class="paragraph"> </div>
 
@@ -252,13 +250,13 @@
       example, its ability to include complex computations inside
       proofs made it possible to develop the first formally verified
       proof of the 4-color theorem.  This proof had previously been
-      controversial among mathematicians because part of it included
-      checking a large number of configurations using a program. In
-      the Coq formalization, everything is checked, including the
-      correctness of the computational part.  More recently, an even
-      more massive effort led to a Coq formalization of the
-      Feit-Thompson Theorem &mdash; the first major step in the
-      classification of finite simple groups.
+      controversial among mathematicians because it required checking
+      a large number of configurations using a program. In the Coq
+      formalization, everything is checked, including the correctness
+      of the computational part.  More recently, an even more massive
+      effort led to a Coq formalization of the Feit-Thompson Theorem,
+      the first major step in the classification of finite simple
+      groups.
 
 </li>
 </ul>
@@ -277,7 +275,7 @@
    Thierry Coquand, one of Coq's early developers. 
 <div class="paragraph"> </div>
 
-<a name="lab5"></a><h2 class="section">Functional Programming</h2>
+<a id="lab5"></a><h2 class="section">Functional Programming</h2>
 
 <div class="paragraph"> </div>
 
@@ -289,14 +287,13 @@
 
 <div class="paragraph"> </div>
 
-    Functional programming has been developed over many decades &mdash;
+    Functional programming has been developed over many decades --
     indeed, its roots go back to Church's lambda-calculus, which was
-    invented in the 1930s, well before the first computers (at least
-    the first electronic ones)!  But since the early '90s it has
-    enjoyed a surge of interest among industrial engineers and
-    language designers, playing a key role in high-value systems at
-    companies like Jane St. Capital, Microsoft, Facebook, and
-    Ericsson.
+    invented in the 1930s, well <i>before</i> the first electronic
+    computers!  But since the early '90s it has enjoyed a surge of
+    interest among industrial engineers and language designers,
+    playing a key role in high-value systems at companies like Jane
+    Street Capital, Microsoft, Facebook, Twitter, and Ericsson.
 
 <div class="paragraph"> </div>
 
@@ -317,8 +314,8 @@
     operation on a data structure yields a new data structure, leaving
     the old one intact, then there is no need to worry about how that
     structure is being shared and whether a change by one part of the
-    program might break an invariant that another part of the program
-    relies on.  These considerations are particularly critical in
+    program might break an invariant relied on by another part of the
+    program.  These considerations are particularly critical in
     concurrent systems, where every piece of mutable state that is
     shared between threads is a potential source of pernicious bugs.
     Indeed, a large part of the recent interest in functional
@@ -329,15 +326,15 @@
 
     Another reason for the current excitement about functional
     programming is related to the first: functional programs are often
-    much easier to parallelize than their imperative counterparts.  If
-    running a computation has no effect other than producing a result,
-    then it does not matter <i>where</i> it is run.  Similarly, if a data
-    structure is never modified destructively, then it can be copied
-    freely, across cores or across the network.  Indeed, the
-    "Map-Reduce" idiom, which lies at the heart of massively
-    distributed query processors like Hadoop and is used by Google to
-    index the entire web is a classic example of functional
-    programming.
+    much easier to parallelize and physically distribute than their
+    imperative counterparts.  If running a computation has no effect
+    other than producing a result, then it does not matter <i>where</i> it
+    is run.  Similarly, if a data structure is never modified
+    destructively, then it can be copied freely, across cores or
+    across the network.  Indeed, the "Map-Reduce" idiom, which lies at
+    the heart of massively distributed query processors like Hadoop
+    and is used by Google to index the entire web is a classic example
+    of functional programming.
 
 <div class="paragraph"> </div>
 
@@ -348,34 +345,27 @@
     programming language plus a set of tools for stating and proving
     logical assertions.  Moreover, when we come to look more closely,
     we find that these two sides of Coq are actually aspects of the
-    very same underlying machinery &mdash; i.e., <i>proofs are programs</i>.  
+    very same underlying machinery -- i.e., <i>proofs are programs</i>.  
 </div>
 
 <div class="doc">
-<a name="lab6"></a><h2 class="section">Further Reading</h2>
+<a id="lab6"></a><h2 class="section">Further Reading</h2>
 
 <div class="paragraph"> </div>
 
  This text is intended to be self contained, but readers looking
     for a deeper treatment of particular topics will find some
-    suggestions for further reading in the <a href="Postscript.html"><span class="inlineref">Postscript</span></a>
-    chapter. 
+    suggestions for further reading in the <a href="Postscript.html"><span class="inlineref">Postscript</span></a> chapter.
+    Bibliographic information for all cited works can be found in the
+    file <a href="Bib.html"><span class="inlineref">Bib</span></a>.
 </div>
 
 <div class="doc">
-<a name="lab7"></a><h1 class="section">Practicalities</h1>
+<a id="lab7"></a><h1 class="section">Practicalities</h1>
 
 <div class="paragraph"> </div>
 
-<a name="lab8"></a><h2 class="section">Chapter Dependencies</h2>
-
-<div class="paragraph"> </div>
-
- A diagram of the dependencies between chapters and some suggested
-    paths through the material can be found in the file <a href="deps.html"><span class="inlineref"><span class="inlinecode"><span class="id" type="var">deps.html</span></span></span></a>. 
-<div class="paragraph"> </div>
-
-<a name="lab9"></a><h2 class="section">System Requirements</h2>
+<a id="lab8"></a><h2 class="section">System Requirements</h2>
 
 <div class="paragraph"> </div>
 
@@ -385,7 +375,7 @@
 
 <ul class="doclist">
 <li> A current installation of Coq, available from the Coq home page.
-      These files have been tested with Coq 8.8.1.
+      These files have been tested with Coq 8.12.
 
 <div class="paragraph"> </div>
 
@@ -404,8 +394,8 @@
 
 <div class="paragraph"> </div>
 
-          Adventurous users of Coq within Emacs may also want to check
-          out extensions such as <span class="inlinecode"><span class="id" type="var">company</span>-<span class="id" type="var">coq</span></span> and <span class="inlinecode"><span class="id" type="var">control</span>-<span class="id" type="var">lock</span></span>.
+          Adventurous users of Coq within Emacs may want to check
+          out extensions such as <span class="inlinecode"><span class="id" title="var">company</span>-<span class="id" title="var">coq</span></span> and <span class="inlinecode"><span class="id" title="var">control</span>-<span class="id" title="var">lock</span></span>.
 
 <div class="paragraph"> </div>
 
@@ -421,15 +411,12 @@
 
           Users who like CoqIDE should consider running it with the
           "asynchronous" and "error resilience" modes disabled:
-
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">coqide</span> -<span class="id" title="var">async</span>-<span class="id" title="var">proofs</span> <span class="id" title="var">off</span> \<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-<span class="id" title="var">async</span>-<span class="id" title="var">proofs</span>-<span class="id" title="var">command</span>-<span class="id" title="var">error</span>-<span class="id" title="var">resilience</span> <span class="id" title="var">off</span> <span class="id" title="var">Foo.v</span> &amp;
 <div class="paragraph"> </div>
 
-<div class="code code-tight">
-<span class="id" type="var">coqide</span>&nbsp;-<span class="id" type="var">async</span>-<span class="id" type="var">proofs</span>&nbsp;<span class="id" type="var">off</span>&nbsp;-<span class="id" type="var">async</span>-<span class="id" type="var">proofs</span>-<span class="id" type="var">command</span>-<span class="id" type="var">error</span>-<span class="id" type="var">resilience</span>&nbsp;<span class="id" type="var">off</span>&nbsp;<span class="id" type="var">Foo.v</span>&nbsp;&amp;
-<div class="paragraph"> </div>
-
-</div>
-
+</span>
 </li>
 </ul>
 
@@ -438,7 +425,7 @@
 
 <div class="paragraph"> </div>
 
-<a name="lab10"></a><h2 class="section">Exercises</h2>
+<a id="lab9"></a><h2 class="section">Exercises</h2>
 
 <div class="paragraph"> </div>
 
@@ -477,7 +464,20 @@
 
 <div class="paragraph"> </div>
 
-    Also, some exercises are marked "advanced," and some are marked
+    Those using SF in a classroom setting should note that the autograder
+    assigns extra points to harder exercises:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 <span class="id" title="var">star</span>  = 1 <span class="id" title="var">point</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 <span class="id" title="var">stars</span> = 2 <span class="id" title="var">points</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 <span class="id" title="var">stars</span> = 3 <span class="id" title="var">points</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4 <span class="id" title="var">stars</span> = 6 <span class="id" title="var">points</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 <span class="id" title="var">stars</span> = 10 <span class="id" title="var">points</span>
+<div class="paragraph"> </div>
+
+</span>
+<div class="paragraph"> </div>
+
+    Some exercises are marked "advanced," and some are marked
     "optional."  Doing just the non-optional, non-advanced exercises
     should provide good coverage of the core material.  Optional
     exercises provide a bit of extra practice with key concepts and
@@ -496,28 +496,65 @@
     search engines. 
 <div class="paragraph"> </div>
 
-<a name="lab11"></a><h2 class="section">Downloading the Coq Files</h2>
+<a id="lab10"></a><h2 class="section">Downloading the Coq Files</h2>
 
 <div class="paragraph"> </div>
 
  A tar file containing the full sources for the "release version"
     of this book (as a collection of Coq scripts and HTML files) is
-    available at <a href="http://softwarefoundations.cis.upenn.edu"><span class="inlineref">http://softwarefoundations.cis.upenn.edu</span></a>.
+    available at <a href="https://softwarefoundations.cis.upenn.edu"><span class="inlineref">https://softwarefoundations.cis.upenn.edu</span></a>.
 
 <div class="paragraph"> </div>
 
     If you are using the book as part of a class, your professor may
     give you access to a locally modified version of the files; you
-    should use this one instead of the public release version, so that
+    should use that one instead of the public release version, so that
     you get any local updates during the semester. 
-</div>
+<div class="paragraph"> </div>
 
-<div class="doc">
-<a name="lab12"></a><h1 class="section">Resources</h1>
+<a id="lab11"></a><h2 class="section">Chapter Dependencies</h2>
 
 <div class="paragraph"> </div>
 
-<a name="lab13"></a><h2 class="section">Sample Exams</h2>
+ A diagram of the dependencies between chapters and some suggested
+    paths through the material can be found in the file <a href="deps.html"><span class="inlineref"><span class="inlinecode"><span class="id" title="var">deps.html</span></span></span></a>. 
+</div>
+
+<div class="doc">
+<a id="lab12"></a><h2 class="section">Recommended Citation Format</h2>
+
+<div class="paragraph"> </div>
+
+ If you want to refer to this volume in your own writing, please
+    do so as follows:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;@<span class="id" title="var">book</span>            {Pierce:<span class="id" title="var">SF</span>1,<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">author</span>       =   {	       Benjamin C. Pierce <br>
+	       Arthur Azevedo de Amorim <br>
+	       Chris Casinghino <br>
+	       Marco Gaboardi <br>
+	       Michael Greenberg <br>
+	       Cătălin Hriţcu <br>
+	       Vilhelm Sjöberg <br>
+	       Brent Yorgey},<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">title</span>        =   "Logical Foundations",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">series</span>       =   "Software Foundations",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">volume</span>       =   "1",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">year</span>         =   "2020",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">publisher</span>    =   "Electronic textbook",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">note</span>         =   {<span class="id" title="var">Version</span> 5.8, \<span class="id" title="var">URL</span>{<span class="id" title="var">http</span>://<span class="id" title="var">softwarefoundations.cis.upenn.edu</span>} },<br/>
+&nbsp;&nbsp;&nbsp;}
+<div class="paragraph"> </div>
+
+</span>
+</div>
+
+<div class="doc">
+<a id="lab13"></a><h1 class="section">Resources</h1>
+
+<div class="paragraph"> </div>
+
+<a id="lab14"></a><h2 class="section">Sample Exams</h2>
 
 <div class="paragraph"> </div>
 
@@ -529,7 +566,7 @@
     the problems are still relevant to the current text. 
 <div class="paragraph"> </div>
 
-<a name="lab14"></a><h2 class="section">Lecture Videos</h2>
+<a id="lab15"></a><h2 class="section">Lecture Videos</h2>
 
 <div class="paragraph"> </div>
 
@@ -542,7 +579,7 @@
 </div>
 
 <div class="doc">
-<a name="lab15"></a><h1 class="section">Note for Instructors</h1>
+<a id="lab16"></a><h1 class="section">Note for Instructors</h1>
 
 <div class="paragraph"> </div>
 
@@ -590,12 +627,12 @@
 <div class="paragraph"> </div>
 
     We'll set you up with access to the git repository and developers'
-    mailing lists.  In the repository you'll find a file <span class="inlinecode"><span class="id" type="var">INSTRUCTORS</span></span>
+    mailing lists.  In the repository you'll find a file <span class="inlinecode"><span class="id" title="var">INSTRUCTORS</span></span>
     with further instructions. 
 </div>
 
 <div class="doc">
-<a name="lab16"></a><h1 class="section">Translations</h1>
+<a id="lab17"></a><h1 class="section">Translations</h1>
 
 <div class="paragraph"> </div>
 
@@ -606,7 +643,7 @@
 </div>
 
 <div class="doc">
-<a name="lab17"></a><h1 class="section">Thanks</h1>
+<a id="lab18"></a><h1 class="section">Thanks</h1>
 
 <div class="paragraph"> </div>
 
@@ -615,13 +652,16 @@
     NSF Expeditions grant 1521523, <i>The Science of Deep
     Specification</i>. 
 </div>
-<div class="code code-tight">
+<div class="code">
 
-<span class="comment">(*&nbsp;Wed&nbsp;Jan&nbsp;9&nbsp;12:02:43&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+<br/>
+<span class="comment">(*&nbsp;2020-09-09&nbsp;20:51&nbsp;*)</span><br/>
 </div>
 </div>
 
-
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
 
 </div>
 

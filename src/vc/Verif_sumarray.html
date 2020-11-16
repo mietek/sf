@@ -1,0 +1,1217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Verif_sumarray: Introduction to Verifiable C</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vc.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 5: Verifiable C</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Verif_sumarray<span class="subtitle">Introduction to Verifiable C</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+<a id="lab11"></a><h2 class="section">Verified Software Toolchain</h2>
+
+<div class="paragraph"> </div>
+
+ The Verified Software Toolchain is a toolset for proving the functional 
+  correctness of C programs, with
+<ul class="doclist">
+<li> a <i>program logic</i> called Verifiable C, based on separation logic.
+
+</li>
+<li> a <i>proof automation system</i> called VST-Floyd that assists you in applying
+    the program logic to your program.
+
+</li>
+<li> a soundness proof in Coq, guaranteeing that whatever properties you
+    prove about your program will actually hold in any execution of the
+    C source-language operational semantics. And this proof <i>composes</i>
+    with the correctness proof of the CompCert verified optimizing C compiler,
+    so you can also get a guarantee about the behavior of the assembly 
+    language program.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  This volume of <i>Software Foundations</i> teaches you how to use Verifiable C
+  and VST-Floyd to prove C programs correct.  In the process you'll learn
+  some key concepts of Hoare Logic and Separation Logic.  This book does
+  <i>not</i> cover VST's soundness proof (which is described in the book
+  <i>Program Logics for Certified Compilers</i>  <a href="Bib.html#Appel-2014"><span class="inlineref">[Appel 2014]</span></a>). 
+<div class="paragraph"> </div>
+
+<a id="lab12"></a><h2 class="section">How to use this textbook</h2>
+
+<div class="paragraph"> </div>
+
+ The first two chapters (this one and <a href="Verif_reverse.html"><span class="inlineref">Verif_reverse</span></a>) are a 
+ feature-by-feature introduction to Verifiable C, demonstrated on two
+ example C programs:  adding up an array and reversing a linked list.
+ These chapters are best understood if you step through them in Coq, where
+ you can see the proof goals at each stage; they are less useful to read in
+ HTML.  These two chapters closely follow the first 48 mini-chapters of the
+ <i>Verifiable C Reference Manual</i>, <span class="inlinecode"><span class="id" title="var">VC.pdf</span></span>, that is distributed with VST --
+ and you can find a copy distributed with this volume of <i>Software 
+ Foundations</i>.   The first two chapters have no exercises.
+
+<div class="paragraph"> </div>
+
+ This <i>Verifiable C</i> volume of <i>Software Foundations</i> is self-contained,
+ so you should not need to look things up in the reference manual <span class="inlinecode"><span class="id" title="var">VC.pdf</span></span>.
+ But to use features of Verifiable C beyond what's needed for this textbook,
+ <span class="inlinecode"><span class="id" title="var">VC.pdf</span></span> can be very useful.  The words SEE ALSO suggest which chapters
+ of the reference manual cover the features discussed in this text.
+
+<div class="paragraph"> </div>
+
+ The remaining 7 chapters are <i>mainly</i> exercises.  The best way to learn 
+ is by doing it yourself -- so each chapter presents a little C program,
+ and guides you through verifying it yourself.  The "capstone exercise"
+ is the verification of a hash table with external chaining.
+
+<div class="paragraph"> </div>
+
+<a id="lab13"></a><h2 class="section">A C program to add up an array</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a little C program, <span class="inlinecode"><span class="id" title="var">sumarray.c</span></span>:
+<pre>
+    #include &lt;stddef.h&gt;
+
+    unsigned sumarray(unsigned a[], int n) {
+      int i; unsigned s;
+      i=0;
+      s=0;
+      while (i&lt;n) {
+        s+=a[i];
+        i++;
+      }
+      return s;
+    }
+
+    unsigned four[4] = {1,2,3,4};
+
+    int main(void) {
+      unsigned int s;
+      s = sumarray(four,4);
+      return (int)s;
+    }
+</pre>
+
+<div class="paragraph"> </div>
+
+<a id="lab14"></a><h2 class="section">Workflow</h2>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 3 (Workflow),
+     Chapter 4 (<i>Verifiable C and clightgen</i>), Chapter 5 (<i>ASTs</i>) 
+<div class="paragraph"> </div>
+
+ To verify a C program, such as <span class="inlinecode"><span class="id" title="var">sumarray.c</span></span>, use the CompCert
+  front end to parse it into an Abstract Syntax Tree (AST).
+  For all the chapters in this volume of <i>Software Foundations</i> we've done
+  that for you, so you don't have to install clightgen; but generally
+  what you would do is,
+<pre>
+   clightgen -normalize sumarray.c
+</pre>
+  You would have installed <span class="inlinecode"><span class="id" title="var">clightgen</span></span> as part of the CompCert tools, by
+  mentioning the -clightgen option when you run ./configure when building CompCert.
+
+<div class="paragraph"> </div>
+
+  The output of <span class="inlinecode"><span class="id" title="var">clightgen</span></span> would be a file <span class="inlinecode"><span class="id" title="var">sumarray.v</span></span> that contains the Coq
+  inductive data structure describing the syntax trees of the source
+  program.  You can open <span class="inlinecode"><span class="id" title="var">sumarray.v</span></span> in the current directory
+  and inspect it. 
+<div class="paragraph"> </div>
+
+<a id="lab15"></a><h2 class="section">Let's verify!</h2>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 7 (<i>Functional model, API spec</i>) 
+<div class="paragraph"> </div>
+
+ This file, <span class="inlinecode"><span class="id" title="var">Verif_sumarray.v</span></span>, contains a <i>specification</i>
+    of the functional correctness of the program <span class="inlinecode"><span class="id" title="var">sumarray.c</span></span>,
+    followed by a proof that the program satisfies its specification.
+
+<div class="paragraph"> </div>
+
+    For larger programs, one would typically break this down into three
+    or more files:
+<ul class="doclist">
+<li> Functional model (often in the form of a Coq function)
+
+</li>
+<li> API specification
+
+</li>
+<li> Function-body correctness proofs, one per file. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+<a id="lab16"></a><h3 class="section">Make sure you have the right version of VST installed</h3>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <a class="idref" href="Preface.html#"><span class="id" title="library">VC.Preface</span></a>. <span class="comment">(*&nbsp;Check&nbsp;for&nbsp;the&nbsp;right&nbsp;version&nbsp;of&nbsp;VST&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<a id="lab17"></a><h3 class="section">Standard boilerplate</h3>
+
+<div class="paragraph"> </div>
+
+ Every API specification begins with the same standard boilerplate;
+    the only thing that changes is the name of the program -- in this
+    case, <span class="inlinecode"><span class="id" title="var">sumarray</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VST.floyd.proofauto</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VC.sumarray</span>.<br/>
+<span class="id" title="keyword">Instance</span> <a id="CompSpecs" class="idref" href="#CompSpecs"><span class="id" title="instance">CompSpecs</span></a> : <span class="id" title="class">compspecs</span>. <span class="id" title="var">make_compspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">Definition</span> <a id="Vprog" class="idref" href="#Vprog"><span class="id" title="definition">Vprog</span></a> : <span class="id" title="definition">varspecs</span>. <span class="id" title="var">mk_varspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+</div>
+
+<div class="doc">
+The first line imports Verifiable C and its <i>Floyd</i> proof-automation
+    library.  The second line imports the AST of the program to be verified.
+    The third line processes all the struct and union definitions
+    in the AST, and the fourth line processes global variable declarations. 
+<div class="paragraph"> </div>
+
+<a id="lab18"></a><h3 class="section">Functional model</h3>
+
+<div class="paragraph"> </div>
+
+ To prove correctness of <span class="inlinecode"><span class="id" title="var">sumarray.c</span></span>, we start by writing a
+   <i>functional model</i> of adding up a sequence.  We can use a list-fold
+   to express the sum of all the elements in a list of integers: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="sum_Z" class="idref" href="#sum_Z"><span class="id" title="definition">sum_Z</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> := <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#fold_right"><span class="id" title="definition">fold_right</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.add"><span class="id" title="definition">Z.add</span></a> 0.<br/>
+</div>
+
+<div class="doc">
+Then we prove properties of the functional model: in this case,
+    how <span class="inlinecode"><span class="id" title="var">sum_Z</span></span> interacts with list append. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="sum_Z_app" class="idref" href="#sum_Z_app"><span class="id" title="lemma">sum_Z_app</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="a:1" class="idref" href="#a:1"><span class="id" title="binder">a</span></a> <a id="b:2" class="idref" href="#b:2"><span class="id" title="binder">b</span></a>, <a class="idref" href="Verif_sumarray.html#sum_Z"><span class="id" title="definition">sum_Z</span></a> (<a class="idref" href="Verif_sumarray.html#a:1"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a><a class="idref" href="Verif_sumarray.html#b:2"><span class="id" title="variable">b</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a>  <a class="idref" href="Verif_sumarray.html#sum_Z"><span class="id" title="definition">sum_Z</span></a> <a class="idref" href="Verif_sumarray.html#a:1"><span class="id" title="variable">a</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <a class="idref" href="Verif_sumarray.html#sum_Z"><span class="id" title="definition">sum_Z</span></a> <a class="idref" href="Verif_sumarray.html#b:2"><span class="id" title="variable">b</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">a</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The data types used in a functional model can be any kind of mathematics
+    at all, as long as we have a way to relate them to the integers, tuples,
+    and sequences used in a C program.  But the mathematical integers <span class="inlinecode"><span class="id" title="var">Z</span></span>
+    and the 32-bit modular integers <span class="inlinecode"><span class="id" title="var">Int.int</span></span> are often relevant.
+    Notice that this functional spec does not depend on <span class="inlinecode"><span class="id" title="var">sumarray.v</span></span> or on
+    anything in the Verifiable C libraries. This is typical, and desirable:
+    the functional model is about mathematics, not about C programming. 
+<div class="paragraph"> </div>
+
+<a id="lab19"></a><h2 class="section">API spec for the sumarray.c program</h2>
+
+<div class="paragraph"> </div>
+
+ The Application Programmer Interface (API) of a C program is expressed
+   in its header file: function prototypes and data-structure definitions that
+   explain how to call upon the modules' functionality. In Verifiable C, an
+   <i>API specification</i> is written as a series of <i>function specifications</i>
+   (<span class="inlinecode"><span class="id" title="var">funspec</span></span>s) corresponding to the function prototypes. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="sumarray_spec" class="idref" href="#sumarray_spec"><span class="id" title="definition">sumarray_spec</span></a> : <span class="id" title="definition">ident</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <span class="id" title="inductive">funspec</span> :=<br/>
+<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_sumarray</span><br/>
+&nbsp;<span class="id" title="notation">WITH</span> <a id="a:8" class="idref" href="#a:8"><span class="id" title="binder">a</span></a><span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="sh:9" class="idref" href="#sh:9"><span class="id" title="binder">sh</span></a> <span class="id" title="notation">:</span> <span class="id" title="definition">share</span><span class="id" title="notation">,</span> <a id="contents:10" class="idref" href="#contents:10"><span class="id" title="binder">contents</span></a> <span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a><span class="id" title="notation">,</span> <a id="size:11" class="idref" href="#size:11"><span class="id" title="binder">size</span></a><span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a><br/>
+&nbsp;<span class="id" title="notation">PRE</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <span class="id" title="definition">tuint</span><span class="id" title="notation">,</span> <span class="id" title="definition">tint</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PROP</span>  <span class="id" title="notation">(</span><span class="id" title="definition">readable_share</span> <a class="idref" href="Verif_sumarray.html#sh:4"><span class="id" title="variable">sh</span></a><span class="id" title="notation">;</span> 0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_sumarray.html#size:6"><span class="id" title="variable">size</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <span class="id" title="definition">Int.max_signed</span><span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#Forall"><span class="id" title="inductive">Forall</span></a> (<span class="id" title="keyword">fun</span> <a id="x:7" class="idref" href="#x:7"><span class="id" title="binder">x</span></a> ⇒ 0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_sumarray.html#x:7"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <span class="id" title="definition">Int.max_unsigned</span>) <a class="idref" href="Verif_sumarray.html#contents:5"><span class="id" title="variable">contents</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PARAMS</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_sumarray.html#a:3"><span class="id" title="variable">a</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> <a class="idref" href="Verif_sumarray.html#size:6"><span class="id" title="variable">size</span></a>)<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">SEP</span>   <span class="id" title="notation">(</span><span class="id" title="definition">data_at</span> <a class="idref" href="Verif_sumarray.html#sh:4"><span class="id" title="variable">sh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tuint</span> <a class="idref" href="Verif_sumarray.html#size:6"><span class="id" title="variable">size</span></a>) (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="constructor">Vint</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Int.repr</span> <a class="idref" href="Verif_sumarray.html#contents:5"><span class="id" title="variable">contents</span></a>)) <a class="idref" href="Verif_sumarray.html#a:3"><span class="id" title="variable">a</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tuint</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">()</span> <span class="id" title="notation">RETURN</span> <span class="id" title="notation">(</span><span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> (<a class="idref" href="Verif_sumarray.html#sum_Z"><span class="id" title="definition">sum_Z</span></a> <a class="idref" href="Verif_sumarray.html#contents:10"><span class="id" title="variable">contents</span></a>))<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">data_at</span> <a class="idref" href="Verif_sumarray.html#sh:9"><span class="id" title="variable">sh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tuint</span> <a class="idref" href="Verif_sumarray.html#size:11"><span class="id" title="variable">size</span></a>) (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="constructor">Vint</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Int.repr</span> <a class="idref" href="Verif_sumarray.html#contents:10"><span class="id" title="variable">contents</span></a>)) <a class="idref" href="Verif_sumarray.html#a:8"><span class="id" title="variable">a</span></a><span class="id" title="notation">)</span>.<br/>
+</div>
+
+<div class="doc">
+This <span class="inlinecode"><span class="id" title="var">DECLARE</span></span> statement has type <span class="inlinecode"><span class="id" title="var">ident</span>×<span class="id" title="var">funspec</span></span>.  That is,
+ it associates the name of a function (the identifier <span class="inlinecode"><span class="id" title="var">_sumarray</span></span>) with
+ a function-specification.  The identifier <span class="inlinecode"><span class="id" title="var">_sumarray</span></span> comes directly
+ from the C program, as parsed by <span class="inlinecode"><span class="id" title="var">clightgen</span></span>.  If you are curious,
+ you can look in <span class="inlinecode"><span class="id" title="var">sumarray.v</span></span>  (the output of <span class="inlinecode"><span class="id" title="var">clightgen</span></span>) for
+ <span class="inlinecode"><span class="id" title="keyword">Definition</span></span> <span class="inlinecode"><span class="id" title="var">_sumarray</span></span> <span class="inlinecode">:=</span> <span class="inlinecode">...</span>.  Later in <span class="inlinecode"><span class="id" title="var">sumarray.v</span></span>, you can see 
+ <span class="inlinecode"><span class="id" title="keyword">Definition</span></span> <span class="inlinecode"><span class="id" title="var">f_sumarray</span></span> that is the C-language function body (represented
+ as a syntax tree).
+
+<div class="paragraph"> </div>
+
+  A function is specified by its <i>precondition</i> and its
+  <i>postcondition</i>.  The <span class="inlinecode"><span class="id" title="var">WITH</span></span> clause quantifies over Coq values that
+  may appear in both the precondition and the postcondition. The
+  precondition has access to the function parameters
+  (in this case <span class="inlinecode"><span class="id" title="var">a</span></span> and <span class="inlinecode"><span class="id" title="var">size</span></span>) and the postcondition has access
+  to the return value <span class="inlinecode">(<span class="id" title="var">sum_Z</span></span> <span class="inlinecode"><span class="id" title="var">contents</span>)</span>.
+
+<div class="paragraph"> </div>
+
+  Function preconditions, postconditions, and loop invariants are
+  <i>assertions</i> about the state of variables and memory at a particular
+  program point.  In an assertion <span class="inlinecode"><span class="id" title="var">PROP</span>(<span class="id" title="var">P</span>)</span> <span class="inlinecode"><span class="id" title="var">LOCAL</span>(<span class="id" title="var">Q</span>)</span> <span class="inlinecode"><span class="id" title="var">SEP</span>(<span class="id" title="var">R</span>)</span>, the
+  propositions in the sequence <span class="inlinecode"><span class="id" title="var">P</span></span> are all of Coq type <span class="inlinecode"><span class="id" title="keyword">Prop</span></span>.  They
+  describe things that are true independent of program state.  In the
+  precondition above, the statement <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">size</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">Int.max_signed</span></span> is
+  true <i>just within the scope of the quantification of the variable</i>
+  <span class="inlinecode"><span class="id" title="var">size</span></span>; that variable is bound by <span class="inlinecode"><span class="id" title="var">WITH</span></span>, and spans the <span class="inlinecode"><span class="id" title="var">PRE</span></span> and
+  <span class="inlinecode"><span class="id" title="var">POST</span></span> assertions.
+
+<div class="paragraph"> </div>
+
+  The <span class="inlinecode"><span class="id" title="var">LOCAL</span></span> clause, describing what's in C local variables,
+  takes different forms depending on context:
+<ul class="doclist">
+<li> In a function-precondition, we write PROP/PARAMS/SEP, that is,
+    the <span class="inlinecode"><span class="id" title="var">PARAMS</span></span> lists the values of C function parameters (in order).
+
+</li>
+<li> In a function-postcondition, we write <span class="inlinecode"><span class="id" title="var">RETURN</span>(<span class="id" title="var">v</span>)</span> to indicate
+    the return value of the function.
+
+</li>
+<li> Within a function body (in assertions and invariants) we write
+    <span class="inlinecode"><span class="id" title="var">LOCAL</span></span> to describe the values of local variables (including parameters).
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  Whether it is PARAMS or RETURN or LOCAL, we are talking about the
+  <i>values</i> contained in parameters or local variables.
+  In general, a C scalar variable holds something of type <span class="inlinecode"><span class="id" title="var">val</span></span>; this
+  type is defined by CompCert as, 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="inductive">val</span>.<br/>
+<span class="comment">(*<br/>
+&nbsp;Inductive&nbsp;val:&nbsp;Type&nbsp;:=<br/>
+&nbsp;|&nbsp;Vundef:&nbsp;val<br/>
+&nbsp;|&nbsp;Vint:&nbsp;int&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;val<br/>
+&nbsp;|&nbsp;Vlong:&nbsp;int64&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;val<br/>
+&nbsp;|&nbsp;Vfloat:&nbsp;float&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;val<br/>
+&nbsp;|&nbsp;Vsingle:&nbsp;float32&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;val<br/>
+&nbsp;|&nbsp;Vptr:&nbsp;block&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;ptrofs&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;val.&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+In an assertion <span class="inlinecode"><span class="id" title="var">PROP</span>(<span class="id" title="var">P</span>)</span> <span class="inlinecode"><span class="id" title="var">LOCAL</span>(<span class="id" title="var">Q</span>)</span> <span class="inlinecode"><span class="id" title="var">SEP</span>(<span class="id" title="var">R</span>)</span>, the <span class="inlinecode"><span class="id" title="var">SEP</span></span> conjuncts <span class="inlinecode"><span class="id" title="var">R</span></span> are
+  <i>spatial assertions</i> in separation logic.  In our example precondition,
+  there's just one SEP conjunct, a <span class="inlinecode"><span class="id" title="var">data_at</span></span> assertion saying
+  that at address <span class="inlinecode"><span class="id" title="var">a</span></span> in memory, there is a data structure of type
+<pre>
+  array[size] of unsigned int;
+</pre>
+  with access-permission <span class="inlinecode"><span class="id" title="var">sh</span></span>, and the contents of that array is the
+  sequence <span class="inlinecode"><span class="id" title="var">map</span></span> <span class="inlinecode"><span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">map</span></span> <span class="inlinecode"><span class="id" title="var">Int.repr</span></span> <span class="inlinecode"><span class="id" title="var">contents</span>)</span>.
+
+<div class="paragraph"> </div>
+
+  The postcondition is introduced by <span class="inlinecode"><span class="id" title="var">POST</span></span> <span class="inlinecode">[</span> <span class="inlinecode"><span class="id" title="var">tuint</span></span> <span class="inlinecode">]</span>, indicating that
+  this function returns a value of type <span class="inlinecode"><span class="id" title="var">unsigned</span></span> <span class="inlinecode"><span class="id" title="var">int</span></span>. There are no
+  <span class="inlinecode"><span class="id" title="var">PROP</span></span> statements in this postcondition--no forever-true facts hold
+  now, that weren't already true on entry to the function.
+
+<div class="paragraph"> </div>
+
+  <span class="inlinecode"><span class="id" title="var">RETURN</span>(<span class="id" title="var">v</span>)</span> gives the return value <span class="inlinecode"><span class="id" title="var">v</span></span>; <span class="inlinecode"><span class="id" title="var">RETURN</span>()</span> for void functions.
+
+<div class="paragraph"> </div>
+
+  The postcondition's <span class="inlinecode"><span class="id" title="var">SEP</span></span> clause mentions all the spatial resources
+  from the precondition, minus ones that have been freed
+  (deallocated), plus ones that have been malloc'd (allocated).
+
+<div class="paragraph"> </div>
+
+  So, overall, the specification for <span class="inlinecode"><span class="id" title="var">sumarray</span></span> is this: "At any call
+  to sumarray, there exist values <span class="inlinecode"><span class="id" title="var">a</span>,</span> <span class="inlinecode"><span class="id" title="var">sh</span>,</span> <span class="inlinecode"><span class="id" title="var">contents</span>,</span> <span class="inlinecode"><span class="id" title="var">size</span></span> such that
+  <span class="inlinecode"><span class="id" title="var">sh</span></span> gives at least read-permission; <span class="inlinecode"><span class="id" title="var">size</span></span> is representable as a
+  nonnegative 32-bit signed integer; function-parameter <span class="inlinecode"><span class="id" title="var">_a</span></span> contains
+  value <span class="inlinecode"><span class="id" title="var">a</span></span> and <span class="inlinecode"><span class="id" title="var">_n</span></span> contains the 32-bit representation of <span class="inlinecode"><span class="id" title="var">size</span></span>; and
+  there's an array in memory at address <span class="inlinecode"><span class="id" title="var">a</span></span> with permission <span class="inlinecode"><span class="id" title="var">sh</span></span>
+  containing <span class="inlinecode"><span class="id" title="var">contents</span></span>.  The function returns a value equal to
+  <span class="inlinecode"><span class="id" title="var">sum_int</span>(<span class="id" title="var">contents</span>)</span>, and leaves the array in memory unaltered."  
+<div class="paragraph"> </div>
+
+<a id="lab20"></a><h3 class="section">Function specification for main()</h3>
+
+<div class="paragraph"> </div>
+
+ The function-spec for <span class="inlinecode"><span class="id" title="var">main</span></span> has a special form, which we discuss
+   below in the section called <i>Global variables and main</i>.  In
+   particular, its precondition is defined using <span class="inlinecode"><span class="id" title="var">main_pre</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a id="main_spec" class="idref" href="#main_spec"><span class="id" title="definition">main_spec</span></a> :=<br/>
+&nbsp;<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_main</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">WITH</span> <a id="gv:13" class="idref" href="#gv:13"><span class="id" title="binder">gv</span></a> <span class="id" title="notation">:</span> <span class="id" title="definition">globals</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PRE</span>  <span class="id" title="notation">[]</span> <span class="id" title="definition">main_pre</span> <span class="id" title="definition">prog</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#tt"><span class="id" title="constructor">tt</span></a> <a class="idref" href="Verif_sumarray.html#gv:12"><span class="id" title="variable">gv</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tint</span> <span class="id" title="notation">]</span>  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span><span class="id" title="notation">()</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">RETURN</span> <span class="id" title="notation">(</span><span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> (1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>2<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>3<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>4))<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span><span class="id" title="notation">(</span><span class="id" title="method">TT</span><span class="id" title="notation">)</span>.<br/>
+</div>
+
+<div class="doc">
+This postcondition says we have indeed added up the global array
+   <span class="inlinecode"><span class="id" title="var">four</span></span>. 
+<div class="paragraph"> </div>
+
+<a id="lab21"></a><h3 class="section">Integer overflow</h3>
+ In Verifiable C's signed integer arithmetic, you must prove (if the
+ system cannot prove automatically) that no overflow occurs.  For unsigned
+ integers, arithmetic is treated as modulo-2^n (where n is typically 32
+ or 64), and overflow is not an issue.  The function <span class="inlinecode"><span class="id" title="var">Int.repr</span>:</span> <span class="inlinecode"><span class="id" title="var">Z</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">int</span></span>
+ truncates mathematical integers into 32-bit integers by taking the
+ (sign-extended) low-order 32 bits.  <span class="inlinecode"><span class="id" title="var">Int.signed</span>:</span> <span class="inlinecode"><span class="id" title="var">int</span></span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">Z</span></span> injects back
+ into the signed integers.
+
+<div class="paragraph"> </div>
+
+ The <span class="inlinecode"><span class="id" title="var">sumarray</span></span> program uses unsigned arithmetic for <span class="inlinecode"><span class="id" title="var">s</span></span> and the
+ array contents; it uses signed arithmetic for <span class="inlinecode"><span class="id" title="var">i</span></span>.
+
+<div class="paragraph"> </div>
+
+ The postcondition guarantees that the value returned is
+ <span class="inlinecode"><span class="id" title="var">Int.repr</span></span> <span class="inlinecode">(<span class="id" title="var">sum_Z</span></span> <span class="inlinecode"><span class="id" title="var">contents</span>)</span>.  But what if the sum of all the <span class="inlinecode"><span class="id" title="var">s</span></span>
+ is larger than 2^32, so the sum doesn't fit in a 32-bit signed integer?
+ Then <span class="inlinecode"><span class="id" title="var">Int.unsigned</span>(<span class="id" title="var">Int.repr</span></span> <span class="inlinecode">(<span class="id" title="var">sum_Z</span></span> <span class="inlinecode"><span class="id" title="var">contents</span>))</span> <span class="inlinecode">≠</span> <span class="inlinecode"><span class="id" title="var">sum_Z</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span>.
+ In general, for a claim about <span class="inlinecode"><span class="id" title="var">Int.repr</span>(<span class="id" title="var">x</span>)</span> to be <i>useful</i> one also
+ needs to know that <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">Int.max_unsigned</span></span> or
+ <span class="inlinecode"><span class="id" title="var">Int.min_signed</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">Int.max_signed</span></span>.
+ The caller of <span class="inlinecode"><span class="id" title="var">sumarray</span></span> will probably need to prove
+ <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">sum_Z</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">Int.max_unsigned</span></span>
+ in order to make much use of the postcondition. 
+<div class="paragraph"> </div>
+
+<a id="lab22"></a><h2 class="section">Packaging the Gprog and Vprog</h2>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 8 (<i>Proof of the sumarray program</i>) 
+<div class="paragraph"> </div>
+
+ To prove the correctness of a whole program,
+<ul class="doclist">
+<li> 1. Collect the function-API specs together into <span class="inlinecode"><span class="id" title="var">Gprog</span></span>.
+
+</li>
+<li> 2. Prove that each function satisfies its own API spec
+    (with a <span class="inlinecode"><span class="id" title="var">semax_body</span></span> proof).
+
+</li>
+<li> 3. Tie everything together with a <span class="inlinecode"><span class="id" title="var">semax_func</span></span> proof.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+The first step is easy: 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;Packaging&nbsp;the&nbsp;API&nbsp;specs&nbsp;all&nbsp;together.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="Gprog" class="idref" href="#Gprog"><span class="id" title="definition">Gprog</span></a> := <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a><a class="idref" href="Verif_sumarray.html#sumarray_spec"><span class="id" title="definition">sumarray_spec</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="Verif_sumarray.html#main_spec"><span class="id" title="definition">main_spec</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a>.<br/>
+</div>
+
+<div class="doc">
+What's in <span class="inlinecode"><span class="id" title="var">Gprog</span></span> are the funspecs that we built using <span class="inlinecode"><span class="id" title="var">DECLARE</span></span>.
+  (In multi-module programs we would also include imported funspecs.)
+
+<div class="paragraph"> </div>
+
+ In addition to <span class="inlinecode"><span class="id" title="var">Gprog</span></span>, the API spec contains <span class="inlinecode"><span class="id" title="var">Vprog</span></span>, the list of
+ global-variable type-specs.  This was computed automatically by the
+ <span class="inlinecode"><span class="id" title="var">mk_varspecs</span></span> tactic, in the "boilerplate" code above. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="Verif_sumarray.html#Vprog"><span class="id" title="definition">Vprog</span></a>.<br/>
+<span class="comment">(*&nbsp;&nbsp;&nbsp;=&nbsp;<span class="inlinecode">(<span class="id" title="var">_four</span>,</span> <span class="inlinecode"><span class="id" title="var">tarray</span></span> <span class="inlinecode"><span class="id" title="var">tuint</span></span> <span class="inlinecode">4)</span>&nbsp;&nbsp;:&nbsp;varspecs&nbsp;*)</span><br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">varspecs</span>.<br/>
+<span class="comment">(*&nbsp;&nbsp;&nbsp;=&nbsp;list&nbsp;(ident&nbsp;*&nbsp;type)&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+That is, for each C language global variable, <span class="inlinecode"><span class="id" title="var">Vprog</span></span> gives its
+  name and its C-language type. 
+<div class="paragraph"> </div>
+
+<a id="lab23"></a><h2 class="section">Proof of the sumarray program</h2>
+
+<div class="paragraph"> </div>
+
+ Now comes the proof that <span class="inlinecode"><span class="id" title="var">f_sumarray</span></span>, the body of the <span class="inlinecode"><span class="id" title="var">sumarray</span>()</span>
+   function, satisfies <span class="inlinecode"><span class="id" title="var">sumarray_spec</span></span>, in global context <span class="inlinecode">(<span class="id" title="var">Vprog</span>,<span class="id" title="var">Gprog</span>)</span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="body_sumarray" class="idref" href="#body_sumarray"><span class="id" title="lemma">body_sumarray</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_sumarray.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_sumarray.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_sumarray</span> <a class="idref" href="Verif_sumarray.html#sumarray_spec"><span class="id" title="definition">sumarray_spec</span></a>.<br/>
+</div>
+
+<div class="doc">
+Here, <span class="inlinecode"><span class="id" title="var">f_sumarray</span></span> is the actual function body (AST of the C code)
+  as parsed by <span class="inlinecode"><span class="id" title="var">clightgen</span></span>; you can read it in <span class="inlinecode"><span class="id" title="var">sumarray.v</span></span>.
+  You can read <span class="inlinecode"><span class="id" title="var">body_sumarray</span></span> as claiming: In the context of <span class="inlinecode"><span class="id" title="var">Vprog</span></span> and
+  <span class="inlinecode"><span class="id" title="var">Gprog</span></span>, the function body <span class="inlinecode"><span class="id" title="var">f_sumarray</span></span> satisfies its specification
+  <span class="inlinecode"><span class="id" title="var">sumarray_spec</span></span>.  We need the context in case the sumarray function
+  refers to a global variable (<span class="inlinecode"><span class="id" title="var">Vprog</span></span> provides the variable's type)
+  or calls a global function  (<span class="inlinecode"><span class="id" title="var">Gprog</span></span> provides the function's API spec). 
+<div class="paragraph"> </div>
+
+ Now, the proof of <span class="inlinecode"><span class="id" title="var">body_sumarray</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+</div>
+
+<div class="doc">
+If you are reading this as a static document, you should consider
+ switching to your favorite Coq development environment, in which you 
+ can step through the rest of this chapter, tactic by tactic, and examine
+ the proof state at each point. 
+<div class="paragraph"> </div>
+
+<a id="lab24"></a><h3 class="section">start_function</h3>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 9 (<i>start_function</i>)
+
+<div class="paragraph"> </div>
+
+ The predicate <span class="inlinecode"><span class="id" title="var">semax_body</span></span> states the Hoare triple of the function body,
+ <span class="inlinecode"><span class="id" title="var">Delta</span></span> <span class="inlinecode">&#x22A2;</span> <span class="inlinecode">{<span class="id" title="var">Pre</span>}</span> <span class="inlinecode"><span class="id" title="var">c</span></span> <span class="inlinecode">{<span class="id" title="var">Post</span>}</span>, where <span class="inlinecode"><span class="id" title="var">Pre</span></span> and <span class="inlinecode"><span class="id" title="var">Post</span></span> are taken from the
+ <span class="inlinecode"><span class="id" title="var">funspec</span></span>, <span class="inlinecode"><span class="id" title="var">c</span></span> is the body of the function, and the type-context <span class="inlinecode"><span class="id" title="var">Delta</span></span>
+ is calculated from the global type-context overlaid with the parameter-
+ and local-types of the function.
+
+<div class="paragraph"> </div>
+
+ To prove this, we begin with the tactic <span class="inlinecode"><span class="id" title="var">start_function</span></span>,  which takes care
+ of some simple bookkeeping and expresses the Hoare triple to be proved. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">start_function</span>. <span class="comment">(*&nbsp;Always&nbsp;do&nbsp;this&nbsp;at&nbsp;the&nbsp;beginning&nbsp;of&nbsp;a&nbsp;semax_body&nbsp;proof&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Some of the assumptions you now see above the line are,
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" title="var">a</span>,</span> <span class="inlinecode"><span class="id" title="var">sh</span>,</span> <span class="inlinecode"><span class="id" title="var">contents</span>,</span> <span class="inlinecode"><span class="id" title="var">size</span></span>, taken directly from the WITH clause
+       of <span class="inlinecode"><span class="id" title="var">sumarray_spec</span></span>;
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">Delta_specs</span></span>, the context in which Floyd's proof tactics will look up
+       the specifications of global functions;
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">Delta</span></span>, the context in which Floyd will look up the types of
+       local and global variables;
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">SH</span>,<span class="id" title="var">H</span>,<span class="id" title="var">H<sub>0</sub></span></span>, taken exactly from the <span class="inlinecode"><span class="id" title="var">PROP</span></span> clauses of <span class="inlinecode"><span class="id" title="var">sumarray_spec</span></span>'s
+       precondition.
+
+</li>
+</ul>
+  There are also two <i>abbreviations</i> above the line,
+  <span class="inlinecode"><span class="id" title="var">POSTCONDITION</span></span> and <span class="inlinecode"><span class="id" title="var">MORE_COMMANDS</span></span>, discussed below. 
+<div class="paragraph"> </div>
+
+<a id="lab25"></a><h3 class="section">Forward symbolic execution</h3>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 10 (<i>forward</i>).
+
+<div class="paragraph"> </div>
+
+  We do Hoare logic proof by forward symbolic execution.  At the beginning 
+  of this function body, our proof goal is a Hoare triple about the statement
+  <span class="inlinecode">(<span class="id" title="var">i</span>=0;</span> <span class="inlinecode">...<span class="id" title="var">more</span></span> <span class="inlinecode"><span class="id" title="var">commands</span>...)</span>. In a forward Hoare logic proof of 
+  <span class="inlinecode">{<span class="id" title="var">P</span>}(<span class="id" title="var">i</span>=0;...<span class="id" title="var">more</span>...){<span class="id" title="var">R</span>}</span> we might first apply the sequence rule,
+<pre>
+    {P}(i=0;){Q}  {Q}(...more...){R}
+    ---------------------------------
+    {P}(i=0;...more...){R}
+</pre>
+assuming we could derive some appropriate assertion <span class="inlinecode"><span class="id" title="var">Q</span></span>.
+For many kinds of statements (assignments, return, break,
+continue) <span class="inlinecode"><span class="id" title="var">Q</span></span> is derived automatically by the <span class="inlinecode"><span class="id" title="var">forward</span></span> tactic,
+which applies a strongest-postcondition style of proof rule.
+Let us now apply the <span class="inlinecode"><span class="id" title="var">forward</span></span> tactic: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;i&nbsp;=&nbsp;0;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Look at the precondition of the current proof goal, that is, the
+  second argument of <span class="inlinecode"><span class="id" title="var">semax</span></span>; it has the form <span class="inlinecode"><span class="id" title="var">PROP</span>(...)</span> <span class="inlinecode"><span class="id" title="var">LOCAL</span>(...)</span>
+  <span class="inlinecode"><span class="id" title="var">SEP</span>(...)</span>.  That precondition is also the <i>postcondition</i> of <span class="inlinecode"><span class="id" title="var">i</span>=0;</span>.
+  It's much like the <i>precondition</i> of <span class="inlinecode"><span class="id" title="var">i</span>=0;</span> except for one change:
+  we now know that <span class="inlinecode"><span class="id" title="var">i</span></span> is equal to <span class="inlinecode">0</span>, which is expressed in the
+  <span class="inlinecode"><span class="id" title="var">LOCAL</span></span> part as <span class="inlinecode"><span class="id" title="var">temp</span></span> <span class="inlinecode"><span class="id" title="var">_i</span></span> <span class="inlinecode">(<span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">Int.repr</span></span> <span class="inlinecode">0))</span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> 0. <span class="comment">(*&nbsp;:&nbsp;Z,&nbsp;&nbsp;&nbsp;the&nbsp;mathematical&nbsp;integer&nbsp;zero.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="definition">Int.repr</span> 0). <span class="comment">(*&nbsp;:&nbsp;int,&nbsp;&nbsp;&nbsp;the&nbsp;32-bit&nbsp;integer&nbsp;representing&nbsp;0.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> 0)). <span class="comment">(*&nbsp;:&nbsp;val,&nbsp;&nbsp;&nbsp;the&nbsp;type&nbsp;of&nbsp;CompCert&nbsp;values&nbsp;*)</span><br/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="constructor">temp</span> <span class="id" title="definition">_i</span> (<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> 0))). <span class="comment">(*&nbsp;:&nbsp;localdef,&nbsp;&nbsp;the&nbsp;type&nbsp;of&nbsp;LOCAL&nbsp;assertions&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<a id="lab26"></a><h3 class="section">abbreviate, MORE_COMMANDS, POSTCONDITION</h3>
+  When doing forward symbolic execution (forward Floyd/Hoare proof)
+  through a large function, you don't usually want to see the entire
+  function-body in your proof subgoal.  Therefore the system abbreviates
+  some things for you, using the magic of Coq's implicit arguments. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> @<span class="id" title="definition">abbreviate</span>.<br/>
+<span class="comment">(*&nbsp;&nbsp;&nbsp;:&nbsp;forall&nbsp;A&nbsp;:&nbsp;Type,&nbsp;A&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;A&nbsp;*)</span><br/>
+<span class="id" title="keyword">About</span> <span class="id" title="definition">abbreviate</span>.<br/>
+<span class="comment">(*&nbsp;&nbsp;&nbsp;Arguments&nbsp;A,&nbsp;x&nbsp;are&nbsp;implicit&nbsp;and&nbsp;maximally&nbsp;inserted&nbsp;&nbsp;.&nbsp;.&nbsp;.&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+We see here that <span class="inlinecode"><span class="id" title="var">abbreviate</span></span> is just the identity function,
+   with <i>both</i> of its arguments implicit! 
+<div class="paragraph"> </div>
+
+ To examine the actual contents of MORE_COMMANDS, just do this: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="tactic">unfold</span> <span class="id" title="definition">abbreviate</span> <span class="id" title="tactic">in</span> <span class="id" title="var">MORE_COMMANDS</span>.<br/>
+</div>
+
+<div class="doc">
+or alternately, 
+</div>
+<div class="code">
+<span class="id" title="tactic">subst</span> <span class="id" title="var">MORE_COMMANDS</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="definition">abbreviate</span>.<br/>
+</div>
+
+<div class="doc">
+Similarly, to see the POSTCONDITION, just do, 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="tactic">unfold</span> <span class="id" title="definition">abbreviate</span> <span class="id" title="tactic">in</span> <span class="id" title="var">POSTCONDITION</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab27"></a><h3 class="section">Hint</h3>
+ In any VST proof state, the <span class="inlinecode"><span class="id" title="var">hint</span></span> tactic will print a suggestion
+  (if it can) that will help you make progress in the proof.
+  In stepping through the case study in this chapter,
+  insert <span class="inlinecode"><span class="id" title="var">hint</span></span> at any point to see what it says. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+Then delete the hints!  (They slow down replay of your proof.) 
+<div class="paragraph"> </div>
+
+ The hint here suggests using <span class="inlinecode"><span class="id" title="var">abbreviate_semax</span></span>, which will undo
+  the <span class="inlinecode"><span class="id" title="tactic">unfold</span></span> <span class="inlinecode"><span class="id" title="var">abbreviate</span></span> that we did above.  Really this is optional;
+  if we don't do <span class="inlinecode"><span class="id" title="var">abbreviate_semax</span></span>, the next <span class="inlinecode"><span class="id" title="var">forward</span></span> tactic will
+  do it for us. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">abbreviate_semax</span>.<br/>
+<span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+This time, the hint suggests that we try 'forward'. 
+<div class="paragraph"> </div>
+
+<a id="lab28"></a><h3 class="section">Forward through another assignment statement.</h3>
+
+</div>
+<div class="code">
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;s&nbsp;=&nbsp;0;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" title="var">forward</span></span> tactic works on assignment statements, break,
+   continue, and return. 
+<div class="paragraph"> </div>
+
+<a id="lab29"></a><h3 class="section">While loops, forward_while</h3>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 12 (<i>if, while, for</i>) and Chapter 13 (<i>while loops</i>).
+
+<div class="paragraph"> </div>
+
+   To do symbolic execution through a <span class="inlinecode"><span class="id" title="var">while</span></span> loop, use the
+   <span class="inlinecode"><span class="id" title="var">forward_while</span></span> tactic; you must supply a loop invariant. 
+</div>
+<div class="code">
+<span class="id" title="var">forward_while</span><br/>
+&nbsp;(<span class="id" title="notation">EX</span> <a id="i:15" class="idref" href="#i:15"><span class="id" title="binder">i</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span>  <span class="id" title="notation">(</span>0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_sumarray.html#i:14"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <span class="id" title="var">size</span><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="notation">LOCAL</span> <span class="id" title="notation">(</span><span class="id" title="constructor">temp</span> <span class="id" title="definition">_a</span> <span class="id" title="var">a</span><span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">temp</span> <span class="id" title="definition">_i</span> (<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> <a class="idref" href="Verif_sumarray.html#i:14"><span class="id" title="variable">i</span></a>))<span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">temp</span> <span class="id" title="definition">_n</span> (<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> <span class="id" title="var">size</span>))<span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">temp</span> <span class="id" title="definition">_s</span> (<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> (<a class="idref" href="Verif_sumarray.html#sum_Z"><span class="id" title="definition">sum_Z</span></a> (<span class="id" title="definition">sublist</span> 0 <a class="idref" href="Verif_sumarray.html#i:14"><span class="id" title="variable">i</span></a> <span class="id" title="var">contents</span>))))<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span>   <span class="id" title="notation">(</span><span class="id" title="definition">data_at</span> <span class="id" title="var">sh</span> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tuint</span> <span class="id" title="var">size</span>) (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="constructor">Vint</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Int.repr</span> <span class="id" title="var">contents</span>)) <span class="id" title="var">a</span><span class="id" title="notation">)</span>).<br/>
+</div>
+
+<div class="doc">
+A loop invariant is an assertion, almost always in the form
+  of an existential quantifier,  <span class="inlinecode"><span class="id" title="var">EX</span>...<span class="id" title="var">PROP</span>(...)<span class="id" title="var">LOCAL</span>(...)<span class="id" title="var">SEP</span>(...)</span>.
+  Each iteration of the loop has a state characterized by
+  a different value of some iteration variable(s),
+  the <span class="inlinecode"><span class="id" title="var">EX</span></span> binds that value.
+
+<div class="paragraph"> </div>
+
+  <span class="inlinecode"><span class="id" title="var">forward_while</span></span> leaves four subgoals; here we label them
+   with the - bullet. 
+</div>
+<div class="code">
+- <span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+The first subgoal is to prove
+  that the current assertion (precondition) entails the loop invariant. 
+<div class="paragraph"> </div>
+
+<a id="lab30"></a><h3 class="section">Proving separation-logic entailments</h3>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 14 (<i>PROP LOCAL SEP</i>) and Chapter
+     15 (<i>Entailments</i>)
+
+<div class="paragraph"> </div>
+
+  This proof goal is an <i>entailment</i>,  <span class="inlinecode"><span class="id" title="var">ENTAIL</span></span> <span class="inlinecode"><span class="id" title="var">Delta</span>,</span> <span class="inlinecode"><span class="id" title="var">P</span></span> <span class="inlinecode"><span class="nowrap">&vert;--</span></span> <span class="inlinecode"><span class="id" title="var">Q</span></span>,  meaning 
+  "in context <span class="inlinecode"><span class="id" title="var">Delta</span></span>, any state that satisfies <span class="inlinecode"><span class="id" title="var">P</span></span> will also satisfy <span class="inlinecode"><span class="id" title="var">Q</span></span>."
+
+<div class="paragraph"> </div>
+
+  In this case, the right-hand-side of this entailment is existentially
+  quantified; it says: there exists a value <span class="inlinecode"><span class="id" title="var">i</span></span> such that (among other things)
+  <span class="inlinecode"><span class="id" title="var">temp</span></span> <span class="inlinecode"><span class="id" title="var">_i</span></span> <span class="inlinecode">(<span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">Int.repr</span></span> <span class="inlinecode"><span class="id" title="var">i</span>))</span>, that is, the C variable <span class="inlinecode"><span class="id" title="var">_i</span></span> contains the
+  value <span class="inlinecode"><span class="id" title="var">i</span></span>.  But the left-hand-side of the entailment says 
+  <span class="inlinecode"><span class="id" title="var">temp</span></span> <span class="inlinecode"><span class="id" title="var">_i</span></span> <span class="inlinecode">(<span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">Int.repr</span></span> <span class="inlinecode">0))</span>, that is, the C variable <span class="inlinecode"><span class="id" title="var">_i</span></span> contains 0.
+
+<div class="paragraph"> </div>
+
+  This is analogous to the following situation: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nested</span> <span class="id" title="var">Proofs</span> <span class="id" title="var">Allowed</span>.<br/>
+<span class="id" title="keyword">Goal</span> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">∀</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">(</span></a><a id="f:16" class="idref" href="#f:16"><span class="id" title="binder">f</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">:</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Z</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">→</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Z</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">)</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">(</span></a><a id="x:17" class="idref" href="#x:17"><span class="id" title="binder">x</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">:</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Z</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">),</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">f</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">(</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">x</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">)=0</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">→</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">∃</span></a> <a id="i:18" class="idref" href="#i:18"><span class="id" title="binder">i</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">:</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Z</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">,</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">f</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">(</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">x</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">)=</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">i</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+To prove such a goal, one uses Coq's "exists" tactic to
+ demonstrate a value for <span class="inlinecode"><span class="id" title="var">i</span></span>: 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">∃</span> 0.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+In a separation logic entailment, one can prove an <span class="inlinecode"><span class="id" title="var">EX</span></span> on the
+  right-hand side by using the <span class="inlinecode"><span class="id" title="var">Exists</span></span> tactic to demonstrate a value
+  for the quantified variable: 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Exists</span> 0. <span class="comment">(*&nbsp;Instantiate&nbsp;the&nbsp;existential&nbsp;on&nbsp;the&nbsp;right-side&nbsp;of&nbsp;<span class="nowrap">&vert;--</span>&nbsp;&nbsp;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Notice that <span class="inlinecode"><span class="id" title="var">i</span></span> has now been replace with <span class="inlinecode">0</span> on the right side.
+
+<div class="paragraph"> </div>
+
+   To prove entailments, we usually use the <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> tactic to
+   simplify the entailment as much as possible--or in many cases,
+   to prove it entirely. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+</div>
+
+<div class="doc">
+In this case, it solves entirely; in other cases, entailer!
+    leaves subgoals for you to prove. 
+<div class="paragraph"> </div>
+
+<a id="lab31"></a><h3 class="section">Type-checking the loop test</h3>
+
+</div>
+<div class="code">
+- <span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+The second subgoal of <span class="inlinecode"><span class="id" title="var">forward_while</span></span> is always to prove that the
+  loop-test expression can evaluate without crashing--that is,
+  all the variables it references exist and are initialized,
+  it doesn't divide by zero, et cetera.
+
+<div class="paragraph"> </div>
+
+  We call this a "type-checking condition", the predicate <span class="inlinecode"><span class="id" title="var">tc_expr</span></span>.
+  In this case, it's the while-loop test <span class="inlinecode"><span class="id" title="var">i</span>&lt;<span class="id" title="var">n</span></span> that must execute,
+  so we see <span class="inlinecode"><span class="id" title="var">tc_expr</span></span> <span class="inlinecode"><span class="id" title="var">Delta</span></span> <span class="inlinecode">(!</span> <span class="inlinecode">(<span class="id" title="var">_i</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">_n</span>))</span> on the right-hand side
+  of the entailment.
+
+<div class="paragraph"> </div>
+
+  Very often, these <span class="inlinecode"><span class="id" title="var">tc_expr</span></span> goals solve automatically by <span class="inlinecode"><span class="id" title="var">entailer</span>!</span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+</div>
+
+<div class="doc">
+and indeed, this subgoal is solved. 
+<div class="paragraph"> </div>
+
+<a id="lab32"></a><h3 class="section">Proving that the loop body preserves the loop invariant</h3>
+
+</div>
+<div class="code">
+- <span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+The third subgoal of <span class="inlinecode"><span class="id" title="var">forward_while</span></span> is to prove
+    that the loop body preserves the loop invariant.
+   We must forward-symbolic-execute through the loop body. 
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 16 (<i>Array subscripts</i>) 
+<div class="paragraph"> </div>
+
+ Examine the proof goal at the beginning of the loop body.  Above the
+    line is the variable <span class="inlinecode"><span class="id" title="var">i</span></span>, introduced automatically by <span class="inlinecode"><span class="id" title="var">forward_while</span></span>
+    from the existential <span class="inlinecode"><span class="id" title="var">EX</span></span> <span class="inlinecode"><span class="id" title="var">i</span>:<span class="id" title="var">Z</span></span> in the loop invariant.
+
+<div class="paragraph"> </div>
+
+    The first C command in the loop body is the array subscript,
+    <span class="inlinecode"></span> <span class="inlinecode"><span class="id" title="var">_x</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">a</span>[<span class="id" title="var">_i</span>];</span> <span class="inlinecode"></span>.   In order to prove this statement, the <span class="inlinecode"><span class="id" title="var">forward</span></span>
+    tactic needs to be able to prove that <span class="inlinecode"><span class="id" title="var">i</span></span> is within bounds of the
+    array.  When we try <span class="inlinecode"><span class="id" title="var">forward</span></span>, it fails: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Fail</span> <span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;x&nbsp;=&nbsp;a<span class="inlinecode"><span class="id" title="var">i</span></span>&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" title="var">forward</span></span> fails and tells us to first make <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span>
+   provable.  This auxiliary fact will help it prove that the array
+   subscript <span class="inlinecode"><span class="id" title="var">i</span></span> is within the bounds of the array <span class="inlinecode"><span class="id" title="var">a</span></span>.  It asks us to
+   assert and prove some fact strong enough to imply this.
+
+<div class="paragraph"> </div>
+
+   Above the line we have <span class="inlinecode">0&lt;=<span class="id" title="var">i</span></span> and <span class="inlinecode"><span class="id" title="var">i</span>&lt;<span class="id" title="var">size</span></span>, so if we could prove
+   <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">size</span></span> that would be enough.  Unfortunately,
+   it won't work to do  <span class="inlinecode"><span class="id" title="tactic">assert</span></span> <span class="inlinecode">(<span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">size</span>)</span>  because
+   there is not enough information above the line to prove that. 
+<div class="paragraph"> </div>
+
+ SEE ALSO: VST.pdf, Chapter "assert_PROP"
+
+<div class="paragraph"> </div>
+
+   The required information to prove <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">size</span></span> comes from
+   the <i>precondition</i> of the current <span class="inlinecode"><span class="id" title="var">semax</span></span> goal. In the precondition, we have
+<pre>
+   data_at sh (tarray tuint size) (map Vint (map Int.repr contents)) a
+</pre>
+   The <span class="inlinecode"><span class="id" title="var">data_at</span></span> predicate always enforces that the  "contents" list for
+   an array is exactly the same length as the size of the array.
+
+<div class="paragraph"> </div>
+
+   To make use of precondition facts in an assertion, use <span class="inlinecode"><span class="id" title="var">assert_PROP</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">assert_PROP</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <span class="id" title="var">contents</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="var">size</span>). {<br/>
+<br/>
+</div>
+
+<div class="doc">
+The proof goal is an entailment, with the current precondition on
+    the left, and the proposition to be proved on the right.
+    As usual, to prove an entailment, we use the <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> tactic
+    to simplify the proof goal: 
+</div>
+<div class="code">
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+</div>
+
+<div class="doc">
+Indeed, <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> has done almost all the work.  If you want
+   to see how <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> did it, undo the last step and use these
+   two tactics:  <span class="inlinecode"><span class="id" title="var">go_lower</span>.</span>  <span class="inlinecode"><span class="id" title="var">saturate_local</span>.</span>
+   The job of <span class="inlinecode"><span class="id" title="var">go_lower</span></span> is to process the PROP and LOCAL parts of
+   the entailment; and <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> derives all the propositional
+   facts derivable from the <span class="inlinecode"><span class="id" title="var">mpred</span></span>s on the left-hand-side, and puts
+   those facts above the line.  In this case, above the line is,
+   <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode">(<span class="id" title="var">unfold_reptype</span></span> <span class="inlinecode">(<span class="id" title="var">map</span></span> <span class="inlinecode"><span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">map</span></span> <span class="inlinecode"><span class="id" title="var">Int.repr</span></span> <span class="inlinecode"><span class="id" title="var">contents</span>)))</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">size</span></span>
+   which is the fact we need. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" title="var">hint</span></span> suggests that <span class="inlinecode"><span class="id" title="var">list_solve</span></span> solves this goal,
+   <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode">(<span class="id" title="var">map</span></span> <span class="inlinecode"><span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">map</span></span> <span class="inlinecode"><span class="id" title="var">Int.repr</span></span> <span class="inlinecode"><span class="id" title="var">contents</span>))</span>.
+   Indeed, <span class="inlinecode"><span class="id" title="var">list_solve</span></span> knows a lot of things about the interaction
+   of list operators: <span class="inlinecode"><span class="id" title="var">Zlength</span>,</span> <span class="inlinecode"><span class="id" title="var">map</span>,</span> <span class="inlinecode"><span class="id" title="var">sublist</span>,</span> etc.
+
+<div class="paragraph"> </div>
+
+   Or, we can solve the goal "by hand": 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> 2 <span class="id" title="tactic">rewrite</span> <span class="id" title="lemma">Zlength_map</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+}<br/>
+<span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+Now that we have <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">size</span></span> above the, we can go
+   <span class="inlinecode"><span class="id" title="var">forward</span></span> through the array-subscript statement. 
+</div>
+<div class="code">
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;<span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">a</span>[<span class="id" title="var">i</span>];</span>&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Now <span class="inlinecode"><span class="id" title="var">forward</span></span> through the rest of the loop body. 
+</div>
+<div class="code">
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;s&nbsp;+=&nbsp;x;&nbsp;*)</span><br/>
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;i++;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+SEE ALSO: VC.pdf Chapter 17 (<i>At the end of the loop body</i>) 
+<div class="paragraph"> </div>
+
+ We have reached the end of the loop body, and it's
+   time to prove that the <i>current precondition</i>  (which is the
+   postcondition of the loop body) entails the loop invariant. 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="var">Exists</span> (<span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1).<br/>
+&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+&nbsp;<span class="id" title="tactic">f_equal</span>. <span class="id" title="tactic">f_equal</span>.<br/>
+</div>
+
+<div class="doc">
+Here the proof goal is,
+<pre>
+   sum_Z (sublist 0 (i + 1) contents) =
+   sum_Z (sublist 0 i contents) + Znth i contents
+</pre>
+   We will prove this in stages:
+<pre>
+   sum_Z (sublist 0 (i + 1) contents) =
+   sum_Z (sublist 0 i contents ++ sublist i (i+1) contents) =
+   sum_Z (sublist 0 i contents) + sum_Z (sublist i (i+1) contents) =
+   sum_Z (sublist 0 i contents) + sum_Z (Znth i contents :: nil) =
+   sum_Z (sublist 0 i contents) + Znth i contents
+</pre>
+ 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="lemma">sublist_split</span> 0 <span class="id" title="var">i</span> (<span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1)) <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;<span class="id" title="tactic">rewrite</span> <a class="idref" href="Verif_sumarray.html#sum_Z_app"><span class="id" title="lemma">sum_Z_app</span></a>. <span class="id" title="tactic">rewrite</span> (<span class="id" title="lemma">sublist_one</span> <span class="id" title="var">i</span>) <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="var">lia</span>.<br/>
+</div>
+
+<div class="doc">
+After the loop, our precondition is the conjunction of the loop 
+    invariant and the negation of the loop test.  
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 18 (<i>Returning from a function</i>) 
+</div>
+<div class="code">
+
+<br/>
+- <span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+You can always go <span class="inlinecode"><span class="id" title="var">forward</span></span> through a <span class="inlinecode"><span class="id" title="keyword">return</span></span> statement.
+  The resulting proof goal is an entailment, that the current
+  precondition implies the function's postcondition. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;return&nbsp;s;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Here we prove that the postcondition of the function body
+    entails the postcondition demanded by the function specification. 
+</div>
+<div class="code">
+<span class="id" title="var">entailer</span>!.<br/>
+<span class="id" title="var">hint</span>.<br/>
+<span class="id" title="tactic">autorewrite</span> <span class="id" title="keyword">with</span> <span class="id" title="var">sublist</span> <span class="id" title="tactic">in</span> *&#x22A2;.<br/>
+<span class="id" title="var">hint</span>.<br/>
+<span class="id" title="tactic">autorewrite</span> <span class="id" title="keyword">with</span> <span class="id" title="var">sublist</span>.<br/>
+<span class="id" title="var">hint</span>.<br/>
+<span class="id" title="tactic">reflexivity</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab33"></a><h2 class="section">Global variables and main()</h2>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 19 (<i>Global variables and main</i>) 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;Contents&nbsp;of&nbsp;the&nbsp;extern&nbsp;global&nbsp;initialized&nbsp;array&nbsp;"_four"&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <a id="four_contents" class="idref" href="#four_contents"><span class="id" title="definition">four_contents</span></a> := <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> 2<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> 3<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> 4<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="body_main" class="idref" href="#body_main"><span class="id" title="lemma">body_main</span></a>:  <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_sumarray.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_sumarray.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_main</span> <a class="idref" href="Verif_sumarray.html#main_spec"><span class="id" title="definition">main_spec</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">start_function</span>.<br/>
+</div>
+
+<div class="doc">
+C programs may have extern global variables, either with
+  explicit initializers or implicitly initialized to zero.
+  Because they live in memory, they need to be described by a
+  separation logic predicate, a "resource" that gets passed from
+  one function to another via the SEP part of funspec preconditions
+  and postconditions.  Initially, all the global-variable resources
+  are passed into the <span class="inlinecode"><span class="id" title="var">main</span></span> function, as its precondition.  The
+  built-in operator <span class="inlinecode"><span class="id" title="var">main_pre</span></span> calculates this precondition of <span class="inlinecode"><span class="id" title="var">main</span></span>
+  by examining all the global declarations of the program.
+
+<div class="paragraph"> </div>
+
+  In this program, there is one global variable,
+<pre>
+    unsigned four[4] = {1,2,3,4};
+</pre>
+  and we can see its SEP assertion in the precondition of the
+  current proof goal:
+<pre>
+   data_at Ews (tarray tuint 4)
+           (map Vint [Int.repr 1; Int.repr 2; Int.repr 3; Int.repr 4])
+           (gv _four)
+</pre>
+ 
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 20 (<i>Function calls</i>)
+
+<div class="paragraph"> </div>
+
+  We are ready to prove the function-call, <span class="inlinecode"><span class="id" title="var">s</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">sumarray</span>(<span class="id" title="var">four</span>,4);</span>
+  We use the <span class="inlinecode"><span class="id" title="var">forward_call</span></span> tactic, and for the argument we must supply
+  a tuple of values that instantiates the WITH clause of the called
+  function's funspec.  In <span class="inlinecode"><span class="id" title="var">DECLARE</span></span> <span class="inlinecode"><span class="id" title="var">_sumarray</span></span>, the <span class="inlinecode"><span class="id" title="var">WITH</span></span> clause reads,
+  <span class="inlinecode"><span class="id" title="var">WITH</span></span> <span class="inlinecode"><span class="id" title="var">a</span>:</span> <span class="inlinecode"><span class="id" title="var">val</span>,</span> <span class="inlinecode"><span class="id" title="var">sh</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" title="var">share</span>,</span> <span class="inlinecode"><span class="id" title="var">contents</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" title="var">list</span></span> <span class="inlinecode"><span class="id" title="var">Z</span>,</span> <span class="inlinecode"><span class="id" title="var">size</span>:</span> <span class="inlinecode"><span class="id" title="var">Z</span></span>.
+  Therefore the argument to <span class="inlinecode"><span class="id" title="var">forward_call</span></span> must be a four-tuple of type,
+  <span class="inlinecode">(<span class="id" title="var">val</span></span> <span class="inlinecode">×</span> <span class="inlinecode"><span class="id" title="var">share</span></span> <span class="inlinecode">×</span> <span class="inlinecode"><span class="id" title="var">list</span></span> <span class="inlinecode"><span class="id" title="var">Z</span></span> <span class="inlinecode">×</span> <span class="inlinecode"><span class="id" title="var">Z</span>)</span>.  
+</div>
+<div class="code">
+<span class="id" title="var">forward_call</span> <span class="comment">(*&nbsp;&nbsp;s&nbsp;=&nbsp;sumarray(four,4);&nbsp;*)</span><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">gv</span> <span class="id" title="definition">_four</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="definition">Ews</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_sumarray.html#four_contents"><span class="id" title="definition">four_contents</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> 4<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a>.<br/>
+</div>
+
+<div class="doc">
+The subgoal of <span class="inlinecode"><span class="id" title="var">forward_call</span></span> is that we have to prove the PROP
+  part of the <span class="inlinecode"><span class="id" title="var">sumarray</span></span> function's precondition. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;<span class="id" title="var">split3</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="var">computable</span>. <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">constructor</span>; <span class="id" title="var">computable</span>.<br/>
+</div>
+
+<div class="doc">
+Now we are after the function-call, and we can go forward through
+  the return statement. 
+</div>
+<div class="code">
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;return&nbsp;s;&nbsp;*)</span><br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab34"></a><h2 class="section">Tying all the functions together</h2>
+
+<div class="paragraph"> </div>
+
+ SEE ALSO: VC.pdf Chapter 21 (<i>Tying all the functions together</i>)
+
+<div class="paragraph"> </div>
+
+  The C program may do input/output, affecting the state of the
+  outside world.  This state is described (abstractly) by the <span class="inlinecode"><span class="id" title="var">Espec</span></span>,
+  the "external specification."  The sumarray program does not do
+  any input/output, so we can use a trivial <span class="inlinecode"><span class="id" title="var">Espec</span></span>.  We provide this to
+  the <span class="inlinecode"><span class="id" title="var">semax_prog</span></span> proofs (below, in the <span class="inlinecode"><span class="id" title="var">prog_correct</span></span> lemma) as follows: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">NullExtension.Espec</span>.<br/>
+</div>
+
+<div class="doc">
+This is a <i>typeclass instance</i>.  If you're not familiar with typeclasses,
+  don't worry, just treat this as "boilerplate" that you can ignore. 
+<div class="paragraph"> </div>
+
+ An entire C program is proved correct if all the functions
+  satisfy their funspecs.  We listed all those functions (upon whose
+  specifications we depend) in the <span class="inlinecode"><span class="id" title="var">Gprog</span></span> definition.  The judgment
+  <span class="inlinecode"><span class="id" title="var">semax_prog</span></span> <span class="inlinecode"><span class="id" title="var">prog</span></span> <span class="inlinecode"><span class="id" title="var">Vprog</span></span> <span class="inlinecode"><span class="id" title="var">Gprog</span></span> says, "In the program <span class="inlinecode"><span class="id" title="var">prog</span></span>, whose
+  <span class="inlinecode"><span class="id" title="var">varspecs</span></span> are <span class="inlinecode"><span class="id" title="var">Vprog</span></span> and whose funspecs are <span class="inlinecode"><span class="id" title="var">Gprog</span></span>, every
+  function mentioned in <span class="inlinecode"><span class="id" title="var">Gprog</span></span> does satisfy its specification." 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="prog_correct" class="idref" href="#prog_correct"><span class="id" title="lemma">prog_correct</span></a>: <span class="id" title="definition">semax_prog</span> <span class="id" title="definition">prog</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#tt"><span class="id" title="constructor">tt</span></a> <a class="idref" href="Verif_sumarray.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_sumarray.html#Gprog"><span class="id" title="definition">Gprog</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="var">prove_semax_prog</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="var">semax_func_cons</span> <a class="idref" href="Verif_sumarray.html#body_sumarray"><span class="id" title="lemma">body_sumarray</span></a>.<br/>
+<span class="id" title="var">semax_func_cons</span> <a class="idref" href="Verif_sumarray.html#body_main"><span class="id" title="lemma">body_main</span></a>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab35"></a><h2 class="section">Additional recommended reading</h2>
+
+<div class="paragraph"> </div>
+
+ Recommended: read VC.pdf Chapters 22-47 (up to <i>Pointer comparisons</i>) 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-09-18&nbsp;15:39&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

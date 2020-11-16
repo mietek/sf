@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Postscript: Postcript and bibliography</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vc.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 5: Verifiable C</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Postscript<span class="subtitle">Postcript and bibliography</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+<a id="lab154"></a><h1 class="section">Looking back</h1>
+
+<div class="paragraph"> </div>
+
+ You've now seen how to verify programs that use many of C's data
+  structures (arrays, pointers, structs, integers) and control
+  structures (functions, if-then-else, loops), and abstraction 
+  structures (data abstraction, module interfaces).  The final exercise
+  (hash tables) demonstrated all of these at once, in addition to a
+  key concept: layering the proof using a functional model,
+  so that proofs about the properties of the functional model (<a href="Hashfun.html"><span class="inlineref">Hashfun</span></a>)
+  cleanly separate from the implementation proof (<a href="Verif_hash.html"><span class="inlineref">Verif_hash</span></a>) showing
+  that the C program refines the functional model. 
+<div class="paragraph"> </div>
+
+<a id="lab155"></a><h1 class="section">Looking forward</h1>
+
+<div class="paragraph"> </div>
+
+ If you want to verify some C programs on your own, you may take
+ inspiration from some of these Verifiable C proofs:
+<ul class="doclist">
+<li> SHA-2 cryptographic hashing <a href="Bib.html#Appel-2015"><span class="inlineref">[Appel 2015]</span></a>
+
+</li>
+<li> HMAC cryptographic authentication <a href="Bib.html#Beringer-2015"><span class="inlineref">[Beringer 2015]</span></a>
+
+</li>
+<li> HMAC-DRBG cryptographic random number generation <a href="Bib.html#Ye-2017"><span class="inlineref">[Ye 2017]</span></a>
+
+</li>
+<li> Concurrent messaging system <a href="Bib.html#Mansky-2017"><span class="inlineref">[Mansky 2017]</span></a>
+
+</li>
+<li> Generational copying garbage collector <a href="Bib.html#Wang-2019"><span class="inlineref">[Wang 2019]</span></a>
+
+</li>
+<li> Bins-based malloc/free system <a href="Bib.html#Appel-and Naumann 2020"><span class="inlineref">[Appel and Naumann 2020]</span></a>
+
+</li>
+<li> AES encryption, B+Trees, Tries of B+ trees (unpublished 
+        master's or undergraduate theses). 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+<a id="lab156"></a><h2 class="section">Small examples</h2>
+ VST is distributed with a <span class="inlinecode"><span class="id" title="var">progs</span></span> directory of many small C programs
+  that demonstrate different features and methods of Verifiable C.
+  If your VST installation is in the standard place, you can find this
+  as a subdirectory of <span class="inlinecode">`<span class="id" title="var">coqc</span></span> <span class="inlinecode">-<span class="id" title="keyword">where</span>`/<span class="id" title="var">user</span>-<span class="id" title="var">contrib</span>/<span class="id" title="var">VST</span></span>. 
+<div class="paragraph"> </div>
+
+<a id="lab157"></a><h2 class="section">Modules</h2>
+ All the verifications in this volume are single-file C programs.  Real 
+  software engineering in C is done with modules in .c files and interfaces
+  in .h files.  Since 2019, VST has a module system; the early version
+  is described in <a href="Bib.html#Beringer-2019"><span class="inlineref">[Beringer 2019]</span></a> and the newer version is demonstrated 
+  in progs/VSUpile.  The description in <a href="Bib.html#Beringer-2019"><span class="inlineref">[Beringer 2019]</span></a> mostly matches
+  the proofs in progs/VSUpile, but the proofs handle data abstraction in a more
+  advanced way than is described in the paper. 
+<div class="paragraph"> </div>
+
+<a id="lab158"></a><h2 class="section">Input/output</h2>
+  To prove I/O using our Verifiable C logic, we treat the state of the
+  outside world as a resource in the SEP clause, alongside (but separating from) 
+  in-memory conjuncts.  Proved examples are in <span class="inlinecode"><span class="id" title="var">progs</span>/<span class="id" title="var">io.c</span>,</span> <span class="inlinecode"><span class="id" title="var">progs</span>/<span class="id" title="var">io_mem.c</span></span>,
+  and their proof files <span class="inlinecode"><span class="id" title="var">progs</span>/<span class="id" title="var">verif_io.v</span>,</span> <span class="inlinecode"><span class="id" title="var">progs</span>/<span class="id" title="var">verif_io_mem.v</span></span>.  Research
+  papers describing these concepts include <a href="Bib.html#Koh-2020"><span class="inlineref">[Koh 2020]</span></a> and
+  <a href="Bib.html#Mansky-2020"><span class="inlineref">[Mansky 2020]</span></a>. 
+<div class="paragraph"> </div>
+
+<a id="lab159"></a><h1 class="section">Looking around</h1>
+
+<div class="paragraph"> </div>
+
+ VST is not the only program verification system.  How should you decide
+  which system to use? 
+<div class="paragraph"> </div>
+
+<a id="lab160"></a><h2 class="section">Static analyzers</h2>
+ There are many <i>static analyzers</i> -- too numerous to list here -- that
+  attempt to check <i>safety</i> of your program:  will it crash?  Will it access
+  an array out of bounds, or dereference an uninitialized pointer?  Static
+  analyzers can be useful in software engineering, but they have two major 
+  limitations:
+<ul class="doclist">
+<li> They don't verify <i>functional correctness</i> -- that is, does your program
+    produce the right answer, or interact with the right behavior?
+
+</li>
+<li> They are incomplete.  For example, proving that <span class="inlinecode"><span class="id" title="var">a</span>[<span class="id" title="var">i</span>]</span> is an in-bounds array
+    access requires proving that <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">N</span></span>.  Sometimes a static analyzer
+    can deduce that from the program flow, but in general it is a functional
+    correctness property that may require sophisticated invariants to prove. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+<a id="lab161"></a><h2 class="section">Functional correctness verifiers -- functional languages</h2>
+ A good way to write proved-correct software is to program in a pure
+  functional program logic, and use higher-order logic to prove correctness.
+  For example:
+<ul class="doclist">
+<li> Write pure functional programs in Coq, prove them correct in Coq, then
+    extract them from Coq to OCaml or Haskell.  See Volume 3 of Software
+    Foundations:  Verified Functional Algorithms.
+
+</li>
+<li> In HOL systems (Higher-order Logic) such as Isabelle/HOL, you can do the
+    same thing: write functional programs, prove them correct, extract, compile.
+
+</li>
+<li> You can write Haskell programs, compile with <span class="inlinecode"><span class="id" title="var">ghc</span></span>, and import into Coq
+    for verification using hs-to-coq <a href="Bib.html#Spector-Zabusky-2018"><span class="inlineref">[Spector-Zabusky 2018]</span></a>.
+
+</li>
+<li> ACL2 is an older system, that uses a first-order logic.  That's less 
+    expressive, you don't get polymorphism or quantification, but there
+    have been many successful applications of ACL2 in industry. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+<a id="lab162"></a><h2 class="section">Functional correctness verifiers -- imperative languages</h2>
+
+<div class="paragraph"> </div>
+
+ Functional programming has its limitations: it requires a garbage
+  collector,  usually written in an imperative language, and how did you
+  prove that correct?  In functional languages it is often harder
+  to build (and reason about) low-latency code, or to access low-level
+  primitives.  For these and other reasons, some software is still
+  written in low-level imperative languages such as C.
+
+<div class="paragraph"> </div>
+
+  There are verifiers for high-level imperative languages (that
+  require a garbage collector).  For example, Dafny <a href="Bib.html#Leino-2010"><span class="inlineref">[Leino 2010]</span></a>
+  is a language and tool for Hoare-logic style verification.
+  It's relatively simple to learn and elegant to use.
+
+<div class="paragraph"> </div>
+
+  ML with mutable references and arrays is also a high-level imperative
+  language.  CFML is a system for reasoning about imperative ML
+  programs using separation logic in Coq <a href="Bib.html#Chargueraud-2010"><span class="inlineref">[Chargueraud 2010]</span></a>,
+  soon to be described in another volume of <i>Software Foundations</i>.
+  CakeML is a system for proving (and correctly compiling) ML
+  programs in HOL <a href="Bib.html#Kumar-2014"><span class="inlineref">[Kumar 2014]</span></a>. 
+<div class="paragraph"> </div>
+
+<a id="lab163"></a><h2 class="section">Functional correctness verifiers -- C</h2>
+
+<div class="paragraph"> </div>
+
+ For the canonical <i>low-level imperative language</i> -- C -- there
+  are several systems:
+<ul class="doclist">
+<li> Frama-C (<a href="https://frama-c.com/"><span class="inlineref">https://frama-c.com/</span></a>)
+
+</li>
+<li> VeriFast <a href="Bib.html#Jacobs-2011"><span class="inlineref">[Jacobs 2011]</span></a>
+
+</li>
+<li> VST (the subject of this volume).
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  Unlike VST, where (as you have seen) the proof script is separate from
+  the program, in both Frama-C and VeriFast you prove the program by inserting
+  assertions and invariants into the program. the tools complete the
+  verification automatically -- or else, point out which assertions 
+  have failed, so you can adjust your assertions and invariants, and try again.
+
+<div class="paragraph"> </div>
+
+  Each of these three systems has an assertion language, in which you
+  express your function specifications, assertions, and invariants.
+<ul class="doclist">
+<li> In VST, as you have seen, that language is a separation language
+    (PROP/LOCAL/SEP) embedded in Coq, so that the PROP, LOCAL, and SEP
+    clauses can all make use of the full expressive power of the Calculus
+    of Inductive Constructions (CiC).  You have seen a simple example of
+    the expressive power of this approach, where we can use ordinary Coq 
+    proofs in <a href="Hashfun.html"><span class="inlineref">Hashfun</span></a>, and directly connect them to separation-logic
+    proofs in <a href="Verif_hash.html"><span class="inlineref">Verif_hash</span></a>.
+
+</li>
+<li> Frama-C uses a weaker assertion language, expressed in C syntax.  That's
+    a much weaker logic to reason in, and it doesn't directly connect to
+    a general-purpose logic (and proof assistant) like Coq.  Also, since
+    Frama-C is not a separation logic, it can be difficult to reason about
+    data structures.
+
+</li>
+<li> VeriFast uses a capable Dafny-like logic -- even more capable, since
+    it is separation logic, not just Hoare logic.  That means you can reason
+    about data structures.  There's no artificial limitation to a C-like syntax
+    in the assertion language.  Unfortunately, VeriFast's assertion language
+    is not connected to a general-purpose logic (and proof assistant); that 
+    means you can do refinement proofs (this C program implements that
+    functional model),  but it's not so easy to reason about properties of
+    your functional models. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+<a id="lab164"></a><h2 class="section">Foundational soundness</h2>
+
+<div class="paragraph"> </div>
+
+ Formal reasoning about source programs is a good thing -- but once you've
+  proved your source program correct, how do you know that is compiled
+  correctly?  That is, 
+<ul class="doclist">
+<li> the compiler must not have bugs, and
+
+</li>
+<li> the compiler must agree with your verifier on every detail of the
+    semantics of the source language.
+
+</li>
+</ul>
+  Of all the systems described above, only VST and CakeML can make this
+  connection end-to-end, with machine-checked proofs. 
+<div class="paragraph"> </div>
+
+<a id="lab165"></a><h1 class="section">Conclusion</h1>
+
+<div class="paragraph"> </div>
+
+ This volume has given you a taste of formal verification for a low-level
+  imperative language.  Since C was not designed with verification in mind,
+  it has many sharp corners and idiosyncrasies, which the verification tool
+  cannot always hide from you.  But C is a <i>lingua franca</i> in which you can
+  express a wide variety of programming paradigms, and Verifiable C is
+  expressive enough to allow to verify them.  We wish you success in your
+  future software verification efforts. 
+</div>
+<div class="code">
+
+<br/><hr class='doublespaceincode'/>
+<span class="comment">(*&nbsp;2020-09-18&nbsp;15:39&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

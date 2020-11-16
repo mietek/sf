@@ -97,16 +97,29 @@ idtac " ".
 
 idtac "#> Manually graded: factorial_dec".
 idtac "Advanced".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 print_manual_grade manual_grade_for_factorial_dec.
 idtac " ".
 
 idtac " ".
 
 idtac "Max points - standard: 13".
-idtac "Max points - advanced: 20".
+idtac "Max points - advanced: 22".
+idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
 idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- decorations_in_if_minus_plus_reloaded ---------".
@@ -129,6 +142,4 @@ idtac "---------- factorial_dec ---------".
 idtac "MANUAL".
 Abort.
 
-(* Thu Feb 7 20:08:08 EST 2019 *)
-
-(* Thu Feb 7 20:09:28 EST 2019 *)
+(* 2020-09-09 21:08 *)

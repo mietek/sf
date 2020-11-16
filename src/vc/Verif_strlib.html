@@ -1,0 +1,917 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Verif_strlib: String functions</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vc.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 5: Verifiable C</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Verif_strlib<span class="subtitle">String functions</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+  In this chapter we show how to prove the correctness of C programs
+ that use null-terminated character strings.
+
+<div class="paragraph"> </div>
+
+ Here are some functions from the C standard library, <span class="inlinecode"><span class="id" title="var">strlib.c</span></span>
+
+<div class="paragraph"> </div>
+
+<pre>
+    #include &lt;stddef.h&gt;
+
+    size_t strlen(const char *str) {
+      size_t i;
+      for (i=0; ; i++)
+        if (str[i]==0) return i;
+    }
+
+    char *strcpy(char *dest, const char *src) {
+      size_t i;
+      for(i = 0;; i++){
+        char d = src[i];
+        dest[i] = d;
+        if(d == 0) return dest;
+      }
+    }
+
+    int strcmp(const char *str1, const char *str2) {
+      size_t i;
+      for(i = 0;; i++){
+        char d<sub>1</sub> = str1[i];
+        char d<sub>2</sub> = str2[i];
+        if(d<sub>1</sub> == 0 &amp;&amp; d<sub>2</sub> == 0) return 0;
+        else if(d<sub>1</sub> &lt; d<sub>2</sub>) return -1;
+        else if(d<sub>1</sub> &gt; d<sub>2</sub>) return 1;
+      }
+    }    
+</pre>
+
+<div class="paragraph"> </div>
+
+<a id="lab103"></a><h1 class="section">Standard boilerplate</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <a class="idref" href="Preface.html#"><span class="id" title="library">VC.Preface</span></a>. <span class="comment">(*&nbsp;Check&nbsp;for&nbsp;the&nbsp;right&nbsp;version&nbsp;of&nbsp;VST&nbsp;*)</span><br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VST.floyd.proofauto</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VC.strlib</span>.<br/>
+<span class="id" title="keyword">Instance</span> <a id="CompSpecs" class="idref" href="#CompSpecs"><span class="id" title="instance">CompSpecs</span></a> : <span class="id" title="class">compspecs</span>. <span class="id" title="var">make_compspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">Definition</span> <a id="Vprog" class="idref" href="#Vprog"><span class="id" title="definition">Vprog</span></a> : <span class="id" title="definition">varspecs</span>. <span class="id" title="var">mk_varspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VC.hints</span>. <span class="comment">(*&nbsp;Import&nbsp;special&nbsp;hints&nbsp;for&nbsp;this&nbsp;tutorial.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Strings.Ascii.html#"><span class="id" title="library">Coq.Strings.Ascii</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab104"></a><h1 class="section">Representation of null-terminated strings.</h1>
+
+<div class="paragraph"> </div>
+
+ Coq represents a string as a list-like Inductive of Ascii
+    characters: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Locate</span> <span class="id" title="var">string</span>. <span class="comment">(*&nbsp;Coq.Strings.String.string&nbsp;*)</span><br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>.<br/>
+<span class="comment">(*&nbsp;Inductive&nbsp;string&nbsp;:&nbsp;Set&nbsp;:=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;EmptyString&nbsp;:&nbsp;string&nbsp;|&nbsp;String&nbsp;:&nbsp;Ascii.ascii&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;string&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;string&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The C programming language represents a <i>character</i> as
+   a byte, that is, an 8-bit signed or unsigned integer.
+   In Coq represent the 8-bit integers using the <span class="inlinecode"><span class="id" title="var">byte</span></span> type. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="record">byte</span>. <span class="comment">(*&nbsp;Notation&nbsp;byte&nbsp;:=&nbsp;Byte.int&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+CompCert's <span class="inlinecode"><span class="id" title="var">Byte</span></span> module is an 8-bit instantiation of
+   the n-bit integers, just as the <span class="inlinecode"><span class="id" title="var">Int</span></span> module is a 32-bit
+   instantiation. 
+
+<div class="paragraph"> </div>
+
+   Here, we can ask what <span class="inlinecode"><span class="id" title="var">Byte</span></span> knows about the theory of 8-bit
+   modular integers: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Search</span> <span class="id" title="abbreviation">byte</span>. <span class="comment">(*&nbsp;Too&nbsp;long&nbsp;a&nbsp;list&nbsp;of&nbsp;theorems&nbsp;to&nbsp;reproduce&nbsp;here!&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+We can convert a Coq string to a list of bytes: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="string_to_list_byte" class="idref" href="#string_to_list_byte"><span class="id" title="definition">string_to_list_byte</span></a> (<a id="s:1" class="idref" href="#s:1"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Verif_strlib.html#s:1"><span class="id" title="variable">s</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#EmptyString"><span class="id" title="constructor">EmptyString</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Strings.String.html#String"><span class="id" title="constructor">String</span></a> <span class="id" title="var">a</span> <span class="id" title="var">s'</span> ⇒ <span class="id" title="definition">Byte.repr</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.of_N"><span class="id" title="definition">Z.of_N</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Strings.Ascii.html#N_of_ascii"><span class="id" title="definition">Ascii.N_of_ascii</span></a> <span class="id" title="var">a</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Verif_strlib.html#string_to_list_byte:2"><span class="id" title="definition">string_to_list_byte</span></a> <span class="id" title="var">s'</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="Hello" class="idref" href="#Hello"><span class="id" title="definition">Hello</span></a> := "Hello"%<span class="id" title="var">string</span>.<br/>
+<span class="id" title="keyword">Definition</span> <a id="Hello'" class="idref" href="#Hello'"><span class="id" title="definition">Hello'</span></a> := <a class="idref" href="Verif_strlib.html#string_to_list_byte"><span class="id" title="definition">string_to_list_byte</span></a> <a class="idref" href="Verif_strlib.html#Hello"><span class="id" title="definition">Hello</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> <a class="idref" href="Verif_strlib.html#string_to_list_byte"><span class="id" title="definition">string_to_list_byte</span></a> <a class="idref" href="Verif_strlib.html#Hello"><span class="id" title="definition">Hello</span></a>.<br/>
+&nbsp;<span class="comment">(*&nbsp;=&nbsp;<span class="inlinecode"><span class="id" title="var">Byte.repr</span></span> <span class="inlinecode">72;</span> <span class="inlinecode"><span class="id" title="var">Byte.repr</span></span> <span class="inlinecode">101;</span> <span class="inlinecode"><span class="id" title="var">Byte.repr</span></span> <span class="inlinecode">108;</span> 
+      <span class="inlinecode"><span class="id" title="var">Byte.repr</span></span> <span class="inlinecode">108;</span> <span class="inlinecode"><span class="id" title="var">Byte.repr</span></span> <span class="inlinecode">111</span>&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;list&nbsp;byte&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Section</span> <a id="StringDemo" class="idref" href="#StringDemo"><span class="id" title="section">StringDemo</span></a>.<br/><hr class='doublespaceincode'/>
+&nbsp;&nbsp;<span class="id" title="keyword">Variable</span> <a id="StringDemo.p" class="idref" href="#StringDemo.p"><span class="id" title="variable">p</span></a> : <span class="id" title="inductive">val</span>. <span class="comment">(*&nbsp;Suppose&nbsp;we&nbsp;have&nbsp;an&nbsp;address&nbsp;in&nbsp;memory&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+To describe a single byte in memory, we can use <span class="inlinecode"><span class="id" title="var">data_at</span></span>
+   with the signed-character type: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">tschar</span>. <span class="comment">(*&nbsp;=&nbsp;Tint&nbsp;I<sub>8</sub>&nbsp;Signed&nbsp;noattr&nbsp;:&nbsp;type&nbsp;*)</span><br/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <span class="id" title="definition">tschar</span> (<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> 72)) <a class="idref" href="Verif_strlib.html#StringDemo.p"><span class="id" title="variable">p</span></a>). <span class="comment">(*&nbsp;:&nbsp;mpred&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+This <span class="inlinecode"><span class="id" title="var">data_at</span></span> <span class="inlinecode"><span class="id" title="var">Tsh</span></span> <span class="inlinecode"><span class="id" title="var">tschar</span></span> <span class="inlinecode">(<span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">Int.repr</span></span> <span class="inlinecode">72))</span> <span class="inlinecode"><span class="id" title="var">p</span></span> is an <span class="inlinecode"><span class="id" title="var">mpred</span></span>, that is,
+ a memory predicate in separation logic.  It says, at address <span class="inlinecode"><span class="id" title="var">p</span></span> in memory
+ there is a sequence of bytes whose length is appropriate for type <span class="inlinecode"><span class="id" title="var">tschar</span></span>;
+ that is, one byte.  The contents of this sequence of bytes (one byte) is a
+ representation of the integer 72. The ownership share (access permission)
+ of memory at address <span class="inlinecode"><span class="id" title="var">p</span></span> is the "top share" <span class="inlinecode"><span class="id" title="var">Tsh</span></span> 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <span class="id" title="definition">tschar</span> (<span class="id" title="definition">Vbyte</span> (<span class="id" title="definition">Byte.repr</span> 72))).<br/>
+</div>
+
+<div class="doc">
+We can express the same thing using <span class="inlinecode"><span class="id" title="var">Vbyte</span></span> <span class="inlinecode">(<span class="id" title="var">Byte.repr</span></span> <span class="inlinecode">72)</span>. In fact,
+ <span class="inlinecode"><span class="id" title="var">Vbyte</span></span> is not a primitive CompCert value, it is a definition: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">Vbyte</span>. <span class="comment">(*&nbsp;=&nbsp;fun&nbsp;c&nbsp;:&nbsp;byte&nbsp;=&gt;&nbsp;Vint&nbsp;(Int.repr&nbsp;(Byte.signed&nbsp;c))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;byte&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;val&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Goal</span> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Vbyte</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">(</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Byte.repr</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">72)</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">=</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Vint</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">(</span></a><a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">Int.repr</span></a> <a id="Unnamed_thm" class="idref" href="#Unnamed_thm"><span class="id" title="definition">72)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Goal</span> <a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">Vbyte</span></a> <a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">(</span></a><a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">Byte.repr</span></a> <a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">72)</span></a> <a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">=</span></a> <a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">Vint</span></a> <a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">(</span></a><a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">Int.repr</span></a> <a id="Unnamed_thm0" class="idref" href="#Unnamed_thm0"><span class="id" title="definition">72)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="definition">Vbyte</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="lemma">Byte.signed_repr</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">rep_lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The C programming language represents a string of length <span class="inlinecode"><span class="id" title="var">k</span></span> as an array
+   of nonnull characters (bytes), terminated by a null character.  We represent
+   this in separation logic using the <span class="inlinecode"><span class="id" title="var">cstring</span></span> memory-predicate: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Locate</span> <span class="id" title="var">cstring</span>. <span class="comment">(*&nbsp;VST.floyd.entailer.cstring&nbsp;*)</span><br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">cstring</span>. <span class="comment">(*&nbsp;=<br/>
+&nbsp;&nbsp;fun&nbsp;{CS&nbsp;:&nbsp;compspecs}&nbsp;(sh&nbsp;:&nbsp;Share.t)&nbsp;(s&nbsp;:&nbsp;list&nbsp;byte)&nbsp;(p&nbsp;:&nbsp;val)&nbsp;=&gt;<br/>
+&nbsp;&nbsp;!!&nbsp;(~&nbsp;In&nbsp;Byte.zero&nbsp;s)&nbsp;&amp;&amp;<br/>
+&nbsp;&nbsp;data_at&nbsp;sh&nbsp;(tarray&nbsp;tschar&nbsp;(Zlength&nbsp;s&nbsp;+&nbsp;1))&nbsp;(map&nbsp;Vbyte&nbsp;(s++<span class="inlinecode"><span class="id" title="var">Byte.zero</span></span>))&nbsp;p&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Here is an example of a <span class="inlinecode"><span class="id" title="var">cstring</span></span> predicate that says, At address
+   <span class="inlinecode"><span class="id" title="var">p</span></span> there is a null-terminated string representing "Hello".  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="definition">cstring</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_strlib.html#Hello'"><span class="id" title="definition">Hello'</span></a> <a class="idref" href="Verif_strlib.html#StringDemo.p"><span class="id" title="variable">p</span></a>). <span class="comment">(*&nbsp;:&nbsp;mpred&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+By unfolding the definition of <span class="inlinecode"><span class="id" title="var">cstring</span></span> this is equivalent to, 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> (<br/>
+&nbsp;&nbsp;<span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">¬</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#In"><span class="id" title="definition">In</span></a> <span class="id" title="definition">Byte.zero</span> <a class="idref" href="Verif_strlib.html#Hello'"><span class="id" title="definition">Hello'</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">&amp;&amp;</span><br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> (5 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1)) (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<a class="idref" href="Verif_strlib.html#Hello'"><span class="id" title="definition">Hello'</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>)) <a class="idref" href="Verif_strlib.html#StringDemo.p"><span class="id" title="variable">p</span></a> ).<br/>
+</div>
+
+<div class="doc">
+This says, no element of the list <span class="inlinecode"><span class="id" title="var">Hello'</span></span> is equal to <span class="inlinecode"><span class="id" title="var">Byte.zero</span></span>.
+ In memory at address <span class="inlinecode"><span class="id" title="var">p</span></span> there is an array of 6 bytes, whose contents are
+ the contents of <span class="inlinecode"><span class="id" title="var">Hello'</span></span> with a <span class="inlinecode"><span class="id" title="var">Byte.zero</span></span> appended at the end.
+
+<div class="paragraph"> </div>
+
+ Sometimes we know that there is a null-terminated string inside an  array of
+ length <span class="inlinecode"><span class="id" title="var">n</span></span>.  That is, there are <span class="inlinecode"><span class="id" title="var">k</span></span> nonnull characters (where <span class="inlinecode"><span class="id" title="var">k</span>&lt;<span class="id" title="var">n</span></span>), 
+ followed by a null character, followed by <span class="inlinecode"><span class="id" title="var">n</span>-(<span class="id" title="var">k</span>+1)</span> uninitialized (or
+ don't-care) characters.  We represent this with the <span class="inlinecode"><span class="id" title="var">cstringn</span></span> predicate. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">cstringn</span>. <span class="comment">(*&nbsp;=<br/>
+&nbsp;fun&nbsp;{CS&nbsp;:&nbsp;compspecs}&nbsp;(sh&nbsp;:&nbsp;Share.t)&nbsp;(s&nbsp;:&nbsp;list&nbsp;byte)&nbsp;(n&nbsp;:&nbsp;Z)&nbsp;(p&nbsp;:&nbsp;val)&nbsp;=&gt;<br/>
+&nbsp;!!&nbsp;(~&nbsp;In&nbsp;Byte.zero&nbsp;s)&nbsp;&amp;&amp;<br/>
+&nbsp;data_at&nbsp;sh&nbsp;(tarray&nbsp;tschar&nbsp;n)<br/>
+&nbsp;&nbsp;(map&nbsp;Vbyte&nbsp;(s&nbsp;++&nbsp;<span class="inlinecode"><span class="id" title="var">Byte.zero</span></span>)&nbsp;++<br/>
+&nbsp;&nbsp;&nbsp;list_repeat&nbsp;(Z.to_nat&nbsp;(n&nbsp;-&nbsp;(Zlength&nbsp;s&nbsp;+&nbsp;1)))&nbsp;Vundef)&nbsp;p&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Check</span> (<span class="id" title="definition">cstringn</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_strlib.html#Hello'"><span class="id" title="definition">Hello'</span></a> 10 <a class="idref" href="Verif_strlib.html#StringDemo.p"><span class="id" title="variable">p</span></a>). <span class="comment">(*&nbsp;:&nbsp;mpred&nbsp;*)</span><br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">End</span> <a class="idref" href="Verif_strlib.html#StringDemo"><span class="id" title="section">StringDemo</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab105"></a><h1 class="section">Reasoning about the contents of C strings</h1>
+
+<div class="paragraph"> </div>
+
+ In separation logic proofs about C strings, we often find
+  proof goals similar to the one exemplified by this lemma: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="demonstrate_cstring1" class="idref" href="#demonstrate_cstring1"><span class="id" title="lemma">demonstrate_cstring1</span></a>: <br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="i:5" class="idref" href="#i:5"><span class="id" title="binder">i</span></a> <a id="contents:6" class="idref" href="#contents:6"><span class="id" title="binder">contents</span></a><br/>
+&nbsp;&nbsp;&nbsp;(<a id="H:7" class="idref" href="#H:7"><span class="id" title="binder">H</span></a>:  <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">¬</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#In"><span class="id" title="definition">In</span></a> <span class="id" title="definition">Byte.zero</span> <a class="idref" href="Verif_strlib.html#contents:6"><span class="id" title="variable">contents</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;(<a id="H<sub>0</sub>:8" class="idref" href="#H<sub>0</sub>:8"><span class="id" title="binder">H<sub>0</sub></span></a>: <span class="id" title="definition">Znth</span> <a class="idref" href="Verif_strlib.html#i:5"><span class="id" title="variable">i</span></a> (<a class="idref" href="Verif_strlib.html#contents:6"><span class="id" title="variable">contents</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <span class="id" title="definition">Byte.zero</span>)<br/>
+&nbsp;&nbsp;&nbsp;(<a id="H<sub>1</sub>:9" class="idref" href="#H<sub>1</sub>:9"><span class="id" title="binder">H<sub>1</sub></span></a>: 0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:5"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#contents:6"><span class="id" title="variable">contents</span></a>),<br/>
+&nbsp;&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:5"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> (<a class="idref" href="Verif_strlib.html#contents:6"><span class="id" title="variable">contents</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+   A null-terminated string is an array of characters with three parts:
+<ul class="doclist">
+<li> The contents of the string, none of which is the '\0' character;
+
+</li>
+<li> The null termination character, equal to Byte.zero;
+
+</li>
+<li> the remaining garbage in the array, after the null.
+
+</li>
+</ul>
+   When processing a string, you should maintain three kinds of 
+   assumptions above the line:
+<ul class="doclist">
+<li> Hypothesis <span class="inlinecode"><span class="id" title="var">H</span></span> above the line says that none of the
+
+</li>
+</ul>
+  contents is the null character;
+<ul class="doclist">
+<li> Hypothesis <span class="inlinecode"><span class="id" title="var">H<sub>0</sub></span></span> typically comes from a loop test, <span class="inlinecode"><span class="id" title="var">s</span>[<span class="id" title="var">i</span>]!=0</span>
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">H<sub>1</sub></span></span> typically comes from a loop invariant:  suppose a 
+
+</li>
+</ul>
+  a loop iteration variable <span class="inlinecode"><span class="id" title="var">_i</span></span> (with value <span class="inlinecode"><span class="id" title="var">i</span></span>)
+  is traversing the array.  We expect that loop to go up to but 
+  no farther than the null character, that is, one past the contents.
+
+<div class="paragraph"> </div>
+
+  The <span class="inlinecode"><span class="id" title="var">cstring</span></span> tactic processes all three of these hypotheses to conclude
+  that <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="tactic">assert</span> (<span class="id" title="var">H<sub>7</sub></span>: <span class="id" title="var">i</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <span class="id" title="var">contents</span>) <span class="id" title="tactic">by</span> <span class="id" title="var">cstring</span>.<br/>
+</div>
+
+<div class="doc">
+But actually, <span class="inlinecode"><span class="id" title="var">cstring</span></span> tactic will prove any rep_lia consequence
+   of that fact.  For example: 
+</div>
+<div class="code">
+<span class="id" title="tactic">clear</span> <span class="id" title="var">H<sub>7</sub></span>.<br/>
+<span class="id" title="tactic">autorewrite</span> <span class="id" title="keyword">with</span> <span class="id" title="var">sublist</span>.<br/>
+<span class="id" title="var">cstring</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Here is another demonstration.  When your loop on the string
+   contents reaches the end, the loop test <span class="inlinecode"><span class="id" title="var">s</span>[<span class="id" title="var">i</span>]!=0</span> is false, so
+   therefore <span class="inlinecode"><span class="id" title="var">s</span>[<span class="id" title="var">i</span>]=0</span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="demonstrate_cstring2" class="idref" href="#demonstrate_cstring2"><span class="id" title="lemma">demonstrate_cstring2</span></a>: <br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="i:10" class="idref" href="#i:10"><span class="id" title="binder">i</span></a> <a id="contents:11" class="idref" href="#contents:11"><span class="id" title="binder">contents</span></a><br/>
+&nbsp;&nbsp;&nbsp;(<a id="H:12" class="idref" href="#H:12"><span class="id" title="binder">H</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">¬</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#In"><span class="id" title="definition">In</span></a> <span class="id" title="definition">Byte.zero</span> <a class="idref" href="Verif_strlib.html#contents:11"><span class="id" title="variable">contents</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;(<a id="H<sub>0</sub>:13" class="idref" href="#H<sub>0</sub>:13"><span class="id" title="binder">H<sub>0</sub></span></a>: <span class="id" title="definition">Znth</span> <a class="idref" href="Verif_strlib.html#i:10"><span class="id" title="variable">i</span></a> (<a class="idref" href="Verif_strlib.html#contents:11"><span class="id" title="variable">contents</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="definition">Byte.zero</span>)<br/>
+&nbsp;&nbsp;&nbsp;(<a id="H<sub>1</sub>:14" class="idref" href="#H<sub>1</sub>:14"><span class="id" title="binder">H<sub>1</sub></span></a>: 0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:10"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#6f909ea2391c6073ff1047e870dd64e<sub>2</sub>"><span class="id" title="notation">≤</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#contents:11"><span class="id" title="variable">contents</span></a>),<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_strlib.html#i:10"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#contents:11"><span class="id" title="variable">contents</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+Hypothesis <span class="inlinecode"><span class="id" title="var">H<sub>0</sub></span></span> expresses that the loop test determined <span class="inlinecode"><span class="id" title="var">s</span>[<span class="id" title="var">i</span>]=0</span>.
+   The <span class="inlinecode"><span class="id" title="var">cstring</span></span> can then prove that <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">Zlength</span></span> <span class="inlinecode"><span class="id" title="var">contents</span></span>.  
+</div>
+<div class="code">
+<span class="id" title="var">cstring</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab106"></a><h1 class="section">Function specs</h1>
+
+<div class="paragraph"> </div>
+
+ <span class="inlinecode"><span class="id" title="var">strlen</span>(<span class="id" title="var">s</span>)</span> returns the length of the string <span class="inlinecode"><span class="id" title="var">s</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a id="strlen_spec" class="idref" href="#strlen_spec"><span class="id" title="definition">strlen_spec</span></a> :=<br/>
+&nbsp;<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_strlen</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">WITH</span> <a id="sh:18" class="idref" href="#sh:18"><span class="id" title="binder">sh</span></a><span class="id" title="notation">:</span> <span class="id" title="definition">share</span><span class="id" title="notation">,</span> <a id="s:19" class="idref" href="#s:19"><span class="id" title="binder">s</span></a> <span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span><span class="id" title="notation">,</span> <a id="str:20" class="idref" href="#str:20"><span class="id" title="binder">str</span></a><span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PRE</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <span class="id" title="definition">tschar</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span><span class="id" title="definition">readable_share</span> <a class="idref" href="Verif_strlib.html#sh:15"><span class="id" title="variable">sh</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PARAMS</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_strlib.html#str:17"><span class="id" title="variable">str</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#sh:15"><span class="id" title="variable">sh</span></a> <a class="idref" href="Verif_strlib.html#s:16"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_strlib.html#str:17"><span class="id" title="variable">str</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tuint</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">()</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">RETURN</span> <span class="id" title="notation">(</span><span class="id" title="definition">Vptrofs</span> (<span class="id" title="definition">Ptrofs.repr</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:19"><span class="id" title="variable">s</span></a>))<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#sh:18"><span class="id" title="variable">sh</span></a> <a class="idref" href="Verif_strlib.html#s:19"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_strlib.html#str:20"><span class="id" title="variable">str</span></a><span class="id" title="notation">)</span>.<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" title="var">strcpy</span>(<span class="id" title="var">dest</span>,<span class="id" title="var">src</span>)</span> copies the string <span class="inlinecode"><span class="id" title="var">src</span></span> to the array <span class="inlinecode"><span class="id" title="var">dest</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a id="strcpy_spec" class="idref" href="#strcpy_spec"><span class="id" title="definition">strcpy_spec</span></a> :=<br/>
+&nbsp;<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_strcpy</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">WITH</span> <a id="wsh:27" class="idref" href="#wsh:27"><span class="id" title="binder">wsh</span></a><span class="id" title="notation">:</span> <span class="id" title="definition">share</span><span class="id" title="notation">,</span> <a id="rsh:28" class="idref" href="#rsh:28"><span class="id" title="binder">rsh</span></a><span class="id" title="notation">:</span> <span class="id" title="definition">share</span><span class="id" title="notation">,</span> <a id="dest:29" class="idref" href="#dest:29"><span class="id" title="binder">dest</span></a> <span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="n:30" class="idref" href="#n:30"><span class="id" title="binder">n</span></a> <span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a><span class="id" title="notation">,</span> <a id="src:31" class="idref" href="#src:31"><span class="id" title="binder">src</span></a> <span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="s:32" class="idref" href="#s:32"><span class="id" title="binder">s</span></a> <span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PRE</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <span class="id" title="definition">tschar</span><span class="id" title="notation">,</span> <span class="id" title="definition">tptr</span> <span class="id" title="definition">tschar</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span><span class="id" title="definition">writable_share</span> <a class="idref" href="Verif_strlib.html#wsh:21"><span class="id" title="variable">wsh</span></a><span class="id" title="notation">;</span> <span class="id" title="definition">readable_share</span> <a class="idref" href="Verif_strlib.html#rsh:22"><span class="id" title="variable">rsh</span></a><span class="id" title="notation">;</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:26"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Verif_strlib.html#n:24"><span class="id" title="variable">n</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PARAMS</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_strlib.html#dest:23"><span class="id" title="variable">dest</span></a><span class="id" title="notation">;</span> <a class="idref" href="Verif_strlib.html#src:25"><span class="id" title="variable">src</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">data_at_</span> <a class="idref" href="Verif_strlib.html#wsh:21"><span class="id" title="variable">wsh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:24"><span class="id" title="variable">n</span></a>) <a class="idref" href="Verif_strlib.html#dest:23"><span class="id" title="variable">dest</span></a><span class="id" title="notation">;</span> <span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#rsh:22"><span class="id" title="variable">rsh</span></a> <a class="idref" href="Verif_strlib.html#s:26"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_strlib.html#src:25"><span class="id" title="variable">src</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <span class="id" title="definition">tschar</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">()</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">RETURN</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_strlib.html#dest:29"><span class="id" title="variable">dest</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">cstringn</span> <a class="idref" href="Verif_strlib.html#wsh:27"><span class="id" title="variable">wsh</span></a> <a class="idref" href="Verif_strlib.html#s:32"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_strlib.html#n:30"><span class="id" title="variable">n</span></a> <a class="idref" href="Verif_strlib.html#dest:29"><span class="id" title="variable">dest</span></a><span class="id" title="notation">;</span> <span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#rsh:28"><span class="id" title="variable">rsh</span></a> <a class="idref" href="Verif_strlib.html#s:32"><span class="id" title="variable">s</span></a> <a class="idref" href="Verif_strlib.html#src:31"><span class="id" title="variable">src</span></a><span class="id" title="notation">)</span>.<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" title="var">strcmp</span>(<span class="id" title="var">s<sub>1</sub></span>,<span class="id" title="var">s<sub>2</sub></span>)</span> compares strings s<sub>1</sub> and s<sub>2</sub> for lexicographic
+  order.  This funspec is an underspecification of the actual
+  behavior, in that it specifies equality testing only. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a id="strcmp_spec" class="idref" href="#strcmp_spec"><span class="id" title="definition">strcmp_spec</span></a> :=<br/>
+&nbsp;<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_strcmp</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">WITH</span> <a id="sh<sub>1</sub>:39" class="idref" href="#sh<sub>1</sub>:39"><span class="id" title="binder">sh<sub>1</sub></span></a><span class="id" title="notation">:</span> <span class="id" title="definition">share</span><span class="id" title="notation">,</span> <a id="sh<sub>2</sub>:40" class="idref" href="#sh<sub>2</sub>:40"><span class="id" title="binder">sh<sub>2</sub></span></a><span class="id" title="notation">:</span> <span class="id" title="definition">share</span><span class="id" title="notation">,</span> <a id="str1:41" class="idref" href="#str1:41"><span class="id" title="binder">str1</span></a> <span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="s<sub>1</sub>:42" class="idref" href="#s<sub>1</sub>:42"><span class="id" title="binder">s<sub>1</sub></span></a> <span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span><span class="id" title="notation">,</span> <a id="str2:43" class="idref" href="#str2:43"><span class="id" title="binder">str2</span></a> <span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="s<sub>2</sub>:44" class="idref" href="#s<sub>2</sub>:44"><span class="id" title="binder">s<sub>2</sub></span></a> <span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PRE</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <span class="id" title="definition">tschar</span><span class="id" title="notation">,</span> <span class="id" title="definition">tptr</span> <span class="id" title="definition">tschar</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span><span class="id" title="definition">readable_share</span> <a class="idref" href="Verif_strlib.html#sh<sub>1</sub>:33"><span class="id" title="variable">sh<sub>1</sub></span></a><span class="id" title="notation">;</span> <span class="id" title="definition">readable_share</span> <a class="idref" href="Verif_strlib.html#sh<sub>2</sub>:34"><span class="id" title="variable">sh<sub>2</sub></span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PARAMS</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_strlib.html#str1:35"><span class="id" title="variable">str1</span></a><span class="id" title="notation">;</span> <a class="idref" href="Verif_strlib.html#str2:37"><span class="id" title="variable">str2</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#sh<sub>1</sub>:33"><span class="id" title="variable">sh<sub>1</sub></span></a> <a class="idref" href="Verif_strlib.html#s<sub>1</sub>:36"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_strlib.html#str1:35"><span class="id" title="variable">str1</span></a><span class="id" title="notation">;</span> <span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#sh<sub>2</sub>:34"><span class="id" title="variable">sh<sub>2</sub></span></a> <a class="idref" href="Verif_strlib.html#s<sub>2</sub>:38"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_strlib.html#str2:37"><span class="id" title="variable">str2</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tint</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="i:45" class="idref" href="#i:45"><span class="id" title="binder">i</span></a> : <span class="id" title="abbreviation">int</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span><span class="id" title="keyword">if</span> <span class="id" title="lemma">Int.eq_dec</span> <a class="idref" href="Verif_strlib.html#i:45"><span class="id" title="variable">i</span></a> <span class="id" title="definition">Int.zero</span> <span class="id" title="keyword">then</span> <a class="idref" href="Verif_strlib.html#s<sub>1</sub>:42"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="Verif_strlib.html#s<sub>2</sub>:44"><span class="id" title="variable">s<sub>2</sub></span></a> <span class="id" title="keyword">else</span> <a class="idref" href="Verif_strlib.html#s<sub>1</sub>:42"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="Verif_strlib.html#s<sub>2</sub>:44"><span class="id" title="variable">s<sub>2</sub></span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">RETURN</span> <span class="id" title="notation">(</span><span class="id" title="constructor">Vint</span> <a class="idref" href="Verif_strlib.html#i:45"><span class="id" title="variable">i</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#sh<sub>1</sub>:39"><span class="id" title="variable">sh<sub>1</sub></span></a> <a class="idref" href="Verif_strlib.html#s<sub>1</sub>:42"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_strlib.html#str1:41"><span class="id" title="variable">str1</span></a><span class="id" title="notation">;</span> <span class="id" title="definition">cstring</span> <a class="idref" href="Verif_strlib.html#sh<sub>2</sub>:40"><span class="id" title="variable">sh<sub>2</sub></span></a> <a class="idref" href="Verif_strlib.html#s<sub>2</sub>:44"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_strlib.html#str2:43"><span class="id" title="variable">str2</span></a><span class="id" title="notation">)</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="Gprog" class="idref" href="#Gprog"><span class="id" title="definition">Gprog</span></a> : <span class="id" title="definition">funspecs</span> := <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a> <a class="idref" href="Verif_strlib.html#strlen_spec"><span class="id" title="definition">strlen_spec</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="Verif_strlib.html#strcpy_spec"><span class="id" title="definition">strcpy_spec</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="Verif_strlib.html#strcmp_spec"><span class="id" title="definition">strcmp_spec</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab107"></a><h1 class="section">Proof of the <span class="inlinecode"><span class="id" title="var">strlen</span></span> function</h1>
+
+<div class="paragraph"> </div>
+
+<a id="lab108"></a><h4 class="section">Exercise: 2 stars, standard (body_strlen)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="body_strlen" class="idref" href="#body_strlen"><span class="id" title="lemma">body_strlen</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_strlib.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_strlib.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_strlen</span> <a class="idref" href="Verif_strlib.html#strlen_spec"><span class="id" title="definition">strlen_spec</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="var">start_function</span>.<br/>
+</div>
+
+<div class="doc">
+Look at the proof goal below the line.  We have the assertion,
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;<span class="id" title="var">PROP</span> ( )  <span class="id" title="var">LOCAL</span> (<span class="id" title="var">temp</span> <span class="id" title="var">_str</span> <span class="id" title="var">str</span>)  <span class="id" title="var">SEP</span> (<span class="id" title="var">cstring</span> <span class="id" title="var">sh</span> <span class="id" title="var">s</span> <span class="id" title="var">str</span>))
+<div class="paragraph"> </div>
+
+</span> When proving things about a string-manipulating function, the
+  first decision is:  Does this function treat the string <i>abstractly</i>
+  or does it subscript the array and look at the individual characters?
+<ul class="doclist">
+<li> If abstract, then we should <i>not</i> unfold the definition <span class="inlinecode"><span class="id" title="var">cstring</span></span>.
+
+</li>
+<li> If we subscript the array directly, we <i>must</i> unfold <span class="inlinecode"><span class="id" title="var">cstring</span></span>.
+
+</li>
+</ul>
+  Since this <span class="inlinecode"><span class="id" title="var">strlen</span></span> function does access the array contents, we
+  start by unfolding <span class="inlinecode"><span class="id" title="var">cstring</span></span>.
+</div>
+<div class="code">
+<span class="id" title="tactic">unfold</span> <span class="id" title="definition">cstring</span> <span class="id" title="tactic">in</span> ×.<br/>
+</div>
+
+<div class="doc">
+Now, we have a <span class="inlinecode"><span class="id" title="keyword">Prop</span></span>osition  <span class="inlinecode">¬</span> <span class="inlinecode"><span class="id" title="var">In</span></span> <span class="inlinecode"><span class="id" title="var">Byte.zero</span></span> <span class="inlinecode"><span class="id" title="var">s</span></span> in the <span class="inlinecode"><span class="id" title="var">SEP</span></span>
+    clause of our assertion; we can move it above the line by <span class="inlinecode"><span class="id" title="var">Intros</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="var">Intros</span>.<br/>
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;i=0;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Now we are at a for-loop.  Unlike a simple while-loop, a for-loop may:
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" title="var">break</span>;</span> (prematurely terminate the loop)
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">continue</span>;</span> (prematurely terminate the body, skipping to the increment)
+
+</li>
+</ul>
+ So therefore the simple Hoare-logic <i>while</i> rule is not always applicable.
+ The general form of Verifiable C's loop tactic is:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;<span class="id" title="var">forward_loop</span> <span class="id" title="var">Inv1</span>  <span class="id" title="var">continue</span>: <span class="id" title="var">Inv2</span> <span class="id" title="var">break</span>: <span class="id" title="var">Inv3</span>
+<div class="paragraph"> </div>
+
+</span> where <span class="inlinecode"><span class="id" title="var">Inv1</span></span> is the invariant that holds right before the loop test,
+ <span class="inlinecode"><span class="id" title="var">Inv2</span></span> is the invariant that holds right before the increment, and
+ <span class="inlinecode"><span class="id" title="var">Inv3</span></span> is the postcondition of the loop.
+
+<div class="paragraph"> </div>
+
+ Providing  <span class="inlinecode"><span class="id" title="var">continue</span>:</span> <span class="inlinecode"><span class="id" title="var">Inv2</span></span> is optional, as is <span class="inlinecode"><span class="id" title="var">break</span>:</span> <span class="inlinecode"><span class="id" title="var">Inv3</span></span>.
+ In many cases the <span class="inlinecode"><span class="id" title="var">forward_loop</span></span> tactic can figure out that the <span class="inlinecode"><span class="id" title="var">continue</span>:</span>
+ invariant is not needed (if the loop doesn't contain a <span class="inlinecode"><span class="id" title="var">continue</span></span> statement),
+ or the <span class="inlinecode"><span class="id" title="var">break</span>:</span> postcondition is not needed (if there's no <span class="inlinecode"><span class="id" title="var">break</span></span> 
+ statement, or if there are no commands after the loop).
+
+<div class="paragraph"> </div>
+
+  So let's try this loop with only a single loop invariant: 
+</div>
+<div class="code">
+<span class="id" title="var">forward_loop</span>  (<span class="id" title="notation">EX</span> <a id="i:47" class="idref" href="#i:47"><span class="id" title="binder">i</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span>0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:46"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <span class="id" title="var">s</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">LOCAL</span> <span class="id" title="notation">(</span><span class="id" title="constructor">temp</span> <span class="id" title="definition">_str</span> <span class="id" title="var">str</span><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_i</span> (<span class="id" title="definition">Vptrofs</span> (<span class="id" title="definition">Ptrofs.repr</span> <a class="idref" href="Verif_strlib.html#i:46"><span class="id" title="variable">i</span></a>))<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">data_at</span> <span class="id" title="var">sh</span> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <span class="id" title="var">s</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<span class="id" title="var">s</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>)) <span class="id" title="var">str</span><span class="id" title="notation">)</span>).<br/>
+</div>
+
+<div class="doc">
+Look at the <span class="inlinecode"><span class="id" title="var">LOCAL</span></span> clause that binds <span class="inlinecode"><span class="id" title="var">temp</span></span> <span class="inlinecode"><span class="id" title="var">_i</span></span> to the value
+   <span class="inlinecode"><span class="id" title="var">Vptrofs</span></span> <span class="inlinecode">(<span class="id" title="var">Ptrofs.repr</span></span> <span class="inlinecode"><span class="id" title="var">i</span>)</span>.  What is that?  The answer is,
+   in reasoning about C programs, we need:
+<ul class="doclist">
+<li> 8-bit integers, <span class="inlinecode"><span class="id" title="var">Byte.int</span></span> or simply <span class="inlinecode"><span class="id" title="var">byte</span></span>
+
+</li>
+<li> 32-bit integers, <span class="inlinecode"><span class="id" title="var">Int.int</span></span> or simply <span class="inlinecode"><span class="id" title="var">int</span></span>
+
+</li>
+<li> 64-bit integers, <span class="inlinecode"><span class="id" title="var">Int64.int</span></span>
+
+</li>
+</ul>
+  But there is also the concept expressed in C as <span class="inlinecode"><span class="id" title="var">size_t</span></span>, that is,
+  <i>The integer type with the same number of bits as a pointer</i>.
+  In this might be the same as 32-bit int, or it might be the same
+  as 64-bit int.
+
+<div class="paragraph"> </div>
+
+  So, just as CompCert has the <span class="inlinecode"><span class="id" title="var">Int</span></span> module for reasoning about 32-bit
+  integers and the Int64 module for 64-bit integers, it has also
+  the <span class="inlinecode"><span class="id" title="var">Ptrofs</span></span> module for reasoning about <i>pointer offsets</i>.  <span class="inlinecode"><span class="id" title="var">Ptrofs</span></span>
+  is isomorphic to (but not identical to) either <span class="inlinecode"><span class="id" title="var">Int64</span></span> or <span class="inlinecode"><span class="id" title="var">Int</span></span>,
+  depending on the boolean value <span class="inlinecode"><span class="id" title="var">Archi.ptr64</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Compute</span> <span class="id" title="definition">Archi.ptr64</span>. <span class="comment">(*&nbsp;=&nbsp;false&nbsp;:&nbsp;bool&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+If this computes <span class="inlinecode"><span class="id" title="var">false</span></span>, then this installation of Verifiable C is
+ configured for 32-bit pointers; if <span class="inlinecode"><span class="id" title="var">true</span></span>, then this Verifiable C is
+ configured for 64-bit.  But either way, to turn a <span class="inlinecode"><span class="id" title="var">Ptrofs.int</span></span> value into a
+ CompCert <span class="inlinecode"><span class="id" title="var">val</span></span>, we have <span class="inlinecode"><span class="id" title="var">Vptrofs</span></span>. And -- just as we can write C programs
+ that are portable to 32-bit or 64-bit pointers using <span class="inlinecode"><span class="id" title="var">size_t</span></span>, we can write
+ proofs scripts portable by using <span class="inlinecode"><span class="id" title="var">Ptrofs</span></span>.  
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">Vptrofs</span>. <span class="comment">(*&nbsp;=&nbsp;<br/>
+&nbsp;fun&nbsp;n&nbsp;:&nbsp;ptrofs&nbsp;=&gt;<br/>
+&nbsp;&nbsp;&nbsp;if&nbsp;Archi.ptr64&nbsp;then&nbsp;Vlong&nbsp;(Ptrofs.to_int64&nbsp;n)&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;Vint&nbsp;(Ptrofs.to_int&nbsp;n)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;ptrofs&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;val&nbsp;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+And therefore, <span class="inlinecode"><span class="id" title="var">_i</span></span> is a C variable of type <span class="inlinecode"><span class="id" title="var">size_t</span></span>, 
+  <span class="inlinecode"><span class="id" title="var">i</span></span> is a Coq variable of type <span class="inlinecode"><span class="id" title="var">Z</span></span>, and and <span class="inlinecode"><span class="id" title="var">Vptrofs</span></span> <span class="inlinecode">(<span class="id" title="var">Ptrofs.repr</span></span> <span class="inlinecode"><span class="id" title="var">i</span>)</span>
+  is a CompCert <span class="inlinecode"><span class="id" title="var">val</span></span> that <i>represents</i> <span class="inlinecode"><span class="id" title="var">i</span></span> as a <span class="inlinecode"><span class="id" title="var">val</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="tactic">assert</span> (<span class="id" title="keyword">Example</span>: <span class="id" title="definition">Archi.ptr64</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="n:49" class="idref" href="#n:49"><span class="id" title="binder">n</span></a>, <span class="id" title="definition">Vptrofs</span> (<span class="id" title="definition">Ptrofs.repr</span> <a class="idref" href="Verif_strlib.html#n:48"><span class="id" title="variable">n</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> <a class="idref" href="Verif_strlib.html#n:48"><span class="id" title="variable">n</span></a>)). {<br/>
+&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">Hx</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span> <span class="id" title="var">Hx</span>. <span class="comment">(*&nbsp;in&nbsp;case&nbsp;Archi.ptr64&nbsp;=&nbsp;true&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;In&nbsp;a&nbsp;32-bit&nbsp;C&nbsp;system:&nbsp;*)</span><br/>
+<span class="id" title="var">all</span>:  <span class="id" title="tactic">intros</span>.<br/>
+<span class="id" title="var">all</span>:  <span class="id" title="var">hint</span>.<br/>
+<span class="id" title="var">all</span>:  <span class="id" title="tactic">autorewrite</span> <span class="id" title="keyword">with</span> <span class="id" title="var">norm</span>.<br/>
+<span class="id" title="var">all</span>:  <span class="id" title="tactic">auto</span>.<br/>
+} <span class="id" title="tactic">clear</span> <span class="id" title="keyword">Example</span>.<br/>
+</div>
+
+<div class="doc">
+Now it's time to prove all the subgoals of <span class="inlinecode"><span class="id" title="var">forward_loop</span></span>. 
+</div>
+<div class="code">
+× <span class="comment">(*&nbsp;Prove&nbsp;the&nbsp;precondition&nbsp;entails&nbsp;the&nbsp;loop&nbsp;invariant&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
+× <span class="comment">(*&nbsp;Prove&nbsp;the&nbsp;loop&nbsp;body&nbsp;preserves&nbsp;the&nbsp;invariant&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab109"></a><h1 class="section">Proof of the <span class="inlinecode"><span class="id" title="var">strcpy</span></span> function</h1>
+
+<div class="paragraph"> </div>
+
+<a id="lab110"></a><h4 class="section">Exercise: 2 stars, standard (strcpy_then_clause)</h4>
+ The next lemma, or some variation of it, will be useful in the proof of
+ the <span class="inlinecode"><span class="id" title="var">strcpy</span></span> function (in the <i>then</i> clause of the <i>if</i> statement). 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="strcpy_then_clause" class="idref" href="#strcpy_then_clause"><span class="id" title="lemma">strcpy_then_clause</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> (<a id="wsh:50" class="idref" href="#wsh:50"><span class="id" title="binder">wsh</span></a>: <span class="id" title="definition">share</span>) (<a id="dest:51" class="idref" href="#dest:51"><span class="id" title="binder">dest</span></a>: <span class="id" title="inductive">val</span>) (<a id="n:52" class="idref" href="#n:52"><span class="id" title="binder">n</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) (<a id="s:53" class="idref" href="#s:53"><span class="id" title="binder">s</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="abbreviation">byte</span>),<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Verif_strlib.html#n:52"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">¬</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#In"><span class="id" title="definition">In</span></a> <span class="id" title="definition">Byte.zero</span> <a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#wsh:50"><span class="id" title="variable">wsh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:52"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<span class="id" title="definition">sublist</span> 0 (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a>) <a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">upd_Znth</span> 0 (<span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:52"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a>)) <span class="id" title="constructor">Vundef</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> (<span class="id" title="definition">Byte.signed</span> (<span class="id" title="definition">Znth</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a>) (<a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>))))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_strlib.html#dest:51"><span class="id" title="variable">dest</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#wsh:50"><span class="id" title="variable">wsh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:52"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:52"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:53"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">)</span></a>)) <span class="id" title="constructor">Vundef</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_strlib.html#dest:51"><span class="id" title="variable">dest</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+<span class="id" title="tactic">apply</span> <span class="id" title="lemma">derives_refl'</span>.<br/>
+<span class="id" title="tactic">f_equal</span>.<br/>
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">list_repeat_app'</span>. <span class="comment">(*&nbsp;Hint:&nbsp;this&nbsp;lemma&nbsp;will&nbsp;be&nbsp;useful.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">upd_Znth_app1</span>. <span class="comment">(*&nbsp;Hint:&nbsp;this&nbsp;lemma&nbsp;will&nbsp;be&nbsp;useful.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">app_Znth2</span>. <span class="comment">(*&nbsp;Hint:&nbsp;this&nbsp;lemma&nbsp;will&nbsp;be&nbsp;useful.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">Znth_0_cons</span>. <span class="comment">(*&nbsp;Hint:&nbsp;this&nbsp;lemma&nbsp;will&nbsp;be&nbsp;useful.&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Other&nbsp;useful&nbsp;lemmas&nbsp;will&nbsp;be&nbsp;map_app,&nbsp;app_ass&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab111"></a><h4 class="section">Exercise: 2 stars, standard (strcpy_else_clause)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="strcpy_else_clause" class="idref" href="#strcpy_else_clause"><span class="id" title="lemma">strcpy_else_clause</span></a>: <span class="id" title="keyword">∀</span> <a id="wsh:54" class="idref" href="#wsh:54"><span class="id" title="binder">wsh</span></a> <a id="dest:55" class="idref" href="#dest:55"><span class="id" title="binder">dest</span></a> <a id="n:56" class="idref" href="#n:56"><span class="id" title="binder">n</span></a> <a id="s:57" class="idref" href="#s:57"><span class="id" title="binder">s</span></a> <a id="i:58" class="idref" href="#i:58"><span class="id" title="binder">i</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:57"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Verif_strlib.html#n:56"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">¬</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#In"><span class="id" title="definition">In</span></a> <span class="id" title="definition">Byte.zero</span> <a class="idref" href="Verif_strlib.html#s:57"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <a class="idref" href="Verif_strlib.html#s:57"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1 <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">Znth</span> <a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a> (<a class="idref" href="Verif_strlib.html#s:57"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <span class="id" title="definition">Byte.zero</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#wsh:54"><span class="id" title="variable">wsh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:56"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">upd_Znth</span> <a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<span class="id" title="definition">sublist</span> 0 <a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a> <a class="idref" href="Verif_strlib.html#s:57"><span class="id" title="variable">s</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:56"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a> <a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a>)) <span class="id" title="constructor">Vundef</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> (<span class="id" title="definition">Byte.signed</span> (<span class="id" title="definition">Znth</span> <a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a> (<a class="idref" href="Verif_strlib.html#s:57"><span class="id" title="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>)))))) <a class="idref" href="Verif_strlib.html#dest:55"><span class="id" title="variable">dest</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#wsh:54"><span class="id" title="variable">wsh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:56"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<span class="id" title="definition">sublist</span> 0 (<a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1) <a class="idref" href="Verif_strlib.html#s:57"><span class="id" title="variable">s</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:56"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_strlib.html#i:58"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">)</span></a>)) <span class="id" title="constructor">Vundef</span>) <a class="idref" href="Verif_strlib.html#dest:55"><span class="id" title="variable">dest</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+<span class="id" title="tactic">apply</span> <span class="id" title="lemma">derives_refl'</span>.<br/>
+<span class="id" title="tactic">f_equal</span>.<br/>
+</div>
+
+<div class="doc">
+Useful lemmas here will be: upd_Znth_app2, sublist_split,
+list_repeat_app', app_Znth1, map_app, app_ass, sublist_len_1. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab112"></a><h2 class="section">data_at is not injective!</h2>
+ The <span class="inlinecode"><span class="id" title="var">Vundef</span></span> value means <i>uninitialized</i> or <i>undefined</i> or
+   <i>defined but don't care</i>.  Consider this lemma: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="data_at_Vundef_example" class="idref" href="#data_at_Vundef_example"><span class="id" title="lemma">data_at_Vundef_example</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="i:59" class="idref" href="#i:59"><span class="id" title="binder">i</span></a> <a id="n:60" class="idref" href="#n:60"><span class="id" title="binder">n</span></a> <a id="sh:61" class="idref" href="#sh:61"><span class="id" title="binder">sh</span></a> <a id="p:62" class="idref" href="#p:62"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:59"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Verif_strlib.html#n:60"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:61"><span class="id" title="variable">sh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:60"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#i:59"><span class="id" title="variable">i</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1)) (<span class="id" title="definition">Vbyte</span> <span class="id" title="definition">Byte.zero</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:60"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-(</span></a><a class="idref" href="Verif_strlib.html#i:59"><span class="id" title="variable">i</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">)</span></a>)) <span class="id" title="constructor">Vundef</span>) <a class="idref" href="Verif_strlib.html#p:62"><span class="id" title="variable">p</span></a><br/>
+&nbsp;<span class="id" title="notation"><span class="nowrap">&vert;--</span></span>           <br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:61"><span class="id" title="variable">sh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:60"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> <a class="idref" href="Verif_strlib.html#i:59"><span class="id" title="variable">i</span></a>) (<span class="id" title="definition">Vbyte</span> <span class="id" title="definition">Byte.zero</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:60"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a><a class="idref" href="Verif_strlib.html#i:59"><span class="id" title="variable">i</span></a>)) <span class="id" title="constructor">Vundef</span>) <a class="idref" href="Verif_strlib.html#p:62"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+The proof goal means: If cells <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">j</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">i</span>+1</span> are zero and cells
+   <span class="inlinecode"><span class="id" title="var">i</span>+1</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">j</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">n</span></span> are don't care, that implies the weaker statement that
+   cells <span class="inlinecode">0</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">j</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">i</span></span> are zero and cells <span class="inlinecode"><span class="id" title="var">i</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" title="var">j</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" title="var">n</span></span> are don't-care.
+
+<div class="paragraph"> </div>
+
+   Now, let's try to prove it using the same technique as in
+   <span class="inlinecode"><span class="id" title="var">strcpy_then_clause</span></span>: 
+</div>
+<div class="code">
+<span class="id" title="tactic">apply</span> <span class="id" title="lemma">derives_refl'</span>.<br/>
+<span class="id" title="tactic">f_equal</span>.<br/>
+<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="lemma">list_repeat_app'</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="tactic">replace</span> (<span class="id" title="var">n</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a><span class="id" title="var">i</span>) <span class="id" title="keyword">with</span> (1 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">(</span></a><span class="id" title="var">n</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-(</span></a><span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">)</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">)</span></a>) <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="lemma">list_repeat_app'</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="tactic">rewrite</span> !<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#app_ass"><span class="id" title="abbreviation">app_ass</span></a>.<br/>
+<span class="id" title="tactic">f_equal</span>.<br/>
+<span class="id" title="tactic">f_equal</span>.<br/>
+</div>
+
+<div class="doc">
+Oops!  The current proof goal is False!  The problem was
+that we should not have applied <span class="inlinecode"><span class="id" title="var">derives_refl'</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Abort</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="data_at_Vundef_example" class="idref" href="#data_at_Vundef_example"><span class="id" title="lemma">data_at_Vundef_example</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="i:63" class="idref" href="#i:63"><span class="id" title="binder">i</span></a> <a id="n:64" class="idref" href="#n:64"><span class="id" title="binder">n</span></a> <a id="sh:65" class="idref" href="#sh:65"><span class="id" title="binder">sh</span></a> <a id="p:66" class="idref" href="#p:66"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:63"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="Verif_strlib.html#n:64"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:65"><span class="id" title="variable">sh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:64"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#i:63"><span class="id" title="variable">i</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1)) (<span class="id" title="definition">Vbyte</span> <span class="id" title="definition">Byte.zero</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:64"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-(</span></a><a class="idref" href="Verif_strlib.html#i:63"><span class="id" title="variable">i</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">)</span></a>)) <span class="id" title="constructor">Vundef</span>) <a class="idref" href="Verif_strlib.html#p:66"><span class="id" title="variable">p</span></a><br/>
+&nbsp;<span class="id" title="notation"><span class="nowrap">&vert;--</span></span>           <br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:65"><span class="id" title="variable">sh</span></a> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <a class="idref" href="Verif_strlib.html#n:64"><span class="id" title="variable">n</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> <a class="idref" href="Verif_strlib.html#i:63"><span class="id" title="variable">i</span></a>) (<span class="id" title="definition">Vbyte</span> <span class="id" title="definition">Byte.zero</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<a class="idref" href="Verif_strlib.html#n:64"><span class="id" title="variable">n</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a><a class="idref" href="Verif_strlib.html#i:63"><span class="id" title="variable">i</span></a>)) <span class="id" title="constructor">Vundef</span>) <a class="idref" href="Verif_strlib.html#p:66"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="lemma">list_repeat_app'</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="tactic">replace</span> (<span class="id" title="var">n</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a><span class="id" title="var">i</span>) <span class="id" title="keyword">with</span> (1 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">(</span></a><span class="id" title="var">n</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-(</span></a><span class="id" title="var">i</span><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a>1<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">)</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">)</span></a>) <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="lemma">list_repeat_app'</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="tactic">rewrite</span> !<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#app_ass"><span class="id" title="abbreviation">app_ass</span></a>.<br/>
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">split2_data_at_Tarray_app</span>.<br/>
+<span class="comment">(*&nbsp;&nbsp;forall&nbsp;(cs&nbsp;:&nbsp;compspecs)&nbsp;(mid&nbsp;n&nbsp;:&nbsp;Z)&nbsp;(sh&nbsp;:&nbsp;Share.t)&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(t&nbsp;:&nbsp;type)&nbsp;(v<sub>1</sub>&nbsp;v<sub>2</sub>&nbsp;:&nbsp;list&nbsp;(reptype&nbsp;t))&nbsp;(p&nbsp;:&nbsp;val),<br/>
+&nbsp;&nbsp;Zlength&nbsp;v<sub>1</sub>&nbsp;=&nbsp;mid&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span><br/>
+&nbsp;&nbsp;Zlength&nbsp;v<sub>2</sub>&nbsp;=&nbsp;n&nbsp;-&nbsp;mid&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span><br/>
+&nbsp;&nbsp;data_at&nbsp;sh&nbsp;(tarray&nbsp;t&nbsp;n)&nbsp;(v<sub>1</sub>&nbsp;++&nbsp;v<sub>2</sub>)&nbsp;p&nbsp;=<br/>
+&nbsp;&nbsp;data_at&nbsp;sh&nbsp;(tarray&nbsp;t&nbsp;mid)&nbsp;v<sub>1</sub>&nbsp;p&nbsp;*<br/>
+&nbsp;&nbsp;data_at&nbsp;sh&nbsp;(tarray&nbsp;t&nbsp;(n&nbsp;-&nbsp;mid))&nbsp;v<sub>2</sub><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(field_address0&nbsp;(tarray&nbsp;t&nbsp;n)&nbsp;<span class="inlinecode"><span class="id" title="var">ArraySubsc</span></span> <span class="inlinecode"><span class="id" title="var">mid</span></span>&nbsp;p)<br/>
+*)</span><br/>
+<span class="id" title="tactic">rewrite</span> (<span class="id" title="lemma">split2_data_at_Tarray_app</span> <span class="id" title="var">i</span>) <span class="id" title="tactic">by</span> <span class="id" title="var">list_solve</span>.<br/>
+<span class="id" title="tactic">rewrite</span> (<span class="id" title="lemma">split2_data_at_Tarray_app</span> 1) <span class="id" title="tactic">by</span> <span class="id" title="var">list_solve</span>.<br/>
+<span class="id" title="tactic">rewrite</span> (<span class="id" title="lemma">split2_data_at_Tarray_app</span> <span class="id" title="var">i</span>) <span class="id" title="tactic">by</span> <span class="id" title="var">list_solve</span>.<br/>
+<span class="id" title="tactic">rewrite</span> (<span class="id" title="lemma">split2_data_at_Tarray_app</span> 1) <span class="id" title="tactic">by</span> <span class="id" title="var">list_solve</span>.<br/>
+<span class="id" title="var">cancel</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Why did that work?  Let's look at a simpler example. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="cancel_example" class="idref" href="#cancel_example"><span class="id" title="lemma">cancel_example</span></a>:<br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="sh:67" class="idref" href="#sh:67"><span class="id" title="binder">sh</span></a> <a id="i:68" class="idref" href="#i:68"><span class="id" title="binder">i</span></a> <a id="j:69" class="idref" href="#j:69"><span class="id" title="binder">j</span></a> <a id="p:70" class="idref" href="#p:70"><span class="id" title="binder">p</span></a> <a id="q:71" class="idref" href="#q:71"><span class="id" title="binder">q</span></a>, <br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:67"><span class="id" title="variable">sh</span></a> <span class="id" title="definition">tint</span> (<span class="id" title="constructor">Vint</span> <a class="idref" href="Verif_strlib.html#i:68"><span class="id" title="variable">i</span></a>) <a class="idref" href="Verif_strlib.html#p:70"><span class="id" title="variable">p</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:67"><span class="id" title="variable">sh</span></a> <span class="id" title="definition">tint</span> (<span class="id" title="constructor">Vint</span> <a class="idref" href="Verif_strlib.html#j:69"><span class="id" title="variable">j</span></a>) <a class="idref" href="Verif_strlib.html#q:71"><span class="id" title="variable">q</span></a><br/>
+&nbsp;<span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:67"><span class="id" title="variable">sh</span></a> <span class="id" title="definition">tint</span> (<span class="id" title="constructor">Vint</span> <a class="idref" href="Verif_strlib.html#i:68"><span class="id" title="variable">i</span></a>) <a class="idref" href="Verif_strlib.html#p:70"><span class="id" title="variable">p</span></a> <span class="id" title="notation">×</span> <span class="id" title="definition">data_at</span> <a class="idref" href="Verif_strlib.html#sh:67"><span class="id" title="variable">sh</span></a> <span class="id" title="definition">tint</span> (<span class="id" title="constructor">Vundef</span>) <a class="idref" href="Verif_strlib.html#q:71"><span class="id" title="variable">q</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+Uncomment the following line, and notice that it solves the goal. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;cancel.&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" title="var">cancel</span></span> breaks this into two subgoals: 
+</div>
+<div class="code">
+<span class="id" title="tactic">apply</span> <span class="id" title="method">sepcon_derives</span>.<br/>
+- <br/>
+</div>
+
+<div class="doc">
+In the first subgoal, we use the fact that <span class="nowrap">&vert;--</span> is reflexive 
+</div>
+<div class="code">
+<span class="id" title="tactic">apply</span> <span class="id" title="method">derives_refl</span>.<br/>
+-<br/>
+</div>
+
+<div class="doc">
+In the second subgoal, we use the fact that <i>any</i> value
+  implies a Vundef, or more generally, <i>any</i> value implies
+  <span class="inlinecode"><span class="id" title="var">default_val</span></span> <span class="inlinecode"><span class="id" title="var">t</span></span> for any CompCert type t. 
+</div>
+<div class="code">
+<span class="id" title="tactic">apply</span> <span class="id" title="lemma">stronger_default_val</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+The moral of the story is:  When proving 
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;<span class="id" title="var">data_at</span> <span class="id" title="var">sh</span> <span class="id" title="var">t</span> <span class="id" title="var">a</span> <span class="id" title="var">p</span> <span class="nowrap">&vert;--</span> <span class="id" title="var">data_at</span> <span class="id" title="var">sh</span> <span class="id" title="var">t</span> <span class="id" title="var">b</span> <span class="id" title="var">p</span>
+<div class="paragraph"> </div>
+
+</span>   if (a=b) you can simplify the goal using
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">derives_refl'</span>; <span class="id" title="tactic">f_equal</span>.
+<div class="paragraph"> </div>
+
+</span>   but if a is strictly more defined than b, then derives_refl' is not appropriate. 
+<div class="paragraph"> </div>
+
+<a id="lab113"></a><h4 class="section">Exercise: 3 stars, standard (body_strcpy)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="body_strcpy" class="idref" href="#body_strcpy"><span class="id" title="lemma">body_strcpy</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_strlib.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_strlib.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_strcpy</span> <a class="idref" href="Verif_strlib.html#strcpy_spec"><span class="id" title="definition">strcpy_spec</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="var">start_function</span>.<br/>
+</div>
+
+<div class="doc">
+Because this function subscripts the strings, it does <i>not</i>
+  treat the strings abstractly, we must unfold <span class="inlinecode"><span class="id" title="var">cstring</span></span> and <span class="inlinecode"><span class="id" title="var">cstringn</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="tactic">unfold</span> <span class="id" title="definition">cstring</span>,<span class="id" title="definition">cstringn</span> <span class="id" title="tactic">in</span> ×.<br/>
+<span class="id" title="var">forward</span>.<br/>
+<span class="id" title="var">Intros</span>.<br/>
+<span class="id" title="var">forward_loop</span> (<span class="id" title="notation">EX</span> <a id="i:73" class="idref" href="#i:73"><span class="id" title="binder">i</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span>0 <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">≤</span></a> <a class="idref" href="Verif_strlib.html#i:72"><span class="id" title="variable">i</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#bdb3edde5f841a282ce8fc1b00e3d211"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <span class="id" title="var">s</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">LOCAL</span> <span class="id" title="notation">(</span><span class="id" title="constructor">temp</span> <span class="id" title="definition">_i</span> (<span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> <a class="idref" href="Verif_strlib.html#i:72"><span class="id" title="variable">i</span></a>))<span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_dest</span> <span class="id" title="var">dest</span><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_src</span> <span class="id" title="var">src</span><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">data_at</span> <span class="id" title="var">wsh</span> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> <span class="id" title="var">n</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<span class="id" title="definition">sublist</span> 0 <a class="idref" href="Verif_strlib.html#i:72"><span class="id" title="variable">i</span></a> <span class="id" title="var">s</span>) <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <span class="id" title="definition">list_repeat</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.to_nat"><span class="id" title="definition">Z.to_nat</span></a> (<span class="id" title="var">n</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#::Z_scope:x_'-'_x"><span class="id" title="notation">-</span></a> <a class="idref" href="Verif_strlib.html#i:72"><span class="id" title="variable">i</span></a>)) <span class="id" title="constructor">Vundef</span>) <span class="id" title="var">dest</span><span class="id" title="notation">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="var">rsh</span> (<span class="id" title="definition">tarray</span> <span class="id" title="definition">tschar</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.Zcomplements.html#Zlength"><span class="id" title="definition">Zlength</span></a> <span class="id" title="var">s</span> <a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> 1)) (<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <span class="id" title="definition">Vbyte</span> (<span class="id" title="var">s</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>)) <span class="id" title="var">src</span><span class="id" title="notation">)</span>).<br/>
++ <span class="comment">(*&nbsp;Prove&nbsp;the&nbsp;precondition&nbsp;implies&nbsp;the&nbsp;loop&nbsp;invariant&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">admit</span>.<br/>
++ <span class="comment">(*&nbsp;Prove&nbsp;the&nbsp;loop&nbsp;body&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+In the <span class="inlinecode"><span class="id" title="keyword">then</span></span> clause of this proof, you may reach a proof goal similar to
+ Lemma strcpy_then_clause, but not identical.  In that case you may want to
+ use the same proof techniques you used in that exercise.  Ditto for the else
+ clause, and strcpy_else_clause. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab114"></a><h4 class="section">Exercise: 3 stars, standard (example_call_strcpy)</h4>
+ Prove the correctness of a function that calls <span class="inlinecode"><span class="id" title="var">strcpy</span></span>.
+<pre>
+  int example_call_strcpy(void) {
+    char buf[10];
+    strcpy(buf,"Hello");
+    return buf[0];
+  }
+</pre>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="stringlit_1_contents" class="idref" href="#stringlit_1_contents"><span class="id" title="definition">stringlit_1_contents</span></a> := <a class="idref" href="Verif_strlib.html#Hello'"><span class="id" title="definition">Hello'</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Definition</span> <a id="example_call_strcpy_spec" class="idref" href="#example_call_strcpy_spec"><span class="id" title="definition">example_call_strcpy_spec</span></a> :=<br/>
+&nbsp;<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_example_call_strcpy</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">WITH</span> <a id="gv:75" class="idref" href="#gv:75"><span class="id" title="binder">gv</span></a><span class="id" title="notation">:</span> <span class="id" title="definition">globals</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PRE</span> <span class="id" title="notation">[</span>  <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">()</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PARAMS</span><span class="id" title="notation">()</span> <span class="id" title="notation">GLOBALS</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_strlib.html#gv:74"><span class="id" title="variable">gv</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">cstring</span> <span class="id" title="definition">Ews</span> (<a class="idref" href="Verif_strlib.html#Hello'"><span class="id" title="definition">Hello'</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>) (<a class="idref" href="Verif_strlib.html#gv:74"><span class="id" title="variable">gv</span></a> <span class="id" title="definition">___stringlit_1</span>)<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="definition">tint</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">()</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">RETURN</span> <span class="id" title="notation">(</span><span class="id" title="constructor">Vint</span> (<span class="id" title="definition">Int.repr</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.ZArith.BinInt.html#Z.of_N"><span class="id" title="definition">Z.of_N</span></a> (<a class="idref" href="http://coq.inria.fr/library//Coq.Strings.Ascii.html#N_of_ascii"><span class="id" title="definition">Ascii.N_of_ascii</span></a> "H"%<span class="id" title="var">char</span>)))<span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><span class="id" title="definition">cstring</span> <span class="id" title="definition">Ews</span> (<a class="idref" href="Verif_strlib.html#Hello'"><span class="id" title="definition">Hello'</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="definition">Byte.zero</span><a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>) (<a class="idref" href="Verif_strlib.html#gv:75"><span class="id" title="variable">gv</span></a> <span class="id" title="definition">___stringlit_1</span>)<span class="id" title="notation">)</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="body_example_call_strcpy" class="idref" href="#body_example_call_strcpy"><span class="id" title="lemma">body_example_call_strcpy</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_strlib.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_strlib.html#Gprog"><span class="id" title="definition">Gprog</span></a> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">f_example_call_strcpy</span> <a class="idref" href="Verif_strlib.html#example_call_strcpy_spec"><span class="id" title="definition">example_call_strcpy_spec</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="var">start_function</span>.<br/>
+</div>
+
+<div class="doc">
+This proof is fairly straightforward.  First, figure out what WITH
+ witness to give for forward_call.  Hint: look at the SEP clause of the
+ precondition of strcpy_spec, and see how the <span class="inlinecode"><span class="id" title="var">data_at</span></span> and <span class="inlinecode"><span class="id" title="var">cstring</span></span>
+ conjuncts must match your current assertion.
+
+<div class="paragraph"> </div>
+
+ Second, after the forward_call, don't forget to unfold <span class="inlinecode"><span class="id" title="var">cstringn</span></span>; this is
+ necessary because after the call we subscript the <span class="inlinecode"><span class="id" title="var">_buf</span></span> array directly. 
+</div>
+<div class="code">
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="doc"> 
+<div class="paragraph"> </div>
+
+<a id="lab115"></a><h4 class="section">Exercise: 4 stars, standard, optional (body_strcmp)</h4>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="body_strcmp" class="idref" href="#body_strcmp"><span class="id" title="lemma">body_strcmp</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_strlib.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_strlib.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_strcmp</span> <a class="idref" href="Verif_strlib.html#strcmp_spec"><span class="id" title="definition">strcmp_spec</span></a>.<br/>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" title="var">Admitted</span>.<br/>
+<font size=-2>&#9744;</font>
+</div>
+
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-09-18&nbsp;15:39&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

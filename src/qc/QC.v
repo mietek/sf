@@ -40,8 +40,7 @@ Check returnGen.
     supplies its generator argument with several different random
     seeds: *)
 
-(* Sample (returnGen 42). *)
-(**
+(* Sample (returnGen 42).
 
      ===> [42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42] 
 *)
@@ -103,16 +102,17 @@ Print ChoosableFromInterval.
        }. 
 *)
 
-(* Sample (choose (0,10)). *)
-(**
+(* Sample (choose (0,10)).
 
-     ===> [ 1, 2, 1, 9, 8, 1, 3, 6, 2, 1, 8, 0, 1, 1, 3, 5, 4, 10, 4, 6 ] 
+     ===> [ 1, 2, 1, 9, 8, 10, 3, 6, 0, 1, 8 ]
 *)
 
-(** **** Exercise: 1 star, optional (cfi)  *)
-(** Print out the full definition of [ChoosableFromInterval].  Can you
-    understand what it means? *)
-(** [] *)    
+(** **** Exercise: 1 star, standard, optional (cfi)
+
+    Print out the full definition of [ChoosableFromInterval].  Can you
+    understand what it means?
+
+    [] *)    
 
 (* ================================================================= *)
 (** ** Lists *)
@@ -129,8 +129,7 @@ Check listOf.
      ===> listOf : G ?A -> G (list ?A) 
 *)
 
-(* Sample (listOf (choose (0,4))). *)
-(**
+(* Sample (listOf (choose (0,4))).
 
      ===> 
       [ [ 0, 3, 2, 0 ], 
@@ -164,8 +163,7 @@ Check vectorOf.
      ===> vectorOf : nat -> G ?A -> G (list ?A) 
 *)
 
-(* Sample (vectorOf 3 (choose (0,4))). *)
-(**
+(* Sample (vectorOf 3 (choose (0,4))).
 
      ===> 
       [ [0, 1, 4], 
@@ -196,6 +194,7 @@ Module DefineG.
 
 Inductive G (A:Type) : Type :=
 | MkG : (nat -> RandomSeed -> A) -> G A.
+Arguments MkG {A}.
 
 End DefineG.
 
@@ -219,7 +218,6 @@ Inductive color := Red | Green | Blue | Yellow.
 (** In order for commands like [Sample] to display colors, we should
     make [color] an instance of the [Show] typeclass: *)
 
-Require Import String. Open Scope string.
 Instance show_color : Show color :=
   {| show c :=
        match c with
@@ -243,8 +241,7 @@ Check elems_.
 Definition genColor' : G color :=
   elems_ Red [ Red ; Green ; Blue ; Yellow ].
 
-(* Sample genColor'. *)
-(**
+(* Sample genColor'.
 
      ===> 
    [Red, Green, Blue, Blue, Red, Yellow, Blue, Red, Blue, Blue, Red] 
@@ -278,8 +275,7 @@ Definition genColor' : G color :=
 Definition genColor : G color :=
   elems [ Red ; Green ; Blue ; Yellow ].
 
-(* Sample genColor. *)
-(**
+(* Sample genColor.
 
      ===> [Red, Green, Blue, Blue, Red, Yellow, Blue, Red, Blue, Blue, Red] 
 *)
@@ -358,8 +354,8 @@ Check oneOf_.
     the _expected_ size of the generated trees is actually
     infinite! *)
 
-(** The solution is to use the standard "fuel" idiom that all Coq
-    users know.  We add a natural number [sz] as a parameter.  We
+(** The solution is to use the standard "fuel" idiom that Coq users
+    are familiar with.  We add a natural number [sz] as a parameter.  We
     decrease this size in each recursive call, and when it reaches
     [O], we always generate [Leaf].  Thus, the initial [sz] parameter
     serves as a bound on the depth of the tree. *)
@@ -374,8 +370,7 @@ Fixpoint genTreeSized {A} (sz : nat) (g : G A) : G (Tree A) :=
         ]
   end.
 
-(* Sample (genTreeSized 3 (choose(0,3))). *)
-(**
+(* Sample (genTreeSized 3 (choose(0,3))).
 
      ===> 
        [ Leaf,
@@ -434,8 +429,7 @@ Fixpoint genTreeSized' {A} (sz : nat) (g : G A) : G (Tree A) :=
              ]
   end.
 
-(* Sample (genTreeSized' 3 (choose(0,3))). *)
-(**
+(* Sample (genTreeSized' 3 (choose(0,3))).
 
      ===> 
          [ Node (3) (Node (1) (Node (3) (Leaf) (Leaf)) (Leaf)) 
@@ -472,19 +466,23 @@ Fixpoint genTreeSized' {A} (sz : nat) (g : G A) : G (Tree A) :=
 
 (** This looks better. *)
 
-(** **** Exercise: 2 stars (genListSized)  *)
-(** Write a sized generator for lists, following [genTreeSized']. *)
+(** **** Exercise: 2 stars, standard (genListSized)
 
-(* FILL IN HERE *)
-(** [] *)
+    Write a sized generator for lists, following [genTreeSized']. *)
 
-(** **** Exercise: 3 stars (genColorOption)  *)
-(** Write a custom generator for values of type [option color].  Make
+(* FILL IN HERE
+
+    [] *)
+
+(** **** Exercise: 3 stars, standard (genColorOption)
+
+    Write a custom generator for values of type [option color].  Make
     it generate [None] about 1/10th of the time, and make it generate
     [Some Red] three times as often as the other colors. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (* ================================================================= *)
 (** ** Checkers *)
@@ -503,8 +501,8 @@ Fixpoint mirror {A : Type} (t : Tree A) : Tree A :=
     equality test on trees.  We can obtain that with minimal effort
     using the [Dec] typeclass and the [dec_eq] tactic. *)
 
-Instance eq_dec_tree (t1 t2 : Tree nat) : Dec (t1 = t2) := {}.
-Proof. dec_eq. Defined.
+Instance eq_dec_tree (t1 t2 : Tree nat) : Dec (t1 = t2).
+Proof. constructor; dec_eq. Defined.
 
 (** We expect that mirroring a tree twice should yield the original
     tree.  *)
@@ -562,7 +560,6 @@ Class Checkable A :=
     checker : A -> Checker
   }.
 
-
 (** It is easy to give a [bool] instance for [Checkable]. *)
 
 Instance checkableBool : Checkable bool :=
@@ -583,16 +580,14 @@ Instance checkableBool : Checkable bool :=
 
 End CheckerPlayground1.
 
-(* Sample (CheckerPlayground1.checker true). *)
-(**
+(* Sample (CheckerPlayground1.checker true).
 
      ===>
       [Success, Success, Success, Success, Success, Success, Success, 
        Success, Success, Success, Success] 
 *)
 
-(* Sample (CheckerPlayground1.checker false). *)
-(**
+(* Sample (CheckerPlayground1.checker false).
 
      ===>
       [Failure, Failure, Failure, Failure, Failure, Failure, Failure, 
@@ -635,16 +630,14 @@ End CheckerPlayground2.
     instance for decidable properties does not look at its
     argument.) *)
 
-(*  Sample (CheckerPlayground1.checker CheckerPlayground2.c1). *)
-(**
+(*  Sample (CheckerPlayground1.checker CheckerPlayground2.c1).
 
      ===>
       [Failure, Failure, Failure, Failure, Failure, Failure, Failure, 
        Failure, Failure, Failure, Failure] 
 *)
 
-(* Sample (CheckerPlayground1.checker CheckerPlayground2.c2). *)
-(**
+(* Sample (CheckerPlayground1.checker CheckerPlayground2.c2).
 
      ===>
       [Success, Success, Success, Success, Success, Success, Success, 
@@ -676,8 +669,11 @@ Definition forAll {A B : Type} `{Checkable B}
 
 End CheckerPlayground3.
 
-(** Let's try this out.  We can define a boolean test that returns [true]
-    for [Red] and [false] for other colors. *)
+(** Let's try this out!
+
+    First, let's revisit our color example to execute a simple check. 
+    We can define a boolean test that returns [true] for [Red] and 
+    [false] for other colors. *)
 
 Definition isRed c := 
   match c with
@@ -689,8 +685,7 @@ Definition isRed c :=
     [Checkable] instance for [bool], we can apply [forAll] to [isRed]
     and sample from the resulting [Checker] to run some tests. *)
 
-(* Sample (CheckerPlayground3.forAll genColor isRed). *)
-(**
+(* Sample (CheckerPlayground3.forAll genColor isRed).
 
      ===>
       [Success, Failure, Failure, Failure, Success, Failure, 
@@ -701,7 +696,7 @@ Definition isRed c :=
 
     Good to know. *)
 
-(** Now, what about [mirrorP]? *)
+(** Now back to a more realistic example. What about [mirrorP]? *)
 
 (*
 Sample (CheckerPlayground3.forAll
@@ -755,7 +750,7 @@ Instance showResult : Show Result :=
   {
     show r := match r with
                 Success => "Success"
-              | Failure A showA a => "Failure: " ++ show a
+              | Failure a => "Failure: " ++ show a
               end
   }.
 
@@ -796,7 +791,7 @@ Definition forAll {A B : Type} `{Show A} `{Checkable B}
   r <- checker (f a) ;;
   match r with
     Success => ret Success
-  | Failure B showB b => ret (Failure (a,b))
+  | Failure b => ret (Failure (a,b))
   end.
 
 (** Note that, rather than just returning [Failure a], we package up
@@ -1010,27 +1005,32 @@ Fixpoint tern_mirror {A : Type} (t : TernaryTree A) : TernaryTree A :=
     | TNode x l m r => TNode x (tern_mirror r) m (tern_mirror l)
   end.
 
-(** **** Exercise: 1 star (show_tern_tree)  *)
-(** Write a [Show] instance for Ternary Trees. *)
+(** **** Exercise: 1 star, standard (show_tern_tree)
 
-(* FILL IN HERE *)
-(** [] *)
+    Write a [Show] instance for Ternary Trees. *)
 
-(** **** Exercise: 2 stars (gen_tern_tree)  *)
-(** Write a generator for ternary trees. *)
+(* FILL IN HERE
+
+    [] *)
+
+(** **** Exercise: 2 stars, standard (gen_tern_tree)
+
+    Write a generator for ternary trees. *)
 
 (* FILL IN HERE *)
 
 (** The following line should generate a bunch of nat ternary trees. *)
-(* Sample (@genTernTreeSized nat 3 (choose (0,10))). *)
-(** [] *)
+(* Sample (@genTernTreeSized nat 3 (choose (0,10))).
 
-(** **** Exercise: 2 stars (shrink_tern_tree)  *)
-(** Write a shrinker for ternary trees. *)
+    [] *)
 
-(* FILL IN HERE *)
-(** [] *)
+(** **** Exercise: 2 stars, standard (shrink_tern_tree)
 
+    Write a shrinker for ternary trees. *)
+
+(* FILL IN HERE
+
+    [] *)
 
 (** From the root node, we can define a path in a ternary tree by first
     defining a direction corresponding to a choice of child tree... *)
@@ -1077,8 +1077,8 @@ Definition path_mirror := map (fun t => match t with
 (** Before we can state some properties about paths in ternary trees, it's
     useful to have a decidable equality for ternary trees of [nat]s. *)
 
-Instance eq_dec_tern_tree (t1 t2 : TernaryTree nat) : Dec (t1 = t2) := {}.
-Proof. dec_eq. Defined.
+Instance eq_dec_tern_tree (t1 t2 : TernaryTree nat) : Dec (t1 = t2).
+Proof. constructor; dec_eq. Defined.
 
 (** Traversing a path in a tree should be the same as traversing the
     mirror of the path in the mirror of the tree, just with a mirrored
@@ -1124,12 +1124,14 @@ Definition genPath : G path :=
 
 Instance shrinkPath : Shrink path := shrinkList.
 
-(** **** Exercise: 4 stars (bug_finding_tern_tree)  *)
-(** Using [genTernTreeSized] and [shrinkTernTree] find (and fix!) any
+(** **** Exercise: 4 stars, standard (bug_finding_tern_tree)
+
+    Using [genTernTreeSized] and [shrinkTernTree] find (and fix!) any
     bugs in [tern_mirror]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (* ################################################################# *)
 (** * Putting it all Together *)
@@ -1196,8 +1198,7 @@ Proof. dec_eq. Defined.
 
 (** Putting it all together: *)
 
-(*  QuickChick every_color_is_red. *)
-(**
+(*  QuickChick every_color_is_red.
 
      ===>
        QuickChecking every_color_is_red
@@ -1223,7 +1224,7 @@ Module DefineSized.
 Import DefineG.
 
 Definition sized {A : Type} (f : nat -> G A) : G A :=
-  MkG _
+  MkG
       (fun n r =>
          match f n with
            MkG g => g n r
@@ -1262,14 +1263,16 @@ Instance genTree {A} `{Gen A} : GenSized (Tree A) :=
 
 (* QuickChick faultyMirrorP. *)
 
-(** **** Exercise: 2 stars (tern_tree_typeclasses)  *)
-(** Add typeclass instances for [GenSized] and [Shrink] so that you
+(** **** Exercise: 2 stars, standard (tern_tree_typeclasses)
+
+    Add typeclass instances for [GenSized] and [Shrink] so that you
     can [QuickChick tern_mirror_reverse] directly. *)
 
 (* FILL IN HERE *)
 
-(* QuickChick tern_mirror_reverse. *)
-(** [] *)
+(* QuickChick tern_mirror_reverse.
+
+    [] *)
 
 (* ################################################################# *)
 (** * Automation *)
@@ -1340,8 +1343,7 @@ Fixpoint size {A} (t : Tree A) : nat :=
 Definition treeProp (g : nat -> G nat -> G (Tree nat)) n :=
   forAll (g n (choose (0,n))) (fun t => collect (size t) true).
 
-(* QuickChick (treeProp genTreeSized 5). *)
-(**
+(* QuickChick (treeProp genTreeSized 5).
 
      ===> 
        4947 : 0
@@ -1377,8 +1379,7 @@ Definition treeProp (g : nat -> G nat -> G (Tree nat)) n :=
 
 (** Compare this with [genTreeSized'].  *)
 
-(* QuickChick (treeProp genTreeSized' 5). *)
-(**
+(* QuickChick (treeProp genTreeSized' 5).
 
      ===> 
        1624 : 0
@@ -1414,7 +1415,20 @@ Definition treeProp (g : nat -> G nat -> G (Tree nat)) n :=
 *)
 
 (** This generates far fewer tiny examples, likely leading to more
-    efficient testing of interesting properties. *)
+    efficient testing of interesting properties. However, there are 
+    still a lot of empty trees being generated.  Can we do something
+    about that? 
+ *)
+
+(** **** Exercise: 2 stars, standard (genTreeSized'')
+
+    Write a generator [genTreeSized''] that generates fewer empty 
+    trees. Check your results using [collect].
+*)
+
+(* FILL IN HERE
+
+    [] *)
 
 (* ################################################################# *)
 (** * Dealing with Preconditions *)
@@ -1451,11 +1465,15 @@ Fixpoint insert (x : nat) (l : list nat) :=
 Definition insert_spec (x : nat) (l : list nat) :=
   sorted l ==> sorted (insert x l).
 
-(* QuickChick insert_spec. *)
-(**
+Definition test_insert_spec :=
+  forAll (choose (0,10)) (fun x =>
+  forAll (listOf (choose (0,10))) (fun l =>                            
+  insert_spec x l)).
+
+(* QuickChick test_insert_spec.
 
      ===> 
-       QuickChecking insert_spec 
+       QuickChecking test_insert_spec 
        +++ Passed 10000 tests (17325 discards) 
 *)
 
@@ -1475,22 +1493,33 @@ Definition insert_spec (x : nat) (l : list nat) :=
 Definition insert_spec' (x : nat) (l : list nat) :=
   collect (List.length l) (insert_spec x l).
 
-(* QuickChick insert_spec'. *)
-(**
+Definition test_insert_spec' :=
+  forAll (choose (0,10)) (fun x =>
+  forAll (listOf (choose (0,10))) (fun l =>                            
+  insert_spec' x l)).
+
+(* QuickChick test_insert_spec'.
 
      ===> 
    QuickChecking insert_spec' 
-   3447 : 0 
-   3446 : 1 
-   1929 : 2 
-   788 : 3 
-   271 : 4 
-   96 : 5 
-   19 : 6 
-   4 : 7 
-   +++ Passed 10000 tests (17263 discards) 
+   3652 : (Discarded) 7
+   3582 : 0
+   3568 : (Discarded) 6
+   3542 : 1
+   3469 : (Discarded) 5
+   3200 : (Discarded) 4
+   2830 : (Discarded) 3
+   1842 : 2
+   1606 : (Discarded) 2
+   716 : 3
+   248 : 4
+   61 : 5
+   8 : 6
+   1 : 7
+   +++ Passed 10000 tests (18325 discards)
 *)
-(** The vast majority of inputs have length 2 or less!
+(** The vast majority of inputs have length 2 or less, while the larger
+    lists are almost always discarded!
 
     (This explains something you might have found suspicious in the
     previous statistics: that 1/3 of the randomly generated lists were
@@ -1560,8 +1589,9 @@ QuickChick insert_spec_sorted.
 *)
 (** Does this mean we are happy? *)
 
-(** **** Exercise: 5 stars, optional (uniform_sorted)  *)
-(** Using "collect", find out whether generating a sorted list of
+(** **** Exercise: 5 stars, standard, optional (uniform_sorted)
+
+    Using "collect", find out whether generating a sorted list of
     numbers between 0 and 5 is uniform in the frequencies with which
     different _numbers_ are found in the generated lists.
 
@@ -1569,8 +1599,9 @@ QuickChick insert_spec_sorted.
     achieves a more uniform distribution (preserving uniformity in the
     lengths). *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (* ================================================================= *)
 (** ** Another Precondition: Binary Search Trees *)
@@ -1606,8 +1637,9 @@ Definition insertBST_spec (low high : nat) (x : nat) (t : Tree nat) :=
   (isBST low high t) ==> 
   isBST low high (insertBST x t).                         
 
-(* QuickChick insertBST_spec. *)
-(** 
+(* QuickChick insertBST_spec.
+
+    
 
     ===> 
       QuickChecking insertBST_spec
@@ -1639,8 +1671,7 @@ Definition insertBST_spec' (low high : nat) (x : nat) (t : Tree nat) :=
 
 (** ... and try again... *)
 
-(* QuickChick insertBST_spec'. *)
-(**
+(* QuickChick insertBST_spec'.
 
      ===> 
      QuickChecking insertBST_spec'
@@ -1649,11 +1680,13 @@ Definition insertBST_spec' (low high : nat) (x : nat) (t : Tree nat) :=
 *)
 (** ... we see that 90%% of tests are being discarded. *)
 
-(** **** Exercise: 4 stars (gen_bst)  *)
-(** Write a generator that produces binary search trees directly, so
+(** **** Exercise: 4 stars, standard (gen_bst)
+
+    Write a generator that produces binary search trees directly, so
     that you run 10000 tests with 0 discards. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
 
-(* Tue Oct 9 11:47:30 EDT 2018 *)
+    [] *)
+
+(* 2020-10-14 10:23 *)

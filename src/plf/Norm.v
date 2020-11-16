@@ -1,12 +1,12 @@
 (** * Norm: Normalization of STLC *)
 
 Set Warnings "-notation-overridden,-parsing".
-From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Lists.List.
 From Coq Require Import Strings.String.
 From PLF Require Import Maps.
 From PLF Require Import Smallstep.
 
-Hint Constructors multi.
+Hint Constructors multi : core.
 
 (* Chapter written and maintained by Andrew Tolmach *)
 
@@ -49,7 +49,7 @@ Hint Constructors multi.
     entirely trivial to prove, since each reduction of a term can
     duplicate redexes in subterms. *)
 
-(** **** Exercise: 2 stars, standard (norm_fail)  
+(** **** Exercise: 2 stars, standard (norm_fail) 
 
     Where do we fail if we attempt to prove normalization by a
     straightforward induction on the size of a well-typed term? *)
@@ -60,7 +60,7 @@ Hint Constructors multi.
 Definition manual_grade_for_norm_fail : option (nat*string) := None.
 (** [] *)
 
-(** **** Exercise: 5 stars, standard, recommended (norm)  
+(** **** Exercise: 5 stars, standard, especially useful (norm) 
 
     The best ways to understand an intricate proof like this is
     are (1) to help fill it in and (2) to extend it.  We've left out some
@@ -85,112 +85,155 @@ Definition manual_grade_for_norm : option (nat*string) := None.
 (** *** Syntax and Operational Semantics *)
 
 Inductive ty : Type :=
-  | Bool : ty
-  | Arrow : ty -> ty -> ty
-  | Prod  : ty -> ty -> ty
+  | Ty_Bool : ty
+  | Ty_Arrow : ty -> ty -> ty
+  | Ty_Prod  : ty -> ty -> ty
 .
 
 Inductive tm : Type :=
     (* pure STLC *)
-  | var : string -> tm
-  | app : tm -> tm -> tm
-  | abs : string -> ty -> tm -> tm
-    (* pairs *)
-  | pair : tm -> tm -> tm
-  | fst : tm -> tm
-  | snd : tm -> tm
+  | tm_var : string -> tm
+  | tm_app : tm -> tm -> tm
+  | tm_abs : string -> ty -> tm -> tm
     (* booleans *)
-  | tru : tm
-  | fls : tm
-  | test : tm -> tm -> tm -> tm.
-          (* i.e., [test t0 then t1 else t2] *)
+  | tm_true : tm
+  | tm_false : tm
+  | tm_if : tm -> tm -> tm -> tm
+    (* pairs *)
+  | tm_pair : tm -> tm -> tm
+  | tm_fst : tm -> tm
+  | tm_snd : tm -> tm.
+ 
+Declare Custom Entry stlc.
+
+Notation "<{ e }>" := e (e custom stlc at level 99).
+Notation "( x )" := x (in custom stlc, x at level 99).
+Notation "x" := x (in custom stlc at level 0, x constr at level 0).
+Notation "S -> T" := (Ty_Arrow S T) (in custom stlc at level 50, right associativity).
+Notation "x y" := (tm_app x y) (in custom stlc at level 1, left associativity).
+Notation "\ x : t , y" :=
+  (tm_abs x t y) (in custom stlc at level 90, x at level 99,
+                     t custom stlc at level 99,
+                     y custom stlc at level 99,
+                     left associativity).
+Coercion tm_var : string >-> tm.
+
+Notation "{ x }" := x (in custom stlc at level 1, x constr).
+
+Notation "'Bool'" := Ty_Bool (in custom stlc at level 0).
+Notation "'if' x 'then' y 'else' z" :=
+  (tm_if x y z) (in custom stlc at level 89,
+                    x custom stlc at level 99,
+                    y custom stlc at level 99,
+                    z custom stlc at level 99,
+                    left associativity).
+Notation "'true'"  := true (at level 1).
+Notation "'true'"  := tm_true (in custom stlc at level 0).
+Notation "'false'"  := false (at level 1).
+Notation "'false'"  := tm_false (in custom stlc at level 0).
+
+Notation "X * Y" :=
+  (Ty_Prod X Y) (in custom stlc at level 2, X custom stlc, Y custom stlc at level 0).
+Notation "( x ',' y )" := (tm_pair x y) (in custom stlc at level 0,
+                                                x custom stlc at level 99,
+                                                y custom stlc at level 99).
+Notation "t '.fst'" := (tm_fst t) (in custom stlc at level 0).
+Notation "t '.snd'" := (tm_snd t) (in custom stlc at level 0).
 
 (* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
-Fixpoint subst (x:string) (s:tm) (t:tm) : tm :=
-  match t with
-  | var y => if eqb_string x y then s else t
-  | abs y T t1 =>
-      abs y T (if eqb_string x y then t1 else (subst x s t1))
-  | app t1 t2 => app (subst x s t1) (subst x s t2)
-  | pair t1 t2 => pair (subst x s t1) (subst x s t2)
-  | fst t1 => fst (subst x s t1)
-  | snd t1 => snd (subst x s t1)
-  | tru => tru
-  | fls => fls
-  | test t0 t1 t2 =>
-      test (subst x s t0) (subst x s t1) (subst x s t2)
-  end.
+Reserved Notation "'[' x ':=' s ']' t" (in custom stlc at level 20, x constr).
 
-Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
+Fixpoint subst (x : string) (s : tm) (t : tm) : tm :=
+  match t with
+  | tm_var y =>
+      if eqb_string x y then s else t
+  | <{ \ y : T, t1 }> =>
+      if eqb_string x y then t else <{ \y:T, [x:=s] t1 }>
+  | <{t1 t2}> =>
+      <{ ([x:=s]t1) ([x:=s]t2)}>
+  | <{true}> =>
+      <{true}>
+  | <{false}> =>
+      <{false}>
+  | <{if t1 then t2 else t3}> =>
+      <{if ([x:=s] t1) then ([x:=s] t2) else ([x:=s] t3)}>
+  | <{(t1, t2)}> =>
+      <{( ([x:=s] t1), ([x:=s] t2) )}>
+  | <{t0.fst}> =>
+      <{ ([x:=s] t0).fst}>
+  | <{t0.snd}> =>
+      <{ ([x:=s] t0).snd}>
+  end
+
+  where "'[' x ':=' s ']' t" := (subst x s t) (in custom stlc).
 
 (* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 Inductive value : tm -> Prop :=
-  | v_abs : forall x T11 t12,
-      value (abs x T11 t12)
+  | v_abs : forall x T2 t1,
+      value <{\x:T2, t1}>
+  | v_true :
+      value <{true}>
+  | v_false :
+      value <{false}>
   | v_pair : forall v1 v2,
       value v1 ->
       value v2 ->
-      value (pair v1 v2)
-  | v_tru : value tru
-  | v_fls : value fls
-.
+      value <{(v1, v2)}>.
 
-Hint Constructors value.
+Hint Constructors value : core.
 
-Reserved Notation "t1 '-->' t2" (at level 40).
+Reserved Notation "t '-->' t'" (at level 40).
 
 Inductive step : tm -> tm -> Prop :=
-  | ST_AppAbs : forall x T11 t12 v2,
+  | ST_AppAbs : forall x T2 t1 v2,
          value v2 ->
-         (app (abs x T11 t12) v2) --> [x:=v2]t12
+         <{(\x:T2, t1) v2}> --> <{ [x:=v2]t1 }>
   | ST_App1 : forall t1 t1' t2,
          t1 --> t1' ->
-         (app t1 t2) --> (app t1' t2)
+         <{t1 t2}> --> <{t1' t2}>
   | ST_App2 : forall v1 t2 t2',
          value v1 ->
          t2 --> t2' ->
-         (app v1 t2) --> (app v1 t2')
-  (* pairs *)
+         <{v1 t2}> --> <{v1  t2'}>
+  | ST_IfTrue : forall t1 t2,
+      <{if true then t1 else t2}> --> t1
+  | ST_IfFalse : forall t1 t2,
+      <{if false then t1 else t2}> --> t2
+  | ST_If : forall t1 t1' t2 t3,
+      t1 --> t1' ->
+      <{if t1 then t2 else t3}> --> <{if t1' then t2 else t3}>
   | ST_Pair1 : forall t1 t1' t2,
         t1 --> t1' ->
-        (pair t1 t2) --> (pair t1' t2)
+        <{ (t1,t2) }> --> <{ (t1' , t2) }>
   | ST_Pair2 : forall v1 t2 t2',
         value v1 ->
         t2 --> t2' ->
-        (pair v1 t2) --> (pair v1 t2')
-  | ST_Fst : forall t1 t1',
-        t1 --> t1' ->
-        (fst t1) --> (fst t1')
+        <{ (v1, t2) }> -->  <{ (v1, t2') }>
+  | ST_Fst1 : forall t0 t0',
+        t0 --> t0' ->
+        <{ t0.fst }> --> <{ t0'.fst }>
   | ST_FstPair : forall v1 v2,
         value v1 ->
         value v2 ->
-        (fst (pair v1 v2)) --> v1
-  | ST_Snd : forall t1 t1',
-        t1 --> t1' ->
-        (snd t1) --> (snd t1')
+        <{ (v1,v2).fst }> --> v1
+  | ST_Snd1 : forall t0 t0',
+        t0 --> t0' ->
+        <{ t0.snd }> --> <{ t0'.snd }>
   | ST_SndPair : forall v1 v2,
         value v1 ->
         value v2 ->
-        (snd (pair v1 v2)) --> v2
-  (* booleans *)
-  | ST_TestTrue : forall t1 t2,
-        (test tru t1 t2) --> t1
-  | ST_TestFalse : forall t1 t2,
-        (test fls t1 t2) --> t2
-  | ST_Test : forall t0 t0' t1 t2,
-        t0 --> t0' ->
-        (test t0 t1 t2) --> (test t0' t1 t2)
+        <{ (v1,v2).snd }> --> v2
 
-where "t1 '-->' t2" := (step t1 t2).
+where "t '-->' t'" := (step t t').
+
+Hint Constructors step : core.
 
 Notation multistep := (multi step).
 Notation "t1 '-->*' t2" := (multistep t1 t2) (at level 40).
-
-Hint Constructors step.
 
 Notation step_normal_form := (normal_form step).
 
@@ -204,112 +247,197 @@ Qed.
 
 Definition context := partial_map ty.
 
+Reserved Notation "Gamma '|-' t '\in' T" (at level 40,
+                                          t custom stlc, T custom stlc at level 0).
+
 Inductive has_type : context -> tm -> ty -> Prop :=
-  (* Typing rules for proper terms *)
-  | T_Var : forall Gamma x T,
-      Gamma x = Some T ->
-      has_type Gamma (var x) T
-  | T_Abs : forall Gamma x T11 T12 t12,
-      has_type (update Gamma x T11) t12 T12 ->
-      has_type Gamma (abs x T11 t12) (Arrow T11 T12)
+  (* Same as before: *)
+  (* pure STLC *)
+  | T_Var : forall Gamma x T1,
+      Gamma x = Some T1 ->
+      Gamma |- x \in T1
+  | T_Abs : forall Gamma x T1 T2 t1,
+    (x |-> T2 ; Gamma) |- t1 \in T1 ->
+      Gamma |- \x:T2, t1 \in (T2 -> T1)
   | T_App : forall T1 T2 Gamma t1 t2,
-      has_type Gamma t1 (Arrow T1 T2) ->
-      has_type Gamma t2 T1 ->
-      has_type Gamma (app t1 t2) T2
-  (* pairs *)
-  | T_Pair : forall Gamma t1 t2 T1 T2,
-      has_type Gamma t1 T1 ->
-      has_type Gamma t2 T2 ->
-      has_type Gamma (pair t1 t2) (Prod T1 T2)
-  | T_Fst : forall Gamma t T1 T2,
-      has_type Gamma t (Prod T1 T2) ->
-      has_type Gamma (fst t) T1
-  | T_Snd : forall Gamma t T1 T2,
-      has_type Gamma t (Prod T1 T2) ->
-      has_type Gamma (snd t) T2
-  (* booleans *)
+      Gamma |- t1 \in (T2 -> T1) ->
+      Gamma |- t2 \in T2 ->
+      Gamma |- t1 t2 \in T1
   | T_True : forall Gamma,
-      has_type Gamma tru Bool
+       Gamma |- true \in Bool
   | T_False : forall Gamma,
-      has_type Gamma fls Bool
-  | T_Test : forall Gamma t0 t1 t2 T,
-      has_type Gamma t0 Bool ->
-      has_type Gamma t1 T ->
-      has_type Gamma t2 T ->
-      has_type Gamma (test t0 t1 t2) T
-.
+       Gamma |- false \in Bool
+  | T_If : forall t1 t2 t3 T1 Gamma,
+       Gamma |- t1 \in Bool ->
+       Gamma |- t2 \in T1 ->
+       Gamma |- t3 \in T1 ->
+       Gamma |- if t1 then t2 else t3 \in T1
+  | T_Pair : forall Gamma t1 t2 T1 T2,
+      Gamma |- t1 \in T1 ->
+      Gamma |- t2 \in T2 ->
+      Gamma |- (t1, t2) \in (T1 * T2)
+  | T_Fst : forall Gamma t0 T1 T2,
+      Gamma |- t0 \in (T1 * T2) ->
+      Gamma |- t0.fst \in T1
+  | T_Snd : forall Gamma t0 T1 T2,
+      Gamma |- t0 \in (T1 * T2) ->
+      Gamma |- t0.snd \in T2
 
-Hint Constructors has_type.
+where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
-Hint Extern 2 (has_type _ (app _ _) _) => eapply T_App; auto.
-Hint Extern 2 (_ = _) => compute; reflexivity.
+Hint Constructors has_type : core.
+
+Hint Extern 2 (has_type _ (app _ _) _) => eapply T_App; auto : core.
+Hint Extern 2 (_ = _) => compute; reflexivity : core.
+
+(* ================================================================= *)
+(** ** Weakening *)
+
+(** The weakening lemma is proved as in pure STLC. *)
+
+Lemma weakening : forall Gamma Gamma' t T,
+     inclusion Gamma Gamma' ->
+     Gamma  |- t \in T  ->
+     Gamma' |- t \in T.
+Proof.
+  intros Gamma Gamma' t T H Ht.
+  generalize dependent Gamma'.
+  induction Ht; eauto using inclusion_update.
+Qed.
+
+Lemma weakening_empty : forall Gamma t T,
+     empty |- t \in T  ->
+     Gamma |- t \in T.
+Proof.
+  intros Gamma t T.
+  eapply weakening.
+  discriminate.
+Qed.
+
+(* ----------------------------------------------------------------- *)
+(** *** Substitution *)
+
+Lemma substitution_preserves_typing : forall Gamma x U t v T,
+  (x |-> U ; Gamma) |- t \in T ->
+  empty |- v \in U   ->
+  Gamma |- [x:=v]t \in T.
+Proof with eauto.
+  intros Gamma x U t v T Ht Hv.
+  generalize dependent Gamma. generalize dependent T.
+  induction t; intros T Gamma H;
+  (* in each case, we'll want to get at the derivation of H *)
+    inversion H; clear H; subst; simpl; eauto.
+  - (* var *)
+    rename s into y. destruct (eqb_stringP x y); subst.
+    + (* x=y *)
+      rewrite update_eq in H2.
+      injection H2 as H2; subst.
+      apply weakening_empty. assumption.
+    + (* x<>y *)
+      apply T_Var. rewrite update_neq in H2; auto.
+  - (* abs *)
+    rename s into y, t into S.
+    destruct (eqb_stringP x y); subst; apply T_Abs.
+    + (* x=y *)
+      rewrite update_shadow in H5. assumption.
+    + (* x<>y *)
+      apply IHt.
+      rewrite update_permute; auto.
+Qed.
+
+(* ----------------------------------------------------------------- *)
+(** *** Preservation *)
+
+ Theorem preservation : forall t t' T,
+   empty |- t \in T  ->
+   t --> t'  ->
+   empty |- t' \in T.
+Proof with eauto.
+intros t t' T HT. generalize dependent t'.
+remember empty as Gamma.
+induction HT;
+  intros t' HE; subst; inversion HE; subst...
+- (* T_App *)
+  inversion HE; subst...
+  + (* ST_AppAbs *)
+    apply substitution_preserves_typing with T2...
+    inversion HT1...
+- (* T_Fst *)
+  inversion HT...
+- (* T_Snd *)
+  inversion HT...
+Qed.
 
 (* ----------------------------------------------------------------- *)
 (** *** Context Invariance *)
 
 Inductive appears_free_in : string -> tm -> Prop :=
-  | afi_var : forall x,
-      appears_free_in x (var x)
+  | afi_var : forall (x : string),
+      appears_free_in x <{ x }>
   | afi_app1 : forall x t1 t2,
-      appears_free_in x t1 -> appears_free_in x (app t1 t2)
+      appears_free_in x t1 -> appears_free_in x <{ t1 t2 }>
   | afi_app2 : forall x t1 t2,
-      appears_free_in x t2 -> appears_free_in x (app t1 t2)
+      appears_free_in x t2 -> appears_free_in x <{ t1 t2 }>
   | afi_abs : forall x y T11 t12,
         y <> x  ->
         appears_free_in x t12 ->
-        appears_free_in x (abs y T11 t12)
-  (* pairs *)
-  | afi_pair1 : forall x t1 t2,
-      appears_free_in x t1 ->
-      appears_free_in x (pair t1 t2)
-  | afi_pair2 : forall x t1 t2,
-      appears_free_in x t2 ->
-      appears_free_in x (pair t1 t2)
-  | afi_fst : forall x t,
-      appears_free_in x t ->
-      appears_free_in x (fst t)
-  | afi_snd : forall x t,
-      appears_free_in x t ->
-      appears_free_in x (snd t)
+        appears_free_in x <{ \y : T11, t12 }>
   (* booleans *)
   | afi_test0 : forall x t0 t1 t2,
       appears_free_in x t0 ->
-      appears_free_in x (test t0 t1 t2)
+      appears_free_in x <{ if t0 then t1 else t2 }>
   | afi_test1 : forall x t0 t1 t2,
       appears_free_in x t1 ->
-      appears_free_in x (test t0 t1 t2)
+      appears_free_in x <{ if t0 then t1 else t2 }>
   | afi_test2 : forall x t0 t1 t2,
       appears_free_in x t2 ->
-      appears_free_in x (test t0 t1 t2)
+      appears_free_in x <{ if t0 then t1 else t2 }>
+  (* pairs *)
+  | afi_pair1 : forall x t1 t2,
+      appears_free_in x t1 ->
+      appears_free_in x <{ (t1, t2) }>
+  | afi_pair2 : forall x t1 t2,
+      appears_free_in x t2 ->
+      appears_free_in x <{ (t1 , t2) }>
+  | afi_fst : forall x t,
+      appears_free_in x t ->
+      appears_free_in x <{ t.fst }>
+  | afi_snd : forall x t,
+      appears_free_in x t ->
+      appears_free_in x <{ t.snd }>
 .
 
-Hint Constructors appears_free_in.
+Hint Constructors appears_free_in : core.
 
 Definition closed (t:tm) :=
   forall x, ~ appears_free_in x t.
 
 Lemma context_invariance : forall Gamma Gamma' t S,
-     has_type Gamma t S  ->
+     Gamma |- t \in S  ->
      (forall x, appears_free_in x t -> Gamma x = Gamma' x)  ->
-     has_type Gamma' t S.
-Proof with eauto.
-  intros. generalize dependent Gamma'.
-  induction H;
-    intros Gamma' Heqv...
+     Gamma' |- t \in S.
+Proof.
+  intros.
+  generalize dependent Gamma'.
+  induction H; intros; eauto 12.
   - (* T_Var *)
-    apply T_Var... rewrite <- Heqv...
+    apply T_Var. rewrite <- H0; auto.
   - (* T_Abs *)
-    apply T_Abs... apply IHhas_type. intros y Hafi.
-    unfold update, t_update. destruct (eqb_stringP x y)...
-  - (* T_Pair *)
-    apply T_Pair...
-  - (* T_Test *)
-    eapply T_Test...
+    apply T_Abs.
+    apply IHhas_type. intros x1 Hafi.
+    (* the only tricky step... *)
+    destruct (eqb_stringP x x1); subst.
+    + rewrite update_eq.
+      rewrite update_eq.
+      reflexivity.
+    + rewrite update_neq; [| assumption].
+      rewrite update_neq; [| assumption].
+      auto.
 Qed.
 
 Lemma free_in_context : forall x t T Gamma,
    appears_free_in x t ->
-   has_type Gamma t T ->
+   Gamma |- t \in T ->
    exists T', Gamma x = Some T'.
 Proof with eauto.
   intros x t T Gamma Hafi Htyp.
@@ -321,134 +449,12 @@ Proof with eauto.
 Qed.
 
 Corollary typable_empty__closed : forall t T,
-    has_type empty t T  ->
+    empty |- t \in T  ->
     closed t.
 Proof.
   intros. unfold closed. intros x H1.
   destruct (free_in_context _ _ _ _ H1 H) as [T' C].
-  inversion C.  Qed.
-
-(* ----------------------------------------------------------------- *)
-(** *** Preservation *)
-
-Lemma substitution_preserves_typing : forall Gamma x U v t S,
-     has_type (update Gamma x U) t S  ->
-     has_type empty v U   ->
-     has_type Gamma ([x:=v]t) S.
-Proof with eauto.
-  (* Theorem: If Gamma,x:U |- t : S and empty |- v : U, then
-     Gamma |- ([x:=v]t) S. *)
-  intros Gamma x U v t S Htypt Htypv.
-  generalize dependent Gamma. generalize dependent S.
-  (* Proof: By induction on the term t.  Most cases follow directly
-     from the IH, with the exception of var and abs.
-     The former aren't automatic because we must reason about how the
-     variables interact. *)
-  induction t;
-    intros S Gamma Htypt; simpl; inversion Htypt; subst...
-  - (* var *)
-    simpl. rename s into y.
-    (* If t = y, we know that
-         [empty |- v : U] and
-         [Gamma,x:U |- y : S]
-       and, by inversion, [update Gamma x U y = Some S].  We want to
-       show that [Gamma |- [x:=v]y : S].
-
-       There are two cases to consider: either [x=y] or [x<>y]. *)
-    unfold update, t_update in H1.
-    destruct (eqb_stringP x y).
-    + (* x=y *)
-    (* If [x = y], then we know that [U = S], and that [[x:=v]y = v].
-       So what we really must show is that if [empty |- v : U] then
-       [Gamma |- v : U].  We have already proven a more general version
-       of this theorem, called context invariance. *)
-      subst.
-      inversion H1; subst. clear H1.
-      eapply context_invariance...
-      intros x Hcontra.
-      destruct (free_in_context _ _ S empty Hcontra) as [T' HT']...
-      inversion HT'.
-    + (* x<>y *)
-      (* If [x <> y], then [Gamma y = Some S] and the substitution has no
-         effect.  We can show that [Gamma |- y : S] by [T_Var]. *)
-      apply T_Var...
-  - (* abs *)
-    rename s into y. rename t into T11.
-    (* If [t = abs y T11 t0], then we know that
-         [Gamma,x:U |- abs y T11 t0 : T11->T12]
-         [Gamma,x:U,y:T11 |- t0 : T12]
-         [empty |- v : U]
-       As our IH, we know that forall S Gamma,
-         [Gamma,x:U |- t0 : S -> Gamma |- [x:=v]t0 S].
-
-       We can calculate that
-         [x:=v]t = abs y T11 (if eqb_string x y then t0 else [x:=v]t0)
-       And we must show that [Gamma |- [x:=v]t : T11->T12].  We know
-       we will do so using [T_Abs], so it remains to be shown that:
-         [Gamma,y:T11 |- if eqb_string x y then t0 else [x:=v]t0 : T12]
-       We consider two cases: [x = y] and [x <> y].
-    *)
-    apply T_Abs...
-    destruct (eqb_stringP x y).
-    + (* x=y *)
-    (* If [x = y], then the substitution has no effect.  Context
-       invariance shows that [Gamma,y:U,y:T11] and [Gamma,y:T11] are
-       equivalent.  Since the former context shows that [t0 : T12], so
-       does the latter. *)
-      eapply context_invariance...
-      subst.
-      intros x Hafi. unfold update, t_update.
-      destruct (eqb_string y x)...
-    + (* x<>y *)
-    (* If [x <> y], then the IH and context invariance allow us to show that
-         [Gamma,x:U,y:T11 |- t0 : T12]       =>
-         [Gamma,y:T11,x:U |- t0 : T12]       =>
-         [Gamma,y:T11 |- [x:=v]t0 : T12] *)
-      apply IHt. eapply context_invariance...
-      intros z Hafi. unfold update, t_update.
-      destruct (eqb_stringP y z)...
-      subst. rewrite false_eqb_string...
-Qed.
-
-Theorem preservation : forall t t' T,
-     has_type empty t T  ->
-     t --> t'  ->
-     has_type empty t' T.
-Proof with eauto.
-  intros t t' T HT.
-  (* Theorem: If [empty |- t : T] and [t --> t'], then [empty |- t' : T]. *)
-  remember (@empty ty) as Gamma. generalize dependent HeqGamma.
-  generalize dependent t'.
-  (* Proof: By induction on the given typing derivation.  Many cases are
-     contradictory ([T_Var], [T_Abs]).  We show just the interesting ones. *)
-  induction HT;
-    intros t' HeqGamma HE; subst; inversion HE; subst...
-  - (* T_App *)
-    (* If the last rule used was [T_App], then [t = t1 t2], and three rules
-       could have been used to show [t --> t']: [ST_App1], [ST_App2], and
-       [ST_AppAbs]. In the first two cases, the result follows directly from
-       the IH. *)
-    inversion HE; subst...
-    + (* ST_AppAbs *)
-      (* For the third case, suppose
-           [t1 = abs x T11 t12]
-         and
-           [t2 = v2].
-         We must show that [empty |- [x:=v2]t12 : T2].
-         We know by assumption that
-             [empty |- abs x T11 t12 : T1->T2]
-         and by inversion
-             [x:T1 |- t12 : T2]
-         We have already proven that substitution_preserves_typing and
-             [empty |- v2 : T1]
-         by assumption, so we are done. *)
-      apply substitution_preserves_typing with T1...
-      inversion HT1...
-  - (* T_Fst *)
-    inversion HT...
-  - (* T_Snd *)
-    inversion HT...
-Qed.
+  discriminate C.  Qed.
 
 (* ----------------------------------------------------------------- *)
 (** *** Determinism *)
@@ -471,13 +477,21 @@ Proof with eauto.
    - exfalso; apply value__normal in H3...
    - exfalso; apply value__normal in H...
    - f_equal...
+   - (* ST_IfTrue *)
+       inversion H3.
+   - (* ST_IfFalse *)
+       inversion H3.
+   (* ST_If *)
+   - inversion E1.
+   - inversion E1.
+   - f_equal...
    (* ST_Pair1 *)
    - f_equal...
    - exfalso; apply value__normal in H1...
    (* ST_Pair2 *)
    - exfalso; apply value__normal in H...
    - f_equal...
-   (* ST_Fst *)
+   (* ST_Fst1 *)
    - f_equal...
    - exfalso.
      inversion E1; subst.
@@ -488,7 +502,7 @@ Proof with eauto.
      inversion H2; subst.
      + apply value__normal in H...
      + apply value__normal in H0...
-   (* ST_Snd *)
+   (* ST_Snd1 *)
    - f_equal...
    - exfalso.
      inversion E1; subst.
@@ -499,14 +513,6 @@ Proof with eauto.
      inversion H2; subst.
      + apply value__normal in H...
      + apply value__normal in H0...
-   - (* ST_TestTrue *)
-       inversion H3.
-   - (* ST_TestFalse *)
-       inversion H3.
-   (* ST_Test *)
-   - inversion E1.
-   - inversion E1.
-   - f_equal...
 Qed.
 
 (* ################################################################# *)
@@ -531,8 +537,8 @@ Lemma value_halts : forall v, value v -> halts v.
 Proof.
   intros v H. unfold halts.
   exists v. split.
-  apply multi_refl.
-  assumption.
+  - apply multi_refl.
+  - assumption.
 Qed.
 
 (** The key issue in the normalization proof (as in many proofs by
@@ -581,10 +587,10 @@ Qed.
     Inductive proposition like this:
 
       Inductive R : ty -> tm -> Prop :=
-      | R_bool : forall b t, has_type empty t Bool ->
+      | R_bool : forall b t, empty |- t \in Bool ->
                       halts t ->
                       R Bool t
-      | R_arrow : forall T1 T2 t, has_type empty t (Arrow T1 T2) ->
+      | R_arrow : forall T1 T2 t, empty |- t \in (Arrow T1 T2) ->
                       halts t ->
                       (forall s, R T1 s -> R T2 (app t s)) ->
                       R (Arrow T1 T2) t.
@@ -607,14 +613,14 @@ Qed.
     Fortunately, it turns out that we _can_ define [R] using a
     [Fixpoint]: *)
 
-Fixpoint R (T:ty) (t:tm) {struct T} : Prop :=
-  has_type empty t T /\ halts t /\
+Fixpoint R (T:ty) (t:tm) : Prop :=
+  empty |- t \in T /\ halts t /\
   (match T with
-   | Bool  => True
-   | Arrow T1 T2 => (forall s, R T1 s -> R T2 (app t s))
+   | <{ Bool }>  => True
+   | <{ T1 -> T2 }> => (forall s, R T1 s -> R T2 <{t s}> )
 
    (* ... edit the next line when dealing with products *)
-   | Prod T1 T2 => False    (* FILL IN HERE *)
+   | <{ T1 * T2 }> => False    (* FILL IN HERE *)
    end).
 
 (** As immediate consequences of this definition, we have that every
@@ -623,12 +629,14 @@ Fixpoint R (T:ty) (t:tm) {struct T} : Prop :=
 
 Lemma R_halts : forall {T} {t}, R T t -> halts t.
 Proof.
-  intros. destruct T; unfold R in H; inversion H; inversion H1;  assumption.
+  intros.
+  destruct T; unfold R in H; destruct H as [_ [H _]]; assumption.
 Qed.
 
-Lemma R_typable_empty : forall {T} {t}, R T t -> has_type empty t T.
+Lemma R_typable_empty : forall {T} {t}, R T t -> empty |- t \in T.
 Proof.
-  intros. destruct T; unfold R in H; inversion H; inversion H1; assumption.
+  intros.
+  destruct T; unfold R in H; destruct H as [H _]; assumption.
 Qed.
 
 (** Now we proceed to show the main result, which is that every
@@ -651,15 +659,16 @@ Qed.
     determinstic. This lemma might still be true for nondeterministic
     languages, but the proof would be harder! *)
 
-Lemma step_preserves_halting : forall t t', (t --> t') -> (halts t <-> halts t').
+Lemma step_preserves_halting :
+  forall t t', (t --> t') -> (halts t <-> halts t').
 Proof.
  intros t t' ST.  unfold halts.
  split.
  - (* -> *)
   intros [t'' [STM V]].
-  inversion STM; subst.
-   exfalso.  apply value__normal in V. unfold normal_form in V. apply V. exists t'. auto.
-   rewrite (step_deterministic _ _ _ ST H). exists t''. split; assumption.
+  destruct STM.
+   + exfalso; apply value__normal in V; eauto.
+   + rewrite (step_deterministic _ _ _ ST H). exists z. split; assumption.
  - (* <- *)
   intros [t'0 [STM V]].
   exists t'0. split; eauto.
@@ -704,12 +713,12 @@ Qed.
    [T] before stepping as an additional hypothesis. *)
 
 Lemma step_preserves_R' : forall T t t',
-  has_type empty t T -> (t --> t') -> R T t' -> R T t.
+  empty |- t \in T -> (t --> t') -> R T t' -> R T t.
 Proof.
   (* FILL IN HERE *) Admitted.
 
 Lemma multistep_preserves_R' : forall T t t',
-  has_type empty t T -> (t -->* t') -> R T t' -> R T t.
+  empty |- t \in T -> (t -->* t') -> R T t' -> R T t.
 Proof.
   intros T t t' HT STM.
   induction STM; intros.
@@ -781,10 +790,10 @@ Qed.
 
 Definition env := list (string * tm).
 
-Fixpoint msubst (ss:env) (t:tm) {struct ss} : tm :=
+Fixpoint msubst (ss:env) (t:tm) : tm :=
 match ss with
 | nil => t
-| ((x,s)::ss') => msubst ss' ([x:=s]t)
+| ((x,s)::ss') => msubst ss' <{ [x:=s]t }>
 end.
 
 (** We need similar machinery to talk about repeated extension of a
@@ -802,7 +811,7 @@ Fixpoint mupdate (Gamma : context) (xts : tass) :=
 (** We will need some simple operations that work uniformly on
     environments and type assigments *)
 
-Fixpoint lookup {X:Set} (k : string) (l : list (string * X)) {struct l}
+Fixpoint lookup {X:Set} (k : string) (l : list (string * X))
               : option X :=
   match l with
     | nil => None
@@ -810,7 +819,7 @@ Fixpoint lookup {X:Set} (k : string) (l : list (string * X)) {struct l}
       if eqb_string j k then Some x else lookup k l'
   end.
 
-Fixpoint drop {X:Set} (n:string) (nxs:list (string * X)) {struct nxs}
+Fixpoint drop {X:Set} (n:string) (nxs:list (string * X))
             : list (string * X) :=
   match nxs with
     | nil => nil
@@ -840,18 +849,18 @@ Inductive instantiation :  tass -> env -> Prop :=
 
 Lemma vacuous_substitution : forall  t x,
      ~ appears_free_in x t  ->
-     forall t', [x:=t']t = t.
+     forall t', <{ [x:=t']t }> = t.
 Proof with eauto.
   (* FILL IN HERE *) Admitted.
 
 Lemma subst_closed: forall t,
      closed t  ->
-     forall x t', [x:=t']t = t.
+     forall x t', <{ [x:=t']t }> = t.
 Proof.
   intros. apply vacuous_substitution. apply H.  Qed.
 
 Lemma subst_not_afi : forall t x v,
-    closed v ->  ~ appears_free_in x ([x:=v]t).
+    closed v ->  ~ appears_free_in x <{ [x:=v]t }>.
 Proof with eauto.  (* rather slow this way *)
   unfold closed, not.
   induction t; intros x v P A; simpl in A.
@@ -864,30 +873,30 @@ Proof with eauto.  (* rather slow this way *)
      destruct (eqb_stringP x s)...
      + inversion A; subst...
      + inversion A; subst...
-    - (* pair *)
-     inversion A; subst...
-    - (* fst *)
-     inversion A; subst...
-    - (* snd *)
-     inversion A; subst...
     - (* tru *)
      inversion A.
     - (* fls *)
      inversion A.
     - (* test *)
      inversion A; subst...
+    - (* pair *)
+     inversion A; subst...
+    - (* fst *)
+     inversion A; subst...
+    - (* snd *)
+     inversion A; subst...
 Qed.
 
 Lemma duplicate_subst : forall t' x t v,
-  closed v -> [x:=t]([x:=v]t') = [x:=v]t'.
+  closed v -> <{ [x:=t]([x:=v]t') }> = <{ [x:=v]t' }>.
 Proof.
-  intros. eapply vacuous_substitution. apply subst_not_afi.  auto.
+  intros. eapply vacuous_substitution. apply subst_not_afi. assumption.
 Qed.
 
 Lemma swap_subst : forall t x x1 v v1,
     x <> x1 ->
     closed v -> closed v1 ->
-    [x1:=v1]([x:=v]t) = [x:=v]([x1:=v1]t).
+    <{ [x1:=v1]([x:=v]t) }> = <{ [x:=v]([x1:=v1]t) }>.
 Proof with eauto.
  induction t; intros; simpl.
   - (* var *)
@@ -910,7 +919,7 @@ Qed.
 
 (** Closed environments are those that contain only closed terms. *)
 
-Fixpoint closed_env (env:env) {struct env} :=
+Fixpoint closed_env (env:env) :=
   match env with
   | nil => True
   | (x,t)::env' => closed t /\ closed_env env'
@@ -918,23 +927,23 @@ Fixpoint closed_env (env:env) {struct env} :=
 
 (** Next come a series of lemmas charcterizing how [msubst] of closed terms
     distributes over [subst] and over each term form *)
-
+    
 Lemma subst_msubst: forall env x v t, closed v -> closed_env env ->
-    msubst env ([x:=v]t) = [x:=v](msubst (drop x env) t).
+    msubst env <{ [x:=v]t }> = <{ [x:=v]  { msubst (drop x env) t }  }> .
 Proof.
   induction env0; intros; auto.
   destruct a. simpl.
-  inversion H0. fold closed_env in H2.
+  inversion H0.
   destruct (eqb_stringP s x).
   - subst. rewrite duplicate_subst; auto.
   - simpl. rewrite swap_subst; eauto.
 Qed.
 
 Lemma msubst_var:  forall ss x, closed_env ss ->
-   msubst ss (var x) =
+   msubst ss (tm_var x) =
    match lookup x ss with
    | Some t => t
-   | None => var x
+   | None => tm_var x
   end.
 Proof.
   induction ss; intros.
@@ -946,7 +955,7 @@ Proof.
 Qed.
 
 Lemma msubst_abs: forall ss x T t,
-  msubst ss (abs x T t) = abs x T (msubst (drop x ss) t).
+  msubst ss <{ \ x : T, t }> = <{ \x : T, {msubst (drop x ss) t} }>.
 Proof.
   induction ss; intros.
     reflexivity.
@@ -954,7 +963,8 @@ Proof.
       simpl. destruct (eqb_string s x); simpl; auto.
 Qed.
 
-Lemma msubst_app : forall ss t1 t2, msubst ss (app t1 t2) = app (msubst ss t1) (msubst ss t2).
+Lemma msubst_app : forall ss t1 t2, 
+    msubst ss <{ t1 t2 }> = <{ {msubst ss t1} ({msubst ss t2}) }>.
 Proof.
  induction ss; intros.
    reflexivity.
@@ -1016,8 +1026,8 @@ Proof.
   intros c e V; induction V; intros.
     econstructor.
     unfold closed_env. fold closed_env.
-    split.  eapply typable_empty__closed. eapply R_typable_empty. eauto.
-        auto.
+    split; [|assumption].
+    eapply typable_empty__closed. eapply R_typable_empty. eauto.
 Qed.
 
 Lemma instantiation_R : forall c e,
@@ -1039,7 +1049,8 @@ Lemma instantiation_drop : forall c env,
 Proof.
   intros c e V. induction V.
     intros.  simpl.  constructor.
-    intros. unfold drop. destruct (eqb_string x x0); auto. constructor; eauto.
+    intros. unfold drop.
+    destruct (eqb_string x x0); auto. constructor; eauto.
 Qed.
 
 (* ----------------------------------------------------------------- *)
@@ -1048,7 +1059,7 @@ Qed.
 (** We'll need just a few of these; add them as the demand arises. *)
 
 Lemma multistep_App2 : forall v t t',
-  value v -> (t -->* t') -> (app v t) -->* (app v t').
+  value v -> (t -->* t') -> <{ v t }> -->* <{ v t' }>.
 Proof.
   intros v t t' V STM. induction STM.
    apply multi_refl.
@@ -1059,7 +1070,7 @@ Qed.
 (* FILL IN HERE *)
 
 (* ----------------------------------------------------------------- *)
-(** *** The R Lemma. *)
+(** *** The R Lemma *)
 
 (** We can finally put everything together.
 
@@ -1068,8 +1079,8 @@ Qed.
 
 Lemma msubst_preserves_typing : forall c e,
      instantiation c e ->
-     forall Gamma t S, has_type (mupdate Gamma c) t S ->
-     has_type Gamma (msubst e t) S.
+     forall Gamma t S, (mupdate Gamma c) |- t \in S ->
+     Gamma |- { (msubst e t) } \in S.
 Proof.
   induction 1; intros.
     simpl in H. simpl. auto.
@@ -1082,7 +1093,7 @@ Qed.
 (** And at long last, the main lemma. *)
 
 Lemma msubst_R : forall c env t T,
-    has_type (mupdate empty c) t T ->
+    (mupdate empty c) |- t \in T ->
     instantiation c env ->
     R T (msubst env t).
 Proof.
@@ -1105,7 +1116,7 @@ Proof.
     rewrite msubst_abs.
     (* We'll need variants of the following fact several times, so its simplest to
        establish it just once. *)
-    assert (WT: has_type empty (abs x T11 (msubst (drop x env0) t12)) (Arrow T11 T12)).
+    assert (WT : empty |- \x : T2, {msubst (drop x env0) t1 } \in (T2 -> T1) ).
     { eapply T_Abs. eapply msubst_preserves_typing.
       { eapply instantiation_drop; eauto. }
       eapply context_invariance.
@@ -1124,7 +1135,7 @@ Proof.
      intros.
      destruct (R_halts H0) as [v [P Q]].
      pose proof (multistep_preserves_R _ _ _ P H0).
-     apply multistep_preserves_R' with (msubst ((x,v)::env0) t12).
+     apply multistep_preserves_R' with (msubst ((x,v)::env0) t1).
        eapply T_App. eauto.
        apply R_typable_empty; auto.
        eapply multi_trans.  eapply multistep_App2; eauto.
@@ -1134,7 +1145,7 @@ Proof.
        eapply typable_empty__closed.
        apply (R_typable_empty H1).
        eapply instantiation_env_closed; eauto.
-       eapply (IHHT ((x,T11)::c)).
+       eapply (IHHT ((x,T2)::c)).
           intros. unfold update, t_update, lookup. destruct (eqb_string x x0); auto.
        constructor; auto.
 
@@ -1150,7 +1161,7 @@ Proof.
 
 (** And the final theorem: *)
 
-Theorem normalization : forall t T, has_type empty t T -> halts t.
+Theorem normalization : forall t T, empty |- t \in T -> halts t.
 Proof.
   intros.
   replace t with (msubst nil t) by reflexivity.
@@ -1159,5 +1170,4 @@ Proof.
   eapply V_nil.
 Qed.
 
-
-(* Thu Feb 7 20:09:26 EST 2019 *)
+(* 2020-09-09 21:08 *)

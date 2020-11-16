@@ -1,0 +1,14 @@
+--- Redblack.v.orig	2020-11-03 17:26:46.995120800 +0900
++++ Redblack.v	2020-11-03 17:53:01.108931700 +0900
+@@ -799,9 +799,11 @@
+     That execution uses the bytecode interpreter.  The native compiler
+     will have better performance:
+ 
++<<
+       $ ocamlopt -c redblack.mli redblack.ml
+       $ ocamlopt redblack.cmx -open Redblack test_searchtree.ml -o test_redblack
+       $ ./test_redblack
++>>
+ 
+ On the same machine that prints,
+ 

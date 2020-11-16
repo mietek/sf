@@ -1,248 +1,278 @@
 (** * Sort: Insertion Sort *)
 
-(** Sorting can be done in O(N log N) time by various
+(** Sorting can be done in expected O(N log N) time by various
     algorithms (quicksort, mergesort, heapsort, etc.).  But for
     smallish inputs, a simple quadratic-time algorithm such as
-    insertion sort can actually be faster.  And it's certainly easier
-    to implement -- and to prove correct. *)
+    insertion sort can actually be faster.  It's certainly easier to
+    implement -- and to verify. *)
 
-(* ################################################################# *)
-(** * Recommended Reading *)
+(** If you don't recall insertion sort or haven't seen it in
+    a while, see Wikipedia or read any standard textbook; for example:
 
-(** If you don't already know how insertion sort works, see Wikipedia
-    or read any standard textbook; for example:
+    - Sections 2.0 and 2.1 of _Algorithms, Fourth Edition_, by
+      Sedgewick and Wayne, Addison Wesley 2011; or
 
-   Sections 2.0 and 2.1 of _Algorithms, Fourth Edition_,
-       by Sedgewick and Wayne, Addison Wesley 2011;  or
+    - Section 2.1 of _Introduction to Algorithms, 3rd Edition_, by
+      Cormen, Leiserson, and Rivest, MIT Press 2009. *)
 
-   Section 2.1 of _Introduction to Algorithms, 3rd Edition_,
-       by Cormen, Leiserson, and Rivest, MIT Press 2009. *)
+From VFA Require Import Perm.
 
 (* ################################################################# *)
 (** * The Insertion-Sort Program *)
 
 (** Insertion sort is usually presented as an imperative program
-   operating on arrays.  But it works just as well as a functional
-   program operating on linked lists! *)
+    operating on arrays.  But it works just as well as a functional
+    program operating on linked lists. *)
 
-From VFA Require Import Perm. 
-
-Fixpoint insert (i:nat) (l: list nat) := 
+(* [insert i l] inserts [i] into its sorted place in list [l].
+   Precondition: [l] is sorted. *)
+Fixpoint insert (i : nat) (l : list nat) :=
   match l with
-  | nil => i::nil
-  | h::t => if i <=? h then i::h::t else h :: insert i t
- end.
+  | [] => [i]
+  | h :: t => if i <=? h then i :: h :: t else h :: insert i t
+  end.
 
-Fixpoint sort (l: list nat) : list nat :=
+Fixpoint sort (l : list nat) : list nat :=
   match l with
-  | nil => nil
-  | h::t => insert h (sort t)
-end.
+  | [] => []
+  | h :: t => insert h (sort t)
+  end.
 
-Example sort_pi: sort [3;1;4;1;5;9;2;6;5;3;5]
-                    = [1;1;2;3;3;4;5;5;5;6;9].
+Example sort_pi :
+  sort [3;1;4;1;5;9;2;6;5;3;5]
+  = [1;1;2;3;3;4;5;5;5;6;9].
 Proof. simpl. reflexivity. Qed.
 
-(** What Sedgewick/Wayne and Cormen/Leiserson/Rivest don't acknowlege
-    is that the arrays-and-swaps model of sorting is not the only one
-    in the world.  We are writing _functional programs_, where our
-    sequences are (typically) represented as linked lists, and where
-    we do _not_ destructively splice elements into those lists.
-    Instead, we build new lists that (sometimes) share structure with
-    the old ones.
 
-    So, for example: *)
-
-Eval compute in insert 7 [1; 3; 4; 8; 12; 14; 18].
-(* = [1; 3; 4; 7; 8; 12; 14; 18] *)
-
-(** The tail of this list, [12::14::18::nil], is not disturbed or
-   rebuilt by the [insert] algorithm.  The nodes [1::3::4::7::_] are
-   new, constructed by [insert].  The first three nodes of the old
-   list, [1::3::4::_] will likely be garbage-collected, if no other
-   data structure is still pointing at them.  Thus, in this typical
-   case,
-     - Time cost = 4X
-     - Space cost = (4-3)Y = Y
-
-   where X and Y are constants, independent of the length of the tail.
-   The value Y is the number of bytes in one list node: 2 to 4 words,
-   depending on how the implementation handles constructor-tags.
-   We write (4-3) to indicate that four list nodes are constructed,
-   while three list nodes become eligible for garbage collection.  
-
-   We will not _prove_ such things about the time and space cost, but
-   they are _true_ anyway, and we should keep them in
-   consideration. *)
+(** We won't analyze or prove anything about the efficiency of
+    [sort]. Instead, we will verify its correctness: that it produces
+    the correct output for a given input. *)
 
 (* ################################################################# *)
 (** * Specification of Correctness *)
 
-(** A sorting algorithm must rearrange the elements into a list that
-    is totally ordered. *)
+(** A sorting algorithm must rearrange the elements into a list
+    that is totally ordered. There are many ways we might express that
+    idea formally in Coq.  One is with an inductively-defined
+    relation that says: *)
 
-Inductive sorted: list nat -> Prop := 
-| sorted_nil:
-    sorted nil
-| sorted_1: forall x,
-    sorted (x::nil)
-| sorted_cons: forall x y l,
-   x <= y -> sorted (y::l) -> sorted (x::y::l).
+(** - The empty list is sorted.
 
-(** Is this really the right definition of what it means for a list to
-    be sorted?  One might have thought that it should go more like this: *)
+    - Any single-element list is sorted.
 
-Definition sorted' (al: list nat) :=
- forall i j, i < j < length al -> nth i al 0 <= nth j al 0.
+    - For any two adjacent elements, they must be in the proper order. *)
 
-(** This is a reasonable definition too.  It should be equivalent.
-    Later on, we'll prove that the two definitions really are
-    equivalent.  For now, let's use the first one to define what it
-    means to be a correct sorting algorthm. *)
-    
-Definition is_a_sorting_algorithm (f: list nat -> list nat) :=
-  forall al, Permutation al (f al) /\ sorted (f al).
+Inductive sorted : list nat -> Prop :=
+| sorted_nil :
+    sorted []
+| sorted_1 : forall x,
+    sorted [x]
+| sorted_cons : forall x y l,
+    x <= y -> sorted (y :: l) -> sorted (x :: y :: l).
 
-(** The result [(f al)] should not only be a [sorted] sequence,
-    but it should be some rearrangement (Permutation) of the input sequence. *)
+Hint Constructors sorted.
+
+(** This definition might not be the most obvious. Another definition,
+    perhaps more familiar, might be: for any two elements of the list
+    (regardless of whether they are adjacent), they should be in the
+    proper order.  Let's try formalizing that.
+
+    We can think in terms of indices into a list [lst], and say: for
+    any valid indices [i] and [j], if [i < j] then [index lst i <=
+    index lst j], where [index lst n] means the element of [lst] at
+    index [n].  Unfortunately, formalizing this idea becomes messy,
+    because any Coq implementing [index] must be total: it must return
+    some result even if the index is out of range for the list.
+    The Coq standard library contains two such functions: *)
+
+Check nth : forall A : Type, nat -> list A -> A -> A.
+Check nth_error : forall A : Type, list A -> nat -> option A.
+
+(** These two functions ensure totality in different ways:
+
+    - [nth] takes an additional argument of type [A] --a _default_
+      value-- to be returned if the index is out of range, whereas
+
+    - [nth_error] returns [Some v] if the index is in range and [None]
+      --an error-- otherwise.
+
+    If we use [nth], we must ensure that indices are in range: *)
+
+Definition sorted'' (al : list nat) := forall i j,
+    i < j < length al ->
+    nth i al 0 <= nth j al 0.
+
+(** The choice of default value, here 0, is unimportant, because it
+    will never be returned for the [i] and [j] we pass.
+
+    If we use [nth_error], we must add additional antecedents: *)
+
+Definition sorted' (al : list nat) := forall i j iv jv,
+    i < j ->
+    nth_error al i = Some iv ->
+    nth_error al j = Some jv ->
+    iv <= jv.
+
+(** Here, the validity of [i] and [j] are implicit in the fact
+    that we get [Some] results back from each call to [nth_error]. *)
+
+(** All three definitions of sortedness are reasonable.  In practice,
+    [sorted'] is easier to work with than [sorted''] because it
+    doesn't need to mention the [length] function. And [sorted] is
+    easiest, because it doesn't need to mention indices. *)
+
+(** Using [sorted], we specify what it means to be a correct sorting
+    algorthm: *)
+
+Definition is_a_sorting_algorithm (f: list nat -> list nat) := forall al,
+    Permutation al (f al) /\ sorted (f al).
+
+(** Function [f] is a correct sorting algorithm if [f al] is
+    [sorted] and is a permutation of its input. *)
+
 (* ################################################################# *)
 (** * Proof of Correctness *)
 
-(** **** Exercise: 3 stars (insert_perm)  *)
-(** Prove the following auxiliary lemma, [insert_perm], which will be
-    useful for proving [sort_perm] below.  Your proof will be by
-    induction, but you'll need some of the permutation facts from the
-    library, so first remind yourself by doing [Search]. *)
-  
-Search Permutation.
+(** In the following exercises, you will prove the correctness of
+    insertion sort. *)
 
-Lemma insert_perm: forall x l, Permutation (x::l) (insert x l).
-Proof.
-(* FILL IN HERE *) Admitted.
-(** [] *)
+(** **** Exercise: 3 stars, standard (insert_sorted)  *)
 
-(** **** Exercise: 3 stars (sort_perm)  *)
-(** Now prove that sort is a permutation. *)
-
-Theorem sort_perm: forall l, Permutation l (sort l).
-Proof.
-(* FILL IN HERE *) Admitted.
-(** [] *)
-
-(** **** Exercise: 4 stars (insert_sorted)  *)
-(** This one is a bit tricky.  However, there just a single induction
-   right at the beginning, and you do _not_ need to use [insert_perm]
-   or [sort_perm]. *)
+(* Prove that insertion maintains sortedness. Make use of tactic
+   [bdestruct], defined in [Perm]. *)
 
 Lemma insert_sorted:
   forall a l, sorted l -> sorted (insert a l).
 Proof.
-(* FILL IN HERE *) Admitted.
+  intros a l S. induction S; simpl.
+  (* FILL IN HERE *) Admitted.
+
 (** [] *)
 
-(** **** Exercise: 2 stars (sort_sorted)  *)
-(** This one is easy.   *)
+(** **** Exercise: 2 stars, standard (sort_sorted)  *)
+
+(** Using [insert_sorted], prove that insertion sort makes a list
+    sorted. *)
 
 Theorem sort_sorted: forall l, sorted (sort l).
 Proof.
-(* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *) Admitted.
+
 (** [] *)
 
-(** Now we wrap it all up.  *)
+(** **** Exercise: 3 stars, standard (insert_perm)  *)
+
+(** The following lemma will be useful soon as a helper. Take
+    advantage of helpful theorems from the [Permutation] library. *)
+
+Lemma insert_perm: forall x l,
+    Permutation (x :: l) (insert x l).
+Proof.
+  (* FILL IN HERE *) Admitted.
+
+(** [] *)
+
+(** **** Exercise: 3 stars, standard (sort_perm)  *)
+
+(** Prove that [sort] is a permutation, using [insert_perm]. *)
+
+Theorem sort_perm: forall l, Permutation l (sort l).
+Proof.
+(* FILL IN HERE *) Admitted.
+
+(** [] *)
+
+(** **** Exercise: 1 star, standard (insertion_sort_correct)  *)
+
+(** Finish the proof of correctness! *)
 
 Theorem insertion_sort_correct:
     is_a_sorting_algorithm sort.
 Proof.
-  split. apply sort_perm. apply sort_sorted.
-Qed.
+  (* FILL IN HERE *) Admitted.
+
+(** [] *)
 
 (* ################################################################# *)
-(** * Making Sure the Specification is Right *)
+(** * Validating the Specification (Advanced) *)
 
-(** It's really important to get the _specification_ right.  You can
-    prove that your program satisfies its specification (and Coq will
-    check that proof for you), but you can't prove that you have the
-    right specification.  Therefore, we take the trouble to write two
-    different specifications of sortedness ([sorted] and [sorted']),
-    and prove that they mean the same thing.  This increases our
-    confidence that we have the right specification, though of course
-    it doesn't _prove_ that we do. *)
+(** You can prove that a program satisfies a specification, but how
+    can you prove you have the right specification?  Actually, you
+    cannot.  The specification is an informal requirement in your
+    mind.  As Alan Perlis quipped, "One can't proceed from the
+    informal to the formal by formal means."
 
-(** **** Exercise: 4 stars, optional (sorted_sorted')  *)
+    But one way to build confidence in a specification is to state it
+    in two different ways, then prove they are equivalent. *)
+
+(** **** Exercise: 4 stars, advanced (sorted_sorted')  *)
 Lemma sorted_sorted': forall al, sorted al -> sorted' al.
 
-(** Hint: Instead of doing induction on the list [al], do induction
-    on the _sortedness_ of [al]. This proof is a bit tricky, so
-    you may have to think about how to approach it, and try out
-    one or two different ideas.*)
-
+(** Hint: Instead of doing induction on the list [al], do induction on
+    the sortedness of [al]. This proof is a bit tricky, so you may
+    have to think about how to approach it, and try out one or two
+    different ideas.*)
+Proof.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, optional (sorted'_sorted)  *)
-Lemma sorted'_sorted: forall al, sorted' al -> sorted al.
-
-(** Here, you can't do induction on the sorted'-ness of the list,
-    because [sorted'] is not an inductive predicate. *)
-
+(** **** Exercise: 3 stars, advanced (sorted'_sorted)  *)
+Lemma sorted'_sorted : forall al, sorted' al -> sorted al.
 Proof.
+(** Here, you can't do induction on the sortedness of the list,
+    because [sorted'] is not an inductive predicate. But the proof
+    is not hard. *)
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
 (* ################################################################# *)
-(** * Proving Correctness from the Alternate Spec *)
+(** * Proving Correctness from the Alternative Spec (Optional) *)
 
 (** Depending on how you write the specification of a program, it can
-    be _much_ harder or easier to prove correctness.  We saw that the
-    predicates [sorted] and [sorted'] are equivalent; but it is really
-    difficult to prove correctness of insertion sort directly from
-    [sorted'].
+    be harder or easier to prove correctness.  We saw that predicates
+    [sorted] and [sorted'] are equivalent.  It is significantly
+    harder, though, to prove correctness of insertion sort directly
+    from [sorted'].
 
-    Try it yourself, if you dare!  I managed it, but my proof is quite
-    long and complicated.  I found that I needed all these facts:
-    - [insert_perm], [sort_perm]
-    - [Forall_perm], [Permutation_length]
-    - [Permutation_sym], [Permutation_trans]
-    - a new lemma [Forall_nth], stated below.
-
-    Maybe you will find a better way that's not so complicated.
+    Give it a try!  The best proof we know of makes essential use of
+    the auxiliary lemma [nth_default_insert], so you may want to prove
+    that first.  And some other auxiliary lemmas may be needed too.
+    But maybe you will find a simpler appraoch!
 
     DO NOT USE [sorted_sorted'], [sorted'_sorted], [insert_sorted], or
-    [sort_sorted] in these proofs! *)
+    [sort_sorted] in these proofs.  That would defeat the purpose! *)
 
-(** **** Exercise: 3 stars, optional (Forall_nth)  *)
-Lemma Forall_nth:
-  forall {A: Type} (P: A -> Prop) d (al: list A),
-     Forall P al <-> (forall i,  i < length al -> P (nth i al d)).
+(** **** Exercise: 5 stars, standard, optional (insert_sorted')  *)
+
+Lemma nth_error_insert : forall l a i iv,
+    nth_error (insert a l) i = Some iv ->
+    a = iv \/ exists i', nth_error l i' = Some iv.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+(* FILL IN HERE *) Admitted.
 
-
-(** **** Exercise: 4 stars, optional (insert_sorted')  *)
 Lemma insert_sorted':
   forall a l, sorted' l -> sorted' (insert a l).
+Proof.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 4 stars, optional (insert_sorted')  *)
 Theorem sort_sorted': forall l, sorted' (sort l).
-(* FILL IN HERE *) Admitted.
-(** [] *)
+Proof.
+  induction l.
+  - unfold sorted'. intros. destruct i; inv H0.
+  - simpl. apply insert_sorted'. auto.
+Qed.
 
-(* ================================================================= *)
-(** ** The Moral of This Story *)
+(** If you complete the proofs above, you will note that the proof of
+    [insert_sorted] is relatively easy compared to the proof of
+    [insert_sorted'], even though [sorted al <-> sorted' al].  So,
+    suppose someone asked you to prove [sort_sorted'].  Instead of
+    proving it directly, it would be much easier to design predicate
+    [sorted], then prove [sort_sorted] and [sorted_sorted'].
 
-(** The proofs of [insert_sorted] and [sort_sorted] were easy; the
-    proofs of [insert_sorted'] and [sort_sorted'] were difficult; and
-    yet [sorted al <-> sorted' al].  _Different formulations of the
-    functional specification can lead to great differences in the
-    difficulty of the correctness proofs_.
+    The moral of the story is therefore: _Different formulations of
+    the functional specification can lead to great differences in the
+    difficulty of the correctness proofs_. *)
 
-   Suppose someone required you to prove [sort_sorted'], and never
-   mentioned the [sorted] predicate to you.  Instead of proving
-   [sort_sorted'] directly, it would be much easier to design a new
-   predicate ([sorted]), and then prove [sort_sorted] and
-   [sorted_sorted']. *)
 
-(** $Date$ *)
+(* 2020-08-07 17:08 *)

@@ -117,11 +117,11 @@ ul#menu a.hover li  {
 .booktitleinheader {
     color: #000000;
     text-transform: uppercase;
-    margin: 5px auto; 
     font-weight: 300;
     letter-spacing: 1px;
     font-size: 125%;
     margin-left: 0px;
+    margin-bottom: 22px;
  }
 
 /* Chapter titles */
@@ -148,7 +148,8 @@ h2.section {
     padding-left: 0px; 
     padding-top: 0px;  
     padding-bottom: 0px; 
-    margin-top: 0px;
+    /* margin-top: 0px; */
+    margin-top: 9px; /* BCP 2/20 */
     font-size : 135%; }
 
 h3.section {
@@ -161,7 +162,8 @@ h3.section {
     /* padding-bottom: 0px; */
     padding-bottom: 0.5em; 
     /* margin-top: 9px; */
-    margin-top: 4px;
+    /* margin-top: 4px;  (BCP 2/20) */
+    margin-top: 9px;   /* BCP 2/20 */
     font-size : 115%;
     color:black;
 }
@@ -192,7 +194,9 @@ h4.section {
     color: black;
     /* text-align: justify; */
     border-style: plain;
-    padding-top: 18px;
+    /* This might work better after changing back to standard coqdoc: */
+    padding-top: 10px;
+    /* padding-top: 18px; */
 }
 
 .quote { 
@@ -432,55 +436,52 @@ tr.infrulemiddle hr {
 
 .id { display: inline; }
 
-.id[type="constructor"] { 
+.id[title="constructor"] {
     color: #697f2f;
 }
 
-.id[type="var"] { 
+.id[title="var"],
+.id[title="variable"] {
     color: rgb(40%,0%,40%);
 }
 
-.id[type="variable"] { 
-    color: rgb(40%,0%,40%);
-}
-
-.id[type="definition"] { 
+.id[title="definition"] {
     color: rgb(0%,40%,0%);
 }
 
-.id[type="abbreviation"] { 
+.id[title="abbreviation"] {
     color: rgb(0%,40%,0%);
 }
 
-.id[type="lemma"] { 
+.id[title="lemma"] {
     color: rgb(0%,40%,0%);
 }
 
-.id[type="instance"] { 
+.id[title="instance"] {
     color: rgb(0%,40%,0%);
 }
 
-.id[type="projection"] { 
+.id[title="projection"] {
     color: rgb(0%,40%,0%);
 }
 
-.id[type="method"] { 
+.id[title="method"] {
     color: rgb(0%,40%,0%);
 }
 
-.id[type="inductive"] { 
+.id[title="inductive"] {
     color: #034764;
 }
 
-.id[type="record"] { 
+.id[title="record"] {
     color: rgb(0%,0%,80%);
 }
 
-.id[type="class"] { 
+.id[title="class"] {
     color: rgb(0%,0%,80%);
 }
 
-.id[type="keyword"] { 
+.id[title="keyword"] {
     color : #697f2f;
     /*     color: black; */
 }
@@ -506,14 +507,64 @@ tr.infrulemiddle hr {
        background-color: rgb(60%,60%,100%); */
 }
 
+#toc h2.ui-accordion-header {
+    padding: .5em .5em .5em .7em;
+    outline: none;
+}
+
+#toc .ui-accordion .ui-accordion-content {
+	padding: 0.5em 2.5em 0.8em .9em;
+	border-top: 0;
+    margin-bottom: 1em;
+    /* bottom rule */
+    border: none;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom-color 0.25s ease-in;
+    transition-delay: 0.15s;
+}
+
+#toc .ui-accordion .ui-accordion-content-active {
+    border-bottom: 1px solid #9b9b9b;
+    transition-delay: 0s;
+}
+
+#toc h2.ui-accordion-header-active {
+    background: silver !important;
+}
+
+#toc h2:not(.ui-accordion-header-active):hover {
+    background: rgba(0,0,0,0.04) !important;
+}
+
+#toc h2 a:hover {
+    text-decoration: underline;
+}
+
+#toc h2:hover::after {
+    content: "expand ▾";
+    font-size: 80%;
+    float: right;
+    margin-top: 0.2em;
+    color: silver;
+    opacity: 1;
+    transition: opacity .5s ease-in-out;
+}
+
+#toc h2.ui-accordion-header-active:hover::after {
+    opacity: 0;
+}
+
 #toc h2 .select { background-image: url('media/image/arrow_down.jpg'); }
 div#sec1.hide { display: none; }
 
 #toc ul {
     padding-top: 8px;
-    margin-bottom: -8px;
     font-size: 14px;
     padding-left: 0;
+}
+
+#toc ul ul {
+    margin-bottom: -8px;
 }
 
 #toc li {
@@ -601,21 +652,9 @@ html .ui-button.ui-state-disabled:focus {
 	border-bottom-color: #b2b2b2;
 }
 
-.ui-state-active {
-    background: silver !important;
-}
-
 .ui-widget-content {
-    border: none!important;
     background: #ffffff;
     color: #333333;
-    border-bottom: 1px solid #b2b2b2!important;
-}
-
-.ui-accordion .ui-accordion-content {
-	padding: 0 2.2em 2em .75em !important;
-	border-top: 0;
-    overflow: auto;
 }
 
 
@@ -756,11 +795,9 @@ body.sf_home table td p {
     
 }
 
-table.logical { 
-    background-color: rgba(144, 160, 209, 0.5);  }
-    
-    
+table.logical { background-color: rgba(144, 160, 209, 0.5);  }
 table.logical tbody tr td.tab { background-color: #91a1d1; }
+
 table.language_found { background-color: rgba(178, 88, 88, 0.5);  }
 table.language_found  tbody tr td.tab { background-color: #b25959; }
 
@@ -769,6 +806,9 @@ table.algo  tbody tr td.tab { background-color: #c2c26c; }
 
 table.qc {  background-color: rgba(185, 170, 185, 0.5); }
 table.qc tbody tr td.tab { background-color: #8b7d95; }
+
+table.vc {  background-color: rgba(159, 125, 140, 0.5); }
+table.vc tbody tr td.tab { background-color: rgb(159, 125, 140); }
 
 /* Suggested background color for next volume */
 #     #c07d62

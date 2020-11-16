@@ -8,12 +8,11 @@
   Read the [Extract] chapter to see what can be done about that.) *)
 
 (* ################################################################# *)
-(** * Required Reading *)
-(**
-  Binomial Queues http://www.cs.princeton.edu/~appel/Binom.pdf
+(** * Required Reading
+  Binomial Queues https://www.cs.princeton.edu/~appel/Binom.pdf
   by Andrew W. Appel, 2016.
 
-  Binomial Queues http://www.cs.princeton.edu/~appel/BQ.pdf
+  Binomial Queues https://www.cs.princeton.edu/~appel/BQ.pdf
   Section 9.7 of _Algorithms 3rd Edition in Java, Parts 1-4:
     Fundamentals, Data Structures, Sorting, and Searching_,
   by Robert Sedgewick.  Addison-Wesley, 2002.
@@ -22,7 +21,7 @@
 (* ################################################################# *)
 (** * The Program *)
 
-Require Import Coq.Strings.String.
+From Coq Require Import Strings.String. (* for manual grading *)
 From VFA Require Import Perm.
 From VFA Require Import Priqueue.
 
@@ -179,30 +178,30 @@ Definition priq (q: priqueue) : Prop := priq' 0 q.
 (** ...that is, the [priq] property, or the closely related property [pow2heap].
 *)
 
-(** **** Exercise: 1 star (empty_priq)   *)
+(** **** Exercise: 1 star, standard (empty_priq)   *)
 Theorem empty_priq: priq empty.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars (smash_valid)  *)
+(** **** Exercise: 2 stars, standard (smash_valid)  *)
 Theorem smash_valid:
        forall n t u, pow2heap n t -> pow2heap n u -> pow2heap (S n) (smash t u).
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars (carry_valid)  *)
+(** **** Exercise: 3 stars, standard (carry_valid)  *)
 Theorem carry_valid:
            forall n q,  priq' n q ->
            forall t, (t=Leaf \/ pow2heap n t) -> priq' n (carry q t).
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, optional (insert_valid)  *)
+(** **** Exercise: 2 stars, standard, optional (insert_valid)  *)
 Theorem insert_priq: forall x q, priq q -> priq (insert x q).
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, optional (join_valid)  *)
+(** **** Exercise: 3 stars, standard, optional (join_valid)  *)
 (* This proof is rather long, but each step is reasonably straightforward.
     There's just one [induction] to do, right at the beginning. *)
 Theorem join_valid: forall p q c n, priq' n p -> priq' n q -> (c=Leaf \/ pow2heap n c) -> priq' n (join p q c).
@@ -214,7 +213,7 @@ Proof.
  intros. unfold merge. apply join_valid; auto.
 Qed.
 
-(** **** Exercise: 5 stars, optional (delete_max_Some_priq)  *)
+(** **** Exercise: 5 stars, standard, optional (delete_max_Some_priq)  *)
 Theorem delete_max_Some_priq:
       forall p q k, priq p -> delete_max p = Some(k,q) -> priq q.
 (* FILL IN HERE *) Admitted.
@@ -234,8 +233,9 @@ Inductive tree_elems: tree -> list key -> Prop :=
            Permutation b (v::bl++br) ->
            tree_elems (Node v tl tr) b.
 
-(** **** Exercise: 3 stars (priqueue_elems)  *)
-(** Make an inductive definition, similar to [tree_elems], to relate
+(** **** Exercise: 3 stars, standard (priqueue_elems) 
+
+    Make an inductive definition, similar to [tree_elems], to relate
   a priority queue  "l"  to a list of all its elements.
 
   As you can see in the definition of [tree_elems],  a [tree] relates to
@@ -248,7 +248,7 @@ Inductive priqueue_elems: list tree -> list key -> Prop :=
              (* FILL IN HERE *)
 .
 (* Do not modify the following line: *)
-Definition manual_grade_for_priqueue_elems : option (prod nat string) := None.
+Definition manual_grade_for_priqueue_elems : option (nat*string) := None.
 (** [] *)
 
 Definition Abs (p: priqueue) (al: list key) := priqueue_elems p al.
@@ -256,22 +256,24 @@ Definition Abs (p: priqueue) (al: list key) := priqueue_elems p al.
 (* ================================================================= *)
 (** ** Sanity Checks on the Abstraction Relation *)
 
-(** **** Exercise: 2 stars (tree_elems_ext)  *)
-(** Extensionality theorem for the tree_elems relation *)
+(** **** Exercise: 2 stars, standard (tree_elems_ext) 
+
+    Extensionality theorem for the tree_elems relation *)
 
 Theorem tree_elems_ext: forall t e1 e2,
   Permutation e1 e2 -> tree_elems t e1 -> tree_elems t e2.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars (tree_perm)  *)
+(** **** Exercise: 2 stars, standard (tree_perm)  *)
 Theorem tree_perm: forall t e1 e2,
   tree_elems t e1 -> tree_elems t e2 -> Permutation e1 e2.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars (priqueue_elems_ext)  *)
-(** To prove [priqueue_elems_ext], you should almost be able to cut-and-paste the
+(** **** Exercise: 2 stars, standard (priqueue_elems_ext) 
+
+    To prove [priqueue_elems_ext], you should almost be able to cut-and-paste the
    proof of [tree_elems_ext], with just a few edits.  *)
 
 Theorem priqueue_elems_ext: forall q e1 e2,
@@ -279,14 +281,14 @@ Theorem priqueue_elems_ext: forall q e1 e2,
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars (abs_perm)  *)
+(** **** Exercise: 2 stars, standard (abs_perm)  *)
 Theorem abs_perm: forall p al bl,
    priq p -> Abs p al -> Abs p bl -> Permutation al bl.
 Proof.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars (can_relate)  *)
+(** **** Exercise: 2 stars, standard (can_relate)  *)
 Lemma tree_can_relate: forall t, exists al, tree_elems t al.
 Proof.
 (* FILL IN HERE *) Admitted.
@@ -298,14 +300,15 @@ Proof.
 
 (* ================================================================= *)
 (** ** Various Functions Preserve the Abstraction Relation *)
-(** **** Exercise: 1 star (empty_relate)  *)
+(** **** Exercise: 1 star, standard (empty_relate)  *)
 Theorem empty_relate:  Abs empty nil.
 Proof.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars (smash_elems)  *)
-(**  Warning:  This proof is rather long. *)
+(** **** Exercise: 3 stars, standard (smash_elems) 
+
+     Warning:  This proof is rather long. *)
 
 Theorem smash_elems: forall n t u bt bu,
                      pow2heap n t -> pow2heap n u ->
@@ -319,7 +322,7 @@ Theorem smash_elems: forall n t u bt bu,
 
 (**  Some of these proofs are quite long, but they're not especially tricky. *)
 
-(** **** Exercise: 4 stars, optional (carry_elems)  *)
+(** **** Exercise: 4 stars, standard, optional (carry_elems)  *)
 Theorem carry_elems:
       forall n q,  priq' n q ->
       forall t, (t=Leaf \/ pow2heap n t) ->
@@ -329,13 +332,13 @@ Theorem carry_elems:
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, optional (insert_elems)  *)
+(** **** Exercise: 2 stars, standard, optional (insert_elems)  *)
 Theorem insert_relate:
         forall p al k, priq p -> Abs p al -> Abs (insert k p) (k::al).
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 4 stars, optional (join_elems)  *)
+(** **** Exercise: 4 stars, standard, optional (join_elems)  *)
 Theorem join_elems:
                 forall p q c n,
                       priq' n p ->
@@ -349,7 +352,7 @@ Theorem join_elems:
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, optional (merge_relate)  *)
+(** **** Exercise: 2 stars, standard, optional (merge_relate)  *)
 Theorem merge_relate:
     forall p q pl ql al,
        priq p -> priq q ->
@@ -359,13 +362,13 @@ Proof.
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 5 stars, optional (delete_max_None_relate)  *)
+(** **** Exercise: 5 stars, standard, optional (delete_max_None_relate)  *)
 Theorem delete_max_None_relate:
         forall p, priq p -> (Abs p nil <-> delete_max p = None).
 (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 5 stars, optional (delete_max_Some_relate)  *)
+(** **** Exercise: 5 stars, standard, optional (delete_max_Some_relate)  *)
 Theorem delete_max_Some_relate:
   forall (p q: priqueue) k (pl ql: list key), priq p ->
    Abs p pl ->
@@ -382,14 +385,16 @@ Theorem delete_max_Some_relate:
 
 End BinomQueue.
 
-
 (* ################################################################# *)
 (** * Measurement. *)
 
-(** **** Exercise: 5 stars, optional (binom_measurement)  *)
-(** Adapt the program (but not necessarily the proof) to use Ocaml integers
+(** **** Exercise: 5 stars, standard, optional (binom_measurement) 
+
+    Adapt the program (but not necessarily the proof) to use Ocaml integers
   as keys, in the style shown in [Extract].   Write an ML program to
   exercise it with random inputs.  Compare the runtime to the implementation
   from [Priqueue], also adapted for Ocaml integers.
 *)
 (** [] *)
+
+(* 2020-08-07 17:08 *)

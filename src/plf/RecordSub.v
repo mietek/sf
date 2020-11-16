@@ -11,7 +11,8 @@ Set Warnings "-notation-overridden,-parsing".
 From Coq Require Import Strings.String.
 From PLF Require Import Maps.
 From PLF Require Import Smallstep.
-From PLF Require Import MoreStlc.
+
+Module RecordSub.
 
 (* ################################################################# *)
 (** * Core Definitions *)
@@ -21,22 +22,52 @@ From PLF Require Import MoreStlc.
 
 Inductive ty : Type :=
   (* proper types *)
-  | Top   : ty
-  | Base  : string -> ty
-  | Arrow : ty -> ty -> ty
+  | Ty_Top   : ty
+  | Ty_Base  : string -> ty
+  | Ty_Arrow : ty -> ty -> ty
   (* record types *)
-  | RNil : ty
-  | RCons : string -> ty -> ty -> ty.
+  | Ty_RNil : ty
+  | Ty_RCons : string -> ty -> ty -> ty.
 
 Inductive tm : Type :=
   (* proper terms *)
-  | var : string -> tm
-  | app : tm -> tm -> tm
-  | abs : string -> ty -> tm -> tm
-  | rproj : tm -> string -> tm
+  | tm_var : string -> tm
+  | tm_app : tm -> tm -> tm
+  | tm_abs : string -> ty -> tm -> tm
+  | tm_rproj : tm -> string -> tm
   (* record terms *)
-  | rnil :  tm
-  | rcons : string -> tm -> tm -> tm.
+  | tm_rnil :  tm
+  | tm_rcons : string -> tm -> tm -> tm.
+
+Declare Custom Entry stlc.
+Declare Custom Entry stlc_ty.
+
+Notation "<{ e }>" := e (e custom stlc at level 99).
+Notation "<{{ e }}>" := e (e custom stlc_ty at level 99).
+Notation "( x )" := x (in custom stlc, x at level 99).
+Notation "( x )" := x (in custom stlc_ty, x at level 99).
+Notation "x" := x (in custom stlc at level 0, x constr at level 0).
+Notation "x" := x (in custom stlc_ty at level 0, x constr at level 0).
+Notation "S -> T" := (Ty_Arrow S T) (in custom stlc_ty at level 50, right associativity).
+Notation "x y" := (tm_app x y) (in custom stlc at level 1, left associativity).
+Notation "\ x : t , y" :=
+  (tm_abs x t y) (in custom stlc at level 90, x at level 99,
+                     t custom stlc_ty at level 99,
+                     y custom stlc at level 99,
+                     left associativity).
+Coercion tm_var : string >-> tm.
+
+Notation "{ x }" := x (in custom stlc at level 1, x constr).
+
+Notation "'Base' x" := (Ty_Base x) (in custom stlc_ty at level 0).
+
+Notation "  l ':' t1  '::' t2" := (Ty_RCons l t1 t2) (in custom stlc_ty at level 3, right associativity).
+Notation " l := e1 '::' e2" := (tm_rcons l e1 e2) (in custom stlc at level 3, right associativity).
+Notation "'nil'" := (Ty_RNil) (in custom stlc_ty).
+Notation "'nil'" := (tm_rnil) (in custom stlc).
+Notation "o --> l" := (tm_rproj o l) (in custom stlc at level 0).
+
+Notation "'Top'" := (Ty_Top) (in custom stlc_ty at level 0).
 
 (* ----------------------------------------------------------------- *)
 (** *** Well-Formedness *)
@@ -59,112 +90,119 @@ Inductive tm : Type :=
 
 Inductive record_ty : ty -> Prop :=
   | RTnil :
-        record_ty RNil
+        record_ty <{{ nil }}>
   | RTcons : forall i T1 T2,
-        record_ty (RCons i T1 T2).
+        record_ty <{{ i : T1 :: T2 }}>.
 
 Inductive record_tm : tm -> Prop :=
   | rtnil :
-        record_tm rnil
+        record_tm <{ nil }>
   | rtcons : forall i t1 t2,
-        record_tm (rcons i t1 t2).
+        record_tm <{ i := t1 :: t2 }>.
 
 Inductive well_formed_ty : ty -> Prop :=
-  | wfTop :
-        well_formed_ty Top
-  | wfBase : forall i,
-        well_formed_ty (Base i)
+  |  wfTop :
+        well_formed_ty <{{ Top }}>
+  | wfBase : forall (i : string),
+        well_formed_ty <{{ Base i }}>
   | wfArrow : forall T1 T2,
         well_formed_ty T1 ->
         well_formed_ty T2 ->
-        well_formed_ty (Arrow T1 T2)
+        well_formed_ty <{{ T1 -> T2 }}>
   | wfRNil :
-        well_formed_ty RNil
+        well_formed_ty <{{ nil }}>
   | wfRCons : forall i T1 T2,
         well_formed_ty T1 ->
         well_formed_ty T2 ->
         record_ty T2 ->
-        well_formed_ty (RCons i T1 T2).
+        well_formed_ty <{{ i : T1 :: T2 }}>.
 
-Hint Constructors record_ty record_tm well_formed_ty.
+Hint Constructors record_ty record_tm well_formed_ty : core.
 
 (* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 (** Substitution and reduction are as before. *)
 
-Fixpoint subst (x:string) (s:tm) (t:tm) : tm :=
-  match t with
-  | var y => if eqb_string x y then s else t
-  | abs y T t1 =>  abs y T (if eqb_string x y then t1
-                             else (subst x s t1))
-  | app t1 t2 => app (subst x s t1) (subst x s t2)
-  | rproj t1 i => rproj (subst x s t1) i
-  | rnil => rnil
-  | rcons i t1 tr2 => rcons i (subst x s t1) (subst x s tr2)
-  end.
+Reserved Notation "'[' x ':=' s ']' t" (in custom stlc at level 20, x constr).
 
-Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
+Fixpoint subst (x : string) (s : tm) (t : tm) : tm :=
+  match t with
+  | tm_var y =>
+      if eqb_string x y then s else t
+  | <{\y:T, t1}> =>
+      if eqb_string x y then t else <{\y:T, [x:=s] t1}>
+  | <{t1 t2}> =>
+      <{([x:=s] t1) ([x:=s] t2)}>
+  | <{ t1 --> i }> =>
+      <{ ( [x := s] t1) --> i }>
+  | <{ nil }> =>
+      <{ nil }>
+  | <{ i := t1 :: tr }> =>
+     <{ i :=  [x := s] t1 :: ( [x := s] tr) }>
+  end
+
+where "'[' x ':=' s ']' t" := (subst x s t) (in custom stlc).
 
 (* ----------------------------------------------------------------- *)
 (** *** Reduction *)
 
 Inductive value : tm -> Prop :=
-  | v_abs : forall x T t,
-      value (abs x T t)
-  | v_rnil : value rnil
-  | v_rcons : forall i v vr,
-      value v ->
+  | v_abs : forall x T2 t1,
+      value  <{ \ x : T2, t1 }>
+  | v_rnil : value <{ nil }>
+  | v_rcons : forall i v1 vr,
+      value v1 ->
       value vr ->
-      value (rcons i v vr).
+      value <{ i := v1 :: vr }>.
 
-Hint Constructors value.
+Hint Constructors value : core.
 
 Fixpoint Tlookup (i:string) (Tr:ty) : option ty :=
   match Tr with
-  | RCons i' T Tr' =>
+  | <{{ i' : T :: Tr' }}> =>
       if eqb_string i i' then Some T else Tlookup i Tr'
   | _ => None
   end.
 
 Fixpoint tlookup (i:string) (tr:tm) : option tm :=
   match tr with
-  | rcons i' t tr' =>
+  | <{ i' := t :: tr' }> =>
       if eqb_string i i' then Some t else tlookup i tr'
   | _ => None
   end.
 
-Reserved Notation "t1 '-->' t2" (at level 40).
+Reserved Notation "t '-->' t'" (at level 40).
 
 Inductive step : tm -> tm -> Prop :=
-  | ST_AppAbs : forall x T t12 v2,
+  | ST_AppAbs : forall x T2 t1 v2,
          value v2 ->
-         (app (abs x T t12) v2) --> [x:=v2]t12
+         <{(\x:T2, t1) v2}> --> <{ [x:=v2]t1 }>
   | ST_App1 : forall t1 t1' t2,
          t1 --> t1' ->
-         (app t1 t2) --> (app t1' t2)
+         <{t1 t2}> --> <{t1' t2}>
   | ST_App2 : forall v1 t2 t2',
          value v1 ->
          t2 --> t2' ->
-         (app v1 t2) --> (app v1  t2')
-  | ST_Proj1 : forall tr tr' i,
-        tr --> tr' ->
-        (rproj tr i) --> (rproj tr' i)
+         <{v1 t2}> --> <{v1  t2'}>
+  | ST_Proj1 : forall t1 t1' i,
+        t1 --> t1' ->
+        <{ t1 --> i }> --> <{ t1' --> i }>
   | ST_ProjRcd : forall tr i vi,
         value tr ->
-        tlookup i tr = Some vi    ->
-       (rproj tr i) --> vi
+        tlookup i tr = Some vi ->
+        <{ tr --> i }> --> vi
   | ST_Rcd_Head : forall i t1 t1' tr2,
         t1 --> t1' ->
-        (rcons i t1 tr2) --> (rcons i t1' tr2)
+        <{ i := t1 :: tr2 }> --> <{ i := t1' :: tr2 }>
   | ST_Rcd_Tail : forall i v1 tr2 tr2',
         value v1 ->
         tr2 --> tr2' ->
-        (rcons i v1 tr2) --> (rcons i v1 tr2')
+        <{ i := v1 :: tr2 }> --> <{ i := v1 :: tr2' }>
 
-where "t1 '-->' t2" := (step t1 t2).
+where "t '-->' t'" := (step t t').
 
-Hint Constructors step.
+Hint Constructors step : core.
 
 (* ################################################################# *)
 (** * Subtyping *)
@@ -197,30 +235,30 @@ Inductive subtype : ty -> ty -> Prop :=
     S <: T
   | S_Top : forall S,
     well_formed_ty S ->
-    S <: Top
+    S <: <{{ Top }}>
   | S_Arrow : forall S1 S2 T1 T2,
     T1 <: S1 ->
     S2 <: T2 ->
-    Arrow S1 S2 <: Arrow T1 T2
+    <{{ S1 -> S2 }}> <: <{{ T1 -> T2 }}>
   (* Subtyping between record types *)
   | S_RcdWidth : forall i T1 T2,
-    well_formed_ty (RCons i T1 T2) ->
-    RCons i T1 T2 <: RNil
+    well_formed_ty <{{ i : T1 :: T2 }}> ->
+    <{{ i : T1 :: T2 }}> <: <{{ nil }}>
   | S_RcdDepth : forall i S1 T1 Sr2 Tr2,
     S1 <: T1 ->
     Sr2 <: Tr2 ->
     record_ty Sr2 ->
     record_ty Tr2 ->
-    RCons i S1 Sr2 <: RCons i T1 Tr2
+    <{{ i : S1 :: Sr2 }}> <: <{{ i : T1 :: Tr2 }}>
   | S_RcdPerm : forall i1 i2 T1 T2 Tr3,
-    well_formed_ty (RCons i1 T1 (RCons i2 T2 Tr3)) ->
+    well_formed_ty <{{ i1 : T1 :: i2 : T2 :: Tr3 }}> ->
     i1 <> i2 ->
-       RCons i1 T1 (RCons i2 T2 Tr3)
-    <: RCons i2 T2 (RCons i1 T1 Tr3)
+       <{{ i1 : T1 :: i2 : T2 :: Tr3 }}>
+    <: <{{ i2 : T2 :: i1 : T1 :: Tr3 }}>
 
 where "T '<:' U" := (subtype T U).
 
-Hint Constructors subtype.
+Hint Constructors subtype : core.
 
 (* ================================================================= *)
 (** ** Examples *)
@@ -234,19 +272,17 @@ Notation z := "z".
 Notation j := "j".
 Notation k := "k".
 Notation i := "i".
-Notation A := (Base "A").
-Notation B := (Base "B").
-Notation C := (Base "C").
+Notation A := <{{ Base "A" }}>.
+Notation B := <{{ Base "B" }}>.
+Notation C := <{{ Base "C" }}>.
 
 Definition TRcd_j  :=
-  (RCons j (Arrow B B) RNil).     (* {j:B->B} *)
+  <{{ j  : (B -> B) :: nil }}>.     (* {j:B->B} *)
 Definition TRcd_kj :=
-  RCons k (Arrow A A) TRcd_j.      (* {k:C->C,j:B->B} *)
+  <{{ k : (A -> A) :: TRcd_j }}>.      (* {k:C->C,j:B->B} *)
 
 Example subtyping_example_0 :
-  subtype (Arrow C TRcd_kj)
-          (Arrow C RNil).
-(* C->{k:A->A,j:B->B} <: C->{} *)
+  <{{ C -> TRcd_kj }}> <: <{{ C -> nil }}>.
 Proof.
   apply S_Arrow.
     apply S_Refl. auto.
@@ -259,7 +295,7 @@ Qed.
 
 (** **** Exercise: 2 stars, standard (subtyping_example_1)  *)
 Example subtyping_example_1 :
-  subtype TRcd_kj TRcd_j.
+  TRcd_kj <: TRcd_j.
 (* {k:A->A,j:B->B} <: {j:B->B} *)
 Proof with eauto.
   (* FILL IN HERE *) Admitted.
@@ -267,17 +303,16 @@ Proof with eauto.
 
 (** **** Exercise: 1 star, standard (subtyping_example_2)  *)
 Example subtyping_example_2 :
-  subtype (Arrow Top TRcd_kj)
-          (Arrow (Arrow C C) TRcd_j).
-(* Top->{k:A->A,j:B->B} <: (C->C)->{j:B->B} *)
+  <{{ Top -> TRcd_kj }}> <:
+          <{{ (C -> C) -> TRcd_j }}>.
 Proof with eauto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
 (** **** Exercise: 1 star, standard (subtyping_example_3)  *)
 Example subtyping_example_3 :
-  subtype (Arrow RNil (RCons j A RNil))
-          (Arrow (RCons k B RNil) RNil).
+  <{{ nil -> (j : A :: nil) }}> <:
+          <{{ (k : B :: nil) -> nil }}>.
 (* {}->{j:A} <: {k:B}->{} *)
 Proof with eauto.
   (* FILL IN HERE *) Admitted.
@@ -285,9 +320,8 @@ Proof with eauto.
 
 (** **** Exercise: 2 stars, standard (subtyping_example_4)  *)
 Example subtyping_example_4 :
-  subtype (RCons x A (RCons y B (RCons z C RNil)))
-          (RCons z C (RCons y B (RCons x A RNil))).
-(* {x:A,y:B,z:C} <: {z:C,y:B,x:A} *)
+  <{{ x : A :: y : B :: z : C :: nil }}> <:
+  <{{ z : C :: y : B :: x : A :: nil }}>.
 Proof with eauto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
@@ -370,7 +404,7 @@ Proof with (eauto using wf_rcd_lookup).
     + (* subtype *)
       inversion H. subst. inversion H5. subst...  Qed.
 
-(** **** Exercise: 3 stars, standard (rcd_types_match_informal)  
+(** **** Exercise: 3 stars, standard (rcd_types_match_informal) 
 
     Write a careful informal proof of the [rcd_types_match]
     lemma. *)
@@ -386,12 +420,12 @@ Definition manual_grade_for_rcd_types_match_informal : option (nat*string) := No
 
 (** **** Exercise: 3 stars, standard, optional (sub_inversion_arrow)  *)
 Lemma sub_inversion_arrow : forall U V1 V2,
-     subtype U (Arrow V1 V2) ->
+     U <: <{{ V1 -> V2 }}> ->
      exists U1 U2,
-       (U=(Arrow U1 U2)) /\ (subtype V1 U1) /\ (subtype U2 V2).
+       (U= <{{ U1 -> U2 }}> ) /\ (V1 <: U1) /\ (U2 <: V2).
 Proof with eauto.
   intros U V1 V2 Hs.
-  remember (Arrow V1 V2) as V.
+  remember <{{ V1 -> V2 }}> as V.
   generalize dependent V2. generalize dependent V1.
   (* FILL IN HERE *) Admitted.
 (** [] *)
@@ -401,25 +435,26 @@ Proof with eauto.
 
 Definition context := partial_map ty.
 
-Reserved Notation "Gamma '|-' t '\in' T" (at level 40).
+Reserved Notation "Gamma '|-' t '\in' T" (at level 40,
+                                          t custom stlc at level 99, T custom stlc_ty at level 0).
 
 Inductive has_type : context -> tm -> ty -> Prop :=
-  | T_Var : forall Gamma x T,
+  | T_Var : forall Gamma (x : string) T,
       Gamma x = Some T ->
       well_formed_ty T ->
-      Gamma |- var x \in T
+      Gamma |- x \in T
   | T_Abs : forall Gamma x T11 T12 t12,
       well_formed_ty T11 ->
-      update Gamma x T11 |- t12 \in T12 ->
-      Gamma |- abs x T11 t12 \in Arrow T11 T12
+      (x |-> T11; Gamma) |- t12 \in T12 ->
+      Gamma |- (\ x : T11, t12) \in (T11 -> T12)
   | T_App : forall T1 T2 Gamma t1 t2,
-      Gamma |- t1 \in Arrow T1 T2 ->
+      Gamma |- t1 \in (T1 -> T2) ->
       Gamma |- t2 \in T1 ->
-      Gamma |- app t1 t2 \in T2
+      Gamma |- t1 t2 \in T2
   | T_Proj : forall Gamma i t T Ti,
       Gamma |- t \in T ->
       Tlookup i T = Some Ti ->
-      Gamma |- rproj t i \in Ti
+      Gamma |- t --> i \in Ti
   (* Subsumption *)
   | T_Sub : forall Gamma t S T,
       Gamma |- t \in S ->
@@ -427,17 +462,17 @@ Inductive has_type : context -> tm -> ty -> Prop :=
       Gamma |- t \in T
   (* Rules for record terms *)
   | T_RNil : forall Gamma,
-      Gamma |- rnil \in RNil
+      Gamma |- nil \in nil
   | T_RCons : forall Gamma i t T tr Tr,
       Gamma |- t \in T ->
       Gamma |- tr \in Tr ->
       record_ty Tr ->
       record_tm tr ->
-      Gamma |- rcons i t tr \in RCons i T Tr
+      Gamma |- i := t :: tr \in (i : T :: Tr)
 
 where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
-Hint Constructors has_type.
+Hint Constructors has_type : core.
 
 (* ================================================================= *)
 (** ** Typing Examples *)
@@ -447,16 +482,10 @@ Import Examples.
 
 (** **** Exercise: 1 star, standard (typing_example_0)  *)
 Definition trcd_kj :=
-  (rcons k (abs z A (var z))
-           (rcons j (abs z B (var z))
-                      rnil)).
+  <{ k := (\z : A, z) :: j := (\z : B, z) :: nil }>.
 
 Example typing_example_0 :
-  has_type empty
-           (rcons k (abs z A (var z))
-                     (rcons j (abs z B (var z))
-                               rnil))
-           TRcd_kj.
+  empty |- trcd_kj \in TRcd_kj.
 (* empty |- {k=(\z:A.z), j=(\z:B.z)} : {k:A->A,j:B->B} *)
 Proof.
   (* FILL IN HERE *) Admitted.
@@ -464,10 +493,7 @@ Proof.
 
 (** **** Exercise: 2 stars, standard (typing_example_1)  *)
 Example typing_example_1 :
-  has_type empty
-           (app (abs x TRcd_j (rproj (var x) j))
-                   (trcd_kj))
-           (Arrow B B).
+  empty |- (\x : TRcd_j, x --> j) trcd_kj \in (B -> B).
 (* empty |- (\x:{k:A->A,j:B->B}. x.j)
               {k=(\z:A.z), j=(\z:B.z)}
          : B->B *)
@@ -477,13 +503,8 @@ Proof with eauto.
 
 (** **** Exercise: 2 stars, standard, optional (typing_example_2)  *)
 Example typing_example_2 :
-  has_type empty
-           (app (abs z (Arrow (Arrow C C) TRcd_j)
-                           (rproj (app (var z)
-                                            (abs x C (var x)))
-                                    j))
-                   (abs z (Arrow C C) trcd_kj))
-           (Arrow B B).
+  empty |- (\ z : (C -> C) -> TRcd_j, (z (\ x : C, x) ) --> j )
+            ( \z : (C -> C), trcd_kj ) \in (B -> B).
 (* empty |- (\z:(C->C)->{j:B->B}. (z (\x:C.x)).j)
               (\z:C->C. {k=(\z:A.z), j=(\z:B.z)})
            : B->B *)
@@ -527,24 +548,25 @@ Qed.
 
 Lemma lookup_field_in_value : forall v T i Ti,
   value v ->
-  has_type empty v T ->
+  empty |- v \in T ->
   Tlookup i T = Some Ti ->
-  exists vi, tlookup i v = Some vi /\ has_type empty vi Ti.
+  exists vi, tlookup i v = Some vi /\ empty |- vi \in Ti.
 Proof with eauto.
   remember empty as Gamma.
-  intros t T i Ti Hval Htyp. revert Ti HeqGamma Hval.
+  intros t T i Ti Hval Htyp. generalize dependent Ti.
   induction Htyp; intros; subst; try solve_by_invert.
   - (* T_Sub *)
     apply (rcd_types_match S) in H0...
     destruct H0 as [Si [HgetSi Hsub]].
-    destruct (IHHtyp Si) as [vi [Hget Htyvi]]...
+    eapply IHHtyp in HgetSi...
+    destruct HgetSi as [vi [Hget Htyvi]]...
   - (* T_RCons *)
     simpl in H0. simpl. simpl in H1.
     destruct (eqb_string i i0).
     + (* i is first *)
-      inversion H1. subst. exists t...
+      injection H1 as H1. subst. exists t...
     + (* i in tail *)
-      destruct (IHHtyp2 Ti) as [vi [get Htyvi]]...
+      eapply IHHtyp2 in H1...
       inversion Hval...  Qed.
 
 (* ----------------------------------------------------------------- *)
@@ -552,16 +574,16 @@ Proof with eauto.
 
 (** **** Exercise: 3 stars, standard (canonical_forms_of_arrow_types)  *)
 Lemma canonical_forms_of_arrow_types : forall Gamma s T1 T2,
-     has_type Gamma s (Arrow T1 T2) ->
+     Gamma |- s \in (T1 -> T2) ->
      value s ->
      exists x S1 s2,
-        s = abs x S1 s2.
+        s = <{ \ x  : S1, s2 }>.
 Proof with eauto.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
 Theorem progress : forall t T,
-     has_type empty t T ->
+     empty |- t \in T ->
      value t \/ exists t', t --> t'.
 Proof with eauto.
   intros t T Ht.
@@ -579,28 +601,28 @@ Proof with eauto.
       * (* t2 is a value *)
         destruct (canonical_forms_of_arrow_types empty t1 T1 T2)
           as [x [S1 [t12 Heqt1]]]...
-        subst. exists ([x:=t2]t12)...
+        subst. exists <{ [x:=t2] t12 }>...
       * (* t2 steps *)
-        destruct H0 as [t2' Hstp]. exists (app t1 t2')...
+        destruct H0 as [t2' Hstp]. exists <{ t1 t2' }> ...
     + (* t1 steps *)
-      destruct H as [t1' Hstp]. exists (app t1' t2)...
+      destruct H as [t1' Hstp]. exists <{ t1' t2 }>...
   - (* T_Proj *)
     right. destruct IHHt...
     + (* rcd is value *)
       destruct (lookup_field_in_value t T i Ti)
         as [t' [Hget Ht']]...
     + (* rcd_steps *)
-      destruct H0 as [t' Hstp]. exists (rproj t' i)...
+      destruct H0 as [t' Hstp]. exists <{ t' --> i }>...
   - (* T_RCons *)
     destruct IHHt1...
     + (* head is a value *)
       destruct IHHt2...
       * (* tail steps *)
         right. destruct H2 as [tr' Hstp].
-        exists (rcons i t tr')...
+        exists <{ i := t :: tr' }>...
     + (* head steps *)
       right. destruct H1 as [t' Hstp].
-      exists (rcons i t' tr)...  Qed.
+      exists <{ i := t' :: tr}>...  Qed.
 
 (** _Theorem_ : For any term [t] and type [T], if [empty |- t : T]
     then [t] is a value or [t --> t'] for some term [t'].
@@ -675,46 +697,15 @@ Proof with eauto.
             value by [v_rcons]. *)
 
 (* ----------------------------------------------------------------- *)
-(** *** Inversion Lemmas *)
-
-Lemma typing_inversion_var : forall Gamma x T,
-  has_type Gamma (var x) T ->
-  exists S,
-    Gamma x = Some S /\ subtype S T.
-Proof with eauto.
-  intros Gamma x T Hty.
-  remember (var x) as t.
-  induction Hty; intros;
-    inversion Heqt; subst; try solve_by_invert.
-  - (* T_Var *)
-    exists T...
-  - (* T_Sub *)
-    destruct IHHty as [U [Hctx HsubU]]... Qed.
-
-Lemma typing_inversion_app : forall Gamma t1 t2 T2,
-  has_type Gamma (app t1 t2) T2 ->
-  exists T1,
-    has_type Gamma t1 (Arrow T1 T2) /\
-    has_type Gamma t2 T1.
-Proof with eauto.
-  intros Gamma t1 t2 T2 Hty.
-  remember (app t1 t2) as t.
-  induction Hty; intros;
-    inversion Heqt; subst; try solve_by_invert.
-  - (* T_App *)
-    exists T1...
-  - (* T_Sub *)
-    destruct IHHty as [U1 [Hty1 Hty2]]...
-    assert (Hwf := has_type__wf _ _ _ Hty2).
-    exists U1...  Qed.
+(** *** Inversion Lemma *)
 
 Lemma typing_inversion_abs : forall Gamma x S1 t2 T,
-     has_type Gamma (abs x S1 t2) T ->
-     (exists S2, subtype (Arrow S1 S2) T
-              /\ has_type (update Gamma x S1) t2 S2).
+     Gamma |- \ x : S1, t2 \in T ->
+     (exists S2, <{{ S1 -> S2 }}> <: T
+              /\ (x |-> S1; Gamma) |- t2 \in S2).
 Proof with eauto.
   intros Gamma x S1 t2 T H.
-  remember (abs x S1 t2) as t.
+  remember <{ \ x : S1, t2 }> as t.
   induction H;
     inversion Heqt; subst; intros; try solve_by_invert.
   - (* T_Abs *)
@@ -724,50 +715,10 @@ Proof with eauto.
     destruct IHhas_type as [S2 [Hsub Hty]]...
     Qed.
 
-Lemma typing_inversion_proj : forall Gamma i t1 Ti,
-  has_type Gamma (rproj t1 i) Ti ->
-  exists T Si,
-    Tlookup i T = Some Si /\ subtype Si Ti /\ has_type Gamma t1 T.
-Proof with eauto.
-  intros Gamma i t1 Ti H.
-  remember (rproj t1 i) as t.
-  induction H;
-    inversion Heqt; subst; intros; try solve_by_invert.
-  - (* T_Proj *)
-    assert (well_formed_ty Ti) as Hwf.
-    { (* pf of assertion *)
-      apply (wf_rcd_lookup i T Ti)...
-      apply has_type__wf in H... }
-    exists T, Ti...
-  - (* T_Sub *)
-    destruct IHhas_type as [U [Ui [Hget [Hsub Hty]]]]...
-    exists U, Ui...  Qed.
-
-Lemma typing_inversion_rcons : forall Gamma i ti tr T,
-  has_type Gamma (rcons i ti tr) T ->
-  exists Si Sr,
-    subtype (RCons i Si Sr) T /\ has_type Gamma ti Si /\
-    record_tm tr /\ has_type Gamma tr Sr.
-Proof with eauto.
-  intros Gamma i ti tr T Hty.
-  remember (rcons i ti tr) as t.
-  induction Hty;
-    inversion Heqt; subst...
-  - (* T_Sub *)
-    apply IHHty in H0.
-    destruct H0 as [Ri [Rr [HsubRS [HtypRi HtypRr]]]].
-    exists Ri, Rr...
-  - (* T_RCons *)
-    assert (well_formed_ty (RCons i T Tr)) as Hwf.
-    { (* pf of assertion *)
-      apply has_type__wf in Hty1.
-      apply has_type__wf in Hty2... }
-    exists T, Tr...  Qed.
-
 Lemma abs_arrow : forall x S1 s2 T1 T2,
-  has_type empty (abs x S1 s2) (Arrow T1 T2) ->
-     subtype T1 S1
-  /\ has_type (update empty x S1) s2 T2.
+  empty |- \x : S1, s2 \in (T1 -> T2) ->
+     T1 <: S1
+  /\ (x |-> S1) |- s2 \in T2.
 Proof with eauto.
   intros x S1 s2 T1 T2 Hty.
   apply typing_inversion_abs in Hty.
@@ -776,145 +727,88 @@ Proof with eauto.
   destruct Hsub as [U1 [U2 [Heq [Hsub1 Hsub2]]]].
   inversion Heq; subst...  Qed.
 
-(* ----------------------------------------------------------------- *)
-(** *** Context Invariance *)
+(* ================================================================= *)
+(** ** Weakening *)
 
-Inductive appears_free_in : string -> tm -> Prop :=
-  | afi_var : forall x,
-      appears_free_in x (var x)
-  | afi_app1 : forall x t1 t2,
-      appears_free_in x t1 -> appears_free_in x (app t1 t2)
-  | afi_app2 : forall x t1 t2,
-      appears_free_in x t2 -> appears_free_in x (app t1 t2)
-  | afi_abs : forall x y T11 t12,
-        y <> x  ->
-        appears_free_in x t12 ->
-        appears_free_in x (abs y T11 t12)
-  | afi_proj : forall x t i,
-      appears_free_in x t ->
-      appears_free_in x (rproj t i)
-  | afi_rhead : forall x i t tr,
-      appears_free_in x t ->
-      appears_free_in x (rcons i t tr)
-  | afi_rtail : forall x i t tr,
-      appears_free_in x tr ->
-      appears_free_in x (rcons i t tr).
+(** The weakening lemma is proved as in pure STLC. *)
 
-Hint Constructors appears_free_in.
+Lemma weakening : forall Gamma Gamma' t T,
+     inclusion Gamma Gamma' ->
+     Gamma  |- t \in T  ->
+     Gamma' |- t \in T.
+Proof.
+  intros Gamma Gamma' t T H Ht.
+  generalize dependent Gamma'.
+  induction Ht; eauto using inclusion_update.
+Qed.
 
-Lemma context_invariance : forall Gamma Gamma' t S,
-     has_type Gamma t S  ->
-     (forall x, appears_free_in x t -> Gamma x = Gamma' x)  ->
-     has_type Gamma' t S.
-Proof with eauto.
-  intros. generalize dependent Gamma'.
-  induction H;
-    intros Gamma' Heqv...
-  - (* T_Var *)
-    apply T_Var... rewrite <- Heqv...
-  - (* T_Abs *)
-    apply T_Abs... apply IHhas_type. intros x0 Hafi.
-    unfold update, t_update. destruct (eqb_stringP x x0)...
-  - (* T_App *)
-    apply T_App with T1...
-  - (* T_RCons *)
-    apply T_RCons...  Qed.
-
-Lemma free_in_context : forall x t T Gamma,
-   appears_free_in x t ->
-   has_type Gamma t T ->
-   exists T', Gamma x = Some T'.
-Proof with eauto.
-  intros x t T Gamma Hafi Htyp.
-  induction Htyp; subst; inversion Hafi; subst...
-  - (* T_Abs *)
-    destruct (IHHtyp H5) as [T Hctx]. exists T.
-    unfold update, t_update in Hctx.
-    rewrite false_eqb_string in Hctx...  Qed.
+Lemma weakening_empty : forall Gamma t T,
+     empty |- t \in T  ->
+     Gamma |- t \in T.
+Proof.
+  intros Gamma t T.
+  eapply weakening.
+  discriminate.
+Qed.
 
 (* ----------------------------------------------------------------- *)
 (** *** Preservation *)
 
-Lemma substitution_preserves_typing : forall Gamma x U v t S,
-     has_type (update Gamma x U) t S  ->
-     has_type empty v U   ->
-     has_type Gamma ([x:=v]t) S.
-Proof with eauto.
-  intros Gamma x U v t S Htypt Htypv.
-  generalize dependent S. generalize dependent Gamma.
-  induction t; intros; simpl.
-  - (* var *)
-    rename s into y.
-    destruct (typing_inversion_var _ _ _ Htypt) as [T [Hctx Hsub]].
-    unfold update, t_update in Hctx.
-    destruct (eqb_stringP x y)...
-    + (* x=y *)
-      subst.
-      inversion Hctx; subst. clear Hctx.
-      apply context_invariance with empty...
-      intros x Hcontra.
-      destruct (free_in_context _ _ S empty Hcontra) as [T' HT']...
-      inversion HT'.
+Lemma substitution_preserves_typing : forall Gamma x U t v T,
+   (x |-> U ; Gamma) |- t \in T ->
+   empty |- v \in U   ->
+   Gamma |- [x:=v]t \in T.
+Proof.
+Proof.
+  intros Gamma x U t v T Ht Hv.
+  remember (x |-> U; Gamma) as Gamma'.
+  generalize dependent Gamma.
+  induction Ht; intros Gamma' G; simpl; eauto.
+  - (* T_Var *)
+    rename x0 into y.
+    destruct (eqb_stringP x y) as [Hxy|Hxy]; subst.
+    + (* x = y *)
+      rewrite update_eq in H.
+      injection H as H. subst.
+      apply weakening_empty. assumption.
     + (* x<>y *)
-      destruct (subtype__wf _ _ Hsub)...
-  - (* app *)
-    destruct (typing_inversion_app _ _ _ _ Htypt)
-      as [T1 [Htypt1 Htypt2]].
-    eapply T_App...
-  - (* abs *)
-    rename s into y. rename t into T1.
-    destruct (typing_inversion_abs _ _ _ _ _ Htypt)
-      as [T2 [Hsub Htypt2]].
-    destruct (subtype__wf _ _ Hsub) as [Hwf1 Hwf2].
-    inversion Hwf2. subst.
-    apply T_Sub with (Arrow T1 T2)... apply T_Abs...
-    destruct (eqb_stringP x y).
+      apply T_Var; [|assumption].
+      rewrite update_neq in H; assumption.
+  - (* T_Abs *)
+    rename x0 into y. subst.
+    destruct (eqb_stringP x y) as [Hxy|Hxy]; apply T_Abs; try assumption.
     + (* x=y *)
-      eapply context_invariance...
-      subst.
-      intros x Hafi. unfold update, t_update.
-      destruct (eqb_string y x)...
-    + (* x<>y *)
-      apply IHt. eapply context_invariance...
-      intros z Hafi. unfold update, t_update.
-      destruct (eqb_stringP y z)...
-      subst.  rewrite false_eqb_string...
-  - (* rproj *)
-    destruct (typing_inversion_proj _ _ _ _ Htypt)
-      as [T [Ti [Hget [Hsub Htypt1]]]]...
-  - (* rnil *)
-    eapply context_invariance...
-    intros y Hcontra. inversion Hcontra.
-  - (* rcons *)
-    destruct (typing_inversion_rcons _ _ _ _ _ Htypt) as
-      [Ti [Tr [Hsub [HtypTi [Hrcdt2 HtypTr]]]]].
-    apply T_Sub with (RCons s Ti Tr)...
-    apply T_RCons...
-    + (* record_ty Tr *)
-      apply subtype__wf in Hsub. destruct Hsub. inversion H0...
-    + (* record_tm ([x:=v]t2) *)
-      inversion Hrcdt2; subst; simpl...  Qed.
+      subst. rewrite update_shadow in Ht. assumption.
+    + (* x <> y *)
+      subst. apply IHHt.
+      rewrite update_permute; auto.
+      - (* rcons *)   (* <=== only new case compared to pure STLC *)
+      apply T_RCons; eauto.
+      inversion H0; subst; simpl; auto.
+Qed.
 
 Theorem preservation : forall t t' T,
-     has_type empty t T  ->
+     empty |- t \in T  ->
      t --> t'  ->
-     has_type empty t' T.
+     empty |- t' \in T.
 Proof with eauto.
-  intros t t' T HT.
-  remember empty as Gamma. generalize dependent HeqGamma.
-  generalize dependent t'.
+  intros t t' T HT. generalize dependent t'.
+  remember empty as Gamma.
   induction HT;
-    intros t' HeqGamma HE; subst; inversion HE; subst...
+       intros t' HE; subst;
+       try solve [inversion HE; subst; eauto].
   - (* T_App *)
     inversion HE; subst...
     + (* ST_AppAbs *)
       destruct (abs_arrow _ _ _ _ _ HT1) as [HA1 HA2].
-      apply substitution_preserves_typing with T...
+      apply substitution_preserves_typing with T0...
   - (* T_Proj *)
+    inversion HE; subst...
     destruct (lookup_field_in_value _ _ _ _ H2 HT H)
       as [vi [Hget Hty]].
     rewrite H4 in Hget. inversion Hget. subst...
   - (* T_RCons *)
+    inversion HE; subst...
     eauto using step_preserves_record_tm.  Qed.
 
 (** _Theorem_: If [t], [t'] are terms and [T] is a type such that
@@ -953,7 +847,7 @@ Proof with eauto.
        ways a projection can step.  Case [ST_Proj1] follows
        immediately by the IH.
 
-       Instead suppose [tr.i] steps by [ST_ProjRcd].  Then [tr] is a
+       Instead suppose [tr --> i] steps by [ST_ProjRcd].  Then [tr] is a
        value and there is some term [vi] such that
        [tlookup i tr = Some vi] and [t' = vi].  But by lemma
        [lookup_field_in_value], [empty |- vi : Ti] as desired.
@@ -965,7 +859,7 @@ Proof with eauto.
 
      - If the final step of the derivation is by [T_RCons], then there
        exist some terms [t1] [tr], types [T1 Tr] and a label [t] such
-       that [t = {i=t1, tr}], [T = {i:T1, Tr}], [record_ty tr],
+       that [t = i:=t1 :: tr}], [T = i:T1 :: Tr], [record_ty tr],
        [record_tm Tr], [empty |- t1 : T1] and [empty |- tr : Tr].
 
        By the definition of the step relation, [t] must have stepped
@@ -975,4 +869,6 @@ Proof with eauto.
        for [tr]'s typing derivation, [T_RCons], and a use of the
        [step_preserves_record_tm] lemma. *)
 
-(* Thu Feb 7 20:09:26 EST 2019 *)
+End RecordSub.
+
+(* 2020-09-09 21:08 *)

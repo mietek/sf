@@ -225,12 +225,12 @@ Print Assumptions NatList.test_member2.
 Goal True.
 idtac " ".
 
-idtac "-------------------  bag_theorem  --------------------".
+idtac "-------------------  add_inc_count  --------------------".
 idtac " ".
 
-idtac "#> Manually graded: NatList.bag_theorem".
+idtac "#> Manually graded: NatList.add_inc_count".
 idtac "Possible points: 2".
-print_manual_grade NatList.manual_grade_for_bag_theorem.
+print_manual_grade NatList.manual_grade_for_add_inc_count.
 idtac " ".
 
 idtac "-------------------  list_exercises  --------------------".
@@ -336,21 +336,36 @@ idtac " ".
 idtac "-------------------  rev_injective  --------------------".
 idtac " ".
 
-idtac "#> Manually graded: NatList.rev_injective".
+idtac "#> NatList.rev_injective".
 idtac "Advanced".
-idtac "Possible points: 4".
-print_manual_grade NatList.manual_grade_for_rev_injective.
+idtac "Possible points: 6".
+check_type @NatList.rev_injective (
+(forall l1 l2 : NatList.natlist, NatList.rev l1 = NatList.rev l2 -> l1 = l2)).
+idtac "Assumptions:".
+Abort.
+Print Assumptions NatList.rev_injective.
+Goal True.
 idtac " ".
 
 idtac "-------------------  hd_error  --------------------".
 idtac " ".
 
-idtac "#> NatList.hd_error".
-idtac "Possible points: 2".
-check_type @NatList.hd_error ((NatList.natlist -> NatList.natoption)).
+idtac "#> NatList.test_hd_error1".
+idtac "Possible points: 1".
+check_type @NatList.test_hd_error1 ((NatList.hd_error NatList.nil = NatList.None)).
 idtac "Assumptions:".
 Abort.
-Print Assumptions NatList.hd_error.
+Print Assumptions NatList.test_hd_error1.
+Goal True.
+idtac " ".
+
+idtac "#> NatList.test_hd_error2".
+idtac "Possible points: 1".
+check_type @NatList.test_hd_error2 (
+(NatList.hd_error (NatList.cons 1 NatList.nil) = NatList.Some 1)).
+idtac "Assumptions:".
+Abort.
+Print Assumptions NatList.test_hd_error2.
 Goal True.
 idtac " ".
 
@@ -395,20 +410,25 @@ Print Assumptions PartialMap.update_neq.
 Goal True.
 idtac " ".
 
-idtac "-------------------  baz_num_elts  --------------------".
 idtac " ".
 
-idtac "#> Manually graded: baz_num_elts".
-idtac "Possible points: 2".
-print_manual_grade manual_grade_for_baz_num_elts.
-idtac " ".
-
-idtac " ".
-
-idtac "Max points - standard: 21".
+idtac "Max points - standard: 19".
 idtac "Max points - advanced: 31".
 idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
+idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- NatList.snd_fst_is_swap ---------".
@@ -433,7 +453,7 @@ idtac "---------- NatList.test_member1 ---------".
 Print Assumptions NatList.test_member1.
 idtac "---------- NatList.test_member2 ---------".
 Print Assumptions NatList.test_member2.
-idtac "---------- bag_theorem ---------".
+idtac "---------- add_inc_count ---------".
 idtac "MANUAL".
 idtac "---------- NatList.app_nil_r ---------".
 Print Assumptions NatList.app_nil_r.
@@ -449,16 +469,16 @@ idtac "---------- NatList.eqblist_refl ---------".
 Print Assumptions NatList.eqblist_refl.
 idtac "---------- NatList.count_member_nonzero ---------".
 Print Assumptions NatList.count_member_nonzero.
-idtac "---------- NatList.hd_error ---------".
-Print Assumptions NatList.hd_error.
+idtac "---------- NatList.test_hd_error1 ---------".
+Print Assumptions NatList.test_hd_error1.
+idtac "---------- NatList.test_hd_error2 ---------".
+Print Assumptions NatList.test_hd_error2.
 idtac "---------- eqb_id_refl ---------".
 Print Assumptions eqb_id_refl.
 idtac "---------- PartialMap.update_eq ---------".
 Print Assumptions PartialMap.update_eq.
 idtac "---------- PartialMap.update_neq ---------".
 Print Assumptions PartialMap.update_neq.
-idtac "---------- baz_num_elts ---------".
-idtac "MANUAL".
 idtac "".
 idtac "********** Advanced **********".
 idtac "---------- NatList.test_alternate1 ---------".
@@ -469,8 +489,10 @@ idtac "---------- NatList.test_alternate4 ---------".
 Print Assumptions NatList.test_alternate4.
 idtac "---------- NatList.remove_does_not_increase_count ---------".
 Print Assumptions NatList.remove_does_not_increase_count.
-idtac "---------- rev_injective ---------".
-idtac "MANUAL".
+idtac "---------- NatList.rev_injective ---------".
+Print Assumptions NatList.rev_injective.
 Abort.
 
-(* Wed Jan 9 12:02:08 EST 2019 *)
+(* 2020-09-09 20:51 *)
+
+(* 2020-09-09 20:51 *)

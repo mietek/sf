@@ -2,39 +2,41 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
 <title>Preface</title>
-</head>
 <link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
 <script src="common/jquery-ui/external/jquery/jquery.js"></script>
 <script src="common/jquery-ui/jquery-ui.js"></script>
 <script src="common/toggleproofs.js"></script>
 <link href="common/css/plf.css" rel="stylesheet" type="text/css"/>
+</head>
 
 <body>
 
 <div id="page">
 
 <div id="header">
-<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
-<img src='common/media/image/sf_logo_sm.png'></a>
-</br><a href='index.html'>  <span class='booktitleinheader'>Volume 2: Programming Language Foundations</span><br></br>
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 2: Programming Language Foundations</a></div>
 <ul id='menu'>
-   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
-   <a href='coqindex.html'><li class='section_name'>Index</li></a>
-   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
 </ul>
-</a></div>
+</div>
 
 <div id="main">
 
 <h1 class="libtitle">Preface</h1>
 
+<div class="code">
+</div>
 
 
 <div class="doc">
-<a name="lab1"></a><h1 class="section">Welcome</h1>
+<a id="lab1"></a><h1 class="section">Welcome</h1>
 
 <div class="paragraph"> </div>
 
@@ -76,7 +78,7 @@
 </div>
 
 <div class="doc">
-<a name="lab2"></a><h1 class="section">Overview</h1>
+<a id="lab2"></a><h1 class="section">Overview</h1>
 
 <div class="paragraph"> </div>
 
@@ -107,7 +109,7 @@
     for all cited works can be found in the file <a href="Bib.html"><span class="inlineref">Bib</span></a>. 
 <div class="paragraph"> </div>
 
-<a name="lab3"></a><h2 class="section">Program Verification</h2>
+<a id="lab3"></a><h2 class="section">Program Verification</h2>
 
 <div class="paragraph"> </div>
 
@@ -147,7 +149,7 @@
     Imp programs are <i>equivalent</i> in the intuitive sense that they
     exhibit the same behavior when started in any initial memory
     state.  This notion of equivalence then becomes a criterion for
-    judging the correctness of <i>metaprograms</i> &mdash; programs that
+    judging the correctness of <i>metaprograms</i> -- programs that
     manipulate other programs, such as compilers and optimizers.  We
     build a simple optimizer for Imp and prove that it is correct.
 
@@ -155,10 +157,10 @@
 
     Second, we develop a methodology for proving that a given Imp
     program satisfies some formal specifications of its behavior.  We
-    introduce the notion of <i>Hoare triples</i> &mdash; Imp programs annotated
+    introduce the notion of <i>Hoare triples</i> -- Imp programs annotated
     with pre- and post-conditions describing what they expect to be
     true about the memory in which they are started and what they
-    promise to make true about the memory in which they terminate &mdash;
+    promise to make true about the memory in which they terminate --
     and the reasoning principles of <i>Hoare Logic</i>, a domain-specific
     logic specialized for convenient compositional reasoning about
     imperative programs, with concepts like "loop invariant" built in.
@@ -170,12 +172,12 @@
     real-world software and hardware verification tasks. 
 <div class="paragraph"> </div>
 
-<a name="lab4"></a><h2 class="section">Type Systems</h2>
+<a id="lab4"></a><h2 class="section">Type Systems</h2>
 
 <div class="paragraph"> </div>
 
  Our other major topic, covering approximately the second half of
-    the book, is <i>type systems</i> &mdash; powerful tools for establishing
+    the book, is <i>type systems</i> -- powerful tools for establishing
     properties of <i>all</i> programs in a given language.
 
 <div class="paragraph"> </div>
@@ -183,7 +185,7 @@
     Type systems are the best established and most popular example of
     a highly successful class of formal verification techniques known
     as <i>lightweight formal methods</i>.  These are reasoning techniques
-    of modest power &mdash; modest enough that automatic checkers can be
+    of modest power -- modest enough that automatic checkers can be
     built into compilers, linkers, or program analyzers and thus be
     applied even by programmers unfamiliar with the underlying
     theories.  Other examples of lightweight formal methods include
@@ -200,7 +202,7 @@
 </div>
 
 <div class="doc">
-<a name="lab5"></a><h2 class="section">Further Reading</h2>
+<a id="lab5"></a><h2 class="section">Further Reading</h2>
 
 <div class="paragraph"> </div>
 
@@ -211,18 +213,49 @@
 </div>
 
 <div class="doc">
-<a name="lab6"></a><h1 class="section">Note for Instructors</h1>
+<a id="lab6"></a><h1 class="section">Practicalities</h1>
+<a id="lab7"></a><h2 class="section">Recommended Citation Format</h2>
+
+<div class="paragraph"> </div>
+
+ If you want to refer to this volume in your own writing, please
+    do so as follows:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;@<span class="id" title="var">book</span>            {Pierce:<span class="id" title="var">SF</span>2,<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">author</span>       =   {Benjamin C. Pierce <br>
+Arthur Azevedo de Amorim <br>
+Chris Casinghino <br>
+Marco Gaboardi <br>
+Michael Greenberg <br>
+Cătălin Hriţcu <br>
+Vilhelm Sjöberg <br>
+Andrew Tolmach <br>
+Brent Yorgey},<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">title</span>        =   "Programming Language Foundations",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">series</span>       =   "Software Foundations",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">volume</span>       =   "2",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">year</span>         =   "2020",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">publisher</span>    =   "Electronic textbook",<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">note</span>         =   {<span class="id" title="var">Version</span> 5.8, \<span class="id" title="var">URL</span>{<span class="id" title="var">http</span>://<span class="id" title="var">softwarefoundations.cis.upenn.edu</span>} },<br/>
+&nbsp;&nbsp;&nbsp;}
+<div class="paragraph"> </div>
+
+</span>
+</div>
+
+<div class="doc">
+<a id="lab8"></a><h1 class="section">Note for Instructors</h1>
 
 <div class="paragraph"> </div>
 
  If you plan to use these materials in your own course, you will
     undoubtedly find things you'd like to change, improve, or add.
-    Your contributions are welcome!  Please see the <a href="https://www.cis.upenn.edu/~bcpierce/sf/lf-current/Preface.html"><span class="inlineref">Preface</span></a>
+    Your contributions are welcome!  Please see the <a href="https://softwarefoundations.cis.upenn.edu/lf-current/Preface.html"><span class="inlineref">Preface</span></a>
     to <i>Logical Foundations</i> for instructions. 
 </div>
 
 <div class="doc">
-<a name="lab7"></a><h1 class="section">Thanks</h1>
+<a id="lab9"></a><h1 class="section">Thanks</h1>
 
 <div class="paragraph"> </div>
 
@@ -231,13 +264,16 @@
     NSF Expeditions grant 1521523, <i>The Science of Deep
     Specification</i>. 
 </div>
-<div class="code code-tight">
+<div class="code">
 
-<span class="comment">(*&nbsp;Thu&nbsp;Feb&nbsp;7&nbsp;20:09:22&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+<br/>
+<span class="comment">(*&nbsp;2020-09-09&nbsp;21:08&nbsp;*)</span><br/>
 </div>
 </div>
 
-
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
 
 </div>
 

@@ -11,7 +11,6 @@ Set Bullet Behavior "Strict Subproofs".
 
 From QC Require Import QC.
 
-
 (** Having covered the basics of QuickChick in the previous
     chapter, we are ready to dive into a more realistic case study: a
     typed variant of Imp, the simple imperative language introduced in
@@ -85,7 +84,6 @@ Proof. dec_eq. Defined.
     we can take advantage of the [Show] instance of [nat] to print 
     them. *)
 
-(* BCP: Print them as "A", "B", etc.  Or maybe "X1", "X2", etc. *)
 Instance show_id : Show id :=
   { show x := let '(Id n) := x in show n }.
 
@@ -103,13 +101,13 @@ Fixpoint get_fresh_ids n l :=
   | S n' => get_fresh_ids n' ((fresh l) :: l)
   end.
 
-(** **** Exercise: 2 stars (genId)  *)
-(** Write a [Gen] instance for [id] using the [elems_]
+(** **** Exercise: 2 stars, standard (genId)
+
+    Write a [Gen] instance for [id] using the [elems_]
     combinator and [get_fresh_ids].  *)
 
 (* FILL IN HERE *)   
 (** [] *)
-
 
 (** There remains the question of how to [shrink] [id]s. 
     We will answer that question when [id]s are used later 
@@ -179,7 +177,6 @@ Proof. dec_eq. Defined.
        - [set] : To update the binding of an element.
        - [dom] : To get the list of keys in the map. *)
 
-
     
 
 (** The implementation of a map is a simple association list.  If a
@@ -230,7 +227,6 @@ Inductive bound_to {A} : Map A -> id -> A -> Prop :=
     prefer to skip the next few paragraphs (until the start of the
     [Context] subsection), which deal with partially automating the
     proofs for such instances. *)
-
 
 Instance dec_bound_to {A : Type} Gamma x (T : A) 
          `{D : forall (x y : A), Dec (x = y)} 
@@ -406,7 +402,6 @@ where "Gamma '||-' e '\IN' T" := (has_type Gamma e T).
     have allowed for equality checks between booleans as well - that will
     become an exercise at the end of this chapter. *)
 
-
 (** Once again, we need a decidable instance for the typing relation of
     TImp. You can skip to the next exercise if you are not interested in
     specific proof details. *)
@@ -455,8 +450,9 @@ Proof with solve_sum.
   destruct (dec_bound_to Gamma i T); destruct dec; solve_sum.
 Defined.
 
-(** **** Exercise: 3 stars (arbitraryExp)  *)
-(** Derive [Arbitrary] for expressions.  To see how good it is at
+(** **** Exercise: 3 stars, standard (arbitraryExp)
+
+    Derive [Arbitrary] for expressions.  To see how good it is at
     generating _well-typed_ expressions, write a conditional property 
     [cond_prop] that is (trivially) always true, with the precondition 
     that some expression is well-typed. Try to check that property like 
@@ -470,8 +466,9 @@ Defined.
     increase the size until the maximum size is reached, and then
     start over.  What happens when you vary the size bound? *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (* ================================================================= *)
 (** ** Generating Typed Expressions *)
@@ -509,7 +506,7 @@ Print GOpt.
          : Type -> Type
 *)
 
-(* Check Monad_GOpt. *)
+Check Monad_GOpt. 
 (** 
     Monad_GOpt
          : Monad GOpt
@@ -526,14 +523,18 @@ Print GOpt.
     demonstrate how to build up complex generators for typed
     expressions from smaller parts. *)
 
-Inductive has_type_1 : context -> exp -> ty -> Prop := 
-  | Ty_Var1 : forall x T Gamma, 
-      bound_to Gamma x T -> has_type_1 Gamma (EVar x) T.
+Module TypePlayground1.
 
-(** To generate [e] such that [has_type_1 Gamma e T] holds, we need to
+Inductive has_type : context -> exp -> ty -> Prop := 
+  | Ty_Var : forall x T Gamma, 
+      bound_to Gamma x T -> has_type Gamma (EVar x) T.
+
+End TypePlayground1.
+
+(** To generate [e] such that [has_type Gamma e T] holds, we need to
     pick one of its constructors (there is only one choice, here) and
     then try to satisfy its preconditions by generating more things.
-    To satisfy [Ty_Var1] (given [Gamma] and [T]), we need to generate
+    To satisfy [Ty_Var] (given [Gamma] and [T]), we need to generate
     [x] such that [bound_to Gamma x T]. But we already have such a
     generator!  We just need to wrap it in an [EVar].  *)
 
@@ -543,20 +544,24 @@ Definition gen_typed_evar (Gamma : context) (T : ty) : GOpt exp :=
 
 (** (Note that this is the [ret] of the [GOpt] monad.) *)
 
-(** Now let's consider a typing relation [has_type_2], extending
-    [has_type_1] with all of the constructors of [has_type] that do
+(** Now let's consider an extended typing relation, extending the 
+    previous one with all of the constructors of [has_type] that do
     not recursively require [has_type] as a side-condition. These will
     be the _base cases_ for our final generator. *)
-  
-Inductive has_type_2 : context -> exp -> ty -> Prop :=
-| Ty_Var2 : forall x T Gamma, 
-    bound_to Gamma x T -> has_type_2 Gamma (EVar x) T
-| Ty_Num2 : forall Gamma n, 
-    has_type_2 Gamma  (ENum n) TNat
-| Ty_True2 : forall Gamma, has_type_2 Gamma ETrue TBool
-| Ty_False2 : forall Gamma, has_type_2 Gamma EFalse TBool.
 
-(** We can already generate values satisfying [Ty_Var2] using
+Module TypePlayground2.
+
+Inductive has_type : context -> exp -> ty -> Prop :=
+| Ty_Var : forall x T Gamma, 
+    bound_to Gamma x T -> has_type Gamma (EVar x) T
+| Ty_Num : forall Gamma n, 
+    has_type Gamma  (ENum n) TNat
+| Ty_True : forall Gamma, has_type Gamma ETrue TBool
+| Ty_False : forall Gamma, has_type Gamma EFalse TBool.
+
+End TypePlayground2.
+
+(** We can already generate values satisfying [Ty_Var] using
     [gen_typed_evar].  For the rest of the rules, we will need to
     pattern match on the input [T], since [Ty_Num] can only be used if
     [T = TNat], while [Ty_True] and [Ty_False] can only be used if [T
@@ -598,12 +603,16 @@ Definition gen_has_type_2 Gamma T := backtrack (base Gamma T).
 (** To see how we handle recursive rules, let's consider a third
     sub-relation, [has_type_3], with just variables and addition: *)
 
-Inductive has_type_3 : context -> exp -> ty -> Prop :=
- | Ty_Var3 : forall x T Gamma, 
-     bound_to Gamma x T -> has_type_3 Gamma (EVar x) T
- | Ty_Plus3 : forall Gamma e1 e2, 
-    has_type_3 Gamma e1 TNat -> has_type_3 Gamma e2 TNat ->
-    has_type_3 Gamma (EPlus e1 e2) TNat.
+Module TypePlayground3.
+  
+Inductive has_type : context -> exp -> ty -> Prop :=
+ | Ty_Var : forall x T Gamma, 
+     bound_to Gamma x T -> has_type Gamma (EVar x) T
+ | Ty_Plus : forall Gamma e1 e2, 
+    has_type Gamma e1 TNat -> has_type Gamma e2 TNat ->
+    has_type Gamma (EPlus e1 e2) TNat.
+
+End TypePlayground3.
 
 (** Typing derivations involving [EPlus] nodes are binary trees, so we
     need to add a [size] parameter to enforce termination. The base
@@ -846,8 +855,9 @@ Definition expression_soundness_exec :=
   | _ => true
   end)))).   
 
-(* QuickChick expression_soundness_exec. *)
-(** 
+(* QuickChick expression_soundness_exec.
+
+    
 
      ===>
        QuickChecking expression_soundness_exec
@@ -879,8 +889,9 @@ Definition expression_soundness_exec_firstshrink :=
   | _ => true
   end)))).   
 
-(* QuickChick expression_soundness_exec_firstshrink. *)
-(** 
+(* QuickChick expression_soundness_exec_firstshrink.
+
+    
 << 
      ===> 
        QuickChecking expression_soundness_exec_firsttry
@@ -1025,8 +1036,9 @@ Definition shrink_typed_has_type :=
 (* QuickChick shrink_typed_has_type. *)
 
 (* ================================================================= *)
-(** ** Back to Soundness *)
-(** To lift the shrinker to optional expressions, QuickChick provides
+(** ** Back to Soundness
+
+    To lift the shrinker to optional expressions, QuickChick provides
     the following function. *)
 
 Definition lift_shrink {A}
@@ -1054,8 +1066,9 @@ Definition expression_soundness_exec' :=
   | _ => true
   end)))).   
 
-(* QuickChick expression_soundness_exec'. *)
-(** 
+(* QuickChick expression_soundness_exec'.
+
+    
 
      ===>
         QuickChecking expression_soundness_exec'
@@ -1087,7 +1100,7 @@ Notation "c1 ;;; c2" :=
   (CSeq c1 c2) (at level 80, right associativity).
 Notation "'WHILE' b 'DO' c 'END'" :=
   (CWhile b c) (at level 80, right associativity).
-Notation "'IFB' c1 'THEN' c2 'ELSE' c3 'FI'" :=
+Notation "'TEST' c1 'THEN' c2 'ELSE' c3 'FI'" :=
   (CIf c1 c2 c3) (at level 80, right associativity).
 
 Derive Show for com.
@@ -1176,13 +1189,15 @@ Proof with eauto.
     destruct (dec_has_type e Gamma TBool); destruct dec; solve_sum.
 Qed.
 
-(** **** Exercise: 4 stars (arbitrary_well_typed_com)  *)
-(** Write a generator and a shrinker for well_typed programs given
+(** **** Exercise: 4 stars, standard (arbitrary_well_typed_com)
+
+    Write a generator and a shrinker for well_typed programs given
     some context [Gamma].  Write some appropriate sanity checks and
     make sure they give expected results. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* FILL IN HERE
+
+    [] *)
 
 (** To complete the tour of testing for TImp, here is a (buggy??)
     evaluation function for commands given a state. To ensure
@@ -1213,7 +1228,7 @@ Fixpoint ceval (fuel : nat) (st : state) (c : com) : result :=
         | Success st' =>  ceval fuel' st' c2 
         | _ => Fail 
         end
-    | IFB b THEN c1 ELSE c2 FI =>
+    | TEST b THEN c1 ELSE c2 FI =>
       match eval st b with 
       | Some (VBool b) =>
         ceval fuel' st (if b then c1 else c2)
@@ -1243,13 +1258,15 @@ Conjecture well_typed_state_never_stuck :
   forall c, well_typed_com Gamma c ->
   forall fuel, isFail (ceval fuel st c) = false.
 
-(** **** Exercise: 4 stars (well_typed_state_never_stuck)  *)
-(** Write a checker for the above property, find any bugs, and fix them. *)
+(** **** Exercise: 4 stars, standard (well_typed_state_never_stuck)
+
+    Write a checker for the above property, find any bugs, and fix them. *)
 
 (* FILL IN HERE *)
 
-(** **** Exercise: 4 stars (ty_eq_polymorphic)  *)
-(** In the [has_type] relation we allowed equality checks between 
+(** **** Exercise: 4 stars, standard (ty_eq_polymorphic)
+
+    In the [has_type] relation we allowed equality checks between 
     only arithmetic expressions. Introduce an additional typing 
     rule that allows for equality checks between booleans.
 
@@ -1381,8 +1398,9 @@ End GenSTPlayground.
 Conjecture conditional_prop_example : 
   forall (x y : nat), x = y -> x = y.
 
-(* QuickChick conditional_prop_example. *)
-(** 
+(* QuickChick conditional_prop_example.
+
+    
   ==>
     QuickChecking conditional_prop_example
     +++ Passed 10000 tests (0 discards)
@@ -1397,4 +1415,4 @@ Conjecture conditional_prop_example :
 (** The first version of this material was developed in collaboration
     with Nicolas Koh. *)
 
-(* Tue Oct 9 11:47:31 EDT 2018 *)
+(* 2020-10-14 10:23 *)

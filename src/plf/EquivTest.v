@@ -37,24 +37,24 @@ idtac " ".
 
 idtac "#> skip_right".
 idtac "Possible points: 2".
-check_type @skip_right ((forall c : Imp.com, cequiv (Imp.CSeq c Imp.CSkip) c)).
+check_type @skip_right ((forall c : com, cequiv <{ c; skip }> c)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions skip_right.
 Goal True.
 idtac " ".
 
-idtac "-------------------  TEST_false  --------------------".
+idtac "-------------------  if_false  --------------------".
 idtac " ".
 
-idtac "#> TEST_false".
+idtac "#> if_false".
 idtac "Possible points: 2".
-check_type @TEST_false (
-(forall (b : Imp.bexp) (c1 c2 : Imp.com),
- bequiv b Imp.BFalse -> cequiv (Imp.CIf b c1 c2) c2)).
+check_type @if_false (
+(forall (b : bexp) (c1 c2 : com),
+ bequiv b <{ false }> -> cequiv <{ if b then c1 else c2 end }> c2)).
 idtac "Assumptions:".
 Abort.
-Print Assumptions TEST_false.
+Print Assumptions if_false.
 Goal True.
 idtac " ".
 
@@ -64,26 +64,26 @@ idtac " ".
 idtac "#> swap_if_branches".
 idtac "Possible points: 3".
 check_type @swap_if_branches (
-(forall (b : Imp.bexp) (e1 e2 : Imp.com),
- cequiv (Imp.CIf b e1 e2) (Imp.CIf (Imp.BNot b) e2 e1))).
+(forall (b : bexp) (c1 c2 : com),
+ cequiv <{ if b then c1 else c2 end }> <{ if ~ b then c2 else c1 end }>)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions swap_if_branches.
 Goal True.
 idtac " ".
 
-idtac "-------------------  WHILE_true  --------------------".
+idtac "-------------------  while_true  --------------------".
 idtac " ".
 
-idtac "#> WHILE_true".
+idtac "#> while_true".
 idtac "Possible points: 2".
-check_type @WHILE_true (
-(forall (b : Imp.bexp) (c : Imp.com),
- bequiv b (Imp.bool_to_bexp true) ->
- cequiv (Imp.CWhile b c) (Imp.CWhile (Imp.bool_to_bexp true) Imp.CSkip))).
+check_type @while_true (
+(forall (b : bexp) (c : com),
+ bequiv b <{ true }> ->
+ cequiv <{ while b do c end }> <{ while true do skip end }>)).
 idtac "Assumptions:".
 Abort.
-Print Assumptions WHILE_true.
+Print Assumptions while_true.
 Goal True.
 idtac " ".
 
@@ -93,8 +93,8 @@ idtac " ".
 idtac "#> assign_aequiv".
 idtac "Possible points: 2".
 check_type @assign_aequiv (
-(forall (x : String.string) (e : Imp.aexp),
- aequiv (Imp.AId x) e -> cequiv Imp.CSkip (Imp.CAss x e))).
+(forall (x : String.string) (a : aexp),
+ aequiv (AId x) a -> cequiv <{ skip }> <{ x := a }>)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions assign_aequiv.
@@ -115,10 +115,11 @@ idtac " ".
 idtac "#> CIf_congruence".
 idtac "Possible points: 3".
 check_type @CIf_congruence (
-(forall (b b' : Imp.bexp) (c1 c1' c2 c2' : Imp.com),
+(forall (b b' : bexp) (c1 c1' c2 c2' : com),
  bequiv b b' ->
  cequiv c1 c1' ->
- cequiv c2 c2' -> cequiv (Imp.CIf b c1 c2) (Imp.CIf b' c1' c2'))).
+ cequiv c2 c2' ->
+ cequiv <{ if b then c1 else c2 end }> <{ if b' then c1' else c2' end }>)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions CIf_congruence.
@@ -142,8 +143,7 @@ idtac " ".
 
 idtac "#> inequiv_exercise".
 idtac "Possible points: 3".
-check_type @inequiv_exercise (
-(~ cequiv (Imp.CWhile (Imp.bool_to_bexp true) Imp.CSkip) Imp.CSkip)).
+check_type @inequiv_exercise ((~ cequiv <{ while true do skip end }> <{ skip }>)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions inequiv_exercise.
@@ -176,10 +176,10 @@ idtac " ".
 
 idtac "#> Himp.p1_may_diverge".
 idtac "Advanced".
-idtac "Possible points: 2".
+idtac "Possible points: 3".
 check_type @Himp.p1_may_diverge (
-(forall (st : String.string -> nat) (st' : Imp.state),
- st Imp.X <> 0 -> ~ Himp.ceval Himp.p1 st st')).
+(forall (st : String.string -> nat) (st' : state),
+ st X <> 0 -> ~ Himp.ceval Himp.p1 st st')).
 idtac "Assumptions:".
 Abort.
 Print Assumptions Himp.p1_may_diverge.
@@ -188,10 +188,10 @@ idtac " ".
 
 idtac "#> Himp.p2_may_diverge".
 idtac "Advanced".
-idtac "Possible points: 2".
+idtac "Possible points: 3".
 check_type @Himp.p2_may_diverge (
-(forall (st : String.string -> nat) (st' : Imp.state),
- st Imp.X <> 0 -> ~ Himp.ceval Himp.p2 st st')).
+(forall (st : String.string -> nat) (st' : state),
+ st X <> 0 -> ~ Himp.ceval Himp.p2 st st')).
 idtac "Assumptions:".
 Abort.
 Print Assumptions Himp.p2_may_diverge.
@@ -203,7 +203,7 @@ idtac " ".
 
 idtac "#> Himp.p1_p2_equiv".
 idtac "Advanced".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 check_type @Himp.p1_p2_equiv ((Himp.cequiv Himp.p1 Himp.p2)).
 idtac "Assumptions:".
 Abort.
@@ -216,7 +216,7 @@ idtac " ".
 
 idtac "#> Himp.p3_p4_inequiv".
 idtac "Advanced".
-idtac "Possible points: 4".
+idtac "Possible points: 6".
 check_type @Himp.p3_p4_inequiv ((~ Himp.cequiv Himp.p3 Himp.p4)).
 idtac "Assumptions:".
 Abort.
@@ -227,19 +227,32 @@ idtac " ".
 idtac " ".
 
 idtac "Max points - standard: 27".
-idtac "Max points - advanced: 39".
+idtac "Max points - advanced: 45".
+idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
 idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- skip_right ---------".
 Print Assumptions skip_right.
-idtac "---------- TEST_false ---------".
-Print Assumptions TEST_false.
+idtac "---------- if_false ---------".
+Print Assumptions if_false.
 idtac "---------- swap_if_branches ---------".
 Print Assumptions swap_if_branches.
-idtac "---------- WHILE_true ---------".
-Print Assumptions WHILE_true.
+idtac "---------- while_true ---------".
+Print Assumptions while_true.
 idtac "---------- assign_aequiv ---------".
 Print Assumptions assign_aequiv.
 idtac "---------- equiv_classes ---------".
@@ -266,6 +279,4 @@ idtac "---------- Himp.p3_p4_inequiv ---------".
 Print Assumptions Himp.p3_p4_inequiv.
 Abort.
 
-(* Thu Feb 7 20:08:02 EST 2019 *)
-
-(* Thu Feb 7 20:09:28 EST 2019 *)
+(* 2020-09-09 21:08 *)

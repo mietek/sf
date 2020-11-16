@@ -1,0 +1,1246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
+<title>Verif_reverse: Linked lists in Verifiable C</title>
+<link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
+<script src="common/jquery-ui/external/jquery/jquery.js"></script>
+<script src="common/jquery-ui/jquery-ui.js"></script>
+<script src="common/toggleproofs.js"></script>
+<link href="common/css/vc.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 5: Verifiable C</a></div>
+<ul id='menu'>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+</ul>
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Verif_reverse<span class="subtitle">Linked lists in Verifiable C</span></h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+ This chapter demonstrates some more features of Verifiable C. 
+  There are no exercises in this chapter. 
+<div class="paragraph"> </div>
+
+<a id="lab36"></a><h2 class="section">Running Example</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a little C program, <span class="inlinecode"><span class="id" title="var">reverse.c</span></span>:
+
+<div class="paragraph"> </div>
+
+<pre>
+    #include &lt;stddef.h&gt;
+
+    struct list {unsigned head; struct list *tail;};
+
+    struct list *reverse (struct list *p) {
+      struct list *w, *t, *v;
+      w = NULL;
+      v = p;
+      while (v) {
+        t = v<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail;
+        v<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail = w;
+        w = v;
+        v = t;
+      }
+      return w;
+    }
+</pre>
+
+<div class="paragraph"> </div>
+
+This program reverses the linked list <span class="inlinecode"><span class="id" title="var">p</span></span>, by updating all the <span class="inlinecode"><span class="id" title="var">tail</span></span>
+pointers without touching any of the <span class="inlinecode"><span class="id" title="var">head</span></span> values.  You can "see it run"
+by flipping through the slides of Reverse-Slides.pdf, distributed with
+this chapter.    Let's prove this program correct!
+
+<div class="paragraph"> </div>
+
+ SEE ALSO VC.pdf Chapter 46 (<i>Proof of the reverse program</i>) 
+<div class="paragraph"> </div>
+
+ As usual, we import the Verifiable C system <span class="inlinecode"><span class="id" title="var">VST.floyd.proofauto</span></span>,
+    then the program to be verified, in this case <span class="inlinecode"><span class="id" title="var">reverse</span></span>.  Then we
+    give the standard boilerplate definitions of <span class="inlinecode"><span class="id" title="var">CompSpecs</span></span> and <span class="inlinecode"><span class="id" title="var">Vprog</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Require</span> <a class="idref" href="Preface.html#"><span class="id" title="library">VC.Preface</span></a>. <span class="comment">(*&nbsp;Check&nbsp;for&nbsp;the&nbsp;right&nbsp;version&nbsp;of&nbsp;VST&nbsp;*)</span><br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VST.floyd.proofauto</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">VC.reverse</span>.<br/>
+<span class="id" title="keyword">Instance</span> <a id="CompSpecs" class="idref" href="#CompSpecs"><span class="id" title="instance">CompSpecs</span></a> : <span class="id" title="class">compspecs</span>. <span class="id" title="var">make_compspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">Definition</span> <a id="Vprog" class="idref" href="#Vprog"><span class="id" title="definition">Vprog</span></a> : <span class="id" title="definition">varspecs</span>. <span class="id" title="var">mk_varspecs</span> <span class="id" title="definition">prog</span>. <span class="id" title="keyword">Defined</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab37"></a><h2 class="section">Inductive definition of linked lists</h2>
+
+<div class="paragraph"> </div>
+
+ <span class="inlinecode"><span class="id" title="var">Tstruct</span></span> <span class="inlinecode"><span class="id" title="var">_list</span></span> <span class="inlinecode"><span class="id" title="var">noattr</span></span> is the AST (abstract syntax tree) description
+ of the C-language type <span class="inlinecode"><span class="id" title="keyword">struct</span></span> <span class="inlinecode"><span class="id" title="var">list</span></span>.  We will be using this a lot,
+ so we make an abbreviation for it, t_list: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a id="t_list" class="idref" href="#t_list"><span class="id" title="definition">t_list</span></a> := <span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>.<br/>
+</div>
+
+<div class="doc">
+We will define a separation-logic predicate, <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">sigma</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span>,
+ to describe the concept that the address <span class="inlinecode"><span class="id" title="var">p</span></span> in memory is a linked
+ list that represents the mathematical sequence <span class="inlinecode"><span class="id" title="var">sigma</span></span>.
+ Here, <span class="inlinecode"><span class="id" title="var">sigma</span></span> is a list of <span class="inlinecode"><span class="id" title="var">val</span></span>,  which is C's "value" type:
+ integers, pointers, floats, etc. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a id="listrep" class="idref" href="#listrep"><span class="id" title="definition">listrep</span></a> (<a id="sigma:1" class="idref" href="#sigma:1"><span class="id" title="binder">sigma</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>) (<a id="p:2" class="idref" href="#p:2"><span class="id" title="binder">p</span></a>: <span class="id" title="inductive">val</span>) : <span class="id" title="definition">mpred</span> :=<br/>
+&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="Verif_reverse.html#sigma:1"><span class="id" title="variable">sigma</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;| <span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">hs</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="y:5" class="idref" href="#y:5"><span class="id" title="binder">y</span></a>:<span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#y:5"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#p:2"><span class="id" title="variable">p</span></a>  <span class="id" title="notation">×</span>  <a class="idref" href="Verif_reverse.html#listrep:3"><span class="id" title="definition">listrep</span></a> <span class="id" title="var">hs</span> <a class="idref" href="Verif_reverse.html#y:5"><span class="id" title="variable">y</span></a><br/>
+&nbsp;| <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#p:2"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="definition">nullval</span><span class="id" title="notation">)</span> <span class="id" title="notation">&amp;&amp;</span> <span class="id" title="method">emp</span><br/>
+&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+
+<div class="doc">
+This says, if <span class="inlinecode"><span class="id" title="var">sigma</span></span> has head <span class="inlinecode"><span class="id" title="var">h</span></span> and tail <span class="inlinecode"><span class="id" title="var">hs</span></span>, then
+  there is a cons cell at address <span class="inlinecode"><span class="id" title="var">p</span></span> with components <span class="inlinecode">(<span class="id" title="var">h</span>,<span class="id" title="var">y</span>)</span>.
+  This cons cell is described by <span class="inlinecode"><span class="id" title="var">data_at</span></span> <span class="inlinecode"><span class="id" title="var">Tsh</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">(<span class="id" title="var">h</span>,<span class="id" title="var">y</span>)</span> <span class="inlinecode"><span class="id" title="var">p</span></span>.
+  Separate from that, at address <span class="inlinecode"><span class="id" title="var">y</span></span>, there is the representation
+  of the rest of the list, <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">hs</span></span> <span class="inlinecode"><span class="id" title="var">y</span></span>.  The memory footprint
+  for <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode">(<span class="id" title="var">h</span>::<span class="id" title="var">hs</span>)</span> <span class="inlinecode"><span class="id" title="var">p</span></span> contains the first cons cell at address <span class="inlinecode"><span class="id" title="var">p</span></span>,
+  and the rest of the cons cells in the list starting at address <span class="inlinecode"><span class="id" title="var">y</span></span>.
+
+<div class="paragraph"> </div>
+
+  But if <span class="inlinecode"><span class="id" title="var">sigma</span></span> is <span class="inlinecode"><span class="id" title="var">nil</span></span>, then <span class="inlinecode"><span class="id" title="var">p</span></span> is the null pointer, and the
+  memory footprint is empty (<span class="inlinecode"><span class="id" title="var">emp</span></span>).  The fact <span class="inlinecode"><span class="id" title="var">p</span>=<span class="id" title="var">nullval</span></span> is a pure
+  proposition (Coq <span class="inlinecode"><span class="id" title="keyword">Prop</span></span>); we inject this into the assertion language
+  (Coq <span class="inlinecode"><span class="id" title="var">mpred</span></span>) using the <span class="inlinecode">!!</span> operator.
+
+<div class="paragraph"> </div>
+
+  Because <span class="inlinecode">!!<span class="id" title="var">P</span></span> (for a proposition <span class="inlinecode"><span class="id" title="var">P</span></span>) does not specify any footprint
+  (whether empty or otherwise), we do not use the separating conjunction
+  <span class="inlinecode">×</span> to combine it with <span class="inlinecode"><span class="id" title="var">emp</span></span>;  <span class="inlinecode">!!<span class="id" title="var">P</span></span> has no <i>spatial</i> specification
+  to separate from.  Instead, we use the ordinary conjunction <span class="inlinecode">&amp;&amp;</span>.
+
+<div class="paragraph"> </div>
+
+ Now, we want to prevent the <span class="inlinecode"><span class="id" title="tactic">simpl</span></span> tactic from automatically
+ unfolding <span class="inlinecode"><span class="id" title="var">listrep</span></span>.  This is a design choice that you might make
+ differently, in which case, leave out the <span class="inlinecode"><span class="id" title="var">Arguments</span></span> command. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <span class="id" title="var">sigma</span> <span class="id" title="var">p</span> : <span class="id" title="tactic">simpl</span> <span class="id" title="var">never</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab38"></a><h2 class="section">Hint databases for spatial operators</h2>
+
+<div class="paragraph"> </div>
+
+ Whenever you define a new spatial operator--a definition of type
+  <span class="inlinecode"><span class="id" title="var">mpred</span></span> such as <span class="inlinecode"><span class="id" title="var">listrep</span></span>--it's useful to populate two hint  databases.
+<ul class="doclist">
+<li> The <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> hint is a lemma that extracts
+     pure propositional facts from a spatial fact.
+
+</li>
+<li> The <span class="inlinecode"><span class="id" title="var">valid_pointer</span></span> hint is a lemma that extracts a
+     valid-pointer fact from a spatial lemma.
+
+<div class="paragraph"> </div>
+
+   Consider this proof goal: 
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="data_at_isptr_example1" class="idref" href="#data_at_isptr_example1"><span class="id" title="lemma">data_at_isptr_example1</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> (<a id="h:6" class="idref" href="#h:6"><span class="id" title="binder">h</span></a> <a id="y:7" class="idref" href="#y:7"><span class="id" title="binder">y</span></a> <a id="p:8" class="idref" href="#p:8"><span class="id" title="binder">p</span></a> : <span class="id" title="inductive">val</span>) ,<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#h:6"><span class="id" title="variable">h</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#y:7"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#p:8"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="notation">!!</span> <span class="id" title="definition">isptr</span> <a class="idref" href="Verif_reverse.html#p:8"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" title="var">isptr</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span> means <span class="inlinecode"><span class="id" title="var">p</span></span> is a non-null pointer, not NULL or Vundef
+      or a floating-point number: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">isptr</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;=&nbsp;fun&nbsp;v&nbsp;:&nbsp;val&nbsp;=&gt;&nbsp;match&nbsp;v&nbsp;with&nbsp;Vptr&nbsp;_&nbsp;_&nbsp;=&gt;&nbsp;True&nbsp;|&nbsp;_&nbsp;=&gt;&nbsp;False&nbsp;end&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The goal solves automatically, using <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> 
+</div>
+<div class="code">
+<span class="id" title="var">entailer</span>!.<br/>
+<span class="id" title="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="data_at_isptr_example2" class="idref" href="#data_at_isptr_example2"><span class="id" title="lemma">data_at_isptr_example2</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> (<a id="h:9" class="idref" href="#h:9"><span class="id" title="binder">h</span></a> <a id="y:10" class="idref" href="#y:10"><span class="id" title="binder">y</span></a> <a id="p:11" class="idref" href="#p:11"><span class="id" title="binder">p</span></a> : <span class="id" title="inductive">val</span>) ,<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#h:9"><span class="id" title="variable">h</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#y:10"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#p:11"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="notation">!!</span> <span class="id" title="definition">isptr</span> <a class="idref" href="Verif_reverse.html#p:11"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+Let's look more closely at how <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> solves this goal.
+    First, it finds all the pure propositions <span class="inlinecode"><span class="id" title="keyword">Prop</span></span> that it can deduce from
+    the <span class="inlinecode"><span class="id" title="var">mpred</span></span> conjuncts on the left-hand side, and puts them above the line. 
+</div>
+<div class="code">
+<span class="id" title="var">saturate_local</span>.<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> tactic uses a Hint database (also called
+   <span class="inlinecode"><span class="id" title="var">saturate_local</span></span>) to look up the individual conjuncts on the left-hand side
+   (this particular entailment has just one conjunct). 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="var">HintDb</span> <span class="id" title="var">saturate_local</span>.<br/>
+</div>
+
+<div class="doc">
+In this case, the new propositions above the line are labeled <span class="inlinecode"><span class="id" title="var">H</span></span> and <span class="inlinecode"><span class="id" title="var">H<sub>0</sub></span></span>.  Next, if the proof goal has just a proposition <span class="inlinecode">!!<span class="id" title="var">P</span></span> on the right,
+    <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> throws away the left-hand-side and tries to prove <span class="inlinecode"><span class="id" title="var">P</span></span>.
+    (This is rather aggressive, and can sometimes lose information, that is,
+     sometimes <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> will turn a provable goal into an unprovable goal.) 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="tactic">apply</span> <span class="id" title="method">prop_right</span>.<br/>
+</div>
+
+<div class="doc">
+It happens that <span class="inlinecode"><span class="id" title="var">field_compatible</span></span> <span class="inlinecode"><span class="id" title="var">_</span></span> <span class="inlinecode"><span class="id" title="var">_</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span> implies <span class="inlinecode"><span class="id" title="var">isptr</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span>, 
+</div>
+<div class="code">
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">field_compatible_isptr</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;:&nbsp;forall&nbsp;(t&nbsp;:&nbsp;type)&nbsp;(path&nbsp;:&nbsp;list&nbsp;gfield)&nbsp;(p&nbsp;:&nbsp;val),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;field_compatible&nbsp;t&nbsp;path&nbsp;p&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;isptr&nbsp;p&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+So therefore, <span class="inlinecode"><span class="id" title="var">field_compatible_isptr</span></span> solves the goal. 
+</div>
+<div class="code">
+<span class="id" title="tactic">eapply</span> <span class="id" title="lemma">field_compatible_isptr</span>; <span class="id" title="tactic">eauto</span>.<br/>
+</div>
+
+<div class="doc">
+Now you have some insight into how <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> works. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+But when you define a new spatial predicate <span class="inlinecode"><span class="id" title="var">mpred</span></span> such as <span class="inlinecode"><span class="id" title="var">listrep</span></span>,
+   the <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> tactic does not know how to deduce <span class="inlinecode"><span class="id" title="keyword">Prop</span></span> facts
+   from the <span class="inlinecode"><span class="id" title="var">listrep</span></span> conjunct: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_facts_example" class="idref" href="#listrep_facts_example"><span class="id" title="lemma">listrep_facts_example</span></a>:<br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:12" class="idref" href="#sigma:12"><span class="id" title="binder">sigma</span></a> <a id="p:13" class="idref" href="#p:13"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#sigma:12"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_reverse.html#p:13"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><span class="id" title="definition">isptr</span> <a class="idref" href="Verif_reverse.html#p:13"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e<sub>25</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="Verif_reverse.html#p:13"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><span class="id" title="definition">nullval</span><span class="id" title="notation">)</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+<span class="id" title="var">entailer</span>!.<br/>
+</div>
+
+<div class="doc">
+Here, <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> threw away the left-hand-side and left an unprovable goal.
+   Let's see why. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Abort</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_facts_example" class="idref" href="#listrep_facts_example"><span class="id" title="lemma">listrep_facts_example</span></a>:<br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:14" class="idref" href="#sigma:14"><span class="id" title="binder">sigma</span></a> <a id="p:15" class="idref" href="#p:15"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#sigma:14"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_reverse.html#p:15"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><span class="id" title="definition">isptr</span> <a class="idref" href="Verif_reverse.html#p:15"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e<sub>25</sub>"><span class="id" title="notation">∨</span></a> <a class="idref" href="Verif_reverse.html#p:15"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><span class="id" title="definition">nullval</span><span class="id" title="notation">)</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+First <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> would use <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> to see (from the Hint database)
+   what can be deduced from <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">sigma</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="var">saturate_local</span>.<br/>
+</div>
+
+<div class="doc">
+But <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> did not add anything above the line.  That's because
+   there's no Hint in the Hint database for <span class="inlinecode"><span class="id" title="var">listrep</span></span>.
+   Therefore we must add one.   The conventional name for such a lemma
+   is  <span class="inlinecode"><span class="id" title="var">f_local_facts</span></span>, if your new predicate is named <span class="inlinecode"><span class="id" title="var">f</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Abort</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_local_facts" class="idref" href="#listrep_local_facts"><span class="id" title="lemma">listrep_local_facts</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:16" class="idref" href="#sigma:16"><span class="id" title="binder">sigma</span></a> <a id="p:17" class="idref" href="#p:17"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#sigma:16"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_reverse.html#p:17"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><span class="id" title="definition">is_pointer_or_null</span> <a class="idref" href="Verif_reverse.html#p:17"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#p:17"><span class="id" title="variable">p</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><span class="id" title="definition">nullval</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;-&gt;'_x"><span class="id" title="notation">↔</span></a> <a class="idref" href="Verif_reverse.html#sigma:16"><span class="id" title="variable">sigma</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">)</span></a><span class="id" title="notation">)</span>.<br/>
+</div>
+
+<div class="doc">
+For each spatial predicate <span class="inlinecode"><span class="id" title="keyword">Definition</span></span> <span class="inlinecode"><span class="id" title="var">f</span>(<span class="id" title="var">_</span>):</span> <span class="inlinecode"><span class="id" title="var">mpred</span></span>,
+  there should be <i>one</i> "local fact", a lemma of the form
+  <span class="inlinecode"><span class="id" title="var">f</span>(<span class="id" title="var">_</span>)</span> <span class="inlinecode"><span class="nowrap">&vert;--</span></span> <span class="inlinecode">!!</span> <span class="inlinecode"><span class="id" title="var">_</span></span>.  On the right hand side, put all the propositions
+  you can derive from <span class="inlinecode"><span class="id" title="var">f</span>(<span class="id" title="var">_</span>)</span>.  In this case, we know:
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" title="var">p</span></span> is either a pointer or null (it's never <span class="inlinecode"><span class="id" title="var">Vundef</span></span>, or <span class="inlinecode"><span class="id" title="var">Vfloat</span></span>,
+     or a nonzero <span class="inlinecode"><span class="id" title="var">Vint</span></span>).
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">p</span></span> is null, if and only if <span class="inlinecode"><span class="id" title="var">sigma</span></span> is nil. 
+</li>
+</ul>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+We will prove this entailment by induction on sigma 
+</div>
+<div class="code">
+<span class="id" title="var">revert</span> <span class="id" title="var">p</span>; <span class="id" title="tactic">induction</span> <span class="id" title="var">sigma</span>; <span class="id" title="tactic">intros</span> <span class="id" title="var">p</span>.<br/>
+- </div>
+
+<div class="doc">
+In the base case, <span class="inlinecode"><span class="id" title="var">sigma</span></span> is nil.  We can unfold the definition
+   of <span class="inlinecode"><span class="id" title="var">listrep</span></span> to see what that means. 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+</div>
+
+<div class="doc">
+Now we have an entailment with a proposition <span class="inlinecode"><span class="id" title="var">p</span>=<span class="id" title="var">nullval</span></span> on the left.
+ To move that proposition above the line, we could do <span class="inlinecode"><span class="id" title="var">Intros</span></span>, but
+ it's easier just to call on <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> to see how it can simplify (and perhaps
+ partially solve) this entailment goal: 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+&nbsp;<span class="comment">(*&nbsp;The&nbsp;<span class="inlinecode"><span class="id" title="var">entailer</span>!</span>&nbsp;has&nbsp;left&nbsp;an&nbsp;ordinary&nbsp;proposition,&nbsp;which&nbsp;is&nbsp;easy&nbsp;to&nbsp;solve.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">auto</span>.<br/>
+- </div>
+
+<div class="doc">
+In the inductive case, we can again unfold the definition
+   of <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode">(<span class="id" title="var">a</span>::<span class="id" title="var">sigma</span>)</span>; but then it's good to fold <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">sigma</span></span>.
+   Replace the semicolon <span class="inlinecode">;</span> with a period in the next line, to see why. 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>; <span class="id" title="tactic">fold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+</div>
+
+<div class="doc">
+Warning!  Sometimes <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> is too aggressive.  If we use it
+  here, it will throw away the left-hand side because it doesn't
+  understand how to look inside an EXistential quantitier.  The
+  exclamation point <span class="inlinecode">!</span> is a warning that <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> can turn a
+  provable goal into an unprovable goal.  Uncomment the next line
+  and see what happens.  Then put the comment marks back. 
+</div>
+<div class="code">
+&nbsp;<span class="comment">(*&nbsp;entailer!.&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The preferred way to handle <span class="inlinecode"><span class="id" title="var">EX</span></span> <span class="inlinecode"><span class="id" title="var">y</span>:<span class="id" title="var">t</span></span> on the left-hand-side of an
+ entailment is to use <span class="inlinecode"><span class="id" title="var">Intros</span></span> <span class="inlinecode"><span class="id" title="var">y</span>.</span>  Uncomment this to try it out, then
+ put the comment marks back. 
+</div>
+<div class="code">
+&nbsp;<span class="comment">(*&nbsp;Intros&nbsp;y.&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+A less agressive entailment-reducer is <span class="inlinecode"><span class="id" title="var">entailer</span></span> without the
+    exclamation point. This one never turns a provable goal into an
+    unprovable goal.  Here it will Intro the EX-bound variable y. 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="var">entailer</span>.<br/>
+</div>
+
+<div class="doc">
+Should you use <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> or <span class="inlinecode"><span class="id" title="var">entailer</span></span> in ordinary proofs?
+  Usually <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> is best: it's faster, and it does more work for you.
+  Only if you  find that <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> has gone into a dead end, should
+  you use <span class="inlinecode"><span class="id" title="var">entailer</span></span> instead. 
+<div class="paragraph"> </div>
+
+ Here it is safe to use <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+</div>
+
+<div class="doc">
+Notice that entailer! has put several facts above the line:
+  <span class="inlinecode"><span class="id" title="var">field_compatible</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">[]</span> <span class="inlinecode"><span class="id" title="var">p</span></span> and <span class="inlinecode"><span class="id" title="var">value_fits</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">(<span class="id" title="var">a</span>,<span class="id" title="var">y</span>)</span> come from the
+  <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> hint database, from the <span class="inlinecode"><span class="id" title="var">data_at</span></span> conjunct;  and
+  <span class="inlinecode"><span class="id" title="var">is_pointer_or_null</span></span> <span class="inlinecode"><span class="id" title="var">y</span></span> and <span class="inlinecode"><span class="id" title="var">y</span>=<span class="id" title="var">nullval</span></span> <span class="inlinecode">↔</span> <span class="inlinecode"><span class="id" title="var">sigma</span>=[]</span> come from the
+  the <span class="inlinecode"><span class="id" title="var">listrep</span></span> conjunct, using the induction hypothesis <span class="inlinecode"><span class="id" title="var">IHsigma</span></span>.
+
+<div class="paragraph"> </div>
+
+  Now, let's split the goal and take the two cases separately. 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">intro</span>.<br/>
+&nbsp;+<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">clear</span> - <span class="id" title="var">H</span> <span class="id" title="var">H<sub>2</sub></span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">p</span>.<br/>
+</div>
+
+<div class="doc">
+It happens that <span class="inlinecode"><span class="id" title="var">field_compatible</span></span> <span class="inlinecode"><span class="id" title="var">_</span></span> <span class="inlinecode"><span class="id" title="var">_</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span> implies <span class="inlinecode"><span class="id" title="var">isptr</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span>, 
+</div>
+<div class="code">
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">field_compatible_isptr</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;:&nbsp;forall&nbsp;(t&nbsp;:&nbsp;type)&nbsp;(path&nbsp;:&nbsp;list&nbsp;gfield)&nbsp;(p&nbsp;:&nbsp;val),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;field_compatible&nbsp;t&nbsp;path&nbsp;p&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;isptr&nbsp;p&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+ The predicate isptr excludes the null pointer, 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">isptr</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;=&nbsp;fun&nbsp;v&nbsp;:&nbsp;val&nbsp;=&gt;&nbsp;match&nbsp;v&nbsp;with&nbsp;Vptr&nbsp;_&nbsp;_&nbsp;=&gt;&nbsp;True&nbsp;|&nbsp;_&nbsp;=&gt;&nbsp;False&nbsp;end&nbsp;*)</span><br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="definition">nullval</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;=&nbsp;if&nbsp;Archi.ptr64&nbsp;then&nbsp;Vlong&nbsp;Int64.zero&nbsp;else&nbsp;Vint&nbsp;Int.zero&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Therefore <span class="inlinecode"><span class="id" title="var">H</span></span> is a contradiction.  We can proceed with, 
+</div>
+<div class="code">
+<span class="id" title="keyword">Check</span> <span class="id" title="lemma">field_compatible_nullval</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;=&nbsp;forall&nbsp;(CS&nbsp;:&nbsp;compspecs)&nbsp;(t&nbsp;:&nbsp;type)&nbsp;(f&nbsp;:&nbsp;list&nbsp;gfield)&nbsp;(P&nbsp;:&nbsp;Type),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;field_compatible&nbsp;t&nbsp;f&nbsp;nullval&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;P&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="lemma">field_compatible_nullval</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;+ <span class="comment">(*The&nbsp;case&nbsp;&nbsp;<span class="inlinecode"><span class="id" title="var">a</span>::<span class="id" title="var">sigma</span>=[]</span> <span class="inlinecode">→</span> <span class="inlinecode"><span class="id" title="var">p</span>=<span class="id" title="var">nullval</span></span>&nbsp;is&nbsp;easy,&nbsp;by&nbsp;inversion:&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">H<sub>2</sub></span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Now we add this lemma to the Hint database called <span class="inlinecode"><span class="id" title="var">saturate_local</span></span> 
+</div>
+<div class="code">
+<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">listrep_local_facts</span> : <span class="id" title="var">saturate_local</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab39"></a><h3 class="section">Valid pointers, and the <span class="inlinecode"><span class="id" title="var">valid_pointer</span></span> Hint database</h3>
+
+<div class="paragraph"> </div>
+
+ In the C language, you can do a pointer comparison such as <span class="inlinecode"><span class="id" title="var">p</span>!=<span class="id" title="var">NULL</span></span> or
+    <span class="inlinecode"><span class="id" title="var">p</span>==<span class="id" title="var">q</span></span> only if <span class="inlinecode"><span class="id" title="var">p</span></span> is a <i>valid pointer</i>, that is, either NULL or actually
+    pointing within an allocated object.  One way to prove that <span class="inlinecode"><span class="id" title="var">p</span></span> is
+    valid is if, for example,   <span class="inlinecode"><span class="id" title="var">data_at</span></span> <span class="inlinecode"><span class="id" title="var">Tsh</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">(<span class="id" title="var">h</span>,<span class="id" title="var">y</span>)</span> <span class="inlinecode"><span class="id" title="var">p</span></span>, meaning that <span class="inlinecode"><span class="id" title="var">p</span></span>
+    is pointing at a list cell.  There is a hint database <span class="inlinecode"><span class="id" title="var">valid_pointer</span></span> from
+    which the predicate <span class="inlinecode"><span class="id" title="var">valid_pointer</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span> can be proved automatically.
+    For example: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="struct_list_valid_pointer_example" class="idref" href="#struct_list_valid_pointer_example"><span class="id" title="lemma">struct_list_valid_pointer_example</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="h:18" class="idref" href="#h:18"><span class="id" title="binder">h</span></a> <a id="y:19" class="idref" href="#y:19"><span class="id" title="binder">y</span></a> <a id="p:20" class="idref" href="#p:20"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#h:18"><span class="id" title="variable">h</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#y:19"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#p:20"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="definition">valid_pointer</span> <a class="idref" href="Verif_reverse.html#p:20"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">valid_pointer</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+However, the hint database does not know about user-defined
+    separation-logic predicates (<span class="inlinecode"><span class="id" title="var">mpred</span></span>) such as <span class="inlinecode"><span class="id" title="var">listrep</span></span>; for example: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_valid_pointer_example" class="idref" href="#listrep_valid_pointer_example"><span class="id" title="lemma">listrep_valid_pointer_example</span></a>:<br/>
+&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:21" class="idref" href="#sigma:21"><span class="id" title="binder">sigma</span></a> <a id="p:22" class="idref" href="#p:22"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#sigma:21"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_reverse.html#p:22"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="definition">valid_pointer</span> <a class="idref" href="Verif_reverse.html#p:22"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">valid_pointer</span>.<br/>
+</div>
+
+<div class="doc">
+Notice that <span class="inlinecode"><span class="id" title="tactic">auto</span></span> <span class="inlinecode"><span class="id" title="keyword">with</span>...</span> did not solve the proof goal 
+</div>
+<div class="code">
+<span class="id" title="keyword">Abort</span>.<br/>
+</div>
+
+<div class="doc">
+Therefore, we should prove the appropriate lemma, and add it to the
+   Hint database.  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_valid_pointer" class="idref" href="#listrep_valid_pointer"><span class="id" title="lemma">listrep_valid_pointer</span></a>:<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">∀</span> <a id="sigma:23" class="idref" href="#sigma:23"><span class="id" title="binder">sigma</span></a> <a id="p:24" class="idref" href="#p:24"><span class="id" title="binder">p</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#sigma:23"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_reverse.html#p:24"><span class="id" title="variable">p</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span> <span class="id" title="definition">valid_pointer</span> <a class="idref" href="Verif_reverse.html#p:24"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+The main point is to unfold listrep. 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+</div>
+
+<div class="doc">
+Now we can prove it by case analysis on sigma; we don't even need
+   induction. 
+</div>
+<div class="code">
+&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">sigma</span>; <span class="id" title="tactic">simpl</span>.<br/>
+- </div>
+
+<div class="doc">
+The  nil case is easy: 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">hint</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+- </div>
+
+<div class="doc">
+ The cons case 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Intros</span> <span class="id" title="var">y</span>.<br/>
+</div>
+
+<div class="doc">
+Now this solves using the Hint database <span class="inlinecode"><span class="id" title="var">valid_pointer</span></span>, because the
+     <span class="inlinecode"><span class="id" title="var">data_at</span></span> <span class="inlinecode"><span class="id" title="var">Tsh</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">(<span class="id" title="var">v</span>,<span class="id" title="var">y</span>)</span> <span class="inlinecode"><span class="id" title="var">p</span></span> on the left is enough to prove the goal. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">valid_pointer</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Now we add this lemma to the Hint database 
+</div>
+<div class="code">
+<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">listrep_valid_pointer</span> : <span class="id" title="var">valid_pointer</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab40"></a><h2 class="section">Specification of the <span class="inlinecode"><span class="id" title="var">reverse</span></span> function.</h2>
+ A <span class="inlinecode"><span class="id" title="var">funspec</span></span> characterizes the precondition required for calling the function
+  and the postcondition guaranteed by the function. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a id="reverse_spec" class="idref" href="#reverse_spec"><span class="id" title="definition">reverse_spec</span></a> : <span class="id" title="definition">ident</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac<sub>4</sub>"><span class="id" title="notation">×</span></a> <span class="id" title="inductive">funspec</span> :=<br/>
+&nbsp;<span class="id" title="notation">DECLARE</span> <span class="id" title="definition">_reverse</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">WITH</span> <a id="sigma:27" class="idref" href="#sigma:27"><span class="id" title="binder">sigma</span></a> <span class="id" title="notation">:</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <a id="p:28" class="idref" href="#p:28"><span class="id" title="binder">p</span></a><span class="id" title="notation">:</span> <span class="id" title="inductive">val</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">PRE</span>  <span class="id" title="notation">[</span> <span class="id" title="definition">tptr</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">()</span>  <span class="id" title="notation">PARAMS</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#p:26"><span class="id" title="variable">p</span></a><span class="id" title="notation">)</span>  <span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#sigma:25"><span class="id" title="variable">sigma</span></a> <a class="idref" href="Verif_reverse.html#p:26"><span class="id" title="variable">p</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">POST</span> <span class="id" title="notation">[</span> <span class="id" title="notation">(</span><span class="id" title="definition">tptr</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a><span class="id" title="notation">)</span> <span class="id" title="notation">]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="q:29" class="idref" href="#q:29"><span class="id" title="binder">q</span></a>:<span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">()</span>  <span class="id" title="notation">RETURN</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#q:29"><span class="id" title="variable">q</span></a><span class="id" title="notation">)</span>  <span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>(<a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#rev"><span class="id" title="definition">rev</span></a> <a class="idref" href="Verif_reverse.html#sigma:27"><span class="id" title="variable">sigma</span></a>) <a class="idref" href="Verif_reverse.html#q:29"><span class="id" title="variable">q</span></a><span class="id" title="notation">)</span>.<br/>
+</div>
+
+<div class="doc">
+<ul class="doclist">
+<li> The WITH clause says, there is a value <span class="inlinecode"><span class="id" title="var">sigma</span>:</span> <span class="inlinecode"><span class="id" title="var">list</span></span> <span class="inlinecode"><span class="id" title="var">val</span></span>
+      and a value <span class="inlinecode"><span class="id" title="var">p</span>:</span> <span class="inlinecode"><span class="id" title="var">val</span></span>, visible in both the precondition and
+      the postcondition.
+
+</li>
+<li> The PREcondition says,
+<ul class="doclist">
+<li> There is one function-parameter, whose C type is
+         "pointer to struct list"
+
+</li>
+<li> PARAMS:  The parameter contains the Coq value <span class="inlinecode"><span class="id" title="var">p</span></span>;
+
+</li>
+<li> SEP: in memory at address <span class="inlinecode"><span class="id" title="var">p</span></span> there is a linked list
+          representing <span class="inlinecode"><span class="id" title="var">sigma</span></span>.
+
+</li>
+</ul>
+
+</li>
+<li> The POSTcondition says,
+<ul class="doclist">
+<li> the function returns a value whose C type is
+           "pointer to struct list"; and
+
+</li>
+<li> there exists a value <span class="inlinecode"><span class="id" title="var">q</span>:</span> <span class="inlinecode"><span class="id" title="var">val</span></span>, such that
+
+</li>
+<li> RETURN: the function's return value is <span class="inlinecode"><span class="id" title="var">q</span></span>
+
+</li>
+<li> SEP: in memory at address <span class="inlinecode"><span class="id" title="var">q</span></span> there is a linked list representing
+           <span class="inlinecode"><span class="id" title="var">rev</span></span> <span class="inlinecode"><span class="id" title="var">sigma</span></span>.
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+  The global function spec characterizes the preconditions/postconditions of
+  all the functions that your proved-correct program will call. Normally you
+  include all the functions here, but in this tutorial example we include
+  only one. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a id="Gprog" class="idref" href="#Gprog"><span class="id" title="definition">Gprog</span></a> : <span class="id" title="definition">funspecs</span> := <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a> <a class="idref" href="Verif_reverse.html#reverse_spec"><span class="id" title="definition">reverse_spec</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab41"></a><h2 class="section">Proof of the <span class="inlinecode"><span class="id" title="var">reverse</span></span> function</h2>
+
+<div class="paragraph"> </div>
+
+ For each function definition in the C program, prove that the
+ function-body (in this case, f_reverse) satisfies its specification
+  (in this case, reverse_spec).  
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a id="body_reverse" class="idref" href="#body_reverse"><span class="id" title="lemma">body_reverse</span></a>: <span class="id" title="definition">semax_body</span> <a class="idref" href="Verif_reverse.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_reverse.html#Gprog"><span class="id" title="definition">Gprog</span></a> <span class="id" title="definition">f_reverse</span> <a class="idref" href="Verif_reverse.html#reverse_spec"><span class="id" title="definition">reverse_spec</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+</div>
+
+<div class="doc">
+The start_function tactic "opens up" a semax_body
+    proof goal into a Hoare triple. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">start_function</span>.<br/>
+</div>
+
+<div class="doc">
+ As usual, the current assertion (precondition) is derived from the PRE
+  clause of the function specification, <span class="inlinecode"><span class="id" title="var">reverse_spec</span></span>, and the current command 
+  <span class="inlinecode"></span> <span class="inlinecode"><span class="id" title="var">w</span>=0;</span> <span class="inlinecode">...<span class="id" title="var">more</span>...</span> <span class="inlinecode"></span> is the function body of <span class="inlinecode"><span class="id" title="var">f_reverse</span></span>.
+
+<div class="paragraph"> </div>
+
+  The first statement (command) in the function-body is the assignment
+  statement  <span class="inlinecode"><span class="id" title="var">w</span>=<span class="id" title="var">NULL</span>;</span>, where <span class="inlinecode"><span class="id" title="var">NULL</span></span> is a C <span class="inlinecode">#<span class="id" title="var">define</span></span> that exands to
+  "cast 0 to void-pointer", <span class="inlinecode">(<span class="id" title="var">void</span></span> <span class="inlinecode">×</span> <span class="inlinecode">)0</span>, here ugly-printed as
+  <span class="inlinecode">(<span class="id" title="var">tptr</span></span> <span class="inlinecode"><span class="id" title="var">tvoid</span>)(0)</span>.  To apply the separation-logic assignment rule to
+  this command, simply use the tactic <span class="inlinecode"><span class="id" title="var">forward</span></span> : 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;w&nbsp;=&nbsp;NULL;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+The new <span class="inlinecode"><span class="id" title="var">semax</span></span> judgment is for the rest of the function body <i>after</i>
+  the command <span class="inlinecode"><span class="id" title="var">w</span>=<span class="id" title="var">NULL</span></span>.  The precondition of this <span class="inlinecode"><span class="id" title="var">semax</span></span> is actually the
+  postcondition of the <span class="inlinecode"><span class="id" title="var">w</span>=<span class="id" title="var">NULL</span></span> statement.  It's much like the precondition
+  of <span class="inlinecode"><span class="id" title="var">w</span>=<span class="id" title="var">NULL</span></span>, but contains the additional LOCAL fact,
+  <span class="inlinecode"><span class="id" title="var">temp</span></span> <span class="inlinecode"><span class="id" title="var">_w</span></span> <span class="inlinecode">(<span class="id" title="var">Vint</span></span> <span class="inlinecode">(<span class="id" title="var">Int.repr</span></span> <span class="inlinecode">0))</span>, that is, the variable <span class="inlinecode"><span class="id" title="var">_w</span></span> contains <span class="inlinecode"><span class="id" title="var">nullval</span></span>.
+
+<div class="paragraph"> </div>
+
+  We can view the Hoare-logic proof of this program as a "symbolic execution",
+  where the symbolic states are assertions.  We can symbolically execute
+  the next command by saying <span class="inlinecode"><span class="id" title="var">forward</span></span> again. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;v&nbsp;=&nbsp;p;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Examine the precondition, and notice that now we have the additional
+    fact, <span class="inlinecode"><span class="id" title="var">temp</span></span> <span class="inlinecode"><span class="id" title="var">_v</span></span> <span class="inlinecode"><span class="id" title="var">p</span></span>. 
+<div class="paragraph"> </div>
+
+ We cannot the next step using <span class="inlinecode"><span class="id" title="var">forward</span></span> ... 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Fail</span> <span class="id" title="var">forward</span>.<br/>
+</div>
+
+<div class="doc">
+... because the next command is a <span class="inlinecode"><span class="id" title="var">while</span></span> loop. 
+<div class="paragraph"> </div>
+
+<a id="lab42"></a><h2 class="section">The loop invariant</h2>
+
+<div class="paragraph"> </div>
+
+ To prove a while-loop, you must supply a loop invariant,
+    such as
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">EX</span> <span class="id" title="var">s<sub>1</sub></span> ... <span class="id" title="var">PROP</span>(...)<span class="id" title="var">LOCAL</span>(...)<span class="id" title="var">SEP</span>(...).
+<div class="paragraph"> </div>
+
+</span> 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">forward_while</span><br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" title="notation">EX</span> <a id="s<sub>1</sub>:34" class="idref" href="#s<sub>1</sub>:34"><span class="id" title="binder">s<sub>1</sub></span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="s<sub>2</sub>:35" class="idref" href="#s<sub>2</sub>:35"><span class="id" title="binder">s<sub>2</sub></span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="w:36" class="idref" href="#w:36"><span class="id" title="binder">w</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="v:37" class="idref" href="#v:37"><span class="id" title="binder">v</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span><span class="id" title="var">sigma</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#rev"><span class="id" title="definition">rev</span></a> <a class="idref" href="Verif_reverse.html#s<sub>1</sub>:30"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_reverse.html#s<sub>2</sub>:31"><span class="id" title="variable">s<sub>2</sub></span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">LOCAL</span> <span class="id" title="notation">(</span><span class="id" title="constructor">temp</span> <span class="id" title="definition">_w</span> <a class="idref" href="Verif_reverse.html#w:32"><span class="id" title="variable">w</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_v</span> <a class="idref" href="Verif_reverse.html#v:33"><span class="id" title="variable">v</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#s<sub>1</sub>:30"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_reverse.html#w:32"><span class="id" title="variable">w</span></a><span class="id" title="notation">;</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#s<sub>2</sub>:31"><span class="id" title="variable">s<sub>2</sub></span></a> <a class="idref" href="Verif_reverse.html#v:33"><span class="id" title="variable">v</span></a><span class="id" title="notation">)</span>).<br/>
+</div>
+
+<div class="doc">
+The forward_while tactic leaves four subgoals, 
+  which we mark with - (the Coq "bullet") 
+</div>
+<div class="code">
+- <span class="comment">(*&nbsp;Prove&nbsp;that&nbsp;(current)&nbsp;precondition&nbsp;implies&nbsp;the&nbsp;loop&nbsp;invariant&nbsp;*)</span><br/>
+<span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+On the left-hand side of this entailment is the precondition
+  (that we had already established by forward symbolic execution to this
+  point) for the entire while-loop.  On the right-hand side is the loop
+  invariant, that we just gave to the <span class="inlinecode"><span class="id" title="var">forward_while</span></span> tactic.  Because
+  the right_hand side has for existentials, a good proof strategy is to
+  choose values for them, using the <span class="inlinecode"><span class="id" title="var">Exists</span></span> tactic. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Exists</span> (@<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a> <span class="id" title="inductive">val</span>) <span class="id" title="var">sigma</span> <span class="id" title="definition">nullval</span> <span class="id" title="var">p</span>.<br/>
+</div>
+
+<div class="doc">
+Now we have a quantifier-free proof goal; let us see whether <span class="inlinecode"><span class="id" title="var">entailer</span>!</span>
+    can solve some parts of it. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">entailer</span>!.<br/>
+</div>
+
+<div class="doc">
+Indeed, the <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> did a fine job.  What's left is a property of our
+    user-defined <span class="inlinecode"><span class="id" title="var">listrep</span></span> predicate:  <span class="inlinecode"><span class="id" title="var">emp</span></span> <span class="inlinecode"><span class="nowrap">&vert;--</span></span> <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode">[]</span> <span class="inlinecode"><span class="id" title="var">nullval</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+</div>
+
+<div class="doc">
+Now that the user-defined predicate is unfolded, <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> can solve
+     the residual entailment. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">entailer</span>!.<br/><hr class='doublespaceincode'/>
+- <span class="comment">(*&nbsp;Prove&nbsp;that&nbsp;loop&nbsp;invariant&nbsp;implies&nbsp;typechecking&nbsp;of&nbsp;loop&nbsp;condition&nbsp;*)</span><br/>
+<span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+The second subgoal of <span class="inlinecode"><span class="id" title="var">forward_while</span></span> is to prove that the loop-test
+     condition can execute without crashing.   Consider, for example,
+     the C-language while loop,  <span class="inlinecode"><span class="id" title="var">while</span></span> <span class="inlinecode">(<span class="id" title="var">a</span>[<span class="id" title="var">i</span>]&gt;0)</span> <span class="inlinecode">...</span>, where the value of <span class="inlinecode"><span class="id" title="var">i</span></span>
+     might exceed the bounds of the array.  Then this would be a
+     "buffer overrun", and is "undefined behavior" ("stuck") in the C semantics.
+     We must prove that, given the current precondition (in this case,
+     the loop invariant), the loop test is not "undefined behavior."
+     This proof goal takes the form, <span class="inlinecode"><span class="id" title="var">current</span>-<span class="id" title="var">precondition</span></span> <span class="inlinecode"><span class="nowrap">&vert;--</span></span> <span class="inlinecode"><span class="id" title="var">tc_expr</span></span> <span class="inlinecode"><span class="id" title="var">Delta</span></span> <span class="inlinecode"><span class="id" title="var">e</span></span>,
+     where <span class="inlinecode"><span class="id" title="var">e</span></span> is the loop-test expression.  You can pronounce <span class="inlinecode"><span class="id" title="var">tc_expr</span></span> as
+     "type-check expression", since the Verifiable C type-checker ensures
+     that such expressions are safe (sometimes with a subgoal for you to prove).
+
+<div class="paragraph"> </div>
+
+     Fortunately, in most cases the <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> solves <span class="inlinecode"><span class="id" title="var">tc_expr</span></span> goals
+     completely automatically:  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">entailer</span>!.<br/><hr class='doublespaceincode'/>
+- <span class="comment">(*&nbsp;Prove&nbsp;that&nbsp;loop&nbsp;body&nbsp;preserves&nbsp;invariant&nbsp;*)</span><br/>
+<span class="id" title="var">hint</span>.<br/>
+</div>
+
+<div class="doc">
+As usual in any Hoare logic (including Separation Logic), we need to prove
+   that the loop body preserves the loop invariant, more precisely,
+<ul class="doclist">
+<li> {Inv /\ Test} body {Inv}
+
+</li>
+</ul>
+   where Test is the loop-test condition.  Here, the loop-test condition
+   in the original C code is <span class="inlinecode">(<span class="id" title="var">v</span>)</span>, and its manifestation above the line is
+   the hypothesis <span class="inlinecode"><span class="id" title="var">HRE</span>:</span> <span class="inlinecode"><span class="id" title="var">isptr</span></span> <span class="inlinecode"><span class="id" title="var">v</span></span>, meaning that <span class="inlinecode"><span class="id" title="var">v</span></span> is a (non-null) pointer.
+
+<div class="paragraph"> </div>
+
+   The loop invariant was <span class="inlinecode"><span class="id" title="var">EX</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span>:<span class="id" title="var">_</span>,</span> <span class="inlinecode"><span class="id" title="var">EX</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span>:<span class="id" title="var">_</span>,</span> <span class="inlinecode"><span class="id" title="var">EX</span></span> <span class="inlinecode"><span class="id" title="var">w</span>:<span class="id" title="var">_</span>,</span> <span class="inlinecode"><span class="id" title="var">EX</span></span> <span class="inlinecode"><span class="id" title="var">v</span>:<span class="id" title="var">_</span>,</span> <span class="inlinecode">...</span>, and here
+   all the existentially quantified variables on the left side of the entailment
+   have been moved above the line:  <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span>,</span> <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span>:</span> <span class="inlinecode"><span class="id" title="var">val</span></span> and <span class="inlinecode"><span class="id" title="var">w</span>,<span class="id" title="var">v</span>:</span> <span class="inlinecode"><span class="id" title="var">val</span></span>.
+
+<div class="paragraph"> </div>
+
+   The PROP part of the loop invariant was <span class="inlinecode"><span class="id" title="var">sigma</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">rev</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> <span class="inlinecode">++</span> <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span></span>, and
+   it has also been moved above the line, as hypothesis <span class="inlinecode"><span class="id" title="var">H</span></span>.
+
+<div class="paragraph"> </div>
+
+   So now we would like to do forward-symbolic execution through
+   the four assignment statements in the loop body. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Fail</span> <span class="id" title="var">forward</span>.<br/>
+</div>
+
+<div class="doc">
+But we cannot go forward through <span class="inlinecode"><span class="id" title="var">t</span>=<span class="id" title="var">v</span>→<span class="id" title="var">tail</span>;</span> because that would
+   require a SEP conjunct in the precondition of the form
+   <span class="inlinecode"><span class="id" title="var">data_at</span></span> <span class="inlinecode"><span class="id" title="var">sh</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">(<span class="id" title="var">_</span>,<span class="id" title="var">_</span>)</span> <span class="inlinecode"><span class="id" title="var">v</span></span>, and there is no such conjunct.  Actually,
+   there is such a conjunct, but it is hiding inside <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span></span> <span class="inlinecode"><span class="id" title="var">v</span></span>.
+   That is, there is such a conjunct as long as <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span></span> is not <span class="inlinecode"><span class="id" title="var">nil</span></span>.
+   Let's do case analysis on s<sub>2</sub>: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="tactic">destruct</span> <span class="id" title="var">s<sub>2</sub></span> <span class="id" title="keyword">as</span> [ | <span class="id" title="var">h</span> <span class="id" title="var">r</span>].<br/>
+&nbsp;+ <span class="comment">(*&nbsp;s<sub>2</sub>=nil&nbsp;*)</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+Suppose <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span>=<span class="id" title="var">nil</span></span>.  If we unfold <span class="inlinecode"><span class="id" title="var">listrep</span></span> . . . 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <span class="id" title="tactic">at</span> 2.<br/>
+</div>
+
+<div class="doc">
+then we learn that <span class="inlinecode"><span class="id" title="var">v</span>=<span class="id" title="var">nullval</span></span>.  To move this fact (or any proposition)
+    from the precondition to above-the-line, we use <span class="inlinecode"><span class="id" title="var">Intros</span></span>: 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">Intros</span>.<br/>
+</div>
+
+<div class="doc">
+Now, above the line, we have <span class="inlinecode"><span class="id" title="var">v</span>=<span class="id" title="var">nullval</span></span> and <span class="inlinecode"><span class="id" title="var">isptr</span></span> <span class="inlinecode"><span class="id" title="var">v</span></span>; 
+       this is a contradiction. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>. <span class="id" title="var">contradiction</span>.<br/><hr class='doublespaceincode'/>
+&nbsp;+ <span class="comment">(*&nbsp;s<sub>2</sub>=h::r&nbsp;*)</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+Suppose <span class="inlinecode"><span class="id" title="var">s<sub>2</sub></span>=<span class="id" title="var">h</span>::<span class="id" title="var">r</span></span>.  We can unfold/fold the <span class="inlinecode"><span class="id" title="var">listrep</span></span> conjunct for <span class="inlinecode"><span class="id" title="var">h</span>::<span class="id" title="var">r</span></span>;
+    if you don't remember why we do <span class="inlinecode"><span class="id" title="tactic">unfold</span>/<span class="id" title="tactic">fold</span></span>, then replace the semicolon
+    (between the fold and the unfold) with a period and see what happens. 
+</div>
+<div class="code">
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <span class="id" title="tactic">at</span> 2; <span class="id" title="tactic">fold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+</div>
+
+<div class="doc">
+By the definition of <span class="inlinecode"><span class="id" title="var">listrep</span></span>, at address <span class="inlinecode"><span class="id" title="var">v</span></span> there must exist a value <span class="inlinecode"><span class="id" title="var">y</span></span>
+     and a list cell containing (h,y).  So let us move <span class="inlinecode"><span class="id" title="var">y</span></span> above the line: 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">Intros</span> <span class="id" title="var">y</span>.<br/>
+</div>
+
+<div class="doc">
+Now we have the appropriate SEP conjuncts to be able to go <span class="inlinecode"><span class="id" title="var">forward</span></span>
+   through the loop body 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;t&nbsp;=&nbsp;v<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;v<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail&nbsp;=&nbsp;w;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;w&nbsp;=&nbsp;v;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;v&nbsp;=&nbsp;t;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+At the end of loop body; we must reestablish the loop invariant.
+   The left-hand-side of this entailment is the current assertion (after
+   the loop body); the right-hand side is simply our loop invariant.
+   (Unfortunately, the <span class="inlinecode"><span class="id" title="var">forward_while</span></span> tactic has "uncurried" the existentials
+   into a single EX that binds a 4-tuple.)
+   Since the proof goal is a complicated-looking entailment, let's see
+   if <span class="inlinecode"><span class="id" title="var">entailer</span>!</span> can simplify it a bit: 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+</div>
+
+<div class="doc">
+Now, we can provide new values for <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span>,<span class="id" title="var">s<sub>2</sub></span>,<span class="id" title="var">w</span>,<span class="id" title="var">v</span></span> to instantiate the
+   four existentials; these are, respectively, <span class="inlinecode"><span class="id" title="var">h</span>::<span class="id" title="var">s<sub>1</sub></span>,<span class="id" title="var">r</span>,<span class="id" title="var">v</span>,<span class="id" title="var">y</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">Exists</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">h</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a><span class="id" title="var">s<sub>1</sub></span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">r</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">v</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">y</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a>.<br/>
+</div>
+
+<div class="doc">
+Again, we have a complicated-looking entailment; we ask <span class="inlinecode"><span class="id" title="var">entailer</span>!</span>
+   to reduce it some more. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">entailer</span>!.<br/>
+&nbsp;&nbsp;&nbsp;× <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#app_ass"><span class="id" title="abbreviation">app_ass</span></a>. <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;× <span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <span class="id" title="tactic">at</span> 3; <span class="id" title="tactic">fold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Exists</span> <span class="id" title="var">w</span>. <span class="id" title="var">entailer</span>!.<br/><hr class='doublespaceincode'/>
+- <span class="comment">(*&nbsp;after&nbsp;the&nbsp;loop&nbsp;*)</span><br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+As usual in any Hoare logic (including Separation Logic), the 
+    postcondition of a while-loop is {Inv /\ not Test}, where Inv is the 
+    loop invariant and Test is the loop test.  Here, all the EXistentials
+    and PROPs of the loop invariant have been moved above the line as
+    <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span>,<span class="id" title="var">s<sub>2</sub></span>,<span class="id" title="var">w</span>,<span class="id" title="var">v</span>,<span class="id" title="var">HRE</span>,<span class="id" title="var">H</span></span>.
+
+<div class="paragraph"> </div>
+
+    We can always go <span class="inlinecode"><span class="id" title="var">forward</span></span> through a <span class="inlinecode"><span class="id" title="keyword">return</span></span> statement: 
+</div>
+<div class="code">
+<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;return&nbsp;w;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+Now we must prove that the current assertion (after the while-loop)
+  entails the function postcondition.  The left-hand side of this entailment
+  is what we had just before <span class="inlinecode"><span class="id" title="var">forward</span></span> through the <span class="inlinecode"><span class="id" title="keyword">return</span></span>;
+  the right-hand side is the postcondition of <span class="inlinecode"><span class="id" title="var">reverse_spec</span></span>,
+  after the local variables (etc.) have been simplified away.  We must
+  demonstrate a pointer <span class="inlinecode"><span class="id" title="var">q</span></span> (here it's called <span class="inlinecode"><span class="id" title="var">x</span></span>) that satisfies the various
+  conditions.  Here it's easy to find <span class="inlinecode"><span class="id" title="var">x</span></span>, since it's constrained to be
+  equal to <span class="inlinecode"><span class="id" title="var">w</span></span>: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">Exists</span> <span class="id" title="var">w</span>; <span class="id" title="var">entailer</span>!.<br/>
+<span class="id" title="tactic">rewrite</span> (<a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#proj1"><span class="id" title="lemma">proj1</span></a> <span class="id" title="var">H<sub>1</sub></span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <span class="id" title="tactic">at</span> 2; <span class="id" title="tactic">fold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+<span class="id" title="var">entailer</span>!.<br/>
+<span class="id" title="tactic">rewrite</span> &lt;- <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#app_nil_end"><span class="id" title="lemma">app_nil_end</span></a>, <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#rev_involutive"><span class="id" title="lemma">rev_involutive</span></a>.<br/>
+<span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+<a id="lab43"></a><h2 class="section">Why separation logic?</h2>
+
+<div class="paragraph"> </div>
+
+ If we review our functional correctness proof for <span class="inlinecode"><span class="id" title="var">reverse.c</span></span>, it may
+  not be obvious why we need separation logic at all. Let's take a close look.
+
+<div class="paragraph"> </div>
+
+First, we build "separation" into the definition of <span class="inlinecode"><span class="id" title="var">listrep</span></span>. The following is
+our definition:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">listrep</span> (<span class="id" title="var">sigma</span>: <span class="id" title="var">list</span> <span class="id" title="var">val</span>) (<span class="id" title="var">p</span>: <span class="id" title="var">val</span>) : <span class="id" title="var">mpred</span> :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">sigma</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;| <span class="id" title="var">h</span>::<span class="id" title="var">hs</span> ⇒ <span class="id" title="var">EX</span> <span class="id" title="var">y</span>:<span class="id" title="var">val</span>, <span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">h</span>,<span class="id" title="var">y</span>) <span class="id" title="var">p</span>  ×  <span class="id" title="var">listrep</span> <span class="id" title="var">hs</span> <span class="id" title="var">y</span><br/>
+&nbsp;&nbsp;&nbsp;| <span class="id" title="var">nil</span> ⇒  !! (<span class="id" title="var">p</span> = <span class="id" title="var">nullval</span>) &amp;&amp; <span class="id" title="var">emp</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.
+<div class="paragraph"> </div>
+
+</span>In the nonempty list case, the head element is described by
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;<span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">h</span>,<span class="id" title="var">y</span>) <span class="id" title="var">p</span>
+<div class="paragraph"> </div>
+
+</span>which is separated (by the separating conjunction * ) from the rest of the list
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;<span class="id" title="var">listrep</span> <span class="id" title="var">hs</span> <span class="id" title="var">y</span>.
+<div class="paragraph"> </div>
+
+</span>This separation ensures that no address could be used for more than once in a
+linked list. For example, considering a linked list of length at least 2,
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;<span class="id" title="var">listrep</span> (<span class="id" title="var">a</span> :: <span class="id" title="var">b</span> :: <span class="id" title="var">l</span>) <span class="id" title="var">x</span>.
+<div class="paragraph"> </div>
+
+</span>We know that there must be two addresses <span class="inlinecode"><span class="id" title="var">y</span></span> and <span class="inlinecode"><span class="id" title="var">z</span></span> such that
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">a</span>,<span class="id" title="var">y</span>) <span class="id" title="var">x</span> ×<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">b</span>,<span class="id" title="var">z</span>) <span class="id" title="var">y</span> ×<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">listrep</span> <span class="id" title="var">l</span> <span class="id" title="var">z</span>.
+<div class="paragraph"> </div>
+
+</span>The "separating conjunction" <span class="inlinecode">×</span> tells us that <span class="inlinecode"><span class="id" title="var">x</span></span> and <span class="inlinecode"><span class="id" title="var">y</span></span> must be different!
+Formally, we can prove the following two lemmas: 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_len_ge2_fact" class="idref" href="#listrep_len_ge2_fact"><span class="id" title="lemma">listrep_len_ge2_fact</span></a>: <span class="id" title="keyword">∀</span> (<a id="a:38" class="idref" href="#a:38"><span class="id" title="binder">a</span></a> <a id="b:39" class="idref" href="#b:39"><span class="id" title="binder">b</span></a> <a id="x:40" class="idref" href="#x:40"><span class="id" title="binder">x</span></a>: <span class="id" title="inductive">val</span>) (<a id="l:41" class="idref" href="#l:41"><span class="id" title="binder">l</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> (<a class="idref" href="Verif_reverse.html#a:38"><span class="id" title="variable">a</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Verif_reverse.html#b:39"><span class="id" title="variable">b</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Verif_reverse.html#l:41"><span class="id" title="variable">l</span></a>) <a class="idref" href="Verif_reverse.html#x:40"><span class="id" title="variable">x</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">EX</span> <a id="y:42" class="idref" href="#y:42"><span class="id" title="binder">y</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span> <span class="id" title="notation">EX</span> <a id="z:43" class="idref" href="#z:43"><span class="id" title="binder">z</span></a>: <span class="id" title="inductive">val</span><span class="id" title="notation">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#a:38"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#y:42"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#x:40"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#b:39"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#z:43"><span class="id" title="variable">z</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#y:42"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#l:41"><span class="id" title="variable">l</span></a> <a class="idref" href="Verif_reverse.html#z:43"><span class="id" title="variable">z</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>; <span class="id" title="tactic">fold</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Intros</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Exists</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cancel</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/><hr class='doublespaceincode'/>
+<span class="id" title="keyword">Lemma</span> <a id="listrep_len_ge2_address_different" class="idref" href="#listrep_len_ge2_address_different"><span class="id" title="lemma">listrep_len_ge2_address_different</span></a>: <span class="id" title="keyword">∀</span> (<a id="a:44" class="idref" href="#a:44"><span class="id" title="binder">a</span></a> <a id="b:45" class="idref" href="#b:45"><span class="id" title="binder">b</span></a> <a id="x:46" class="idref" href="#x:46"><span class="id" title="binder">x</span></a> <a id="y:47" class="idref" href="#y:47"><span class="id" title="binder">y</span></a> <a id="z:48" class="idref" href="#z:48"><span class="id" title="binder">z</span></a>: <span class="id" title="inductive">val</span>) (<a id="l:49" class="idref" href="#l:49"><span class="id" title="binder">l</span></a>: <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#a:44"><span class="id" title="variable">a</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#y:47"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#x:46"><span class="id" title="variable">x</span></a> <span class="id" title="notation">×</span><br/>
+&nbsp;&nbsp;<span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#b:45"><span class="id" title="variable">b</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><a class="idref" href="Verif_reverse.html#z:48"><span class="id" title="variable">z</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#y:47"><span class="id" title="variable">y</span></a> <span class="id" title="notation">×</span><br/>
+&nbsp;&nbsp;<a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#l:49"><span class="id" title="variable">l</span></a> <a class="idref" href="Verif_reverse.html#z:48"><span class="id" title="variable">z</span></a> <span class="id" title="notation"><span class="nowrap">&vert;--</span></span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">!!</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#x:46"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#::type_scope:x_'&lt;&gt;'_x"><span class="id" title="notation">≠</span></a> <a class="idref" href="Verif_reverse.html#y:47"><span class="id" title="variable">y</span></a><span class="id" title="notation">)</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+</div>
+
+<div class="doc">
+To prove that the addresses are different, we do case analysis first.
+    If <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">y</span></span>, we use the following theorem: 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Check</span> <span class="id" title="lemma">data_at_conflict</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;:&nbsp;forall&nbsp;(sh&nbsp;:&nbsp;Share.t)&nbsp;(t&nbsp;:&nbsp;type)&nbsp;(v&nbsp;v'&nbsp;:&nbsp;reptype&nbsp;t)&nbsp;(p&nbsp;:&nbsp;val),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sepalg.nonidentity&nbsp;sh&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>&nbsp;0&nbsp;&lt;&nbsp;sizeof&nbsp;t&nbsp;<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data_at&nbsp;sh&nbsp;t&nbsp;v&nbsp;p&nbsp;*&nbsp;data_at&nbsp;sh&nbsp;t&nbsp;v'&nbsp;p&nbsp;<span class="nowrap">&vert;--</span>&nbsp;FF&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+It says that we can derives address anti-aliasing from the "separation"
+    defined by <span class="inlinecode">×</span>.  If <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">≠</span> <span class="inlinecode"><span class="id" title="var">y</span></span>, the right side is already proved. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="definition">Val.eq</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>); [| <span class="id" title="tactic">apply</span> <span class="id" title="method">prop_right</span>; <span class="id" title="tactic">auto</span>].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">x</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">sep_apply</span> (<span class="id" title="lemma">data_at_conflict</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">a</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">y</span><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a>).<br/>
+&nbsp;&nbsp;+ <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;+ <span class="id" title="var">entailer</span>!.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+
+<div class="doc">
+Actually, even the property <span class="inlinecode"><span class="id" title="var">x</span>≠<span class="id" title="var">y</span></span> is not strong enough!  We need to
+  know that <span class="inlinecode"><span class="id" title="var">x</span></span> does not overlap with <i>any field</i> of record <span class="inlinecode"><span class="id" title="var">y</span></span>,
+  for example (in C notation)  <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">!=</span> <span class="inlinecode">&amp;(<span class="id" title="var">y</span>→<span class="id" title="var">tail</span>)</span> and <span class="inlinecode">&amp;(<span class="id" title="var">x</span>→<span class="id" title="var">tail</span>)</span> <span class="inlinecode">!=</span> <span class="inlinecode"><span class="id" title="var">y</span></span>.
+  Otherwise, when storing into <span class="inlinecode"><span class="id" title="var">y</span>→<span class="id" title="var">tail</span></span>, we couldn't know that <span class="inlinecode"><span class="id" title="var">x</span>→<span class="id" title="var">head</span></span>
+  is not altered.
+
+<div class="paragraph"> </div>
+
+ Without separation logic, we could still define <span class="inlinecode"><span class="id" title="var">listrep'</span></span> using extra
+ clauses for address anti-aliasing. For example, a length-3 linked list
+ <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode">(<span class="id" title="var">a</span></span> <span class="inlinecode">::</span> <span class="inlinecode"><span class="id" title="var">b</span></span> <span class="inlinecode">::</span> <span class="inlinecode"><span class="id" title="var">c</span></span> <span class="inlinecode">::</span> <span class="inlinecode"><span class="id" title="var">nil</span>)</span> <span class="inlinecode"><span class="id" title="var">x</span></span> can be: exists <span class="inlinecode"><span class="id" title="var">y</span></span> and <span class="inlinecode"><span class="id" title="var">z</span></span>, such that <span class="inlinecode">(<span class="id" title="var">a</span>,</span> <span class="inlinecode"><span class="id" title="var">y</span>)</span>
+ is stored at <span class="inlinecode"><span class="id" title="var">x</span></span>, <span class="inlinecode">(<span class="id" title="var">b</span>,</span> <span class="inlinecode"><span class="id" title="var">z</span>)</span> is stored at <span class="inlinecode"><span class="id" title="var">y</span></span>, <span class="inlinecode">(<span class="id" title="var">c</span>,</span> <span class="inlinecode"><span class="id" title="var">nullval</span>)</span> is stored at <span class="inlinecode"><span class="id" title="var">z</span></span> and
+ <span class="inlinecode"><span class="id" title="var">x</span></span>, <span class="inlinecode"><span class="id" title="var">y</span></span> and <span class="inlinecode"><span class="id" title="var">z</span></span> are different from each other. In general, that assertion will
+ be quadratically long (as a function of the length of the linked list).
+ Then, to make sure <span class="inlinecode"><span class="id" title="var">x</span>→<span class="id" title="var">head</span></span> is not at the same address as <span class="inlinecode"><span class="id" title="var">y</span>→<span class="id" title="var">tail</span></span>, we'd need
+ even more assertions.
+
+<div class="paragraph"> </div>
+
+ In our program correctness proof, we do (implicitly) use the fact that
+ different <span class="inlinecode"><span class="id" title="var">SEP</span></span> clauses describe disjoint heaplets. Here is an
+ intermediate step in the proof of <span class="inlinecode"><span class="id" title="var">body_reverse</span></span>.
+
+<div class="paragraph"> </div>
+
+ (We rarely state intermediate proof goals such as this one.
+  We do it here to illustrate a point about separating conjunction.  
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a id="body_reverse_step" class="idref" href="#body_reverse_step"><span class="id" title="lemma">body_reverse_step</span></a>: <span class="id" title="keyword">∀</span><br/>
+&nbsp;&nbsp;{<a id="Espec:50" class="idref" href="#Espec:50"><span class="id" title="binder">Espec</span></a> : <span class="id" title="class">OracleKind</span>}<br/>
+&nbsp;&nbsp;(<a id="sigma:51" class="idref" href="#sigma:51"><span class="id" title="binder">sigma</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>)<br/>
+&nbsp;&nbsp;(<a id="s<sub>1</sub>:52" class="idref" href="#s<sub>1</sub>:52"><span class="id" title="binder">s<sub>1</sub></span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>)<br/>
+&nbsp;&nbsp;(<a id="h:53" class="idref" href="#h:53"><span class="id" title="binder">h</span></a> : <span class="id" title="inductive">val</span>)<br/>
+&nbsp;&nbsp;(<a id="r:54" class="idref" href="#r:54"><span class="id" title="binder">r</span></a> : <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <span class="id" title="inductive">val</span>)<br/>
+&nbsp;&nbsp;(<a id="w:55" class="idref" href="#w:55"><span class="id" title="binder">w</span></a> <a id="v:56" class="idref" href="#v:56"><span class="id" title="binder">v</span></a> : <span class="id" title="inductive">val</span>)<br/>
+&nbsp;&nbsp;(<a id="HRE:57" class="idref" href="#HRE:57"><span class="id" title="binder">HRE</span></a> : <span class="id" title="definition">isptr</span> <a class="idref" href="Verif_reverse.html#v:56"><span class="id" title="variable">v</span></a>)<br/>
+&nbsp;&nbsp;(<a id="H:58" class="idref" href="#H:58"><span class="id" title="binder">H</span></a> : <a class="idref" href="Verif_reverse.html#sigma:51"><span class="id" title="variable">sigma</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Lists.List.html#rev"><span class="id" title="definition">rev</span></a> <a class="idref" href="Verif_reverse.html#s<sub>1</sub>:52"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c<sub>6</sub>"><span class="id" title="notation">++</span></a> <a class="idref" href="Verif_reverse.html#h:53"><span class="id" title="variable">h</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#::list_scope:x_'::'_x"><span class="id" title="notation">::</span></a> <a class="idref" href="Verif_reverse.html#r:54"><span class="id" title="variable">r</span></a>)<br/>
+&nbsp;&nbsp;(<a id="y:59" class="idref" href="#y:59"><span class="id" title="binder">y</span></a> : <span class="id" title="inductive">val</span>),<br/>
+&nbsp;&nbsp;<span class="id" title="axiom">semax</span> (<span class="id" title="definition">func_tycontext</span> <span class="id" title="definition">f_reverse</span> <a class="idref" href="Verif_reverse.html#Vprog"><span class="id" title="definition">Vprog</span></a> <a class="idref" href="Verif_reverse.html#Gprog"><span class="id" title="definition">Gprog</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span> <span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">LOCAL</span> <span class="id" title="notation">(</span><span class="id" title="constructor">temp</span> <span class="id" title="definition">_t</span> <a class="idref" href="Verif_reverse.html#y:59"><span class="id" title="variable">y</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_w</span> <a class="idref" href="Verif_reverse.html#w:55"><span class="id" title="variable">w</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_v</span> <a class="idref" href="Verif_reverse.html#v:56"><span class="id" title="variable">v</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#s<sub>1</sub>:52"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_reverse.html#w:55"><span class="id" title="variable">w</span></a><span class="id" title="notation">;</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#h:53"><span class="id" title="variable">h</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_reverse.html#y:59"><span class="id" title="variable">y</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#v:56"><span class="id" title="variable">v</span></a><span class="id" title="notation">;</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#r:54"><span class="id" title="variable">r</span></a> <a class="idref" href="Verif_reverse.html#y:59"><span class="id" title="variable">y</span></a><span class="id" title="notation">)</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Ssequence</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Sassign</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Efield</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Ederef</span> (<span class="id" title="constructor">Etempvar</span> <span class="id" title="definition">_v</span> (<span class="id" title="definition">tptr</span> (<span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">_tail</span> (<span class="id" title="definition">tptr</span> (<span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Etempvar</span> <span class="id" title="definition">_w</span> (<span class="id" title="definition">tptr</span> (<span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Ssequence</span> (<span class="id" title="constructor">Sset</span> <span class="id" title="definition">_w</span> (<span class="id" title="constructor">Etempvar</span> <span class="id" title="definition">_v</span> (<span class="id" title="definition">tptr</span> (<span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="constructor">Sset</span> <span class="id" title="definition">_v</span> (<span class="id" title="constructor">Etempvar</span> <span class="id" title="definition">_t</span> (<span class="id" title="definition">tptr</span> (<span class="id" title="constructor">Tstruct</span> <span class="id" title="definition">_list</span> <span class="id" title="definition">noattr</span>))))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">normal_ret_assert</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="notation">PROP</span> <span class="id" title="notation">(</span> <span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">LOCAL</span> <span class="id" title="notation">(</span><span class="id" title="constructor">temp</span> <span class="id" title="definition">_v</span> <a class="idref" href="Verif_reverse.html#y:59"><span class="id" title="variable">y</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_w</span> <a class="idref" href="Verif_reverse.html#v:56"><span class="id" title="variable">v</span></a><span class="id" title="notation">;</span> <span class="id" title="constructor">temp</span> <span class="id" title="definition">_t</span> <a class="idref" href="Verif_reverse.html#y:59"><span class="id" title="variable">y</span></a><span class="id" title="notation">)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="notation">SEP</span> <span class="id" title="notation">(</span><a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#s<sub>1</sub>:52"><span class="id" title="variable">s<sub>1</sub></span></a> <a class="idref" href="Verif_reverse.html#w:55"><span class="id" title="variable">w</span></a><span class="id" title="notation">;</span> <span class="id" title="definition">data_at</span> <span class="id" title="definition">Tsh</span> <a class="idref" href="Verif_reverse.html#t_list"><span class="id" title="definition">t_list</span></a> <a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="Verif_reverse.html#h:53"><span class="id" title="variable">h</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="Verif_reverse.html#w:55"><span class="id" title="variable">w</span></a><a class="idref" href="http://coq.inria.fr/library//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="Verif_reverse.html#v:56"><span class="id" title="variable">v</span></a><span class="id" title="notation">;</span> <a class="idref" href="Verif_reverse.html#listrep"><span class="id" title="definition">listrep</span></a> <a class="idref" href="Verif_reverse.html#r:54"><span class="id" title="variable">r</span></a> <a class="idref" href="Verif_reverse.html#y:59"><span class="id" title="variable">y</span></a><span class="id" title="notation">)</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">abbreviate_semax</span>.<br/>
+</div>
+
+<div class="doc">
+Now, our proof goal is:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;<span class="id" title="var">semax</span> <span class="id" title="var">Delta</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">PROP</span> ( )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">LOCAL</span> (<span class="id" title="var">temp</span> <span class="id" title="var">_t</span> <span class="id" title="var">y</span>; <span class="id" title="var">temp</span> <span class="id" title="var">_w</span> <span class="id" title="var">w</span>; <span class="id" title="var">temp</span> <span class="id" title="var">_v</span> <span class="id" title="var">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">SEP</span> (<span class="id" title="var">listrep</span> <span class="id" title="var">s<sub>1</sub></span> <span class="id" title="var">w</span>; <span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">h</span>, <span class="id" title="var">y</span>) <span class="id" title="var">v</span>; <span class="id" title="var">listrep</span> <span class="id" title="var">r</span> <span class="id" title="var">y</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">_v</span> → <span class="id" title="var">_tail</span>) = <span class="id" title="var">_w</span>; <span class="id" title="var">MORE_COMMANDS</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">POSTCONDITION</span>.
+<div class="paragraph"> </div>
+
+</span>The next <span class="inlinecode"><span class="id" title="var">forward</span></span> tactic will do symbolic execution of <span class="inlinecode"><span class="id" title="var">v</span>→<span class="id" title="var">tail</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" title="var">w</span></span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;<span class="id" title="var">forward</span>. <span class="comment">(*&nbsp;v<span class="nowrap"><span style='font-size:85%;'><span style='vertical-align:5%;'><span style='letter-spacing:-.2em;'>-</span></span>&gt;</span></span>tail&nbsp;=&nbsp;w;&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+It turns the precondition into:
+<br/>
+<span class="inlinecode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">PROP</span> ( )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">LOCAL</span> (<span class="id" title="var">temp</span> <span class="id" title="var">_t</span> <span class="id" title="var">y</span>; <span class="id" title="var">temp</span> <span class="id" title="var">_w</span> <span class="id" title="var">w</span>; <span class="id" title="var">temp</span> <span class="id" title="var">_v</span> <span class="id" title="var">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">SEP</span> (<span class="id" title="var">listrep</span> <span class="id" title="var">s<sub>1</sub></span> <span class="id" title="var">w</span>; <span class="id" title="var">data_at</span> <span class="id" title="var">Tsh</span> <span class="id" title="var">t_list</span> (<span class="id" title="var">h</span>, <span class="id" title="var">w</span>) <span class="id" title="var">v</span>; <span class="id" title="var">listrep</span> <span class="id" title="var">r</span> <span class="id" title="var">y</span>).
+<div class="paragraph"> </div>
+
+</span>It is no problem that the separating conjunct <span class="inlinecode"><span class="id" title="var">data_at</span></span> <span class="inlinecode"><span class="id" title="var">Tsh</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">(<span class="id" title="var">h</span>,</span> <span class="inlinecode"><span class="id" title="var">y</span>)</span> <span class="inlinecode"><span class="id" title="var">v</span></span> is
+turned into <span class="inlinecode"><span class="id" title="var">data_at</span></span> <span class="inlinecode"><span class="id" title="var">Tsh</span></span> <span class="inlinecode"><span class="id" title="var">t_list</span></span> <span class="inlinecode">(<span class="id" title="var">h</span>,</span> <span class="inlinecode"><span class="id" title="var">w</span>)</span> <span class="inlinecode"><span class="id" title="var">v</span></span>. But why weren't the other separating
+conjuncts like <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> <span class="inlinecode"><span class="id" title="var">w</span></span> affected?
+
+<div class="paragraph"> </div>
+
+Because they are separated! The separation ensures that address <span class="inlinecode"><span class="id" title="var">v</span></span> is not used
+in the linked list described by <span class="inlinecode"><span class="id" title="var">listrep</span></span> <span class="inlinecode"><span class="id" title="var">s<sub>1</sub></span></span> <span class="inlinecode"><span class="id" title="var">w</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Abort</span>.<br/>
+</div>
+
+<div class="doc">
+When C programs manipulate pointer data structures (or slices of arrays),
+  address anti-aliasing plays an important role in their  correctness proofs.
+  Separation logic is essential for reasoning about updates to these structures.
+  Verifiable C's SEP clause ensures separation between all its conjuncts. 
+</div>
+<div class="code">
+
+<br/>
+<span class="comment">(*&nbsp;2020-09-18&nbsp;15:39&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

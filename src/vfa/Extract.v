@@ -1,415 +1,388 @@
-(** * Extract: Running Coq programs in ML *)
+(** * Extract: Running Coq Programs in OCaml *)
+
+(** Coq's [Extraction] feature enables you to write a functional
+    program inside Coq, use Coq's logic to prove some correctness
+    properties about it, and translate it into an OCaml program that
+    you can compile with your optimizing OCaml compiler.  Haskell is
+    also supported. *)
+
+(** The [Extraction] chapter of _Logical Foundations_ has
+    a simple example of Coq's program extraction features, but it's
+    not required reading. This chapter starts from scratch and goes
+    deeper. *)
+
+From VFA Require Import Perm.
 Require Extraction.
 
-(** Coq's [Extraction] feature allows you to write a functional
-    program inside Coq; (presumably) use Coq's logic to prove some
-    correctness properties about it; then print it out as an ML (or
-    Haskell) program that you can compile with your optimizing ML (or
-    Haskell) compiler.
+(* ################################################################# *)
+(** * Extraction *)
 
-    The [Extraction] chapter of _Logical Foundations_ gave a
-    simple example of Coq's program extraction features.  In this
-    chapter, we'll take a deeper look. *)
+(** As an example, let's extract insertion sort, which we implemented
+    in [Sort]. *)
 
-Set Warnings "-extraction-inside-module".  (* turn off a warning message *)
-From VFA Require Import Perm.
-
-Module Sort1.
-Fixpoint insert (i:nat) (l: list nat) := 
+Fixpoint ins (i : nat) (l : list nat) :=
   match l with
-  | nil => i::nil
-  | h::t => if i <=? h then i::h::t else h :: insert i t
- end.
+  | [] => [i]
+  | h :: t => if i <=? h then i :: h :: t else h :: ins i t
+  end.
 
-Fixpoint sort (l: list nat) : list nat :=
+Fixpoint sort (l : list nat) : list nat :=
   match l with
-  | nil => nil
-  | h::t => insert h (sort t)
-end.
+  | [] => []
+  | h :: t => ins h (sort t)
+  end.
 
-(** The [Extraction] command prints out a function as Ocaml code. *)
+(** The [Extraction] command prints out a function as OCaml code. *)
 
-Require Coq.extraction.Extraction.
 Extraction sort.
 
-(** You can see the translation of "sort" from Coq to Ocaml,
-    in the "Messages" window of your IDE.
-   Examine it there, and notice the similarities and differences.
-
-  However, we really want the whole program, including the [insert]
-  function.  We get that as follows: *)
+(** You can see the translation of [sort] from Coq to OCaml in
+    your IDE.  Examine it there, and notice the similarities and
+    differences.  To get the whole program, we need [Recursive
+    Extraction]: *)
 
 Recursive Extraction sort.
 
 (** The first thing you see there is a redefinition of the [bool] type.
-  But Ocaml already has a [bool] type whose inductive structure is
-  isomorphic.  We want our extracted functions to be compatible with,
-  callable by, ordinary Ocaml code.  So we want to use Ocaml's standard
-  notation for the inductive definition, [bool].  The following directive
-  accomplishes that: *)
+    But OCaml already has a [bool] type whose inductive structure is
+    isomorphic. We want our extracted functions to be compatible
+    with, i.e. callable by, ordinary OCaml code. So we want to use
+    OCaml's standard definition of [bool] in place of Coq's inductive
+    definition, [bool]. You'll notice the same issue with lists. The
+    following directive causes Coq to use OCaml's definitions of [bool]
+    and [list] in the extracted code: *)
 
 Extract Inductive bool => "bool" [ "true" "false" ].
 Extract Inductive list => "list" [ "[]" "(::)" ].
-Recursive Extraction  sort.
+Recursive Extraction sort.
 
-End Sort1.
+(** But the program still uses a unary representation of natural
+    numbers: the number 7 is really [(S (S (S (S (S (S (S O)))))))],
+    which in OCaml will be a data structure that's seven pointers
+    deep. The [leb] function takes linear time, proportional to the
+    difference in value between [n] and [m]. *)
 
-(** This is better.  But the program still uses a unary representation of
-  natural numbers:  the number 7 is really (S (S (S (S (S (S (S O))))))). which in 
-  Ocaml will be a data structure that's seven pointers deep.  The [leb] function
-  takes time proportional to the difference in value between [n] and [m],
-  which is terrible.  We'd like natural numbers to be represented as Ocaml [int].
-  Unfortunately, there are only a finite number of [int] values in Ocaml
-  (2^31, or 2^63, depending on your implementation); so there are things
-  you could prove about some programs, in Coq, that wouldn't be true in Ocaml.
-
-  There are two solutions to this problem:
-  - Instead of using [nat], use a more efficient constructive type, such as [Z].
-  - Instead of using [nat], use an _abstract type_, and instantiate it with
-       Ocaml integers.
-
-  The first alternative uses Coq's [Z] type, an inductive type with
-  constructors [xI] [xH] etc.  [Z] represents 7 as [Zpos (xI (xI xH))],
-  that is,  +(  1+2*(  1+2*  1 )).
-  A number [n] is represented as a data structure of size log(n), and
-  the operations (plus, less-than) also take about log(n) each.
-
-  [Z]'s log-time per operation is much better than linear time; but in
-  Ocaml we are used to having constant-time operations.  Thus, here
-  we will explore the second alternative: program with abstract types,
-  then use an extraction directive to get efficiency. *)
+(** We could instead use Coq's [Z], which is a binary representation
+    of integers. But that is logarithmic-time, not constant. *)
 
 Require Import ZArith.
 Open Scope Z_scope.
 
-(** We will be using [Parameter] and [Axiom] in Coq.   You already saw
- these keywords, in a [Module Type], in the [ADT] chapter.
- There, they describe interface components that must be instantiated
- by any [Module] that satisfies the type.  Here, we will use this
- feature in a different (and more dangerous) way:  To axiomatize
- a mathematical theory without actually constructing it.  The reason
- that's dangerous is that if your axioms are inconsistent, then you
- can prove [False], or in fact, you can prove _anything_, so all your
- proofs are worthless.  So we must take care!  
+Fixpoint insertZ (i : Z) (l : list Z) :=
+  match l with
+  | [] => [i]
+  | h :: t => if i <=? h then i :: h :: t else h :: insertZ i t
+  end.
 
- Here, we will axiomatize a _very weak_ mathematical theory:  
- We claim that there exists some type [int] with a function [ltb], 
- so that [int] injects into [Z], and [ltb] corresponds to the < relation
- on Z.  That seems true enough (for example, take [int=Z]), but
- we're not _proving_ it here. *)
+Fixpoint sortZ (l : list Z) : list Z :=
+  match l with
+  | [] => []
+  | h :: t => insertZ h (sortZ t)
+  end.
 
-Parameter int : Type.  (* This is the Ocaml [int] type. *)
-Extract Inlined Constant int => "int".  (* so, extract it that way! *)
+Recursive Extraction sortZ.
 
-Parameter ltb: int -> int -> bool.  (* This is the Ocaml (<) operator. *)
-Extract Inlined Constant ltb => "(<)".  (* so, extract it that way! *)
+(** Of course, for that extraction to be meaningful, we would need
+    to prove that [sortZ] is a sorting algorithm. *)
 
-(** Now, we need to axiomatize [ltb] so that we can reason about 
-  programs that use it.  We need to take great care here: the
-  axioms had better be consistent with Ocaml's behavior, otherwise
-  our proofs will be meaningless.
+(** Other alternatives include:
 
-  One axiomatization of [ltb] is just that it's a total order, irreflexive
-  and transitive.  This would work just fine.  But instead, I choose to
-  claim that there's an injection from "int" into the mathematical integers,
-  Coq's [Z] type.  The reason to do this is then we get to use the [omega]
-  tactic, and other Coq libraries about integer comparisons. *)
+    - Extract [nat] directly to OCaml [int].  But [int] is finite (2^63
+      in modern implementations), so there are theorems we could prove
+      in Coq that wouldn't hold in OCaml.
 
-Parameter int2Z: int -> Z.  
-Axiom ltb_lt : forall n m : int, ltb n m = true <-> int2Z n < int2Z m.
+    - Use Coq's [Int63], which faithfully models 63-bit cyclic
+      arithmetic, and extract directly to OCaml [int]. But that's
+      painful.
 
-(** Both of these axioms are sound.  There does (abstractly) exist a
-  function from "int" to [Z], and that function _is_ consistent with
-  the [ltb_lt] axiom.  But you should think about this until you are
-  convinced.
-
-  Notice that we do not give extraction directives for [int2Z] or [ltb_lt].
-  That's because they will not appear in _programs_, only in proofs that
-  are not meant to be extracted.
-
-  Now, here's a dangerous axiom:
-
-  [Parameter ocaml_plus : int -> int -> int.]
-
-  [Extract Inlined Constant ocaml_plus => "(+)".]
-
-  [Axiom ocaml_plus_plus:
-     forall a b c: int,
-       ocaml_plus a b = c <-> int2Z a + int2Z b = int2Z c.]
-
-  The first two lines are OK:  there really is a "+" function in Ocaml,
-  and its type really is  [int -> int -> int].  
-
-  But [ocaml_plus_plus] is unsound!   From it, you could prove,
-
-  [(int2Z max_int + int2Z max_int) = int2Z (ocaml_plus max_int max_int)],
-
-  which is not true in Ocaml, because overflow wraps around, modulo
-  [2^(wordsize-1)].
-
-  So we won't axiomatize Ocaml addition. *)
+    - Define and axiomatize our own lightweight abstract type of
+      naturals, but extract it to OCaml [int].  But, this is
+      dangerous! If our axioms are inconsistent, we can prove anything
+      at all. If they are not faithful to OCaml, our proofs will be
+      meaningless. *)
 
 (* ################################################################# *)
-(** * Utilities for OCaml Integer Comparisons *)
+(** * Lightweight Extraction to [int] *)
 
-(** Just like in Perm.v, but for [int] and [Z] instead of [nat]. *)
+(** We begin by positing a Coq type [int] that will be extracted to
+    OCaml's [int]: *)
 
-Lemma int_blt_reflect : forall x y, reflect (int2Z x < int2Z y) (ltb x y).
+Parameter int : Type.
+Extract Inlined Constant int => "int".
+
+(** We'll abstract OCaml [int] to Coq [Z].  Every [int] does have a
+    representation as a [Z], though the other direction cannot
+    hold. *)
+
+Parameter Abs : int -> Z.
+Axiom Abs_inj: forall (n m : int), Abs n = Abs m -> n = m.
+
+(** Nothing else is known so far about [int]. Let's add a less-than
+    operators, which are extracted to OCaml's: *)
+
+Parameter ltb: int -> int -> bool.
+Extract Inlined Constant ltb => "(<)".
+Axiom ltb_lt : forall (n m : int), ltb n m = true <-> Abs n < Abs m.
+
+Parameter leb: int -> int -> bool.
+Extract Inlined Constant leb => "(<=)".
+Axiom leb_le : forall (n m : int), leb n m = true <-> Abs n <= Abs m.
+
+(** Those axioms are sound: OCaml's [<] and [<=] are consistent with
+    Coq's on any [int]. Note that we do not give extraction directives
+    for [Abs], [ltb_lt], or [leb_le].  They will not appear in
+    programs, only in proofs --which are not meant to be extracted. *)
+
+(** You could imagine doing the same thing we just did with [(+)], but
+    that would be wrong:
+
+      Parameter ocaml_plus : int -> int -> int.
+      Extract Inlined Constant ocaml_plus => "(+)".
+      Axiom ocaml_plus_plus: forall a b c: int,
+        ocaml_plus a b = c <-> Abs a + Abs b = Abs c.
+
+    The first two lines are OK: there really is a [+] function in
+    OCaml, and its type really is [int -> int -> int].
+
+    But [ocaml_plus_plus] is unsound. From it, you could prove,
+
+      Abs max_int + Abs max_int = Abs (ocaml_plus max_int max_int)
+
+    which is not true in OCaml because of overflow.
+
+*)
+
+(** In [Perm] we proved several theorems showing that Boolean
+    operators were reflected in propositions.  Below, we do that
+    for [int] and [Z] comparisons. *)
+
+Lemma int_ltb_reflect : forall x y, reflect (Abs x < Abs y) (ltb x y).
 Proof.
   intros x y.
   apply iff_reflect. symmetry. apply ltb_lt.
 Qed.
 
-Lemma Z_eqb_reflect : forall x y, reflect (x=y) (Z.eqb x y).
+Lemma int_leb_reflect : forall x y, reflect (Abs x <= Abs y) (leb x y).
+Proof.
+  intros x y.
+  apply iff_reflect. symmetry. apply leb_le.
+Qed.
+
+Lemma Z_eqb_reflect : forall x y, reflect (x = y) (Z.eqb x y).
 Proof.
   intros x y.
   apply iff_reflect. symmetry. apply Z.eqb_eq.
 Qed.
 
-Lemma Z_ltb_reflect : forall x y, reflect (x<y) (Z.ltb x y).
+Lemma Z_ltb_reflect : forall x y, reflect (x < y) (Z.ltb x y).
 Proof.
   intros x y.
   apply iff_reflect. symmetry. apply Z.ltb_lt.
 Qed.
 
-(* Add these three lemmas to the Hint database for [bdestruct],
-  so the [bdestruct] tactic will work with them. *)
-Hint Resolve int_blt_reflect Z_eqb_reflect Z_ltb_reflect : bdestruct.
+Lemma Z_leb_reflect : forall x y, reflect (x <= y) (Z.leb x y).
+Proof.
+  intros x y.
+  apply iff_reflect. symmetry. apply Z.leb_le.
+Qed.
+
+Lemma Z_gtb_reflect : forall x y, reflect (x > y) (Z.gtb x y).
+Proof.
+  intros x y.
+  apply iff_reflect. symmetry. rewrite Z.gtb_ltb. rewrite Z.gt_lt_iff. apply Z.ltb_lt.
+Qed.
+
+Lemma Z_geb_reflect : forall x y, reflect (x >= y) (Z.geb x y).
+Proof.
+  intros x y.
+  apply iff_reflect. symmetry. rewrite Z.geb_leb. rewrite Z.ge_le_iff. apply Z.leb_le.
+Qed.
+
+(** Now we upgrade [bdall] to work with [Z] and [int].  *)
+
+Hint Resolve
+     int_ltb_reflect int_leb_reflect
+     Z_eqb_reflect Z_ltb_reflect Z_leb_reflect Z_gtb_reflect Z_geb_reflect
+  : bdestruct.
+
+Ltac bdestruct_guard:=
+  match goal with
+  | |- context [ if Nat.eqb ?X ?Y then _ else _] => bdestruct (Nat.eqb X Y)
+  | |- context [ if Nat.ltb ?X ?Y then _ else _] => bdestruct (Nat.ltb X Y)
+  | |- context [ if Nat.leb ?X ?Y then _ else _] => bdestruct (Nat.leb X Y)
+  | |- context [ if Z.eqb ?X ?Y then _ else _] => bdestruct (Z.eqb X Y)
+  | |- context [ if Z.ltb ?X ?Y then _ else _] => bdestruct (Z.ltb X Y)
+  | |- context [ if Z.leb ?X ?Y then _ else _] => bdestruct (Z.leb X Y)
+  | |- context [ if Z.gtb ?X ?Y then _ else _] => bdestruct (Z.gtb X Y)
+  | |- context [ if Z.geb ?X ?Y then _ else _] => bdestruct (Z.geb X Y)
+  | |- context [ if ltb ?X ?Y then _ else _] => bdestruct (ltb X Y)
+  | |- context [ if leb ?X ?Y then _ else _] => bdestruct (leb X Y)
+  end.
+
+Ltac bdall :=
+  repeat (simpl; bdestruct_guard; try omega; auto).
 
 (* ################################################################# *)
-(** * SearchTrees, Extracted *)
+(** * Insertion Sort, Extracted *)
 
-(** Let us re-do binary search trees, but with Ocaml integers instead of  Coq nats. *)
+(** We're ready to state insertion sort with [int], and to extract it: *)
 
-(* ================================================================= *)
-(** ** Maps, on [Z] Instead of [nat] *)
-(** Our original proof with nats used [Maps.total_map] in its abstraction relation,
-     but that won't work here because we need maps over [Z] rather than [nat].
-     So, we copy-paste-edit to make [total_map] over [Z]. *)
+Fixpoint ins_int (i : int) (l : list int) :=
+  match l with
+  | [] => [i]
+  | h :: t => if leb i h then i :: h :: t else h :: ins_int i t
+  end.
 
-Require Import Coq.Logic.FunctionalExtensionality.
+Fixpoint sort_int (l : list int) : list int :=
+  match l with
+  | [] => []
+  | h :: t => ins_int h (sort_int t)
+  end.
 
-Module IntMaps.
-Definition total_map (A:Type) := Z -> A.
-Definition t_empty {A:Type} (v : A) : total_map A :=  (fun _ => v).
-Definition t_update {A:Type} (m : total_map A) (x : Z) (v : A) :=
-  fun x' => if Z.eqb x x' then v else m x'.
-Lemma t_update_eq : forall A (m: total_map A) x v, (t_update m x v) x = v.
+Recursive Extraction sort_int.
+
+(** Again, for that extraction to be meaningful, we need to prove that
+    [sort_int] is a sorting algorithm.  We can do that with the same
+    techniques we used in [Sort].  In particular, [omega] works
+    with [Z], so we can enjoy automation without having to do any
+    unnecessary work axiomatizing and proving lemmas about [int]. *)
+
+Inductive sorted : list int -> Prop :=
+| sorted_nil:
+    sorted []
+| sorted_1: forall x,
+    sorted [x]
+| sorted_cons: forall x y l,
+    Abs x <= Abs y -> sorted (y :: l) -> sorted (x :: y :: l).
+
+Hint Constructors sorted.
+
+(** **** Exercise: 3 stars, standard (sort_int_correct)  *)
+
+(** Prove the correctness of [sort_int] by adapting your solution to
+    [insertion_sort_correct] from [Sort]. *)
+
+Theorem sort_int_correct : forall (al : list int),
+    Permutation al (sort_int al) /\ sorted (sort_int al).
 Proof.
-  intros. unfold t_update.
-  bdestruct (x=?x); auto.
-  omega. 
-Qed.
+  (* FILL IN HERE *) Admitted.
 
-Theorem t_update_neq : forall (X:Type) v x1 x2 (m : total_map X),
-  x1 <> x2 ->  (t_update m x1 v) x2 = m x2.
-Proof.
-  intros. unfold t_update.
-  bdestruct (x1=?x2); auto.
-  omega.
-Qed.
+(** [] *)
 
-Lemma t_update_shadow : forall A (m: total_map A) v1 v2 x,
-    t_update (t_update m x v1) x v2  = t_update m x v2.
-Proof.
-  intros. unfold t_update.
-  extensionality x'.
-  bdestruct (x=?x'); auto.
-Qed.
+(* ################################################################# *)
+(** * Binary Search Trees, Extracted *)
 
-End IntMaps.
-
-Import IntMaps.
-
-(* ================================================================= *)
-(** ** Trees, on [int] Instead of [nat] *)
-
-Module SearchTree2.
-Section TREES.
-Variable V : Type.
-Variable default: V.
+(** We can reimplement BSTs with [int] keys. *)
 
 Definition key := int.
 
-Inductive tree : Type :=
- | E : tree
- | T: tree -> key -> V -> tree -> tree.
+Inductive tree (V : Type) : Type :=
+  | E : tree V
+  | T : tree V -> key -> V -> tree V -> tree V.
 
-Definition empty_tree : tree := E.
+Arguments E {V}.
+Arguments T {V}.
 
-Fixpoint lookup (x: key) (t : tree) : V :=
+Definition empty_tree {V : Type} : tree V := E.
+
+Fixpoint lookup {V : Type} (default : V) (x : key) (t : tree V) : V :=
   match t with
   | E => default
-  | T tl k v tr => if ltb x k then lookup x tl 
-                         else if ltb k x then lookup x tr
-                         else v
+  | T l k v r => if ltb x k then lookup default x l
+                else if ltb k x then lookup default x r
+                     else v
   end.
 
-Fixpoint insert (x: key) (v: V) (s: tree) : tree :=
- match s with 
- | E => T E x v E
- | T a y v' b => if  ltb x y then T (insert x v a) y v' b
-                        else if ltb y x then T a y v' (insert x v b)
-                        else T a x v b
- end.
+Fixpoint insert {V : Type} (x : key) (v : V) (t : tree V) : tree V :=
+  match t with
+  | E => T E x v E
+  | T l y v' r => if ltb x y then T (insert x v l) y v' r
+                 else if ltb y x then T l y v' (insert x v r)
+                      else T l x v r
+  end.
 
-Fixpoint elements' (s: tree) (base: list (key*V)) : list (key * V) :=
- match s with
- | E => base
- | T a k v b => elements' a ((k,v) :: elements' b base)
- end.
+Fixpoint elements_tr {V : Type}
+         (t : tree V) (acc : list (key * V)) : list (key * V) :=
+  match t with
+  | E => acc
+  | T l k v r => elements_tr l ((k, v) :: elements_tr r acc)
+  end.
 
-Definition elements (s: tree) : list (key * V) := elements' s nil.
+Definition elements {V : Type} (t : tree V) : list (key * V) :=
+  elements_tr t [].
 
-Definition combine {A} (pivot: Z) (m1 m2: total_map A) : total_map A :=
-  fun x => if Z.ltb x pivot  then m1 x else m2 x.
+Theorem lookup_empty : forall (V : Type) (default : V) (k : key),
+    lookup default k empty_tree = default.
+Proof. auto. Qed.
 
-Inductive Abs:  tree -> total_map V -> Prop :=
-| Abs_E: Abs E (t_empty default)
-| Abs_T: forall a b l k v r,
-      Abs l a ->
-      Abs r b ->
-      Abs (T l k v r)  (t_update (combine (int2Z k) a b) (int2Z k) v).
-
-Theorem empty_tree_relate: Abs empty_tree (t_empty default).
+(** **** Exercise: 2 stars, standard (lookup_insert_eq)  *)
+Theorem lookup_insert_eq :
+  forall (V : Type) (default : V) (t : tree V) (k : key) (v : V),
+    lookup default k (insert k v t) = v.
 Proof.
-constructor.
-Qed.
-
-(** **** Exercise: 3 stars (lookup_relate)  *)
-Theorem lookup_relate:
-  forall k t cts ,   Abs t cts -> lookup k t =  cts (int2Z k).
-Proof.  (* Copy your proof from SearchTree.v, and adapt it. *)
-(* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars (insert_relate)  *)
-Theorem insert_relate:
- forall k v t cts,
-    Abs t cts ->
-    Abs (insert k v t) (t_update cts (int2Z k) v).
-Proof.  (* Copy your proof from SearchTree.v, and adapt it. *)
-(* FILL IN HERE *) Admitted.
+(** **** Exercise: 3 stars, standard (lookup_insert_neq)  *)
+Theorem lookup_insert_neq :
+  forall (V : Type) (default : V) (t : tree V) (k k' : key) (v : V),
+    k <> k' -> lookup default k' (insert k v t) = lookup default k' t.
+Proof.
+  (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 1 star (unrealistically_strong_can_relate)  *)
-Lemma unrealistically_strong_can_relate:
- forall t,  exists cts, Abs t cts.
-Proof.  (* Copy-paste your proof from SearchTree.v; it should work as is. *)
-(* FILL IN HERE *) Admitted.
+(** **** Exercise: 5 stars, standard, optional (int_elements)  *)
+
+(** Port the definition of [BST] and re-prove the properties of
+    [elements] for [int]-keyed trees. Send us your solution so
+    we can include it! *)
+
 (** [] *)
 
-End TREES.
-(** Now, run this command and examine the results in the "results"
-   window of your IDE: *)
+(** Now see the extraction in your IDE: *)
 
+Extract Inductive prod => "(*)"  [ "(,)" ]. (* extract pairs natively *)
 Recursive Extraction empty_tree insert lookup elements.
-
-(** Next, we will extract it into an Ocaml source file, and measure its 
-  performance. *)
-
-Extraction "searchtree.ml" empty_tree insert lookup elements.
-
-(** Note: we've done the extraction _inside_ the module, even though
-   Coq warns against it, for a specific reason:  We want to extract only
-   the program, not the proofs. *)
-
-End SearchTree2.
 
 (* ################################################################# *)
 (** * Performance Tests *)
 
-(** Read the Ocaml program, test_searchtree.ml:
+(** Let's measure the performance of BSTs.  First, we extract to
+    an OCaml file: *)
 
-let test (f: int -> int) (n: int) =
- let rec build (j, t) = if j=0 then t
-                    else build(j-1, insert (f j) 1 t)
-  in let t1 = build(n,empty_tree)
-  in let rec g (j,count) = if j=0 then count
-                       else if lookup 0 (f j) t1 = 1
-                            then g(j-1,count+1)
-                            else g(j-1,count)
-  in let start = Sys.time()
-  in let answer = g(n,0)
-      in (answer, Sys.time() -. start)
+Extraction "searchtree.ml" empty_tree insert lookup elements.
 
-let print_test name (f: int -> int) n =
-  let (answer, time) = test f n
-  in (print_string "Insert and lookup "; print_int n;
-      print_string " "; print_string name; print_string " integers in ";
-      print_float time; print_endline " seconds.")
-  
-let test_random n = print_test "random" (fun _ -> Random.int n) n
-let test_consec n = print_test "consecutive" (fun i -> n-i) n
+(** Second, in the same directory as this file ([Extract.v])
+    you will find the file [test_searchtree.ml]. You can
+    run it using the OCaml toplevel with these commands:
 
-let run_tests() = (test_random 1000000; test_random 20000; test_consec 20000)
-		    
-let _ = run_tests ()
->> *)
+# #use "searchtree.ml";;
+# #use "test_searchtree.ml";;
 
-(** You can run this inside the ocaml top level by:
+On a recent machine with a 2.9 GHz Intel Core i9 that prints:
 
-#use "searchtree.ml";;
-#use "test_searchtree.ml";;
-run_tests();;
+Insert and lookup 1000000 random integers in .889566 seconds.
+Insert and lookup 20000 random integers in 0.009918 seconds.
+Insert and lookup 20000 consecutive integers in 2.777335 seconds.
 
+That execution uses the bytecode interpreter.  The native compiler
+will have better performance:
 
-On my machine, in the byte-code interpreter this prints,
+$ ocamlopt -c searchtree.mli searchtree.ml
+$ ocamlopt searchtree.cmx -open Searchtree test_searchtree.ml -o test_searchtree
+$ ./test_searchtree
 
+On the same machine that prints,
 
-Insert and lookup 1000000 random integers in 1.076 seconds.
-Insert and lookup 20000 random integers in 0.015 seconds.
-Insert and lookup 20000 consecutive integers in 5.054 seconds.
-
-
-You can compile and run this with the ocaml native-code compiler by:
-
-ocamlopt searchtree.mli searchtree.ml -open Searchtree test_searchtree.ml -o test_searchtree
-./test_searchtree
-
-
-On my machine this prints,
-
-Insert and lookup 1000000 random integers in 0.468 seconds.
-Insert and lookup 20000 random integers in 0. seconds.
-Insert and lookup 20000 consecutive integers in 0.374 seconds.
+Insert and lookup 1000000 random integers in 0.488973 seconds.
+Insert and lookup 20000 random integers in 0.003237 seconds.
+Insert and lookup 20000 consecutive integers in 0.387535 seconds.
 *)
 
-(* ################################################################# *)
-(** * Unbalanced Binary Search Trees *)
-(** Why is the performance of the algorithm so much worse when the
-   keys are all inserted consecutively?  To examine this, let's compute
-   with some searchtrees inside Coq.  We cannot do this with the search
-   trees defined thus far in this file, because they use a key-comparison
-   function [ltb]  that is abstract and uninstantiated (only during
-   Extraction to Ocaml does [ltb] get instantiated).
+(** Of course, the reason why the performance is so much worse with
+    consecutive integers is that BSTs exhibit worst-case performance
+    under that workload: linear time instead of logarithmic.  We need
+    balanced search trees to achieve logarithmic.  [Redblack]
+    will do that. *)
 
-   So instead, we'll use the SearchTree module, 
-   where everything runs inside Coq. *)
-
-From VFA Require SearchTree.
-Module Experiments.
-Open Scope nat_scope.
-Definition empty_tree := SearchTree.empty_tree nat.
-Definition insert := SearchTree.insert nat.
-Definition lookup := SearchTree.lookup nat 0.
-Definition E := SearchTree.E nat.
-Definition T := SearchTree.T nat.
-
-Goal insert 5 1 (insert 4 1 (insert 3 1 (insert 2 1 (insert 1 1 (insert 0 1 empty_tree))))) <> E.
-simpl. fold E; repeat fold T.
-
-(** Look here!  The tree is completely unbalanced.  Looking up [5] will take linear time.
-   That's why the runtime on consecutive integers is so bad. *)
-
-Abort.
-
-(* ################################################################# *)
-(** * Balanced Binary Search Trees *)
-
-(** To achieve robust performance (that stays N log N for a sequence
-    of N operations, and does not degenerate to N*N), we must keep the
-    search trees balanced.  The next chapter, [Redblack],
-    implements that idea. *)
-
-End Experiments.
+(* 2020-08-07 17:08 *)

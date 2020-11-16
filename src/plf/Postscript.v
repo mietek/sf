@@ -66,7 +66,7 @@
     today... *)
 
 (* ----------------------------------------------------------------- *)
-(** *** CompCert 
+(** *** CompCert
 
     _CompCert_ is a fully verified optimizing compiler for almost all
     of the ISO C90 / ANSI C language, generating code for x86, ARM,
@@ -101,7 +101,7 @@
     http://compcert.inria.fr *)
 
 (* ----------------------------------------------------------------- *)
-(** *** seL4 
+(** *** seL4
 
     _seL4_ is a fully verified microkernel, considered to be the
     world's first OS kernel with an end-to-end proof of implementation
@@ -122,7 +122,7 @@
     https://sel4.systems. *)
 
 (* ----------------------------------------------------------------- *)
-(** *** CertiKOS 
+(** *** CertiKOS
 
     _CertiKOS_ is a clean-slate, fully verified hypervisor, written in
     CompCert C and verified in Coq.
@@ -142,7 +142,7 @@
     http://flint.cs.yale.edu/certikos/ *)
 
 (* ----------------------------------------------------------------- *)
-(** *** Ironclad 
+(** *** Ironclad
 
     _Ironclad Apps_ is a collection of fully verified web
     applications, including a "notary" for securely signing
@@ -167,7 +167,7 @@
     https://github.com/Microsoft/Ironclad/tree/master/ironclad-apps *)
 
 (* ----------------------------------------------------------------- *)
-(** *** Verdi 
+(** *** Verdi
 
     _Verdi_ is a framework for implementing and formally verifying
     distributed systems.
@@ -186,26 +186,26 @@
     http://verdi.uwplse.org *)
 
 (* ----------------------------------------------------------------- *)
-(** *** DeepSpec 
+(** *** DeepSpec
 
     _The Science of Deep Specification_ is an NSF "Expedition"
     project (running from 2016 to 2020) that focuses on the
     specification and verification of full functional correctness of
     both software and hardware.  It also sponsors workshops and summer
     schools.
-      - Website: http://deepspec.org/
-      - Overview presentations: 
-          - http://deepspec.org/about/
+      - Website: https://deepspec.org/
+      - Overview presentations:
+          - https://deepspec.org/page/About/
           - https://www.youtube.com/watch?v=IPNdsnRWBkk *)
 
 (* ----------------------------------------------------------------- *)
-(** *** REMS 
+(** *** REMS
 
     _REMS_ is a european project on Rigorous Engineering of Mainstream
     Systems.  It has produced detailed formal specifications of a wide
     range of critical real-world interfaces, protocols, and APIs,
-    including 
-      the C language, 
+    including
+      the C language,
       the ELF linker format,
       the ARM, Power, MIPS, CHERI, and RISC-V instruction sets,
       the weak memory models of ARM and Power processors, and
@@ -224,7 +224,7 @@
     research. Supporting all this, we are also working on new
     specification tools and their foundations."
 
-    http://www.cl.cam.ac.uk/~pes20/rems/ *)
+    https://www.cl.cam.ac.uk/~pes20/rems/ *)
 
 (* ----------------------------------------------------------------- *)
 (** *** Others *)
@@ -269,13 +269,13 @@
               C. Mitchell [Mitchell 1996] (in Bib.v).
 
         - Iron Lambda (http://iron.ouroborus.net/) is a collection
-          of ​Coq formalisations for functional languages of
+          of Coq formalisations for functional languages of
           increasing complexity. It fills part of the gap between
-          the end of the​ Software Foundations course and what
+          the end of the Software Foundations course and what
           appears in current research papers.  The collection has
           at least Progress and Preservation theorems for a number
           of variants of STLC and the polymorphic
-          lambda-calculus (System F). 
+          lambda-calculus (System F).
 
        - Finally, here are some of the main conferences on programming
          languages and formal verification:
@@ -287,9 +287,9 @@
             - Certified Programs and Proofs (CPP)
             - SPLASH/OOPSLA conferences
             - Principles in Practice workshop (PiP)
-            - CoqPL workshop 
+            - CoqPL workshop
 *)
 
 (** $Date$ *)
 
-(* Thu Feb 7 20:09:27 EST 2019 *)
+(* 2020-09-09 21:08 *)

@@ -49,10 +49,10 @@
    
 *)
 
-
 (* ################################################################# *)
-(** * Module Signature *)
-(** This is the "signature" of a correct implementation of priority queues
+(** * Module Signature
+
+    This is the "signature" of a correct implementation of priority queues
  where the keys are natural numbers.   Using [nat] for the key type is
  a bit silly, since the comparison function Nat.ltb takes linear time
  in the value of the numbers!  But you have already seen in the
@@ -134,7 +134,7 @@ match l with
                else let (j,l') := select h t in (j, i::l')
 end.
 
-(** **** Exercise: 3 stars (select_perm_and_friends)  *)
+(** **** Exercise: 3 stars, standard (select_perm_and_friends)  *)
 
 Lemma select_perm: forall i l, 
   let (j,r) := select i l in
@@ -238,7 +238,7 @@ Lemma delete_max_Some_priq:
       forall p q k, priq p -> delete_max p = Some(k,q) -> priq q.
 Proof. constructor. Qed.
 
-(** **** Exercise: 2 stars (simple_priq_proofs)  *)
+(** **** Exercise: 2 stars, standard (simple_priq_proofs)  *)
 
 Lemma delete_max_None_relate:
   forall p, priq p -> 
@@ -270,3 +270,4 @@ Proof.
 
 End List_Priqueue.
 
+(* 2020-08-07 17:08 *)

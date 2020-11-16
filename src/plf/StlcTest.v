@@ -52,7 +52,17 @@ idtac " ".
 idtac "#> STLC.step_example5".
 idtac "Possible points: 2".
 check_type @STLC.step_example5 (
-(STLC.multistep (STLC.app (STLC.app STLC.idBBBB STLC.idBB) STLC.idB) STLC.idB)).
+(STLC.multistep
+   (STLC.tm_app
+      (STLC.tm_app
+         (STLC.tm_abs STLC.x
+            (STLC.Ty_Arrow (STLC.Ty_Arrow STLC.Ty_Bool STLC.Ty_Bool)
+               (STLC.Ty_Arrow STLC.Ty_Bool STLC.Ty_Bool))
+            (STLC.tm_var STLC.x))
+         (STLC.tm_abs STLC.x (STLC.Ty_Arrow STLC.Ty_Bool STLC.Ty_Bool)
+            (STLC.tm_var STLC.x)))
+      (STLC.tm_abs STLC.x STLC.Ty_Bool (STLC.tm_var STLC.x)))
+   (STLC.tm_abs STLC.x STLC.Ty_Bool (STLC.tm_var STLC.x)))).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLC.step_example5.
@@ -67,11 +77,12 @@ idtac "Possible points: 2".
 check_type @STLC.typing_example_3 (
 (exists T : STLC.ty,
    STLC.has_type (@Maps.empty STLC.ty)
-     (STLC.abs STLC.x (STLC.Arrow STLC.Bool STLC.Bool)
-        (STLC.abs STLC.y (STLC.Arrow STLC.Bool STLC.Bool)
-           (STLC.abs STLC.z STLC.Bool
-              (STLC.app (STLC.var STLC.y)
-                 (STLC.app (STLC.var STLC.x) (STLC.var STLC.z)))))) T)).
+     (STLC.tm_abs STLC.x (STLC.Ty_Arrow STLC.Ty_Bool STLC.Ty_Bool)
+        (STLC.tm_abs STLC.y (STLC.Ty_Arrow STLC.Ty_Bool STLC.Ty_Bool)
+           (STLC.tm_abs STLC.z STLC.Ty_Bool
+              (STLC.tm_app (STLC.tm_var STLC.y)
+                 (STLC.tm_app (STLC.tm_var STLC.x) (STLC.tm_var STLC.z))))))
+     T)).
 idtac "Assumptions:".
 Abort.
 Print Assumptions STLC.typing_example_3.
@@ -83,7 +94,20 @@ idtac " ".
 idtac "Max points - standard: 7".
 idtac "Max points - advanced: 7".
 idtac "".
+idtac "Allowed Axioms:".
+idtac "functional_extensionality".
+idtac "FunctionalExtensionality.functional_extensionality_dep".
+idtac "".
+idtac "".
 idtac "********** Summary **********".
+idtac "".
+idtac "Below is a summary of the automatically graded exercises that are incomplete.".
+idtac "".
+idtac "The output for each exercise can be any of the following:".
+idtac "  - 'Closed under the global context', if it is complete".
+idtac "  - 'MANUAL', if it is manually graded".
+idtac "  - A list of pending axioms, containing unproven assumptions. In this case".
+idtac "    the exercise is considered complete, if the axioms are all allowed.".
 idtac "".
 idtac "********** Standard **********".
 idtac "---------- STLC.substi_correct ---------".
@@ -96,6 +120,4 @@ idtac "".
 idtac "********** Advanced **********".
 Abort.
 
-(* Thu Feb 7 20:08:18 EST 2019 *)
-
-(* Thu Feb 7 20:09:28 EST 2019 *)
+(* 2020-09-09 21:08 *)

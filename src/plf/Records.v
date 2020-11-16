@@ -3,7 +3,6 @@
 Set Warnings "-notation-overridden,-parsing".
 From Coq Require Import Strings.String.
 From PLF Require Import Maps.
-From PLF Require Import Imp.
 From PLF Require Import Smallstep.
 From PLF Require Import Stlc.
 
@@ -23,23 +22,23 @@ From PLF Require Import Stlc.
 
 (**
     Syntax:
-
+<{
        t ::=                          Terms:
-           | {i1=t1, ..., in=tn}         record
+           | {i=t, ..., i=t}             record
            | t.i                         projection
            | ...
 
        v ::=                          Values:
-           | {i1=v1, ..., in=vn}         record value
+           | {i=v, ..., i=v}             record value
            | ...
 
        T ::=                          Types:
-           | {i1:T1, ..., in:Tn}         record type
+           | {i:T, ..., i:T}             record type
            | ...
-
+}>
    Reduction:
 
-                               ti ==> ti'                            
+                               ti ==> ti'
   -------------------------------------------------------------------- (ST_Rcd)
   {i1=v1, ..., im=vm, in=tn, ...} ==> {i1=v1, ..., im=vm, in=tn', ...}
 
@@ -56,9 +55,9 @@ From PLF Require Import Stlc.
              --------------------------------------------------         (T_Rcd)
              Gamma |- {i1=t1, ..., in=tn} : {i1:T1, ..., in:Tn}
 
-                       Gamma |- t : {..., i:Ti, ...}
-                       -----------------------------                   (T_Proj)
-                             Gamma |- t.i : Ti
+                       Gamma |- t0 : {..., i:Ti, ...}
+                       ------------------------------                   (T_Proj)
+                             Gamma |- t0.i : Ti
 *)
 
 (* ################################################################# *)
@@ -79,7 +78,7 @@ Definition alist (X : Type) := list (string * X).
 Inductive ty : Type :=
   | Base     : string -> ty
   | Arrow    : ty -> ty -> ty
-  | TRcd      : (alist ty) -> ty.
+  | TRcd     : (alist ty) -> ty.
 
 (** Unfortunately, we encounter here a limitation in Coq: this type
     does not automatically give us the induction principle we expect:
@@ -92,7 +91,7 @@ Inductive ty : Type :=
     ty_ind :
       forall P : ty -> Prop,
         (forall i : id, P (Base i)) ->
-        (forall t : ty, P t -> forall t0 : ty, P t0 
+        (forall t : ty, P t -> forall t0 : ty, P t0
                             -> P (Arrow t t0)) ->
         (forall a : alist ty, P (TRcd a)) ->    (* ??? *)
         forall t : ty, P t
@@ -111,23 +110,50 @@ End FirstTry.
     constructors ("nil" and "cons") in the syntax of our types. *)
 
 Inductive ty : Type :=
-  | Base : string -> ty
-  | Arrow : ty -> ty -> ty
-  | RNil : ty
-  | RCons : string -> ty -> ty -> ty.
+  | Ty_Base : string -> ty
+  | Ty_Arrow : ty -> ty -> ty
+  | Ty_RNil : ty
+  | Ty_RCons : string -> ty -> ty -> ty.
 
 (** Similarly, at the level of terms, we have constructors [trnil],
     for the empty record, and [rcons], which adds a single field to
     the front of a list of fields. *)
 
 Inductive tm : Type :=
-  | var : string -> tm
-  | app : tm -> tm -> tm
-  | abs : string -> ty -> tm -> tm
+  | tm_var : string -> tm
+  | tm_app : tm -> tm -> tm
+  | tm_abs : string -> ty -> tm -> tm
   (* records *)
-  | rproj : tm -> string -> tm
-  | trnil :  tm
-  | rcons : string -> tm -> tm -> tm.
+  | tm_rproj : tm -> string -> tm
+  | tm_rnil :  tm
+  | tm_rcons : string -> tm -> tm -> tm.
+
+Declare Custom Entry stlc_ty.
+
+Notation "<{ e }>" := e (e custom stlc at level 99).
+Notation "<{{ e }}>" := e (e custom stlc_ty at level 99).
+Notation "( x )" := x (in custom stlc, x at level 99).
+Notation "( x )" := x (in custom stlc_ty, x at level 99).
+Notation "x" := x (in custom stlc at level 0, x constr at level 0).
+Notation "x" := x (in custom stlc_ty at level 0, x constr at level 0).
+Notation "S -> T" := (Ty_Arrow S T) (in custom stlc_ty at level 50, right associativity).
+Notation "x y" := (tm_app x y) (in custom stlc at level 1, left associativity).
+Notation "\ x : t , y" :=
+  (tm_abs x t y) (in custom stlc at level 90, x at level 99,
+                     t custom stlc_ty at level 99,
+                     y custom stlc at level 99,
+                     left associativity).
+Coercion tm_var : string >-> tm.
+
+Notation "{ x }" := x (in custom stlc at level 1, x constr).
+
+Notation "'Base' x" := (Ty_Base x) (in custom stlc_ty at level 0).
+
+Notation "  l ':' t1  '::' t2" := (Ty_RCons l t1 t2) (in custom stlc_ty at level 3, right associativity).
+Notation " l := e1 '::' e2" := (tm_rcons l e1 e2) (in custom stlc at level 3, right associativity).
+Notation "'nil'" := (Ty_RNil) (in custom stlc_ty).
+Notation "'nil'" := (tm_rnil) (in custom stlc).
+Notation "o --> l" := (tm_rproj o l) (in custom stlc at level 0).
 
 (** Some examples... *)
 Open Scope string_scope.
@@ -136,8 +162,8 @@ Notation a := "a".
 Notation f := "f".
 Notation g := "g".
 Notation l := "l".
-Notation A := (Base "A").
-Notation B := (Base "B").
+Notation A := <{{ Base "A" }}>.
+Notation B := <{{ Base "B" }}>.
 Notation k := "k".
 Notation i1 := "i1".
 Notation i2 := "i2".
@@ -158,7 +184,7 @@ Notation i2 := "i2".
     lists to the nil/cons presentation is that it introduces the
     possibility of writing strange types like this... *)
 
-Definition weird_type := RCons X A B.
+Definition weird_type := <{{  a : A  :: B }}>.
 
 (** where the "tail" of a record type is not actually a record type! *)
 
@@ -173,28 +199,28 @@ Definition weird_type := RCons X A B.
 
 Inductive record_ty : ty -> Prop :=
   | RTnil :
-        record_ty RNil
+        record_ty <{{ nil }}>
   | RTcons : forall i T1 T2,
-        record_ty (RCons i T1 T2).
+        record_ty <{{ i : T1 :: T2 }}>.
 
 (** With this, we can define well-formed types. *)
 
 Inductive well_formed_ty : ty -> Prop :=
-  | wfBase : forall i,
-        well_formed_ty (Base i)
+  | wfBase : forall (i : string),
+        well_formed_ty <{{ Base i }}>
   | wfArrow : forall T1 T2,
         well_formed_ty T1 ->
         well_formed_ty T2 ->
-        well_formed_ty (Arrow T1 T2)
+        well_formed_ty <{{ T1 -> T2 }}>
   | wfRNil :
-        well_formed_ty RNil
+        well_formed_ty <{{ nil }}>
   | wfRCons : forall i T1 T2,
         well_formed_ty T1 ->
         well_formed_ty T2 ->
         record_ty T2 ->
-        well_formed_ty (RCons i T1 T2).
+        well_formed_ty <{{ i : T1 :: T2 }}>.
 
-Hint Constructors record_ty well_formed_ty.
+Hint Constructors record_ty well_formed_ty : core.
 
 (** Note that [record_ty] is not recursive -- it just checks the
     outermost constructor.  The [well_formed_ty] property, on the
@@ -211,29 +237,36 @@ Hint Constructors record_ty well_formed_ty.
 
 Inductive record_tm : tm -> Prop :=
   | rtnil :
-        record_tm trnil
+        record_tm <{ nil }>
   | rtcons : forall i t1 t2,
-        record_tm (rcons i t1 t2).
+        record_tm <{ i := t1 :: t2 }>.
 
-Hint Constructors record_tm.
+Hint Constructors record_tm : core.
 
 (* ----------------------------------------------------------------- *)
 (** *** Substitution *)
 
 (** Substitution extends easily. *)
 
-Fixpoint subst (x:string) (s:tm) (t:tm) : tm :=
-  match t with
-  | var y => if eqb_string x y then s else t
-  | abs y T t1 => abs y T
-                     (if eqb_string x y then t1 else (subst x s t1))
-  | app t1 t2 => app (subst x s t1) (subst x s t2)
-  | rproj t1 i => rproj (subst x s t1) i
-  | trnil => trnil
-  | rcons i t1 tr1 => rcons i (subst x s t1) (subst x s tr1)
-  end.
+Reserved Notation "'[' x ':=' s ']' t" (in custom stlc at level 20, x constr).
 
-Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
+Fixpoint subst (x : string) (s : tm) (t : tm) : tm :=
+  match t with
+  | tm_var y =>
+      if eqb_string x y then s else t
+  | <{\y:T, t1}> =>
+      if eqb_string x y then t else <{\y:T, [x:=s] t1}>
+  | <{t1 t2}> =>
+      <{([x:=s] t1) ([x:=s] t2)}>
+  | <{ t1 --> i }> =>
+      <{ ( [x := s] t1) --> i }>
+  | <{ nil }> =>
+      <{ nil }>
+  | <{ i := t1 :: tr }> =>
+     <{ i :=  [x := s] t1 :: ( [x := s] tr) }>
+  end
+
+where "'[' x ':=' s ']' t" := (subst x s t) (in custom stlc).
 
 (* ----------------------------------------------------------------- *)
 (** *** Reduction *)
@@ -241,62 +274,62 @@ Notation "'[' x ':=' s ']' t" := (subst x s t) (at level 20).
 (** A record is a value if all of its fields are. *)
 
 Inductive value : tm -> Prop :=
-  | v_abs : forall x T11 t12,
-      value (abs x T11 t12)
-  | v_rnil : value trnil
+  | v_abs : forall x T2 t1,
+      value  <{ \ x : T2, t1 }>
+  | v_rnil : value <{ nil }>
   | v_rcons : forall i v1 vr,
       value v1 ->
       value vr ->
-      value (rcons i v1 vr).
+      value <{ i := v1 :: vr }>.
 
-Hint Constructors value.
+Hint Constructors value : core.
 
 (** To define reduction, we'll need a utility function for extracting
     one field from record term: *)
 
 Fixpoint tlookup (i:string) (tr:tm) : option tm :=
   match tr with
-  | rcons i' t tr' => if eqb_string i i' then Some t else tlookup i tr'
+  | <{ i' := t :: tr'}> => if eqb_string i i' then Some t else tlookup i tr'
   | _ => None
   end.
 
 (** The [step] function uses this term-level lookup function in the
     projection rule. *)
 
-Reserved Notation "t1 '-->' t2" (at level 40).
+Reserved Notation "t '-->' t'" (at level 40).
 
 Inductive step : tm -> tm -> Prop :=
-  | ST_AppAbs : forall x T11 t12 v2,
+  | ST_AppAbs : forall x T2 t1 v2,
          value v2 ->
-         (app (abs x T11 t12) v2) --> ([x:=v2]t12)
+         <{(\x:T2, t1) v2}> --> <{ [x:=v2]t1 }>
   | ST_App1 : forall t1 t1' t2,
          t1 --> t1' ->
-         (app t1 t2) --> (app t1' t2)
+         <{t1 t2}> --> <{t1' t2}>
   | ST_App2 : forall v1 t2 t2',
          value v1 ->
          t2 --> t2' ->
-         (app v1 t2) --> (app v1 t2')
+         <{v1 t2}> --> <{v1  t2'}>
   | ST_Proj1 : forall t1 t1' i,
         t1 --> t1' ->
-        (rproj t1 i) --> (rproj t1' i)
+        <{ t1 --> i }> --> <{ t1' --> i }>
   | ST_ProjRcd : forall tr i vi,
         value tr ->
         tlookup i tr = Some vi ->
-        (rproj tr i) --> vi
+        <{ tr --> i }> --> vi
   | ST_Rcd_Head : forall i t1 t1' tr2,
         t1 --> t1' ->
-        (rcons i t1 tr2) --> (rcons i t1' tr2)
+        <{ i := t1 :: tr2 }> --> <{ i := t1' :: tr2 }>
   | ST_Rcd_Tail : forall i v1 tr2 tr2',
         value v1 ->
         tr2 --> tr2' ->
-        (rcons i v1 tr2) --> (rcons i v1 tr2')
+        <{ i := v1 :: tr2 }> --> <{ i := v1 :: tr2' }>
 
-where "t1 '-->' t2" := (step t1 t2).
+where "t '-->' t'" := (step t t').
 
 Notation multistep := (multi step).
 Notation "t1 '-->*' t2" := (multistep t1 t2) (at level 40).
 
-Hint Constructors step.
+Hint Constructors step : core.
 
 (* ----------------------------------------------------------------- *)
 (** *** Typing *)
@@ -324,50 +357,51 @@ Hint Constructors step.
 
 Fixpoint Tlookup (i:string) (Tr:ty) : option ty :=
   match Tr with
-  | RCons i' T Tr' =>
+  | <{{ i' : T :: Tr' }}> =>
       if eqb_string i i' then Some T else Tlookup i Tr'
   | _ => None
   end.
 
 Definition context := partial_map ty.
 
-Reserved Notation "Gamma '|-' t '\in' T" (at level 40).
+Reserved Notation "Gamma '|-' t '\in' T" (at level 40,
+                                          t custom stlc, T custom stlc_ty at level 0).
 
-Inductive has_type : context -> tm -> ty -> Prop :=
-  | T_Var : forall Gamma x T,
+Inductive has_type (Gamma : context) :tm -> ty -> Prop :=
+  | T_Var : forall x T,
       Gamma x = Some T ->
       well_formed_ty T ->
-      Gamma |- (var x) \in T
-  | T_Abs : forall Gamma x T11 T12 t12,
+      Gamma |- x \in T
+  | T_Abs : forall x T11 T12 t12,
       well_formed_ty T11 ->
-      (update Gamma x T11) |- t12 \in T12 ->
-      Gamma |- (abs x T11 t12) \in (Arrow T11 T12)
-  | T_App : forall T1 T2 Gamma t1 t2,
-      Gamma |- t1 \in (Arrow T1 T2) ->
+      (x |-> T11; Gamma) |- t12 \in T12 ->
+      Gamma |- \x : T11, t12 \in (T11 -> T12)
+  | T_App : forall T1 T2 t1 t2,
+      Gamma |- t1 \in (T1 -> T2) ->
       Gamma |- t2 \in T1 ->
-      Gamma |- (app t1 t2) \in T2
+      Gamma |- ( t1 t2) \in T2
   (* records: *)
-  | T_Proj : forall Gamma i t Ti Tr,
+  | T_Proj : forall i t Ti Tr,
       Gamma |- t \in Tr ->
       Tlookup i Tr = Some Ti ->
-      Gamma |- (rproj t i) \in Ti
-  | T_RNil : forall Gamma,
-      Gamma |- trnil \in RNil
-  | T_RCons : forall Gamma i t T tr Tr,
+      Gamma |- (t --> i) \in Ti
+ | T_RNil :
+      Gamma |- nil \in nil
+  | T_RCons : forall i t T tr Tr,
       Gamma |- t \in T ->
       Gamma |- tr \in Tr ->
       record_ty Tr ->
       record_tm tr ->
-      Gamma |- (rcons i t tr) \in (RCons i T Tr)
+      Gamma |- ( i := t :: tr) \in ( i : T :: Tr)
 
 where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
-Hint Constructors has_type.
+Hint Constructors has_type : core.
 
 (* ================================================================= *)
 (** ** Examples *)
 
-(** **** Exercise: 2 stars, standard (examples)  
+(** **** Exercise: 2 stars, standard (examples) 
 
     Finish the proofs below.  Feel free to use Coq's automation
     features in this proof.  However, if you are not confident about
@@ -378,34 +412,24 @@ Hint Constructors has_type.
     saying. *)
 
 Lemma typing_example_2 :
-  empty |-
-    (app (abs a (RCons i1 (Arrow A A)
-                      (RCons i2 (Arrow B B)
-                       RNil))
-              (rproj (var a) i2))
-            (rcons i1 (abs a A (var a))
-            (rcons i2 (abs a B (var a))
-             trnil))) \in
-    (Arrow B B).
+  empty |- (\a : ( i1 : (A -> A) :: i2 : (B -> B) :: nil), a --> i2)
+            ( i1 := (\a : A, a) :: i2 := (\a : B,a ) :: nil )  \in (B -> B).
 Proof.
   (* FILL IN HERE *) Admitted.
 
 Example typing_nonexample :
   ~ exists T,
-      (update empty a (RCons i2 (Arrow A A)
-                                RNil)) |-
-               (rcons i1 (abs a B (var a)) (var a)) \in
+     (a |-> <{{  i2 : (A -> A) :: nil   }}>) |-
+       ( i1 := (\a : B, a) :: a ) \in
                T.
 Proof.
   (* FILL IN HERE *) Admitted.
 
 Example typing_nonexample_2 : forall y,
   ~ exists T,
-    (update empty y A) |-
-           (app (abs a (RCons i1 A RNil)
-                     (rproj (var a) i1))
-                   (rcons i1 (var y) (rcons i2 (var y) trnil))) \in
-           T.
+    (y |-> A) |-
+     (\a : ( i1 : A  :: nil ), a --> i1 )
+      ( i1 := y :: i2 := y :: nil )  \in T.
 Proof.
   (* FILL IN HERE *) Admitted.
 
@@ -482,7 +506,7 @@ Qed.
 
         tlookup i t = tlookup i tr,
 
-        so the result follows from the induction hypothesis. [] 
+        so the result follows from the induction hypothesis. []
 
     Here is the formal statement:
 *)
@@ -494,15 +518,15 @@ Lemma lookup_field_in_value : forall v T i Ti,
   exists ti, tlookup i v = Some ti /\ empty |- ti \in Ti.
 Proof with eauto.
   intros v T i Ti Hval Htyp Hget.
-  remember (@empty ty) as Gamma.
+  remember empty as Gamma.
   induction Htyp; subst; try solve_by_invert...
   - (* T_RCons *)
     simpl in Hget. simpl. destruct (eqb_string i i0).
     + (* i is first *)
-      simpl. inversion Hget. subst.
+      simpl. injection Hget as Hget. subst.
       exists t...
     + (* get tail *)
-      destruct IHHtyp2 as [vi [Hgeti Htypi]]...
+      destruct IHHtyp2 as [vi [Hgeti Htypi] ]...
       inversion Hval... Qed.
 
 (* ----------------------------------------------------------------- *)
@@ -517,20 +541,20 @@ Proof with eauto.
        2. t --> t' for some t'.
      Proof: By induction on the given typing derivation. *)
   intros t T Ht.
-  remember (@empty ty) as Gamma.
+  remember empty as Gamma.
   generalize dependent HeqGamma.
   induction Ht; intros HeqGamma; subst.
   - (* T_Var *)
-    (* The final rule in the given typing derivation cannot be 
-       [T_Var], since it can never be the case that 
+    (* The final rule in the given typing derivation cannot be
+       [T_Var], since it can never be the case that
        [empty |- x : T] (since the context is empty). *)
     inversion H.
   - (* T_Abs *)
-    (* If the [T_Abs] rule was the last used, then 
+    (* If the [T_Abs] rule was the last used, then
        [t = abs x T11 t12], which is a value. *)
     left...
   - (* T_App *)
-    (* If the last rule applied was T_App, then [t = t1 t2], 
+    (* If the last rule applied was T_App, then [t = t1 t2],
        and we know from the form of the rule that
          [empty |- t1 : T1 -> T2]
          [empty |- t2 : T1]
@@ -542,19 +566,19 @@ Proof with eauto.
       destruct IHHt2; subst...
       * (* t2 is a value *)
       (* If both [t1] and [t2] are values, then we know that
-         [t1 = abs x T11 t12], since abstractions are the only 
+         [t1 = abs x T11 t12], since abstractions are the only
          values that can have an arrow type.  But
          [(abs x T11 t12) t2 --> [x:=t2]t12] by [ST_AppAbs]. *)
         inversion H; subst; try solve_by_invert.
-        exists ([x:=t2]t12)...
+        exists <{ [x:=t2]t0 }>...
       * (* t2 steps *)
         (* If [t1] is a value and [t2 --> t2'], then
            [t1 t2 --> t1 t2'] by [ST_App2]. *)
-        destruct H0 as [t2' Hstp]. exists (app t1 t2')...
+        destruct H0 as [t2' Hstp]. exists <{ t1 t2' }>...
     + (* t1 steps *)
       (* Finally, If [t1 --> t1'], then [t1 t2 --> t1' t2]
          by [ST_App1]. *)
-      destruct H as [t1' Hstp]. exists (app t1' t2)...
+      destruct H as [t1' Hstp]. exists <{ t1' t2 }>...
   - (* T_Proj *)
     (* If the last rule in the given derivation is [T_Proj], then
        [t = rproj t i] and
@@ -563,25 +587,25 @@ Proof with eauto.
     right. destruct IHHt...
     + (* rcd is value *)
       (* If [t] is a value, then we may use lemma
-         [lookup_field_in_value] to show [tlookup i t = Some ti] 
+         [lookup_field_in_value] to show [tlookup i t = Some ti]
          for some [ti] which gives us [rproj i t --> ti] by
          [ST_ProjRcd]. *)
       destruct (lookup_field_in_value _ _ _ _ H0 Ht H)
-        as [ti [Hlkup _]].
+        as [ti [Hlkup _] ].
       exists ti...
     + (* rcd_steps *)
       (* On the other hand, if [t --> t'], then
          [rproj t i --> rproj t' i] by [ST_Proj1]. *)
-      destruct H0 as [t' Hstp]. exists (rproj t' i)...
+      destruct H0 as [t' Hstp]. exists <{ t' --> i }>...
   - (* T_RNil *)
-    (* If the last rule in the given derivation is [T_RNil], 
+    (* If the last rule in the given derivation is [T_RNil],
        then [t = trnil], which is a value. *)
     left...
   - (* T_RCons *)
     (* If the last rule is [T_RCons], then [t = rcons i t tr] and
          [empty |- t : T]
          [empty |- tr : Tr]
-       By the IH, each of [t] and [tr] either is a value or can 
+       By the IH, each of [t] and [tr] either is a value or can
        take a step. *)
     destruct IHHt1...
     + (* head is a value *)
@@ -595,222 +619,120 @@ Proof with eauto.
            [rcons i t tr --> rcons i t tr'] by
            [ST_Rcd_Tail]. *)
         right. destruct H2 as [tr' Hstp].
-        exists (rcons i t tr')...
+        exists <{ i := t :: tr'}>...
     + (* head steps *)
       (* If [t --> t'], then
          [rcons i t tr --> rcons i t' tr]
          by [ST_Rcd_Head]. *)
       right. destruct H1 as [t' Hstp].
-      exists (rcons i t' tr)...  Qed.
+      exists <{ i := t' :: tr }>...  Qed.
 
-(* ----------------------------------------------------------------- *)
-(** *** Context Invariance *)
+(* ================================================================= *)
+(** ** Weakening *)
 
-Inductive appears_free_in : string -> tm -> Prop :=
-  | afi_var : forall x,
-      appears_free_in x (var x)
-  | afi_app1 : forall x t1 t2,
-      appears_free_in x t1 -> appears_free_in x (app t1 t2)
-  | afi_app2 : forall x t1 t2,
-      appears_free_in x t2 -> appears_free_in x (app t1 t2)
-  | afi_abs : forall x y T11 t12,
-        y <> x  ->
-        appears_free_in x t12 ->
-        appears_free_in x (abs y T11 t12)
-  | afi_proj : forall x t i,
-     appears_free_in x t ->
-     appears_free_in x (rproj t i)
-  | afi_rhead : forall x i ti tr,
-      appears_free_in x ti ->
-      appears_free_in x (rcons i ti tr)
-  | afi_rtail : forall x i ti tr,
-      appears_free_in x tr ->
-      appears_free_in x (rcons i ti tr).
+(** The weakening lemma is proved as in pure STLC. *)
 
-Hint Constructors appears_free_in.
+Lemma weakening : forall Gamma Gamma' t T,
+     inclusion Gamma Gamma' ->
+     Gamma  |- t \in T  ->
+     Gamma' |- t \in T.
+Proof.
+  intros Gamma Gamma' t T H Ht.
+  generalize dependent Gamma'.
+  induction Ht; eauto using inclusion_update.
+Qed.
 
-Lemma context_invariance : forall Gamma Gamma' t S,
-     Gamma |- t \in S  ->
-     (forall x, appears_free_in x t -> Gamma x = Gamma' x)  ->
-     Gamma' |- t \in S.
-Proof with eauto.
-  intros. generalize dependent Gamma'.
-  induction H;
-    intros Gamma' Heqv...
-  - (* T_Var *)
-    apply T_Var... rewrite <- Heqv...
-  - (* T_Abs *)
-    apply T_Abs... apply IHhas_type. intros y Hafi.
-    unfold update, t_update. destruct (eqb_stringP x y)...
-  - (* T_App *)
-    apply T_App with T1...
-  - (* T_RCons *)
-    apply T_RCons...  Qed.
-
-Lemma free_in_context : forall x t T Gamma,
-   appears_free_in x t ->
-   Gamma |- t \in T ->
-   exists T', Gamma x = Some T'.
-Proof with eauto.
-  intros x t T Gamma Hafi Htyp.
-  induction Htyp; inversion Hafi; subst...
-  - (* T_Abs *)
-    destruct IHHtyp as [T' Hctx]... exists T'.
-    unfold update, t_update in Hctx.
-    rewrite false_eqb_string in Hctx...
+Lemma weakening_empty : forall Gamma t T,
+     empty |- t \in T  ->
+     Gamma |- t \in T.
+Proof.
+  intros Gamma t T.
+  eapply weakening.
+  discriminate.
 Qed.
 
 (* ----------------------------------------------------------------- *)
 (** *** Preservation *)
 
-Lemma substitution_preserves_typing : forall Gamma x U v t S,
-     (update Gamma x U) |- t \in S  ->
-     empty |- v \in U   ->
-     Gamma |- ([x:=v]t) \in S.
-Proof with eauto.
-  (* Theorem: If x|->U;Gamma |- t : S and empty |- v : U, then
-     Gamma |- ([x:=v]t) S. *)
-  intros Gamma x U v t S Htypt Htypv.
-  generalize dependent Gamma. generalize dependent S.
-  (* Proof: By induction on the term t.  Most cases follow 
-     directly from the IH, with the exception of var, 
-     abs, rcons. The former aren't automatic because we 
-     must reason about how the variables interact. In the 
-     case of rcons, we must do a little extra work to show 
-     that substituting into a term doesn't change whether 
-     it is a record term. *)
-  induction t;
-    intros S Gamma Htypt; simpl; inversion Htypt; subst...
+  (* As before, we prove the substitution lemma by induction
+     on the term t. The only new case (compared to the proof in
+     StlcProp.v) is the case of rcons. For this case, we must do a little
+     extra work to show that substituting into a term doesn't change
+     whetherit is a record term. *)
+
+Lemma substitution_preserves_typing : forall Gamma x U t v T,
+  (x |-> U ; Gamma) |- t \in T ->
+  empty |- v \in U   ->
+  Gamma |- [x:=v]t \in T.
+Proof.
+  intros Gamma x U t v T Ht Hv.
+  generalize dependent Gamma. generalize dependent T.
+  induction t; intros T Gamma H;
+  (* in each case, we'll want to get at the derivation of H *)
+    inversion H; clear H; subst; simpl; eauto.
   - (* var *)
-    simpl. rename s into y.
-    (* If t = y, we know that
-         [empty |- v : U] and
-         [x|->U; Gamma |- y : S]
-       and, by inversion, [update Gamma x U y = Some S].  
-       We want to show that [Gamma |- [x:=v]y : S].
-
-       There are two cases to consider: either [x=y] or [x<>y]. *)
-    unfold update, t_update in H0.
-    destruct (eqb_stringP x y) as [Hxy|Hxy].
+    rename s into y. destruct (eqb_stringP x y); subst.
     + (* x=y *)
-    (* If [x = y], then we know that [U = S], and that 
-       [[x:=v]y = v]. So what we really must show is that 
-       if [empty |- v : U] then [Gamma |- v : U].  We have
-        already proven a more general version of this theorem, 
-        called context invariance! *)
-      subst.
-      inversion H0; subst. clear H0.
-      eapply context_invariance...
-      intros x Hcontra.
-      destruct (free_in_context _ _ S empty Hcontra)
-        as [T' HT']...
-      inversion HT'.
+      rewrite update_eq in H1.
+      injection H1 as H1; subst.
+      apply weakening_empty. assumption.
     + (* x<>y *)
-    (* If [x <> y], then [Gamma y = Some S] and the substitution
-       has no effect.  We can show that [Gamma |- y : S] by 
-       [T_Var]. *)
-      apply T_Var...
+      apply T_Var. rewrite update_neq in H1; auto. assumption.
   - (* abs *)
-    rename s into y. rename t into T11.
-    (* If [t = abs y T11 t0], then we know that
-         [x|->U; Gamma |- abs y T11 t0 : T11->T12]
-         [x|->U; y|->T11; Gamma |- t0 : T12]
-         [empty |- v : U]
-       As our IH, we know that forall S Gamma,
-         [x|->U; Gamma |- t0 : S -> Gamma |- [x:=v]t0 S].
-
-       We can calculate that
-       [ [x:=v]t = abs y T11 (if eqb_string x y then t0 else [x:=v]t0) ],
-       and we must show that [Gamma |- [x:=v]t : T11->T12].  We know
-       we will do so using [T_Abs], so it remains to be shown that:
-         [y|->T11; Gamma |- if eqb_string x y then t0 else [x:=v]t0 : T12]
-       We consider two cases: [x = y] and [x <> y]. *)
-    apply T_Abs...
-    destruct (eqb_stringP x y) as [Hxy|Hxy].
+    rename s into y, t into T.
+    destruct (eqb_stringP x y); subst; apply T_Abs; try assumption.
     + (* x=y *)
-      (* If [x = y], then the substitution has no effect.  Context
-         invariance shows that [y:U,y:T11] and [Gamma,y:T11] are
-         equivalent.  Since [t0 : T12] under the former context, 
-         this is also the case under the latter. *)
-      eapply context_invariance...
-      subst.
-      intros x Hafi. unfold update, t_update.
-      destruct (eqb_string y x)...
+      rewrite update_shadow in H5. assumption.
     + (* x<>y *)
-      (* If [x <> y], then the IH and context invariance allow 
-         us to show that
-           [x|->U; y|->T11; Gamma |- t0 : T12]       =>
-           [y|->T11; x|->U; Gamma |- t0 : T12]       =>
-           [y|->T11; Gamma |- [x:=v]t0 : T12] *)
-      apply IHt. eapply context_invariance...
-      intros z Hafi. unfold update, t_update.
-      destruct (eqb_stringP y z)...
-      subst. rewrite false_eqb_string...
-  - (* rcons *)
-    apply T_RCons... inversion H7; subst; simpl...
+      apply IHt.
+      rewrite update_permute; auto.
+  - (* rcons *)   (* <=== only new case compared to pure STLC *)
+     apply T_RCons; eauto.
+     inversion H7; subst; simpl; auto.
 Qed.
 
 Theorem preservation : forall t t' T,
-     empty |- t \in T  ->
-     t --> t'  ->
-     empty |- t' \in T.
+  empty |- t \in T  ->
+  t --> t'  ->
+  empty |- t' \in T.
 Proof with eauto.
-  intros t t' T HT.
-  (* Theorem: If [empty |- t : T] and [t --> t'], then
-     [empty |- t' : T]. *)
-  remember (@empty ty) as Gamma. generalize dependent HeqGamma.
-  generalize dependent t'.
-  (* Proof: By induction on the given typing derivation.  
-     Many cases are contradictory ([T_Var], [T_Abs]) or follow 
-     directly from the IH ([T_RCons]).  We show just the 
-     interesting ones. *)
+  intros t t' T HT. generalize dependent t'.
+  remember empty as Gamma.
   induction HT;
-    intros t' HeqGamma HE; subst; inversion HE; subst...
+       intros t' HE; subst;
+       try solve [inversion HE; subst; auto].
   - (* T_App *)
-    (* If the last rule used was [T_App], then [t = t1 t2], 
-       and three rules could have been used to show [t --> t']:
-       [ST_App1], [ST_App2], and [ST_AppAbs]. In the first two 
-       cases, the result follows directly from the IH. *)
     inversion HE; subst...
     + (* ST_AppAbs *)
-      (* For the third case, suppose
-           [t1 = abs x T11 t12]
-         and
-           [t2 = v2].  We must show that [empty |- [x:=v2]t12 : T2].
-         We know by assumption that
-             [empty |- abs x T11 t12 : T1->T2]
-         and by inversion
-             [x:T1 |- t12 : T2]
-         We have already proven that substitution_preserves_typing and
-             [empty |- v2 : T1]
-         by assumption, so we are done. *)
       apply substitution_preserves_typing with T1...
       inversion HT1...
-  - (* T_Proj *)
-    (* If the last rule was [T_Proj], then [t = rproj t1 i].  
+  - (* T_Proj *) (* <=== new case compared to pure STLC *)
+    (* If the last rule was [T_Proj], then [t = rproj t1 i].
        Two rules could have caused [t --> t']: [T_Proj1] and
-       [T_ProjRcd].  The typing of [t'] follows from the IH 
+       [T_ProjRcd].  The typing of [t'] follows from the IH
        in the former case, so we only consider [T_ProjRcd].
 
-       Here we have that [t] is a record value.  Since rule 
-       [T_Proj] was used, we know [empty |- t \in Tr] and 
-       [Tlookup i Tr = Some Ti] for some [i] and [Tr].  
-       We may therefore apply lemma [lookup_field_in_value] 
+       Here we have that [t] is a record value.  Since rule
+       [T_Proj] was used, we know [empty |- t \in Tr] and
+       [Tlookup i Tr = Some Ti] for some [i] and [Tr].
+       We may therefore apply lemma [lookup_field_in_value]
        to find the record element this projection steps to. *)
+    inversion HE; subst...
     destruct (lookup_field_in_value _ _ _ _ H2 HT H)
-      as [vi [Hget Htyp]].
-    rewrite H4 in Hget. inversion Hget. subst...
-  - (* T_RCons *)
-    (* If the last rule was [T_RCons], then [t = rcons i t tr] 
-       for some [i], [t] and [tr] such that [record_tm tr].  If 
-       the step is by [ST_Rcd_Head], the result is immediate by 
+      as [vi [Hget Htyp] ].
+    rewrite H4 in Hget. injection Hget as Hget. subst...
+  - (* T_RCons *) (* <=== new case compared to pure STLC *)
+    (* If the last rule was [T_RCons], then [t = rcons i t tr]
+       for some [i], [t] and [tr] such that [record_tm tr].  If
+       the step is by [ST_Rcd_Head], the result is immediate by
        the IH.  If the step is by [ST_Rcd_Tail], [tr --> tr2']
-       for some [tr2'] and we must also use lemma [step_preserves_record_tm] 
+       for some [tr2'] and we must also use lemma [step_preserves_record_tm]
        to show [record_tm tr2']. *)
+    inversion HE; subst...
     apply T_RCons... eapply step_preserves_record_tm...
 Qed.
 (** [] *)
 
 End STLCExtendedRecords.
 
-(* Thu Feb 7 20:09:25 EST 2019 *)
+(* 2020-09-09 21:08 *)

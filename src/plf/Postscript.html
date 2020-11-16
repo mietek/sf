@@ -2,35 +2,37 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<link href="common/css/sf.css" rel="stylesheet" type="text/css"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="common/css/sf.css" rel="stylesheet" type="text/css" />
 <title>Postscript</title>
-</head>
 <link href="common/jquery-ui/jquery-ui.css" rel="stylesheet">
 <script src="common/jquery-ui/external/jquery/jquery.js"></script>
 <script src="common/jquery-ui/jquery-ui.js"></script>
 <script src="common/toggleproofs.js"></script>
 <link href="common/css/plf.css" rel="stylesheet" type="text/css"/>
+</head>
 
 <body>
 
 <div id="page">
 
 <div id="header">
-<a href='https://www.cis.upenn.edu/~bcpierce/sf/current/index.html'>
-<img src='common/media/image/sf_logo_sm.png'></a>
-</br><a href='index.html'>  <span class='booktitleinheader'>Volume 2: Programming Language Foundations</span><br></br>
+<div id='logoinheader'><a href='https://softwarefoundations.cis.upenn.edu'>
+<img src='common/media/image/sf_logo_sm.png' alt='Software Foundations Logo'></a></div>
+<div class='booktitleinheader'><a href='index.html'>Volume 2: Programming Language Foundations</a></div>
 <ul id='menu'>
-   <a href='toc.html'><li class='section_name'>Table of Contents</li></a>
-   <a href='coqindex.html'><li class='section_name'>Index</li></a>
-   <a href='deps.html'><li class='section_name'>Roadmap</li></a>
+   <li class='section_name'><a href='toc.html'>Table of Contents</a></li>
+   <li class='section_name'><a href='coqindex.html'>Index</a></li>
+   <li class='section_name'><a href='deps.html'>Roadmap</a></li>
 </ul>
-</a></div>
+</div>
 
 <div id="main">
 
 <h1 class="libtitle">Postscript</h1>
 
+<div class="code">
+</div>
 
 <div class="doc">
 
@@ -39,7 +41,7 @@
  Congratulations: We've made it to the end! 
 <div class="paragraph"> </div>
 
-<a name="lab593"></a><h1 class="section">Looking Back</h1>
+<a id="lab612"></a><h1 class="section">Looking Back</h1>
 
 <div class="paragraph"> </div>
 
@@ -189,7 +191,7 @@
 </div>
 
 <div class="doc">
-<a name="lab594"></a><h1 class="section">Looking Around</h1>
+<a id="lab613"></a><h1 class="section">Looking Around</h1>
 
 <div class="paragraph"> </div>
 
@@ -201,7 +203,7 @@
     today... 
 <div class="paragraph"> </div>
 
-<a name="lab595"></a><h3 class="section">CompCert</h3>
+<a id="lab614"></a><h3 class="section">CompCert</h3>
  <i>CompCert</i> is a fully verified optimizing compiler for almost all
     of the ISO C<sub>90</sub> / ANSI C language, generating code for x<sub>86</sub>, ARM,
     and PowerPC processors.  The whole of CompCert is is written in
@@ -247,7 +249,7 @@
     <a href="http://compcert.inria.fr"><span class="inlineref">http://compcert.inria.fr</span></a> 
 <div class="paragraph"> </div>
 
-<a name="lab596"></a><h3 class="section">seL4</h3>
+<a id="lab615"></a><h3 class="section">seL4</h3>
  <i>seL4</i> is a fully verified microkernel, considered to be the
     world's first OS kernel with an end-to-end proof of implementation
     correctness and security enforcement.  It is implemented in C and
@@ -271,7 +273,7 @@
     <a href="https://sel4.systems"><span class="inlineref">https://sel4.systems</span></a>. 
 <div class="paragraph"> </div>
 
-<a name="lab597"></a><h3 class="section">CertiKOS</h3>
+<a id="lab616"></a><h3 class="section">CertiKOS</h3>
  <i>CertiKOS</i> is a clean-slate, fully verified hypervisor, written in
     CompCert C and verified in Coq.
 
@@ -294,7 +296,7 @@
     <a href="http://flint.cs.yale.edu/certikos/"><span class="inlineref">http://flint.cs.yale.edu/certikos/</span></a> 
 <div class="paragraph"> </div>
 
-<a name="lab598"></a><h3 class="section">Ironclad</h3>
+<a id="lab617"></a><h3 class="section">Ironclad</h3>
  <i>Ironclad Apps</i> is a collection of fully verified web
     applications, including a "notary" for securely signing
     statements, a password hasher, a multi-user trusted counter, and a
@@ -324,7 +326,7 @@
     <a href="https://github.com/Microsoft/Ironclad/tree/master/ironclad-apps"><span class="inlineref">https://github.com/Microsoft/Ironclad/tree/master/ironclad-apps</span></a> 
 <div class="paragraph"> </div>
 
-<a name="lab599"></a><h3 class="section">Verdi</h3>
+<a id="lab618"></a><h3 class="section">Verdi</h3>
  <i>Verdi</i> is a framework for implementing and formally verifying
     distributed systems.
 
@@ -346,22 +348,19 @@
     <a href="http://verdi.uwplse.org"><span class="inlineref">http://verdi.uwplse.org</span></a> 
 <div class="paragraph"> </div>
 
-<a name="lab600"></a><h3 class="section">DeepSpec</h3>
+<a id="lab619"></a><h3 class="section">DeepSpec</h3>
  <i>The Science of Deep Specification</i> is an NSF "Expedition"
     project (running from 2016 to 2020) that focuses on the
     specification and verification of full functional correctness of
     both software and hardware.  It also sponsors workshops and summer
     schools.
-
-<div class="paragraph"> </div>
-
 <ul class="doclist">
-<li> Website: <a href="http://deepspec.org/"><span class="inlineref">http://deepspec.org/</span></a>
+<li> Website: <a href="https://deepspec.org/"><span class="inlineref">https://deepspec.org/</span></a>
 
 </li>
-<li> Overview presentations: 
+<li> Overview presentations:
 <ul class="doclist">
-<li> <a href="http://deepspec.org/about/"><span class="inlineref">http://deepspec.org/about/</span></a>
+<li> <a href="https://deepspec.org/page/About/"><span class="inlineref">https://deepspec.org/page/About/</span></a>
 
 </li>
 <li> <a href="https://www.youtube.com/watch?v=IPNdsnRWBkk"><span class="inlineref">https://www.youtube.com/watch?v=IPNdsnRWBkk</span></a> 
@@ -373,12 +372,12 @@
 
 <div class="paragraph"> </div>
 
-<a name="lab601"></a><h3 class="section">REMS</h3>
+<a id="lab620"></a><h3 class="section">REMS</h3>
  <i>REMS</i> is a european project on Rigorous Engineering of Mainstream
     Systems.  It has produced detailed formal specifications of a wide
     range of critical real-world interfaces, protocols, and APIs,
-    including 
-      the C language, 
+    including
+      the C language,
       the ELF linker format,
       the ARM, Power, MIPS, CHERI, and RISC-V instruction sets,
       the weak memory models of ARM and Power processors, and
@@ -401,17 +400,14 @@
 
 <div class="paragraph"> </div>
 
-    <a href="http://www.cl.cam.ac.uk/~pes20/rems/"><span class="inlineref">http://www.cl.cam.ac.uk/~pes20/rems/</span></a> 
+    <a href="https://www.cl.cam.ac.uk/~pes20/rems/"><span class="inlineref">https://www.cl.cam.ac.uk/~pes20/rems/</span></a> 
 <div class="paragraph"> </div>
 
-<a name="lab602"></a><h3 class="section">Others</h3>
+<a id="lab621"></a><h3 class="section">Others</h3>
 
 <div class="paragraph"> </div>
 
  There's much more.  Other projects worth checking out include:
-
-<div class="paragraph"> </div>
-
 <ul class="doclist">
 <li> Vellvm (formal specification and verification of LLVM
         optimization passes)
@@ -443,7 +439,7 @@
 </div>
 
 <div class="doc">
-<a name="lab603"></a><h1 class="section">Looking Forward</h1>
+<a id="lab622"></a><h1 class="section">Looking Forward</h1>
 
 <div class="paragraph"> </div>
 
@@ -465,7 +461,7 @@
 <li> More on Hoare logic and program verification
 <ul class="doclist">
 <li> The Formal Semantics of Programming Languages: An
-              Introduction, by Glynn Winskel <a href="Bib.html#Winskel 1993"><span class="inlineref">[Winskel 1993]</span></a>.
+              Introduction, by Glynn Winskel <a href="Bib.html#Winskel-1993"><span class="inlineref">[Winskel 1993]</span></a>.
 
 </li>
 <li> Many practical verification tools, e.g. Microsoft's
@@ -481,22 +477,19 @@
 <li> More on the foundations of programming languages:
 <ul class="doclist">
 <li> Concrete Semantics with Isabelle/HOL, by Tobias Nipkow
-              and Gerwin Klein <a href="Bib.html#Nipkow 2014"><span class="inlineref">[Nipkow 2014]</span></a>
+              and Gerwin Klein <a href="Bib.html#Nipkow-2014"><span class="inlineref">[Nipkow 2014]</span></a>
 
 </li>
 <li> Types and Programming Languages, by Benjamin C. Pierce
-              <a href="Bib.html#Pierce 2002"><span class="inlineref">[Pierce 2002]</span></a>.
+              <a href="Bib.html#Pierce-2002"><span class="inlineref">[Pierce 2002]</span></a>.
 
 </li>
 <li> Practical Foundations for Programming Languages, by
-              Robert Harper <a href="Bib.html#Harper 2016"><span class="inlineref">[Harper 2016]</span></a>.
+              Robert Harper <a href="Bib.html#Harper-2016"><span class="inlineref">[Harper 2016]</span></a>.
 
 </li>
 <li> Foundations for Programming Languages, by John
-              C. Mitchell <a href="Bib.html#Mitchell 1996"><span class="inlineref">[Mitchell 1996]</span></a>.
-
-<div class="paragraph"> </div>
-
+              C. Mitchell <a href="Bib.html#Mitchell-1996"><span class="inlineref">[Mitchell 1996]</span></a>.
 
 <div class="paragraph"> </div>
 
@@ -506,16 +499,13 @@
 
 </li>
 <li> Iron Lambda (http://iron.ouroborus.net/) is a collection
-          of ​Coq formalisations for functional languages of
+          of Coq formalisations for functional languages of
           increasing complexity. It fills part of the gap between
-          the end of the​ Software Foundations course and what
+          the end of the Software Foundations course and what
           appears in current research papers.  The collection has
           at least Progress and Preservation theorems for a number
           of variants of STLC and the polymorphic
-          lambda-calculus (System F). 
-
-<div class="paragraph"> </div>
-
+          lambda-calculus (System F).
 
 <div class="paragraph"> </div>
 
@@ -548,7 +538,7 @@
 <li> Principles in Practice workshop (PiP)
 
 </li>
-<li> CoqPL workshop 
+<li> CoqPL workshop
 
 </li>
 </ul>
@@ -560,13 +550,16 @@
 
   
 </div>
-<div class="code code-tight">
+<div class="code">
 
-<span class="comment">(*&nbsp;Thu&nbsp;Feb&nbsp;7&nbsp;20:09:27&nbsp;EST&nbsp;2019&nbsp;*)</span><br/>
+<br/>
+<span class="comment">(*&nbsp;2020-09-09&nbsp;21:08&nbsp;*)</span><br/>
 </div>
 </div>
 
-
+<div id="footer">
+<hr/><a href="coqindex.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
 
 </div>
 

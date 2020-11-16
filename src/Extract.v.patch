@@ -1,0 +1,25 @@
+--- Extract.v.orig	2020-11-03 14:07:26.986781600 +0900
++++ Extract.v	2020-11-03 17:51:52.039637300 +0900
+@@ -356,8 +356,10 @@
+     you will find the file [test_searchtree.ml]. You can
+     run it using the OCaml toplevel with these commands:
+ 
++<<
+ # #use "searchtree.ml";;
+ # #use "test_searchtree.ml";;
++>>
+ 
+ On a recent machine with a 2.9 GHz Intel Core i9 that prints:
+ 
+@@ -368,9 +370,11 @@
+ That execution uses the bytecode interpreter.  The native compiler
+ will have better performance:
+ 
++<<
+ $ ocamlopt -c searchtree.mli searchtree.ml
+ $ ocamlopt searchtree.cmx -open Searchtree test_searchtree.ml -o test_searchtree
+ $ ./test_searchtree
++>>
+ 
+ On the same machine that prints,
+ 

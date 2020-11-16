@@ -139,6 +139,25 @@
     chapter. *)
 
 (* ################################################################# *)
+(** * Practicalities *)
+(* ================================================================= *)
+(** ** Recommended Citation Format *)
+
+(** If you want to refer to this volume in your own writing, please
+    do so as follows:
+
+   @book            {$FIRSTAUTHOR:SF$VOLUMENUMBER,
+   author       =   {$AUTHORS},
+   title        =   "$VOLUMENAME",
+   series       =   "Software Foundations",
+   volume       =   "$VOLUMENUMBER",
+   year         =   "$VOLUMEYEAR",
+   publisher    =   "Electronic textbook",
+   note         =   {Version $VERSION, \URLhttp://softwarefoundations.cis.upenn.edu },
+   }
+*)
+
+(* ################################################################# *)
 (** * Note for Instructors *)
 
 (** If you plan to use these materials in your own course, you will
@@ -155,4 +174,4 @@
     Specification_. *)
 
 
-(* Thu Feb 7 20:09:22 EST 2019 *)
+(* 2020-09-09 21:08 *)

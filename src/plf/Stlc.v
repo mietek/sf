@@ -38,66 +38,72 @@ From PLF Require Import Smallstep.
 
     This gives us the following collection of abstract syntax
     constructors (written out first in informal BNF notation -- we'll
-    formalize it below). 
+    formalize it below).
 
-       t ::= x                         variable
-           | \x:T1.t2                  abstraction
-           | t1 t2                     application
-           | tru                       constant true
-           | fls                       constant false
-           | test t1 then t2 else t3   conditional
+       t ::= x                         (variable)
+           | \x:T,t                    (abstraction)
+           | t t                       (application)
+           | true                      (constant true)
+           | false                     (constant false)
+           | if t then t else t        (conditional)
 *)
 
-(** The [\] symbol in a function abstraction [\x:T.t] is generally
+(** The [\] symbol in a function abstraction [\x:T,t] is generally
     written as a Greek letter "lambda" (hence the name of the
     calculus).  The variable [x] is called the _parameter_ to the
-    function; the term [t] is its _body_.  The annotation [:T1]
+    function; the term [t] is its _body_.  The annotation [:T]
     specifies the type of arguments that the function can be applied
     to. *)
 
+(** If you've seen lambda-calculus notation before, you might be
+    wondering why abstraction is written here as [\x:T,t] instead of
+    the usual "[\x:T.t]". The reason is that some front ends for
+    interacting with Coq use period to separate a file into
+    "sentences" to be passed separately to the Coq top level. *)
+
 (** Some examples:
 
-      - [\x:Bool. x]
+      - [\x:Bool, x]
 
         The identity function for booleans.
 
-      - [(\x:Bool. x) tru]
+      - [(\x:Bool, x) true]
 
-        The identity function for booleans, applied to the boolean [tru].
+        The identity function for booleans, applied to the boolean [true].
 
-      - [\x:Bool. test x then fls else tru]
+      - [\x:Bool, if x then false else true]
 
         The boolean "not" function.
 
-      - [\x:Bool. tru]
+      - [\x:Bool, true]
 
         The constant function that takes every (boolean) argument to
-        [tru]. 
-      - [\x:Bool. \y:Bool. x]
+        [true].
+      - [\x:Bool, \y:Bool, x]
 
         A two-argument function that takes two booleans and returns
         the first one.  (As in Coq, a two-argument function is really
         a one-argument function whose body is also a one-argument
         function.)
 
-      - [(\x:Bool. \y:Bool. x) fls tru]
+      - [(\x:Bool, \y:Bool, x) false true]
 
         A two-argument function that takes two booleans and returns
-        the first one, applied to the booleans [fls] and [tru].
+        the first one, applied to the booleans [false] and [true].
 
         As in Coq, application associates to the left -- i.e., this
-        expression is parsed as [((\x:Bool. \y:Bool. x) fls) tru].
+        expression is parsed as [((\x:Bool, \y:Bool, x) false) true].
 
-      - [\f:Bool->Bool. f (f tru)]
+      - [\f:Bool->Bool, f (f true)]
 
         A higher-order function that takes a _function_ [f] (from
-        booleans to booleans) as an argument, applies [f] to [tru],
+        booleans to booleans) as an argument, applies [f] to [true],
         and applies [f] again to the result.
 
-      - [(\f:Bool->Bool. f (f tru)) (\x:Bool. fls)]
+      - [(\f:Bool->Bool, f (f true)) (\x:Bool, false)]
 
         The same higher-order function, applied to the constantly
-        [fls] function. *)
+        [false] function. *)
 
 (** As the last several examples show, the STLC is a language of
     _higher-order_ functions: we can write down functions that take
@@ -111,27 +117,27 @@ From PLF Require Import Smallstep.
     exactly the same.
 
     The _types_ of the STLC include [Bool], which classifies the
-    boolean constants [tru] and [fls] as well as more complex
+    boolean constants [true] and [false] as well as more complex
     computations that yield booleans, plus _arrow types_ that classify
-    functions. 
+    functions.
 
       T ::= Bool
           | T -> T
 
     For example:
 
-      - [\x:Bool. fls] has type [Bool->Bool]
+      - [\x:Bool, false] has type [Bool->Bool]
 
-      - [\x:Bool. x] has type [Bool->Bool]
+      - [\x:Bool, x] has type [Bool->Bool]
 
-      - [(\x:Bool. x) tru] has type [Bool]
+      - [(\x:Bool, x) true] has type [Bool]
 
-      - [\x:Bool. \y:Bool. x] has type [Bool->Bool->Bool]
+      - [\x:Bool, \y:Bool, x] has type [Bool->Bool->Bool]
                               (i.e., [Bool -> (Bool->Bool)])
 
-      - [(\x:Bool. \y:Bool. x) fls] has type [Bool->Bool]
+      - [(\x:Bool, \y:Bool, x) false] has type [Bool->Bool]
 
-      - [(\x:Bool. \y:Bool. x) fls tru] has type [Bool] *)
+      - [(\x:Bool, \y:Bool, x) false true] has type [Bool] *)
 
 (* ################################################################# *)
 (** * Syntax *)
@@ -144,21 +150,56 @@ Module STLC.
 (** ** Types *)
 
 Inductive ty : Type :=
-  | Bool  : ty
-  | Arrow : ty -> ty -> ty.
+  | Ty_Bool  : ty
+  | Ty_Arrow : ty -> ty -> ty.
 
 (* ================================================================= *)
 (** ** Terms *)
 
 Inductive tm : Type :=
-  | var : string -> tm
-  | app : tm -> tm -> tm
-  | abs : string -> ty -> tm -> tm
-  | tru : tm
-  | fls : tm
-  | test : tm -> tm -> tm -> tm.
+  | tm_var   : string -> tm
+  | tm_app   : tm -> tm -> tm
+  | tm_abs   : string -> ty -> tm -> tm
+  | tm_true  : tm
+  | tm_false : tm
+  | tm_if    : tm -> tm -> tm -> tm.
 
-(** Note that an abstraction [\x:T.t] (formally, [abs x T t]) is
+Declare Custom Entry stlc.
+Notation "<{ e }>" := e (e custom stlc at level 99).
+Notation "( x )" := x (in custom stlc, x at level 99).
+Notation "x" := x (in custom stlc at level 0, x constr at level 0).
+Notation "S -> T" := (Ty_Arrow S T) (in custom stlc at level 50, right associativity).
+Notation "x y" := (tm_app x y) (in custom stlc at level 1, left associativity).
+Notation "\ x : t , y" :=
+  (tm_abs x t y) (in custom stlc at level 90, x at level 99,
+                     t custom stlc at level 99,
+                     y custom stlc at level 99,
+                     left associativity).
+Coercion tm_var : string >-> tm.
+
+Notation "'Bool'" := Ty_Bool (in custom stlc at level 0).
+Notation "'if' x 'then' y 'else' z" :=
+  (tm_if x y z) (in custom stlc at level 89,
+                    x custom stlc at level 99,
+                    y custom stlc at level 99,
+                    z custom stlc at level 99,
+                    left associativity).
+Notation "'true'"  := true (at level 1).
+Notation "'true'"  := tm_true (in custom stlc at level 0).
+Notation "'false'"  := false (at level 1).
+Notation "'false'"  := tm_false (in custom stlc at level 0).
+
+(** Some more notation magic to set up the concrete syntax, as we did
+    in the [Imp] chapter... *)
+
+Definition x : string := "x".
+Definition y : string := "y".
+Definition z : string := "z".
+Hint Unfold x : core.
+Hint Unfold y : core.
+Hint Unfold z : core.
+
+(** Note that an abstraction [\x:T,t] (formally, [tm_abs x T t]) is
     always annotated with the type [T] of its parameter, in contrast
     to Coq (and other functional languages like ML, Haskell, etc.),
     which use type inference to fill in missing annotations.  We're
@@ -166,40 +207,18 @@ Inductive tm : Type :=
 
 (** Some examples... *)
 
-Open Scope string_scope.
-
-Definition x := "x".
-Definition y := "y".
-Definition z := "z".
-
-Hint Unfold x.
-Hint Unfold y.
-Hint Unfold z.
-
-(** [idB = \x:Bool. x] *)
-
 Notation idB :=
-  (abs x Bool (var x)).
-
-(** [idBB = \x:Bool->Bool. x] *)
+  <{\x:Bool, x}>.
 
 Notation idBB :=
-  (abs x (Arrow Bool Bool) (var x)).
-
-(** [idBBBB = \x:(Bool->Bool) -> (Bool->Bool). x] *)
+  <{\x:Bool->Bool, x}>.
 
 Notation idBBBB :=
-  (abs x (Arrow (Arrow Bool Bool)
-                      (Arrow Bool Bool))
-    (var x)).
+  <{\x:((Bool->Bool)->(Bool->Bool)), x}>.
 
-(** [k = \x:Bool. \y:Bool. x] *)
+Notation k := <{\x:Bool, \y:Bool, x}>.
 
-Notation k := (abs x Bool (abs y Bool (var x))).
-
-(** [notB = \x:Bool. test x then fls else tru] *)
-
-Notation notB := (abs x Bool (test (var x) fls tru)).
+Notation notB := <{\x:Bool, if x then false else true}>.
 
 (** (We write these as [Notation]s rather than [Definition]s to make
     things easier for [auto].) *)
@@ -219,7 +238,7 @@ Notation notB := (abs x Bool (test (var x) fls tru)).
 (** To define the values of the STLC, we have a few cases to consider.
 
     First, for the boolean part of the language, the situation is
-    clear: [tru] and [fls] are the only values.  A [test] expression
+    clear: [true] and [false] are the only values.  An [if] expression
     is never a value. *)
 
 (** Second, an application is not a value: it represents a function
@@ -228,23 +247,23 @@ Notation notB := (abs x Bool (test (var x) fls tru)).
 
 (** Third, for abstractions, we have a choice:
 
-      - We can say that [\x:T. t] is a value only when [t] is a
+      - We can say that [\x:T, t] is a value only when [t] is a
         value -- i.e., only if the function's body has been
         reduced (as much as it can be without knowing what argument it
         is going to be applied to).
 
-      - Or we can say that [\x:T. t] is always a value, no matter
+      - Or we can say that [\x:T, t] is always a value, no matter
         whether [t] is one or not -- in other words, we can say that
         reduction stops at abstractions.
 
-    Our usual way of evaluating expressions in Coq makes the first
+    Our usual way of evaluating expressions in Gallina makes the first
     choice -- for example,
 
          Compute (fun x:bool => 3 + 4)
 
     yields:
 
-          fun x:bool => 7
+         fun x:bool => 7
 
     Most real-world functional programming languages make the second
     choice -- reduction of a function's body only begins when the
@@ -252,14 +271,14 @@ Notation notB := (abs x Bool (test (var x) fls tru)).
     second choice here. *)
 
 Inductive value : tm -> Prop :=
-  | v_abs : forall x T t,
-      value (abs x T t)
-  | v_tru :
-      value tru
-  | v_fls :
-      value fls.
+  | v_abs : forall x T2 t1,
+      value <{\x:T2, t1}>
+  | v_true :
+      value <{true}>
+  | v_false :
+      value <{false}>.
 
-Hint Constructors value.
+Hint Constructors value : core.
 
 (** Finally, we must consider what constitutes a _complete_ program.
 
@@ -286,13 +305,13 @@ Hint Constructors value.
     argument term for the function parameter in the function's body.
     For example, we reduce
 
-       (\x:Bool. test x then tru else x) fls
+       (\x:Bool, if x then true else x) false
 
     to
 
-       test fls then tru else fls
+       if false then true else false
 
-    by substituting [fls] for the parameter [x] in the body of the
+    by substituting [false] for the parameter [x] in the body of the
     function.
 
     In general, we need to be able to substitute some given term [s]
@@ -302,29 +321,29 @@ Hint Constructors value.
 
 (** Here are some examples:
 
-      - [[x:=tru] (test x then x else fls)]
-           yields [test tru then tru else fls]
+      - [[x:=true] (if x then x else false)]
+           yields [if true then true else false]
 
-      - [[x:=tru] x] yields [tru]
+      - [[x:=true] x] yields [true]
 
-      - [[x:=tru] (test x then x else y)] yields [test tru then tru else y]
+      - [[x:=true] (if x then x else y)] yields [if true then true else y]
 
-      - [[x:=tru] y] yields [y]
+      - [[x:=true] y] yields [y]
 
-      - [[x:=tru] fls] yields [fls] (vacuous substitution)
+      - [[x:=true] false] yields [false] (vacuous substitution)
 
-      - [[x:=tru] (\y:Bool. test y then x else fls)]
-           yields [\y:Bool. test y then tru else fls]
+      - [[x:=true] (\y:Bool, if y then x else false)]
+           yields [\y:Bool, if y then true else false]
 
-      - [[x:=tru] (\y:Bool. x)] yields [\y:Bool. tru]
+      - [[x:=true] (\y:Bool, x)] yields [\y:Bool, true]
 
-      - [[x:=tru] (\y:Bool. y)] yields [\y:Bool. y]
+      - [[x:=true] (\y:Bool, y)] yields [\y:Bool, y]
 
-      - [[x:=tru] (\x:Bool. x)] yields [\x:Bool. x]
+      - [[x:=true] (\x:Bool, x)] yields [\x:Bool, x]
 
-    The last example is very important: substituting [x] with [tru] in
-    [\x:Bool. x] does _not_ yield [\x:Bool. tru]!  The reason for
-    this is that the [x] in the body of [\x:Bool. x] is _bound_ by the
+    The last example is very important: substituting [x] with [true] in
+    [\x:Bool, x] does _not_ yield [\x:Bool, true]!  The reason for
+    this is that the [x] in the body of [\x:Bool, x] is _bound_ by the
     abstraction: it is a new, local name that just happens to be
     spelled the same as some global name [x]. *)
 
@@ -332,83 +351,96 @@ Hint Constructors value.
 
        [x:=s]x               = s
        [x:=s]y               = y                     if x <> y
-       [x:=s](\x:T11. t12)   = \x:T11. t12
-       [x:=s](\y:T11. t12)   = \y:T11. [x:=s]t12     if x <> y
+       [x:=s](\x:T, t)       = \x:T, t
+       [x:=s](\y:T, t)       = \y:T, [x:=s]t         if x <> y
        [x:=s](t1 t2)         = ([x:=s]t1) ([x:=s]t2)
-       [x:=s]tru             = tru
-       [x:=s]fls             = fls
-       [x:=s](test t1 then t2 else t3) =
-              test [x:=s]t1 then [x:=s]t2 else [x:=s]t3
+       [x:=s]true            = true
+       [x:=s]false           = false
+       [x:=s](if t1 then t2 else t3) =
+              if [x:=s]t1 then [x:=s]t2 else [x:=s]t3
 *)
 
 (** ... and formally: *)
 
-Reserved Notation "'[' x ':=' s ']' t" (at level 20).
+Reserved Notation "'[' x ':=' s ']' t" (in custom stlc at level 20, x constr).
 
 Fixpoint subst (x : string) (s : tm) (t : tm) : tm :=
   match t with
-  | var x' =>
-      if eqb_string x x' then s else t
-  | abs x' T t1 =>
-      abs x' T (if eqb_string x x' then t1 else ([x:=s] t1))
-  | app t1 t2 =>
-      app ([x:=s] t1) ([x:=s] t2)
-  | tru =>
-      tru
-  | fls =>
-      fls
-  | test t1 t2 t3 =>
-      test ([x:=s] t1) ([x:=s] t2) ([x:=s] t3)
+  | tm_var y =>
+      if eqb_string x y then s else t
+  | <{\y:T, t1}> =>
+      if eqb_string x y then t else <{\y:T, [x:=s] t1}>
+  | <{t1 t2}> =>
+      <{([x:=s] t1) ([x:=s] t2)}>
+  | <{true}> =>
+      <{true}>
+  | <{false}> =>
+      <{false}>
+  | <{if t1 then t2 else t3}> =>
+      <{if ([x:=s] t1) then ([x:=s] t2) else ([x:=s] t3)}>
   end
 
-where "'[' x ':=' s ']' t" := (subst x s t).
+where "'[' x ':=' s ']' t" := (subst x s t) (in custom stlc).
+
+(** Note on notations: You might be wondering why we need curly braces
+    around the substitution notation in the above definition, and why
+    do we need to redefine the substition notation in the [stlc]
+    custom grammar. The reason is that reserved notations in
+    definitions have to be defined in the general Coq grammar (and not
+    a custom one like [stlc]). This restriction only applies to the
+    [subst] definition, that is before the [where ...] part. From now
+    on, using the substitution notation in the [stlc] custom grammar
+    doesn't need any curly braces. *)
+
+(** For example... *)
+Check <{[x:=true] x}>.
 
 (** _Technical note_: Substitution becomes trickier to define if we
     consider the case where [s], the term being substituted for a
-    variable in some other term, may itself contain free variables.
+    variable in some other term, may itself contain free variables. 
     Since we are only interested here in defining the [step] relation
-    on _closed_ terms (i.e., terms like [\x:Bool. x] that include
+    on _closed_ terms (i.e., terms like [\x:Bool, x] that include
     binders for all of the variables they mention), we can sidestep this
     extra complexity, but it must be dealt with when formalizing
     richer languages. *)
 
 (** For example, using the definition of substitution above to
-    substitute the _open_ term [s = \x:Bool. r], where [r] is a _free_
+    substitute the _open_ term [s = \x:Bool, r], where [r] is a _free_
     reference to some global resource, for the variable [z] in the
-    term [t = \r:Bool. z], where [r] is a bound variable, we would get
-    [\r:Bool. \x:Bool. r], where the free reference to [r] in [s] has
+    term [t = \r:Bool, z], where [r] is a bound variable, we would get
+    [\r:Bool, \x:Bool, r], where the free reference to [r] in [s] has
     been "captured" by the binder at the beginning of [t].
 
     Why would this be bad?  Because it violates the principle that the
     names of bound variables do not matter.  For example, if we rename
-    the bound variable in [t], e.g., let [t' = \w:Bool. z], then
-    [[x:=s]t'] is [\w:Bool. \x:Bool. r], which does not behave the
-    same as [[x:=s]t = \r:Bool. \x:Bool. r].  That is, renaming a
+    the bound variable in [t], e.g., let [t' = \w:Bool, z], then
+    [[x:=s]t'] is [\w:Bool, \x:Bool, r], which does not behave the
+    same as [[x:=s]t = \r:Bool, \x:Bool, r].  That is, renaming a
     bound variable changes how [t] behaves under substitution. *)
 
 (** See, for example, [Aydemir 2008] (in Bib.v) for further discussion
     of this issue. *)
 
-(** **** Exercise: 3 stars, standard (substi_correct)  
+(** **** Exercise: 3 stars, standard (substi_correct) 
 
     The definition that we gave above uses Coq's [Fixpoint] facility
     to define substitution as a _function_.  Suppose, instead, we
     wanted to define substitution as an inductive _relation_ [substi].
     We've begun the definition by providing the [Inductive] header and
-    one of the constructors; your job is to fill in the rest of the
+    one of the construectors; your job is to fill in the rest of the
     constructors and prove that the relation you've defined coincides
     with the function given above. *)
 
 Inductive substi (s : tm) (x : string) : tm -> tm -> Prop :=
   | s_var1 :
-      substi s x (var x) s
+      substi s x (tm_var x) s
   (* FILL IN HERE *)
 .
 
-Hint Constructors substi.
+Hint Constructors substi : core.
 
 Theorem substi_correct : forall s x t t',
-  [x:=s]t = t' <-> substi s x t t'.
+  <{ [x:=s]t }> = t' <-> substi s x t t'.
 Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
@@ -425,14 +457,14 @@ Proof.
     variable in the body of the abstraction.  This last rule, written
     informally as
 
-      (\x:T.t12) v2 --> [x:=v2]t12
+      (\x:T,t12) v2 --> [x:=v2]t12
 
     is traditionally called _beta-reduction_. *)
 
 (** 
                                value v2
-                     ----------------------------                   (ST_AppAbs)
-                     (\x:T.t12) v2 --> [x:=v2]t12
+                     ---------------------------                     (ST_AppAbs)
+                     (\x:T2,t1) v2 --> [x:=v2]t1
 
                               t1 --> t1'
                            ----------------                           (ST_App1)
@@ -442,46 +474,46 @@ Proof.
                               t2 --> t2'
                            ----------------                           (ST_App2)
                            v1 t2 --> v1 t2'
+*)
+(** ... plus the usual rules for conditionals:
 
-    ... plus the usual rules for conditionals:
+                    --------------------------------               (ST_IfTrue)
+                    (if true then t1 else t2) --> t1
 
-                    --------------------------------               (ST_TestTru)
-                    (test tru then t1 else t2) --> t1
-
-                    ---------------------------------              (ST_TestFls)
-                    (test fls then t1 else t2) --> t2
+                    ---------------------------------              (ST_IfFalse)
+                    (if false then t1 else t2) --> t2
 
                              t1 --> t1'
-      --------------------------------------------------------     (ST_Test)
-      (test t1 then t2 else t3) --> (test t1' then t2 else t3)
+      --------------------------------------------------------     (ST_If)
+      (if t1 then t2 else t3) --> (if t1' then t2 else t3)
 *)
 
 (** Formally: *)
 
-Reserved Notation "t1 '-->' t2" (at level 40).
+Reserved Notation "t '-->' t'" (at level 40).
 
 Inductive step : tm -> tm -> Prop :=
-  | ST_AppAbs : forall x T t12 v2,
+  | ST_AppAbs : forall x T2 t1 v2,
          value v2 ->
-         (app (abs x T t12) v2) --> [x:=v2]t12
+         <{(\x:T2, t1) v2}> --> <{ [x:=v2]t1 }>
   | ST_App1 : forall t1 t1' t2,
          t1 --> t1' ->
-         app t1 t2 --> app t1' t2
+         <{t1 t2}> --> <{t1' t2}>
   | ST_App2 : forall v1 t2 t2',
          value v1 ->
          t2 --> t2' ->
-         app v1 t2 --> app v1  t2'
-  | ST_TestTru : forall t1 t2,
-      (test tru t1 t2) --> t1
-  | ST_TestFls : forall t1 t2,
-      (test fls t1 t2) --> t2
-  | ST_Test : forall t1 t1' t2 t3,
+         <{v1 t2}> --> <{v1  t2'}>
+  | ST_IfTrue : forall t1 t2,
+      <{if true then t1 else t2}> --> t1
+  | ST_IfFalse : forall t1 t2,
+      <{if false then t1 else t2}> --> t2
+  | ST_If : forall t1 t1' t2 t3,
       t1 --> t1' ->
-      (test t1 t2 t3) --> (test t1' t2 t3)
+      <{if t1 then t2 else t3}> --> <{if t1' then t2 else t3}>
 
-where "t1 '-->' t2" := (step t1 t2).
+where "t '-->' t'" := (step t t').
 
-Hint Constructors step.
+Hint Constructors step : core.
 
 Notation multistep := (multi step).
 Notation "t1 '-->*' t2" := (multistep t1 t2) (at level 40).
@@ -491,7 +523,7 @@ Notation "t1 '-->*' t2" := (multistep t1 t2) (at level 40).
 
 (** Example:
 
-      (\x:Bool->Bool. x) (\x:Bool. x) -->* \x:Bool. x
+      (\x:Bool->Bool, x) (\x:Bool, x) -->* \x:Bool, x
 
     i.e.,
 
@@ -499,7 +531,7 @@ Notation "t1 '-->*' t2" := (multistep t1 t2) (at level 40).
 *)
 
 Lemma step_example1 :
-  (app idBB idB) -->* idB.
+  <{idBB idB}> -->* idB.
 Proof.
   eapply multi_step.
     apply ST_AppAbs.
@@ -509,8 +541,8 @@ Proof.
 
 (** Example:
 
-      (\x:Bool->Bool. x) ((\x:Bool->Bool. x) (\x:Bool. x))
-            -->* \x:Bool. x
+      (\x:Bool->Bool, x) ((\x:Bool->Bool, x) (\x:Bool, x))
+            -->* \x:Bool, x
 
     i.e.,
 
@@ -518,7 +550,7 @@ Proof.
 *)
 
 Lemma step_example2 :
-  (app idBB (app idBB idB)) -->* idB.
+  <{idBB (idBB idB)}> -->* idB.
 Proof.
   eapply multi_step.
     apply ST_App2. auto.
@@ -529,49 +561,49 @@ Proof.
 
 (** Example:
 
-      (\x:Bool->Bool. x)
-         (\x:Bool. test x then fls else tru)
-         tru
-            -->* fls
+      (\x:Bool->Bool, x)
+         (\x:Bool, if x then false else true)
+         true
+            -->* false
 
     i.e.,
 
-       (idBB notB) tru -->* fls.
+       (idBB notB) true -->* false.
 *)
 
 Lemma step_example3 :
-  app (app idBB notB) tru -->* fls.
+  <{idBB notB true}> -->* <{false}>.
 Proof.
   eapply multi_step.
     apply ST_App1. apply ST_AppAbs. auto. simpl.
   eapply multi_step.
     apply ST_AppAbs. auto. simpl.
   eapply multi_step.
-    apply ST_TestTru. apply multi_refl.  Qed.
+    apply ST_IfTrue. apply multi_refl.  Qed.
 
 (** Example:
 
-      (\x:Bool -> Bool. x)
-         ((\x:Bool. test x then fls else tru) tru)
-            -->* fls
+      (\x:Bool -> Bool, x)
+         ((\x:Bool, if x then false else true) true)
+            -->* false
 
     i.e.,
 
-      idBB (notB tru) -->* fls.
+      idBB (notB true) -->* false.
 
     (Note that this term doesn't actually typecheck; even so, we can
     ask how it reduces.)
 *)
 
 Lemma step_example4 :
-  app idBB (app notB tru) -->* fls.
+  <{idBB (notB true)}> -->* <{false}>.
 Proof.
   eapply multi_step.
     apply ST_App2. auto.
     apply ST_AppAbs. auto. simpl.
   eapply multi_step.
     apply ST_App2. auto.
-    apply ST_TestTru.
+    apply ST_IfTrue.
   eapply multi_step.
     apply ST_AppAbs. auto. simpl.
   apply multi_refl.  Qed.
@@ -580,33 +612,33 @@ Proof.
     to simplify these proofs. *)
 
 Lemma step_example1' :
-  app idBB idB -->* idB.
+  <{idBB idB}> -->* idB.
 Proof. normalize.  Qed.
 
 Lemma step_example2' :
-  app idBB (app idBB idB) -->* idB.
+  <{idBB (idBB idB)}> -->* idB.
 Proof. normalize. Qed.
 
 Lemma step_example3' :
-  app (app idBB notB) tru -->* fls.
+  <{idBB notB true}> -->* <{false}>.
 Proof. normalize.  Qed.
 
 Lemma step_example4' :
-  app idBB (app notB tru) -->* fls.
+  <{idBB (notB true)}> -->* <{false}>.
 Proof. normalize.  Qed.
 
-(** **** Exercise: 2 stars, standard (step_example5)  
+(** **** Exercise: 2 stars, standard (step_example5) 
 
     Try to do this one both with and without [normalize]. *)
 
 Lemma step_example5 :
-       app (app idBBBB idBB) idB
+       <{idBBBB idBB idB}>
   -->* idB.
 Proof.
   (* FILL IN HERE *) Admitted.
 
 Lemma step_example5_with_normalize :
-       app (app idBBBB idBB) idB
+       <{idBBBB idBB idB}>
   -->* idB.
 Proof.
   (* FILL IN HERE *) Admitted.
@@ -633,7 +665,7 @@ Proof.
     "typing context" -- a mapping from variables to their types. *)
 
 (** Following the usual notation for partial maps, we write [(X |->
-    T11, Gamma)] for "update the partial function [Gamma] so that it
+    T, Gamma)] for "update the partial function [Gamma] so that it
     maps [x] to [T]." *)
 
 Definition context := partial_map ty.
@@ -642,64 +674,65 @@ Definition context := partial_map ty.
 (** ** Typing Relation *)
 
 (** 
-                              Gamma x = T
-                            ----------------                            (T_Var)
-                            Gamma |- x \in T
+                              Gamma x = T1
+                            -----------------                            (T_Var)
+                            Gamma |- x \in T1
 
-                   (x |-> T11 ; Gamma) |- t12 \in T12
-                   ----------------------------------                   (T_Abs)
-                    Gamma |- \x:T11.t12 \in T11->T12
+                        x |-> T2 ; Gamma |- t1 \in T1
+                        -----------------------------                    (T_Abs)
+                         Gamma |- \x:T2,t1 \in T2->T1
 
-                        Gamma |- t1 \in T11->T12
-                          Gamma |- t2 \in T11
-                         ----------------------                         (T_App)
-                         Gamma |- t1 t2 \in T12
+                        Gamma |- t1 \in T2->T1
+                          Gamma |- t2 \in T2
+                         ----------------------                          (T_App)
+                         Gamma |- t1 t2 \in T1
 
-                         ---------------------                          (T_Tru)
-                         Gamma |- tru \in Bool
+                         ---------------------                          (T_True)
+                         Gamma |- true \in Bool
 
-                         ---------------------                          (T_Fls)
-                         Gamma |- fls \in Bool
+                         ---------------------                         (T_False)
+                         Gamma |- false \in Bool
 
-       Gamma |- t1 \in Bool    Gamma |- t2 \in T    Gamma |- t3 \in T
-       --------------------------------------------------------------   (T_Test)
-                  Gamma |- test t1 then t2 else t3 \in T
+       Gamma |- t1 \in Bool    Gamma |- t2 \in T1    Gamma |- t3 \in T1
+       ----------------------------------------------------------------   (T_If)
+                  Gamma |- if t1 then t2 else t3 \in T1
 
     We can read the three-place relation [Gamma |- t \in T] as:
     "under the assumptions in Gamma, the term [t] has the type [T]." *)
 
-Reserved Notation "Gamma '|-' t '\in' T" (at level 40).
+Reserved Notation "Gamma '|-' t '\in' T" (at level 101,
+                                          t custom stlc, T custom stlc at level 0).
 
 Inductive has_type : context -> tm -> ty -> Prop :=
-  | T_Var : forall Gamma x T,
-      Gamma x = Some T ->
-      Gamma |- var x \in T
-  | T_Abs : forall Gamma x T11 T12 t12,
-      (x |-> T11 ; Gamma) |- t12 \in T12 ->
-      Gamma |- abs x T11 t12 \in Arrow T11 T12
-  | T_App : forall T11 T12 Gamma t1 t2,
-      Gamma |- t1 \in Arrow T11 T12 ->
-      Gamma |- t2 \in T11 ->
-      Gamma |- app t1 t2 \in T12
-  | T_Tru : forall Gamma,
-       Gamma |- tru \in Bool
-  | T_Fls : forall Gamma,
-       Gamma |- fls \in Bool
-  | T_Test : forall t1 t2 t3 T Gamma,
+  | T_Var : forall Gamma x T1,
+      Gamma x = Some T1 ->
+      Gamma |- x \in T1
+  | T_Abs : forall Gamma x T1 T2 t1,
+      x |-> T2 ; Gamma |- t1 \in T1 ->
+      Gamma |- \x:T2, t1 \in (T2 -> T1)
+  | T_App : forall T1 T2 Gamma t1 t2,
+      Gamma |- t1 \in (T2 -> T1) ->
+      Gamma |- t2 \in T2 ->
+      Gamma |- t1 t2 \in T1
+  | T_True : forall Gamma,
+       Gamma |- true \in Bool
+  | T_False : forall Gamma,
+       Gamma |- false \in Bool
+  | T_If : forall t1 t2 t3 T1 Gamma,
        Gamma |- t1 \in Bool ->
-       Gamma |- t2 \in T ->
-       Gamma |- t3 \in T ->
-       Gamma |- test t1 t2 t3 \in T
+       Gamma |- t2 \in T1 ->
+       Gamma |- t3 \in T1 ->
+       Gamma |- if t1 then t2 else t3 \in T1
 
 where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
 
-Hint Constructors has_type.
+Hint Constructors has_type : core.
 
 (* ================================================================= *)
 (** ** Examples *)
 
 Example typing_example_1 :
-  empty |- abs x Bool (var x) \in Arrow Bool Bool.
+  empty |- \x:Bool, x \in (Bool -> Bool).
 Proof.
   apply T_Abs. apply T_Var. reflexivity.  Qed.
 
@@ -707,50 +740,50 @@ Proof.
     database, [auto] can actually solve this one immediately. *)
 
 Example typing_example_1' :
-  empty |- abs x Bool (var x) \in Arrow Bool Bool.
+  empty |- \x:Bool, x \in (Bool -> Bool).
 Proof. auto.  Qed.
 
 (** More examples:
 
-       empty |- \x:A. \y:A->A. y (y x)
+       empty |- \x:A, \y:A->A, y (y x)
              \in A -> (A->A) -> A.
 *)
 
 Example typing_example_2 :
   empty |-
-    (abs x Bool
-       (abs y (Arrow Bool Bool)
-          (app (var y) (app (var y) (var x))))) \in
-    (Arrow Bool (Arrow (Arrow Bool Bool) Bool)).
-Proof with auto using update_eq.
+    \x:Bool,
+       \y:Bool->Bool,
+          (y (y x)) \in
+    (Bool -> (Bool -> Bool) -> Bool).
+Proof.
   apply T_Abs.
   apply T_Abs.
-  eapply T_App. apply T_Var...
-  eapply T_App. apply T_Var...
-  apply T_Var...
+  eapply T_App. apply T_Var. apply update_eq.
+  eapply T_App. apply T_Var. apply update_eq.
+  apply T_Var. apply update_neq. intros Contra. discriminate.
 Qed.
 
-(** **** Exercise: 2 stars, standard, optional (typing_example_2_full)  
+(** **** Exercise: 2 stars, standard, optional (typing_example_2_full) 
 
     Prove the same result without using [auto], [eauto], or
     [eapply] (or [...]). *)
 
 Example typing_example_2_full :
   empty |-
-    (abs x Bool
-       (abs y (Arrow Bool Bool)
-          (app (var y) (app (var y) (var x))))) \in
-    (Arrow Bool (Arrow (Arrow Bool Bool) Bool)).
+    \x:Bool,
+       \y:Bool->Bool,
+          (y (y x)) \in
+    (Bool -> (Bool -> Bool) -> Bool).
 Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard (typing_example_3)  
+(** **** Exercise: 2 stars, standard (typing_example_3) 
 
-    Formally prove the following typing derivation holds: 
+    Formally prove the following typing derivation holds:
 
     
-       empty |- \x:Bool->B. \y:Bool->Bool. \z:Bool.
+       empty |- \x:Bool->B, \y:Bool->Bool, \z:Bool,
                    y (x z)
              \in T.
 *)
@@ -758,59 +791,57 @@ Proof.
 Example typing_example_3 :
   exists T,
     empty |-
-      (abs x (Arrow Bool Bool)
-         (abs y (Arrow Bool Bool)
-            (abs z Bool
-               (app (var y) (app (var x) (var z)))))) \in
+      \x:Bool->Bool,
+         \y:Bool->Bool,
+            \z:Bool,
+               (y (x z)) \in
       T.
-Proof with auto.
+Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** We can also show that some terms are _not_ typable.  For example, 
+(** We can also show that some terms are _not_ typable.  For example,
     let's check that there is no typing derivation assigning a type
-    to the term [\x:Bool. \y:Bool, x y] -- i.e.,
+    to the term [\x:Bool, \y:Bool, x y] -- i.e.,
 
     ~ exists T,
-        empty |- \x:Bool. \y:Bool, x y \in T.
+        empty |- \x:Bool, \y:Bool, x y \in T.
 *)
 
 Example typing_nonexample_1 :
   ~ exists T,
       empty |-
-        (abs x Bool
-            (abs y Bool
-               (app (var x) (var y)))) \in
+        \x:Bool,
+            \y:Bool,
+               (x y) \in
         T.
 Proof.
-  intros Hc. inversion Hc.
+  intros Hc. destruct Hc as [T Hc].
   (* The [clear] tactic is useful here for tidying away bits of
      the context that we're not going to need again. *)
-  inversion H. subst. clear H.
-  inversion H5. subst. clear H5.
-  inversion H4. subst. clear H4.
-  inversion H2. subst. clear H2.
-  inversion H5. subst. clear H5.
-  inversion H1.  Qed.
+  inversion Hc; subst; clear Hc.
+  inversion H4; subst; clear H4.
+  inversion H5; subst; clear H5 H4.
+  inversion H2; subst; clear H2.
+  discriminate H1.
+Qed.
 
-(** **** Exercise: 3 stars, standard, optional (typing_nonexample_3)  
+(** **** Exercise: 3 stars, standard, optional (typing_nonexample_3) 
 
     Another nonexample:
 
     ~ (exists S T,
-          empty |- \x:S. x x \in T).
+          empty |- \x:S, x x \in T).
 *)
 
 Example typing_nonexample_3 :
   ~ (exists S T,
         empty |-
-          (abs x S
-             (app (var x) (var x))) \in
-          T).
+          \x:S, x x \in T).
 Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
 End STLC.
 
-(* Thu Feb 7 20:09:24 EST 2019 *)
+(* 2020-09-09 21:08 *)
